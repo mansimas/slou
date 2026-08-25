@@ -58,11 +58,11 @@
           <tbody>
             <% rows.forEach(function (r) { %>
               <tr>
-                <td data-label="Laikotarpis" class="nowrap"><%= r.label %></td>
-                <td data-label="Apsilankymai"><%= r.visits %></td>
-                <td data-label="Unikalūs"><%= r.unique %></td>
-                <td data-label="Botai" class="muted"><%= r.bots %></td>
-                <td data-label="Užsakymai"><%= r.orders ? r.orders : '—' %></td>
+                <td class="nowrap"><%= r.label %></td>
+                <td><%= r.visits %></td>
+                <td><%= r.unique %></td>
+                <td class="muted"><%= r.bots %></td>
+                <td><%= r.orders ? r.orders : '—' %></td>
               </tr>
             <% }); %>
           </tbody>
@@ -92,27 +92,23 @@
 
   /* Bendra su užsakymų lentele: rėmelis, antraštės, mobilios kortelės. */
   .orders-scroll { overflow-x: auto; margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; }
-  table.orders { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--card); table-layout: fixed; }
+  table.orders { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--card); }
   table.orders th, table.orders td { padding: 10px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
   table.orders thead th { background: var(--paper-2); font-weight: 600; letter-spacing: .3px; text-transform: uppercase; font-size: 12px; color: var(--muted); white-space: nowrap; }
   table.orders tbody tr:last-child td { border-bottom: none; }
   table.orders tbody tr:hover { background: rgba(166,121,74,.06); }
-  table.orders td.nowrap { white-space: nowrap; }
   table.orders td.muted { color: var(--muted); }
+  /* Viena eilutė — vienas laikotarpis, niekas nelaužoma į kitą eilutę. */
+  table.orders th, table.orders td { white-space: nowrap; }
 
-  /* Skaičių stulpeliai siauresni už laikotarpį. */
-  table.stats th:nth-child(1), table.stats td:nth-child(1) { width: 30%; }
-
+  /*
+    Telefone lentelė LIEKA lentele — anksčiau virsdavo kortelėmis, kur viena
+    diena užimdavo penkias eilutes. Dabar tik mažesnis šriftas ir tarpai, o
+    platesnis turinys slenkamas į šoną.
+  */
   @media (max-width: 720px) {
-    .orders-scroll { overflow-x: visible; border: none; border-radius: 0; }
-    table.orders { table-layout: auto; background: transparent; }
-    table.orders thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
-    table.orders tr { display: block; background: var(--card); border: 1px solid var(--line);
-      border-radius: 10px; padding: 6px 4px; margin-bottom: 14px; }
-    table.orders td { display: block; width: auto !important; border: none; padding: 6px 14px; }
-    table.orders tbody tr:hover { background: var(--card); }
-    table.orders td::before { content: attr(data-label); display: block; font-size: 11px;
-      letter-spacing: .3px; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
-    table.orders td.nowrap { white-space: normal; }
+    table.orders { font-size: 12.5px; }
+    table.orders th, table.orders td { padding: 7px 9px; }
+    .stat-card__n { font-size: 26px; }
   }
 </style>

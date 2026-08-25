@@ -32,6 +32,7 @@ module.exports = {
   routes: {
     'GET /eglei': 'PagesController.orders',
     'GET /estats': 'PagesController.statistics',
+    'GET /elist': 'PagesController.visits',
   },
 
 };

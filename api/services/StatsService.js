@@ -42,6 +42,13 @@ module.exports = {
     return dashboard();
   },
 
+  // The most recent visits, newest first, at most `limit`. Everything is
+  // included — admin pages too, since a hit on one of those from an address
+  // that is not yours is the single most useful thing this list can show you.
+  recentVisits: function (limit) {
+    return recent_visits(limit);
+  },
+
 };
 
 function log_dir() {
@@ -71,6 +78,26 @@ function read_log_lines(filename) {
   return lines;
 }
 
+// Like read_log_lines but for "the last N lines": walks the rotations
+// newest-first and stops as soon as it has enough, so showing 50 visits does
+// not mean reading a 64MB file. Returned oldest-first, like its sibling.
+function read_recent_lines(filename, needed) {
+  var lines = [];
+  for (var a = 0; a <= MAX_ROTATED && lines.length < needed; a++) {
+    var file = path.join(log_dir(), a === 0 ? filename : filename + '.' + a);
+    var content;
+    try {
+      content = fs.readFileSync(file, 'utf8');
+    } catch (unusedErr) {
+      continue;
+    }
+    var split = content.split('\n').filter(function (l) { return l.length; });
+    // Newer file first, so its lines belong AFTER the ones we already have.
+    lines = split.slice(Math.max(0, split.length - (needed - lines.length))).concat(lines);
+  }
+  return lines;
+}
+
 // `info: "" "<payload>" <M-D-H:Min:S-ms>` -> { payload, month, day }
 var LINE_RE = /^\s*\w+:\s*"[^"]*"\s+"(.*)"\s+(\S+)\s*$/;
 
@@ -94,7 +121,17 @@ function parse_line(line) {
   var day = parseInt(parts[1], 10);
   if (isNaN(month) || isNaN(day)) { return null; }
 
-  return { payload: m[1], year: year, month: month - 1, day: day };   // month 0-based
+  var clock = String(parts[2] || '').split(':');
+
+  return {
+    payload: m[1],
+    year: year,
+    month: month - 1,   // 0-based
+    day: day,
+    hour: parseInt(clock[0], 10) || 0,
+    min: parseInt(clock[1], 10) || 0,
+    sec: parseInt(clock[2], 10) || 0,
+  };
 }
 
 // Stamp every entry with `t`, midnight of its own day — all the bucketing
@@ -143,6 +180,12 @@ function field(payload, key) {
   return m ? m[1].trim() : '';
 }
 
+var ADMIN_ACTIONS = [
+  'PagesController.orders',
+  'PagesController.statistics',
+  'PagesController.visits',
+];
+
 // The admin pages must not count as visits — otherwise opening the statistics
 // page inflates the number it is about to show. Their paths are read from the
 // live route table rather than hardcoded, so renaming a route in
@@ -153,7 +196,7 @@ function admin_paths() {
   Object.keys(routes).forEach(function (address) {
     var target = routes[address];
     if (typeof target !== 'string') { return; }
-    if (target !== 'PagesController.orders' && target !== 'PagesController.statistics') { return; }
+    if (ADMIN_ACTIONS.indexOf(target) < 0) { return; }
     // "GET /eglei" -> "/eglei"
     var parts = address.split(' ');
     out.push(parts[parts.length - 1]);
@@ -311,4 +354,80 @@ function totals(months) {
     out.orders += months[key].orders;
   });
   return out;
+}
+
+
+// ---------------------------------------------------------------------------
+// The visit list
+// ---------------------------------------------------------------------------
+
+// One parsed request line -> a row for the page. Every field the logger writes
+// is carried through; the view decides what to show.
+function visit_row(entry) {
+  var vid = field(entry.payload, 'vid');
+  var ip = field(entry.payload, 'ip') || '-';
+
+  var city = field(entry.payload, 'city');
+  var region = field(entry.payload, 'region');
+  var tz = field(entry.payload, 'tz');
+  var country = field(entry.payload, 'country') || '-';
+
+  // Lines logged before city/region/tz were written carry none of them. Look
+  // them up from the address on the line so old visits are not blank. Only a
+  // fallback: a line that HAS the fields keeps what it was given, because the
+  // geoip database changes over time and the recorded answer is the true one.
+  if (!city && !region && !tz && ip !== '-') {
+    try {
+      var geo = require('geoip-lite').lookup(ip);
+      if (geo) {
+        city = geo.city || '';
+        region = geo.region || '';
+        tz = geo.timezone || '';
+        if (country === '-') { country = geo.country || '-'; }
+      }
+    } catch (unusedErr) {
+      // no lookup available; the row simply shows what the line held
+    }
+  }
+
+  return {
+    when: day_label(entry.t) + ' ' + pad2(entry.hour) + ':' + pad2(entry.min),
+    t: entry.t,
+    country: country,
+    city: dash(city),
+    // Region code where the database has one, timezone where it does not —
+    // "VL" and "Europe/Vilnius" are both more use than an empty cell.
+    place: dash(region) !== '-' ? region : dash(tz),
+    device: dash(field(entry.payload, 'device')),
+    // `lt-LT,lt;q=0.9,en;q=0.8` is a preference list; the first entry is the
+    // language the browser is actually set to and the only part worth a column.
+    lang: dash(String(field(entry.payload, 'lang')).split(',')[0]),
+    from: dash(field(entry.payload, 'from')),
+    url: dash(field(entry.payload, 'url')),
+    is_bot: field(entry.payload, 'bot') === 'yes',
+    // Kept for the title attribute rather than a column of its own.
+    ua: dash(field(entry.payload, 'ua')),
+    visitor: (vid && vid !== '-') ? vid.slice(0, 8) : '-',
+  };
+}
+
+function dash(v) {
+  v = (v === undefined || v === null) ? '' : String(v).trim();
+  return v.length ? v : '-';
+}
+
+function recent_visits(limit) {
+  limit = parseInt(limit, 10) || 50;
+  if (limit < 1) { limit = 1; }
+
+  var entries = [];
+  read_recent_lines('requests.log', limit).forEach(function (line) {
+    var parsed = parse_line(line);
+    if (parsed) { entries.push(parsed); }
+  });
+  assign_years(entries);
+
+  var rows = entries.map(visit_row);
+  rows.reverse();                 // newest first
+  return rows.slice(0, limit);
 }

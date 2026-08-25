@@ -116,10 +116,24 @@ shows up in `pm2 logs` immediately. A submission rejected for missing fields
 prints `[ORDER-REJECTED]`, and a failed write prints `[ORDER-FAILED]` to
 stderr.
 
-Hits on the unlisted pages append to `logs/visits.log`. Nothing but orders is
-printed to the console, so `pm2 logs` stays the place you watch for a sale. A
-referrer other than `-` on a visit line means the link exists somewhere it
-shouldn't.
+Hits on the unlisted pages print an `[ADMIN]` line to the console — tagged
+`ORDERS`, `STATS` or `LIST` — and append the full line to `logs/visits.log`.
+Ordinary visits stay out of the console; one of those is one of many and
+belongs in a file, while a hit on a page nothing links to is rare and worth
+seeing as it happens. A referrer other than `-` on one of those lines means the
+URL has leaked somewhere.
+
+There is also an unlisted visit list, routed in `config/local.js`: the last 50
+requests, newest first — date, country, city, location, device, language and
+the referrer that sent them. No IP address is shown. One row per visit on
+every screen size, including phones, where it scrolls sideways rather than
+folding into cards.
+
+Location comes from `geoip-lite`, chosen over `geoip-country` because it
+resolves city, region and timezone. Its database is ~157MB on disk, which
+matters for `npm install` on a new server, not at runtime. City is often blank
+even when the country is known — only some address ranges are placed that
+precisely — so the list falls back to the timezone.
 
 There is also an unlisted statistics page, routed alongside the orders page in
 `config/local.js`: visits, unique visitors, bot hits and orders per day, week

@@ -47,12 +47,20 @@ module.exports = {
   },
 
   // One log line describing the request. Used for every page hit.
+  //
+  // The location fields are resolved HERE, at request time, rather than being
+  // looked up from the ip when a page is rendered: the geoip database is
+  // updated over time, and a visit should keep the place it was actually
+  // attributed to.
   line: function (req, vid) {
     var c = context(req);
     return [
       'vid=' + (vid || '-'),
       'ip=' + c.ip,
       'country=' + c.country,
+      'city=' + c.city,
+      'region=' + c.region,
+      'tz=' + c.tz,
       'url=' + (req.originalUrl || req.url || '-'),
       'method=' + (req.method || '-'),
       'browser=' + c.browser + ' ' + c.browser_version,
@@ -104,7 +112,11 @@ function clientIp(req) {
 }
 
 function context(req) {
-  var geoip = require('geoip-country');
+  // geoip-lite rather than geoip-country: it resolves city, region and
+  // timezone as well, which the visit list shows. It costs ~157MB on disk for
+  // its database — the reason to know that is `npm install` on a new server,
+  // not runtime, where lookups are in-memory and fast.
+  var geoip = require('geoip-lite');
   var ua = req.headers['user-agent'] || '';
   var parsed = parse(ua);
   var ip = clientIp(req);
@@ -113,12 +125,18 @@ function context(req) {
   try {
     geo = geoip.lookup(ip);
   } catch (unusedErr) {
-    geo = null;   // a malformed or private address just has no country
+    geo = null;   // a malformed or private address just has no location
   }
 
   return {
     ip: ip,
     country: (geo && geo.country) || '-',
+    // Frequently blank even when the country is known — the database only
+    // places some ranges to a city. '-' rather than an empty field so the log
+    // line keeps its shape.
+    city: (geo && geo.city) || '-',
+    region: (geo && geo.region) || '-',
+    tz: (geo && geo.timezone) || '-',
     os: parsed.os.name || 'Unknown',
     os_version: parsed.os.version || '',
     browser: parsed.browser.name || 'Unknown',

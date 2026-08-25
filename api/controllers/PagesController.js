@@ -86,12 +86,38 @@ function describeVisitor(req) {
 // catching typos.
 var EMAIL = /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/;
 
+// Someone opened one of the unlisted admin pages.
+//
+// These DO go to the console, unlike ordinary visits. An ordinary visit is one
+// of many and belongs in a file; a hit on a page that nothing links to is rare
+// and is the one thing on this site worth seeing the moment it happens — if it
+// is not you, the URL has leaked.
+//
+// The console line is the compact version. The full one, user agent and all,
+// goes to logs/visits.log.
+function adminVisit(req, page) {
+  var c = VisitService.context(req);
+  var from = req.headers.referer || req.headers.referrer || '-';
+
+  var where = c.country;
+  if (c.city && c.city !== '-') { where += '/' + c.city; }
+
+  console.log('[ADMIN]', new Date().toISOString(), page,
+    '| ip=' + c.ip +
+    ' | ' + where +
+    ' | ' + c.browser + ' ' + c.browser_version +
+    ' | ' + c.device +
+    ' | from=' + from);
+
+  Log.visit(page + ' | ' + VisitService.line(req));
+}
+
 // Country for an address, or '-' for a private/unresolvable one. Kept here
 // rather than in describeVisitor() so the per-request visitor line stays free
 // of a geoip lookup it does not need.
 function countryOf(ip) {
   try {
-    var geo = require('geoip-country').lookup(ip);
+    var geo = require('geoip-lite').lookup(ip);
     return (geo && geo.country) || '-';
   } catch (unusedErr) {
     return '-';
@@ -202,16 +228,7 @@ module.exports = {
   // nothing on the site links to it and `noindex` keeps it out of search
   // results, but there is no password on it.
   orders: function (req, res) {
-    var who = describeVisitor(req);
-    var line = 'ip=' + who.ip +
-      ' | ua=' + who.ua +
-      ' | from=' + who.referer +
-      ' | lang=' + who.lang +
-      ' | xff=' + who.chain;
-
-    // To disk only. The console is reserved for orders — a line every time the
-    // page is opened buries the [ORDER] lines that actually want watching.
-    Log.visit(line);
+    adminVisit(req, 'ORDERS');
 
     var orders = Log.read_orders(req.param('page'), 200);
     return res.view('pages/orders', {
@@ -227,13 +244,25 @@ module.exports = {
   // config/local.js. Unlisted like the orders page, and excluded from its own
   // numbers — see admin_paths() in StatsService.
   statistics: function (req, res) {
-    Log.visit('STATS | ' + VisitService.line(req));
+    adminVisit(req, 'STATS');
     return res.view('pages/statistics', {
       layout: 'layouts/slou',
       active: 'statistics',
       pageTitle: 'Statistika — SLOU',
       noindex: true,
       stats: StatsService.dashboard(),
+    });
+  },
+
+  // The last 50 requests, newest first. Route in config/local.js.
+  visits: function (req, res) {
+    adminVisit(req, 'LIST');
+    return res.view('pages/visits', {
+      layout: 'layouts/slou',
+      active: 'visits',
+      pageTitle: 'Lankytojai — SLOU',
+      noindex: true,
+      visits: StatsService.recentVisits(50),
     });
   },
 

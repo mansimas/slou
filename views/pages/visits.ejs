@@ -1,0 +1,95 @@
+<%
+/**
+ * visits.ejs
+ *
+ * Paskutiniai 50 apsilankymų, naujausi viršuje. Skaitoma iš
+ * logs/requests.log (žr. StatsService.recentVisits).
+ *
+ * Viena eilutė — vienas apsilankymas, TAIP PAT ir telefone: šis puslapis
+ * sąmoningai neišskaido eilučių į korteles, kaip daro užsakymų lentelė.
+ * Siaurame ekrane lentelė slenkama į šoną. IP nerodomas.
+ */
+%>
+<article class="page page--wide">
+  <p class="kicker">SLOU</p>
+  <h1>Lankytojai</h1>
+  <p>Paskutiniai <strong><%= visits.length %></strong> apsilankymai, naujausi viršuje.</p>
+
+  <% if (!visits.length) { %>
+    <p class="stat-empty">Kol kas nėra nė vieno įrašo.</p>
+  <% } else { %>
+    <div class="visits-scroll">
+      <table class="visits">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Šalis</th>
+            <th>Miestas</th>
+            <th>Vieta</th>
+            <th>Įrenginys</th>
+            <th>Kalba</th>
+            <th>Iš kur</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% visits.forEach(function (v) { %>
+            <tr<%= v.is_bot ? ' class="is-bot"' : '' %>>
+              <td class="t"><%= v.when %></td>
+              <td class="c"><%= v.country %></td>
+              <td><%= v.city %></td>
+              <td class="dim"><%= v.place %></td>
+              <td class="dim"><%= v.device %></td>
+              <td><%= v.lang %></td>
+              <%
+                /* Nuoroda, iš kurios atėjo. „-" reiškia, kad adresas suvestas
+                   ranka arba ateita iš vietos, kuri referrer'io nesiunčia.
+                   Rodomas visas adresas per title, kad ilgas nesugadintų eilutės. */
+              %>
+              <td class="from" title="<%= v.from %>">
+                <% if (v.from === '-') { %>
+                  <span class="dim">tiesiogiai</span>
+                <% } else { %>
+                  <%= v.from %>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</article>
+
+<style>
+  .page--wide { max-width: 1140px; }
+  .stat-empty { margin-top: 22px; color: var(--muted); }
+
+  .visits-scroll { overflow-x: auto; margin-top: 22px; border: 1px solid var(--line);
+    border-radius: 10px; background: var(--card); -webkit-overflow-scrolling: touch; }
+
+  table.visits { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table.visits th, table.visits td { padding: 8px 12px; text-align: left;
+    border-bottom: 1px solid var(--line); white-space: nowrap; }
+  table.visits thead th { background: var(--paper-2); font-weight: 600; font-size: 11px;
+    letter-spacing: .3px; text-transform: uppercase; color: var(--muted); }
+  table.visits tbody tr:last-child td { border-bottom: none; }
+  table.visits tbody tr:hover { background: rgba(166,121,74,.06); }
+
+  table.visits td.t { font-variant-numeric: tabular-nums; color: var(--muted); }
+  table.visits td.c { font-weight: 600; }
+  table.visits td.dim { color: var(--muted); }
+  /* Vienintelis stulpelis, kuriam leidžiama trumpėti — nuorodos būna ilgos. */
+  table.visits td.from { max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+  table.visits tr.is-bot td { color: var(--muted); font-style: italic; }
+
+  /*
+    Telefone lentelė NEVIRSTA kortelėmis (skirtingai nuo užsakymų puslapio) —
+    prašyta vienos eilutės vienam apsilankymui. Tik sumažinamas šriftas ir
+    tarpai, o platesnis turinys slenkamas į šoną.
+  */
+  @media (max-width: 720px) {
+    table.visits { font-size: 12px; }
+    table.visits th, table.visits td { padding: 7px 9px; }
+    table.visits td.from { max-width: 150px; }
+  }
+</style>
