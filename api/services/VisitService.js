@@ -35,10 +35,18 @@ module.exports = {
     return hostileRequest(req);
   },
 
+  // Reads the visitor id off the request, minting one if this is a first
+  // visit. Returns { id, isNew } — isNew tells the caller it still has to be
+  // sent to the browser.
+  visitorId: function (req) {
+    return visitor_id(req);
+  },
+
   // One log line describing the request. Used for every page hit.
-  line: function (req) {
+  line: function (req, vid) {
     var c = context(req);
     return [
+      'vid=' + (vid || '-'),
       'ip=' + c.ip,
       'country=' + c.country,
       'url=' + (req.originalUrl || req.url || '-'),
@@ -54,6 +62,18 @@ module.exports = {
   },
 
 };
+
+// 16 random hex characters. crypto.randomBytes, not Math.random: two visitors
+// arriving in the same millisecond must not be handed the same id, or they
+// merge into one in the statistics.
+function visitor_id(req) {
+  var cookie = sails.config.custom.visitorCookie;
+  var existing = req.cookies ? req.cookies[cookie.name] : null;
+  if (existing && /^[0-9a-f]{16}$/.test(existing)) {
+    return { id: existing, isNew: false };
+  }
+  return { id: require('crypto').randomBytes(8).toString('hex'), isNew: true };
+}
 
 function parse(ua) {
   var UAParser = require('ua-parser-js');

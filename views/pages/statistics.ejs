@@ -1,0 +1,118 @@
+<%
+/**
+ * statistics.ejs
+ *
+ * Lankytojai ir užsakymai pagal dieną, savaitę ir mėnesį. Skaičiuojama iš
+ * logs/requests.log ir logs/orders.log (žr. api/services/StatsService.js).
+ *
+ * Kaip ir užsakymų puslapis, šis yra tik savininkui, todėl lietuviškai ir
+ * neverčiamas į kitas kalbas.
+ */
+%>
+<article class="page page--wide">
+  <p class="kicker">SLOU</p>
+  <h1>Statistika</h1>
+
+  <p>
+    <strong>Apsilankymai</strong> — puslapių užklausos be botų ir be šio bei
+    užsakymų puslapio. <strong>Unikalūs</strong> — skirtingi lankytojai
+    (pagal <code>vid</code> slapuką). <strong>Botai</strong> — paieškos
+    sistemų robotai, rodomi atskirai, kad neišpūstų apsilankymų.
+  </p>
+
+  <div class="stat-totals">
+    <div class="stat-card">
+      <span class="stat-card__n"><%= stats.totals.visits %></span>
+      <span class="stat-card__l">Apsilankymai (viso)</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card__n"><%= stats.totals.orders %></span>
+      <span class="stat-card__l">Užsakymai (viso)</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-card__n"><%= stats.totals.bots %></span>
+      <span class="stat-card__l">Botų užklausos (viso)</span>
+    </div>
+  </div>
+
+  <%
+    /* Trys vienodos lentelės — viena funkcija, kad eilutė būtų apibrėžta
+       vienoje vietoje ir visos trys negalėtų išsiskirti. */
+  %>
+  <% function table(title, rows, empty) { %>
+    <h2 class="stat-h"><%= title %></h2>
+    <% if (!rows.length) { %>
+      <p class="stat-empty"><%= empty %></p>
+    <% } else { %>
+      <div class="orders-scroll">
+        <table class="orders stats">
+          <thead>
+            <tr>
+              <th>Laikotarpis</th>
+              <th>Apsilankymai</th>
+              <th>Unikalūs</th>
+              <th>Botai</th>
+              <th>Užsakymai</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rows.forEach(function (r) { %>
+              <tr>
+                <td data-label="Laikotarpis" class="nowrap"><%= r.label %></td>
+                <td data-label="Apsilankymai"><%= r.visits %></td>
+                <td data-label="Unikalūs"><%= r.unique %></td>
+                <td data-label="Botai" class="muted"><%= r.bots %></td>
+                <td data-label="Užsakymai"><%= r.orders ? r.orders : '—' %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } %>
+  <% } %>
+
+  <% table('Pagal dieną', stats.days, 'Kol kas nėra duomenų.') %>
+  <% table('Pagal savaitę', stats.weeks, 'Kol kas nėra duomenų.') %>
+  <% table('Pagal mėnesį', stats.months, 'Kol kas nėra duomenų.') %>
+
+</article>
+
+<style>
+  .page--wide { max-width: 1140px; }
+
+  .stat-totals { display: flex; flex-wrap: wrap; gap: 14px; margin: 26px 0 8px; }
+  .stat-card { flex: 1 1 180px; padding: 18px 20px; background: var(--card);
+    border: 1px solid var(--line); border-radius: 10px; }
+  .stat-card__n { display: block; font-family: var(--serif); font-size: 30px; line-height: 1.1; color: var(--leather-dark); }
+  .stat-card__l { display: block; margin-top: 4px; font-size: 12px; letter-spacing: .4px;
+    text-transform: uppercase; color: var(--muted); }
+
+  .stat-h { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 34px 0 0; }
+  .stat-empty { margin-top: 12px; color: var(--muted); }
+
+  /* Bendra su užsakymų lentele: rėmelis, antraštės, mobilios kortelės. */
+  .orders-scroll { overflow-x: auto; margin-top: 14px; border: 1px solid var(--line); border-radius: 10px; }
+  table.orders { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--card); table-layout: fixed; }
+  table.orders th, table.orders td { padding: 10px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+  table.orders thead th { background: var(--paper-2); font-weight: 600; letter-spacing: .3px; text-transform: uppercase; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  table.orders tbody tr:last-child td { border-bottom: none; }
+  table.orders tbody tr:hover { background: rgba(166,121,74,.06); }
+  table.orders td.nowrap { white-space: nowrap; }
+  table.orders td.muted { color: var(--muted); }
+
+  /* Skaičių stulpeliai siauresni už laikotarpį. */
+  table.stats th:nth-child(1), table.stats td:nth-child(1) { width: 30%; }
+
+  @media (max-width: 720px) {
+    .orders-scroll { overflow-x: visible; border: none; border-radius: 0; }
+    table.orders { table-layout: auto; background: transparent; }
+    table.orders thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    table.orders tr { display: block; background: var(--card); border: 1px solid var(--line);
+      border-radius: 10px; padding: 6px 4px; margin-bottom: 14px; }
+    table.orders td { display: block; width: auto !important; border: none; padding: 6px 14px; }
+    table.orders tbody tr:hover { background: var(--card); }
+    table.orders td::before { content: attr(data-label); display: block; font-size: 11px;
+      letter-spacing: .3px; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+    table.orders td.nowrap { white-space: normal; }
+  }
+</style>

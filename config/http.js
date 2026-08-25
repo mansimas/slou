@@ -109,7 +109,15 @@ module.exports.http = {
         var url = req.originalUrl || req.url || '';
         if (!ASSETS.test(url)) {
           try {
-            Log.req(VisitService.line(req));
+            // The visitor id is minted here rather than in a controller so it
+            // is assigned on the FIRST request of a visit, whatever that
+            // request happened to be.
+            var visitor = VisitService.visitorId(req);
+            if (visitor.isNew) {
+              var cookie = sails.config.custom.visitorCookie;
+              res.cookie(cookie.name, visitor.id, cookie.options);
+            }
+            Log.req(VisitService.line(req, visitor.id));
           } catch (unusedErr) {
             // Logging must never be the reason a page fails to render.
           }
@@ -120,11 +128,12 @@ module.exports.http = {
 
     order: [
       'botGuard',
-      'visitLogger',
-      // cookieParser stays: the language cookie is read through req.cookies.
+      // cookieParser comes BEFORE visitLogger: the logger reads the visitor id
+      // off req.cookies, which does not exist until this has run.
       // 'session' is gone — the hook is off in .sailsrc, so naming it here
       // would be a reference to middleware that no longer exists.
       'cookieParser',
+      'visitLogger',
       'bodyParser',
       'compress',
       'poweredBy',

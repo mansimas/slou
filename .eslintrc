@@ -85,20 +85,6 @@
     "semi":                         ["warn", "always"],
     "semi-spacing":                 ["warn", {"before":false, "after":true}],
     "semi-style":                   ["warn", "last"]
-  },
-
-  // api/services/Log.js is a port of the same file in the matchess project and
-  // is kept line-for-line comparable with it, so that a fix made in one can be
-  // read straight across to the other. That project names things in
-  // snake_case; renaming them here would silently break that correspondence,
-  // so camelcase is switched off for that one file rather than for the app.
-  "overrides": [
-    {
-      "files": ["api/services/Log.js"],
-      "rules": {
-        "camelcase": ["off"]
-      }
-    }
-  ]
+  }
 
 }

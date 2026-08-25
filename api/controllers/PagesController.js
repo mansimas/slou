@@ -209,12 +209,8 @@ module.exports = {
       ' | lang=' + who.lang +
       ' | xff=' + who.chain;
 
-    // Straight to stdout so it shows up live in `pm2 logs` / the terminal.
-    // Tagged ORDERS-VISIT rather than after the URL itself: this file is in a
-    // public repo, and a tag naming the path would give away the very thing
-    // keeping the path out of config/routes.js is meant to protect.
-    console.log('[ORDERS-VISIT]', new Date().toISOString(), line);
-    // ...and to disk, because console scrollback does not survive a restart.
+    // To disk only. The console is reserved for orders — a line every time the
+    // page is opened buries the [ORDER] lines that actually want watching.
     Log.visit(line);
 
     var orders = Log.read_orders(req.param('page'), 200);
@@ -224,6 +220,20 @@ module.exports = {
       pageTitle: 'Užsakymai — SLOU',
       noindex: true,
       orders: orders,
+    });
+  },
+
+  // Visits and orders by day, week and month, read out of the logs. Route in
+  // config/local.js. Unlisted like the orders page, and excluded from its own
+  // numbers — see admin_paths() in StatsService.
+  statistics: function (req, res) {
+    Log.visit('STATS | ' + VisitService.line(req));
+    return res.view('pages/statistics', {
+      layout: 'layouts/slou',
+      active: 'statistics',
+      pageTitle: 'Statistika — SLOU',
+      noindex: true,
+      stats: StatsService.dashboard(),
     });
   },
 

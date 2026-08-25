@@ -108,10 +108,17 @@ shows up in `pm2 logs` immediately. A submission rejected for missing fields
 prints `[ORDER-REJECTED]`, and a failed write prints `[ORDER-FAILED]` to
 stderr.
 
-The unlisted orders page additionally prints an `[ORDERS-VISIT]` line to stdout
-on every hit — visible live in `pm2 logs` — and appends to `logs/visits.log`.
-A referrer other than `-` on those lines means the link exists somewhere it
+Hits on the unlisted pages append to `logs/visits.log`. Nothing but orders is
+printed to the console, so `pm2 logs` stays the place you watch for a sale. A
+referrer other than `-` on a visit line means the link exists somewhere it
 shouldn't.
+
+There is also an unlisted statistics page, routed alongside the orders page in
+`config/local.js`: visits, unique visitors, bot hits and orders per day, week
+and month, read straight out of the logs by `api/services/StatsService.js`. It
+excludes the admin pages from its own numbers, and counts a unique visitor by
+the `vid` cookie rather than by IP — an address merges a household behind one
+router and splits a phone moving between wifi and mobile data.
 
 Two rules when adding a channel:
 

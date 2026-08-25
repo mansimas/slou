@@ -19,6 +19,21 @@ module.exports.custom = {
   // sameSite lax: it must survive arriving from an external link.
   // No `secure` flag yet — the site is served over plain http on 1437, and a
   // secure cookie would simply never be stored. Add it the day TLS lands.
+  // A first-party visitor id, set on the first request and echoed into every
+  // line of logs/requests.log. It is what makes "unique visits" mean anything:
+  // counting distinct IPs treats a household or an office behind one NAT as a
+  // single visitor, and a phone moving between wifi and mobile data as several.
+  // The value is random and holds nothing about the person.
+  visitorCookie: {
+    name: 'vid',
+    options: {
+      maxAge: 365 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+    },
+  },
+
   langCookie: {
     name: 'lang',
     options: {

@@ -91,12 +91,23 @@ function err(msg, rest_params) {
   do_log('logs/errors.log', msg, 'info', '', rest_params);
 }
 
+// Stamp: `YYYY-M-D-H:Min:S-ms`.
+//
+// The year is here, unlike the matchess original, because the statistics page
+// buckets these lines by day, week and month. Without a year, the reader has to
+// GUESS it by walking the file backwards and decrementing whenever the date
+// jumps forward — which works, but breaks down on a log with a gap of more than
+// a year in it, and is impossible to verify by eye.
+//
+// Readers must accept both shapes: every line written before this change has
+// no year, and those lines are still in the files.
 function get_date() {
   var curr_time = new Date();
-  var date1 = ' ' + (curr_time.getMonth() + 1) + '-' + curr_time.getDate() + '-';
+  var date0 = ' ' + curr_time.getFullYear() + '-';
+  var date1 = (curr_time.getMonth() + 1) + '-' + curr_time.getDate() + '-';
   var date2 = curr_time.getHours() + ':' + curr_time.getMinutes() + ':' + curr_time.getSeconds() + '-';
   var date3 = curr_time.getMilliseconds();
-  return date1 + date2 + date3;
+  return date0 + date1 + date2 + date3;
 }
 
 var winston = require('winston');
@@ -227,12 +238,15 @@ function parse_order_line(line) {
   };
 }
 
-// "8-25-15:32:2-574" (the get_date() shape) -> "08-25 15:32". No year is
-// written to the log, so none is shown. Anything unparseable is passed through
-// rather than hidden, so a malformed line is visible instead of silently blank.
+// A get_date() stamp -> "MM-DD HH:MM". Reads both shapes: the current
+// `YYYY-M-D-H:Min:S-ms` and the older year-less `M-D-H:Min:S-ms` still sitting
+// in the files. Anything unparseable is passed through rather than hidden, so a
+// malformed line is visible instead of silently blank.
 function display_date(date) {
-  var p = String(date || '').split('-');   // [month, day, "H:Min:S", ms]
+  var p = String(date || '').split('-');
   if (p.length < 3) { return date || '—'; }
+  // A 4-digit leading field is a year; drop it, the table shows recent orders.
+  if (p.length >= 5 && p[0].length === 4) { p = p.slice(1); }
   var t = p[2].split(':');
   if (t.length < 2) { return date; }
   return pad2(p[0]) + '-' + pad2(p[1]) + ' ' + pad2(t[0]) + ':' + pad2(t[1]);
