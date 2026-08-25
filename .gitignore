@@ -137,10 +137,10 @@ lib-cov
 ################################################
 # Local environment
 #
-# .env holds the MongoDB connection string and
-# other machine-specific settings — keep it off
-# the repo. Document the required keys in the
-# README instead.
+# The app needs no .env — nothing loads one, and
+# there is no database to point at. The rule
+# stays so that a stray .env someone creates
+# locally can never be committed by accident.
 ################################################
 
 .env

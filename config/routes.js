@@ -32,7 +32,18 @@ module.exports.routes = {
   '/':                     'PagesController.home',
   'GET /language/:locale': 'PagesController.setLang',
   'POST /order':           'PagesController.createOrder',
-  'GET /orders123':        'PagesController.orders',
+
+  // The orders page is deliberately NOT declared here. This file is committed
+  // to a public repository, so any path written in it is published along with
+  // it — which would make an unlisted URL guarding customer names and email
+  // addresses pointless. It is declared in config/local.js instead, which
+  // .gitignore keeps out of the repo.
+  //
+  // Sails deep-merges config/local.js over this file, so a `routes` block
+  // there ADDS to these entries rather than replacing them.
+  //
+  // Consequence worth knowing: config/local.js is not in the repo, so a fresh
+  // clone has no orders page until that file is put on the server.
 
 
   /***************************************************************************

@@ -125,14 +125,17 @@ module.exports = {
     }
   },
 
-  // The unlisted order list, GET /orders123. Renders straight from
-  // logs/orders.log, newest first.
+  // The unlisted order list. Renders straight from logs/orders.log, newest
+  // first. Its path is not written here or in config/routes.js — it is
+  // declared in the gitignored config/local.js, so the public repo does not
+  // publish it. `noindex` keeps it out of search results.
   orders: function (req, res) {
     var orders = Log.read_orders(req.param('page'), 200);
     return res.view('pages/orders', {
       layout: 'layouts/slou',
       active: 'orders',
       pageTitle: 'Užsakymai — SLOU',
+      noindex: true,
       orders: orders,
     });
   },
