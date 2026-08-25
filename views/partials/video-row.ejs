@@ -1,0 +1,70 @@
+<%
+/**
+ * video-row.ejs
+ *
+ * The homepage row of product videos (9:16 portrait clips in `videos/`).
+ *
+ * Nothing about a clip is fetched up front: the <video> carries no `src` and
+ * no `poster`. As a card nears the viewport the lazy-loader in
+ * views/layouts/slou.ejs swaps in the poster frame (~40 KB), and the video
+ * file itself is only requested when the visitor presses play. `.vph` is the
+ * placeholder shown until the poster is decoded.
+ *
+ * Expects: `featured` (products that have a `video`) and `t`.
+ */
+%>
+<div class="vrow" role="list">
+  <% featured.forEach(function (p) { %>
+    <article class="vcard" role="listitem">
+      <div class="vmat">
+        <div class="vframe">
+          <div class="vph"><span><%= p.name %></span></div>
+          <video class="vplayer"
+                 data-src="/videos/<%= p.video %>"
+                 data-poster="/videos/posters/<%= p.video.replace('.mp4', '') %>.jpg"
+                 preload="none"
+                 loop playsinline
+                 disablepictureinpicture
+                 aria-label="<%= p.name %>"></video>
+          <button class="vfull" type="button" aria-label="<%= t.videos.full %>" title="<%= t.videos.full %>">
+            <svg class="ic-expand" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M15 20h5v-5M9 20H4v-5"/></svg>
+            <svg class="ic-collapse" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h5V4M20 9h-5V4M20 15h-5v5M4 15h5v5"/></svg>
+          </button>
+          <button class="vplay" type="button" aria-label="<%= t.videos.play %>" title="<%= t.videos.play %>">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <div class="vctrl">
+            <span class="vtime">0:00</span>
+            <div class="vbar" role="slider" tabindex="0"
+                 aria-label="<%= t.videos.progress %>"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="vbar__fill"></div>
+              <div class="vbar__thumb"></div>
+            </div>
+            <button class="vsound" type="button" aria-pressed="true" aria-label="<%= t.videos.sound %>" title="<%= t.videos.sound %>">
+              <svg class="ic-muted" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 9l4 6M21 9l-4 6"/></svg>
+              <svg class="ic-loud" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8.5a5 5 0 010 7M19.5 6a8.5 8.5 0 010 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <%
+        /* Temporarily disabled: the name/price strip renders as a plain <div>
+           instead of a link to the product page, with hover and pointer events
+           switched off in the stylesheet. To put it back, restore the <a
+           class="vbuy"> wrapper with its href to /products/ + p.slug, and drop
+           the `pointer-events` line on `.vbuy` in layouts/slou.ejs. */
+      %>
+      <div class="vbuy is-disabled" aria-disabled="true">
+        <span class="vname"><%= p.name %></span>
+        <span class="vprices">
+          <% if (p.price.was) { %>
+            <s class="vwas"><%= p.price.was %></s>
+            <span class="voff"><%= p.price.off %></span>
+          <% } %>
+          <span class="vnow"><%= p.price.now %></span>
+        </span>
+      </div>
+    </article>
+  <% }); %>
+</div>

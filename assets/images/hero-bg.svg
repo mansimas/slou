@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="SLOU hero background">
+  <defs>
+    <!-- warm cream base gradient -->
+    <linearGradient id="base" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#f6f2ea"/>
+      <stop offset="0.55" stop-color="#efe6d6"/>
+      <stop offset="1" stop-color="#e6d7bf"/>
+    </linearGradient>
+
+    <!-- soft leather-tone glows -->
+    <radialGradient id="glowA" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#c9a877" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#c9a877" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#a97f4f" stop-opacity="0.40"/>
+      <stop offset="1" stop-color="#a97f4f" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowC" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#efe7d6" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#efe7d6" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- subtle leather grain -->
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="n"/>
+      <feColorMatrix in="n" type="matrix"
+        values="0 0 0 0 0.35  0 0 0 0 0.26  0 0 0 0 0.15  0 0 0 0.5 0"/>
+    </filter>
+
+    <filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+  </defs>
+
+  <!-- base -->
+  <rect width="1600" height="1000" fill="url(#base)"/>
+
+  <!-- organic leather-tone light -->
+  <ellipse cx="1180" cy="300" rx="720" ry="560" fill="url(#glowA)"/>
+  <ellipse cx="300"  cy="820" rx="640" ry="520" fill="url(#glowB)"/>
+  <ellipse cx="760"  cy="360" rx="520" ry="420" fill="url(#glowC)"/>
+
+  <!-- flowing minimal line-work (thread motif; the dotted stitch curve
+       that used to sit here read as a row of grey dots, so it was removed) -->
+  <g fill="none" stroke="#8a6a44" stroke-opacity="0.16" stroke-width="2">
+    <path d="M-40 640 C 360 500, 720 760, 1080 600 S 1660 500, 1680 560" filter="url(#soft)"/>
+    <path d="M-40 720 C 380 600, 760 840, 1120 690 S 1660 600, 1680 660" filter="url(#soft)"/>
+  </g>
+
+  <!-- grain overlay -->
+  <rect width="1600" height="1000" filter="url(#grain)" opacity="0.5"/>
+
+  <!-- gentle bottom fade into page background -->
+  <rect x="0" y="720" width="1600" height="280" fill="#f4f1ea" opacity="0.0"/>
+  <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#f4f1ea" stop-opacity="0"/>
+    <stop offset="1" stop-color="#f4f1ea" stop-opacity="1"/>
+  </linearGradient>
+  <rect x="0" y="680" width="1600" height="320" fill="url(#fade)"/>
+</svg>

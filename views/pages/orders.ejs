@@ -1,0 +1,91 @@
+<article class="page page--wide">
+  <p class="kicker">SLOU</p>
+  <h1>Užsakymai / Žinutės</h1>
+  <p>Visos per kontaktų formą ir pagrindinio puslapio užsakymų langą pateiktos žinutės, išsaugotos MongoDB. Iš viso: <strong><%= messages.length %></strong>.</p>
+
+  <% if (messages.length === 0) { %>
+    <p style="margin-top:22px;color:var(--muted);">Kol kas nėra nė vieno įrašo.</p>
+  <% } else { %>
+    <div class="orders-scroll">
+      <table class="orders">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Data</th>
+            <th>Vardas</th>
+            <th>El. paštas</th>
+            <th>Žinutė</th>
+            <th>Kalba</th>
+            <th>Tipas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% messages.forEach(function (m, i) { %>
+            <tr>
+              <td data-label="#"><%= i + 1 %></td>
+              <td data-label="Data" class="nowrap"><%= m.createdAt ? new Date(m.createdAt).toLocaleString('lt-LT') : '—' %></td>
+              <td data-label="Vardas"><%= m.name %></td>
+              <td data-label="El. paštas"><a class="inline" href="mailto:<%= m.email %>"><%= m.email %></a></td>
+              <td data-label="Žinutė" class="msg"><%= m.message %></td>
+              <td data-label="Kalba"><%= m.locale %></td>
+              <td data-label="Tipas"><span class="kind kind--<%= m.kind || 'contact' %>"><%= (m.kind || 'contact') === 'order' ? 'Užsakymas' : 'Žinutė' %></span></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</article>
+
+<style>
+  /* Šis puslapis platesnis nei įprastas .page (780px), kad lentelė tilptų. */
+  .page--wide { max-width: 1140px; }
+  .orders-scroll { overflow-x: auto; margin-top: 26px; border: 1px solid var(--line); border-radius: 10px; }
+  table.orders { width: 100%; border-collapse: collapse; font-size: 14px; background: var(--card); table-layout: fixed; }
+  table.orders th, table.orders td { padding: 11px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+  table.orders thead th { background: var(--paper-2); font-weight: 600; letter-spacing: .3px; text-transform: uppercase; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  table.orders tbody tr:last-child td { border-bottom: none; }
+  table.orders tbody tr:hover { background: rgba(166,121,74,.06); }
+  table.orders td.nowrap { white-space: nowrap; }
+  /* Stulpelių pločiai desktopui: „Žinutė" gauna daugiausiai vietos. */
+  table.orders th:nth-child(1), table.orders td:nth-child(1) { width: 44px; }
+  table.orders th:nth-child(2), table.orders td:nth-child(2) { width: 150px; }
+  table.orders th:nth-child(3), table.orders td:nth-child(3) { width: 130px; }
+  table.orders th:nth-child(4), table.orders td:nth-child(4) { width: 190px; }
+  table.orders th:nth-child(6), table.orders td:nth-child(6) { width: 70px; }
+  table.orders th:nth-child(7), table.orders td:nth-child(7) { width: 104px; }
+  /* Užsakymai iš pagrindinio puslapio atskiriami nuo kontaktų žinučių. */
+  .kind { display: inline-block; font-size: 11px; letter-spacing: .4px; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+  .kind--order { background: rgba(166,121,74,.18); color: var(--leather-dark); }
+  .kind--contact { background: rgba(134,121,106,.14); color: var(--muted); }
+  table.orders td.msg { white-space: pre-wrap; word-break: break-word; }
+  table.orders td:nth-child(4) { word-break: break-word; }
+
+  /* Telefone: lentelė virsta kortelėmis — nebėra fiksuotų pločių ir tuščių tarpų. */
+  @media (max-width: 720px) {
+    .orders-scroll { overflow-x: visible; border: none; border-radius: 0; }
+    table.orders { table-layout: auto; background: transparent; font-size: 14px; }
+    table.orders thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    table.orders tr {
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 6px 4px;
+      margin-bottom: 14px;
+    }
+    table.orders td, table.orders th { display: block; width: auto !important; border: none; padding: 6px 14px; }
+    table.orders tbody tr:hover { background: var(--card); }
+    /* Kiekvienoje eilutėje rodom stulpelio pavadinimą. */
+    table.orders td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 11px;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2px;
+    }
+    table.orders td.nowrap { white-space: normal; }
+  }
+</style>

@@ -1,0 +1,23 @@
+<div class="wrap">
+  <section class="product">
+    <div class="media">
+      <div class="ph"><%= product.name %></div>
+      <img src="/images/products/<%= product.slug %>.jpg" alt="<%= product.name %>"
+           onerror="this.style.display='none'">
+    </div>
+    <div class="info">
+      <div class="cat"><%= product.category %></div>
+      <h1><%= product.name %></h1>
+      <p class="long"><%= product.long %></p>
+      <div class="meta">
+        <% if (product.size) { %><p><%= product.size %></p><% } %>
+        <p><%= t.product.handmade %></p>
+        <p><%= t.product.production %></p>
+      </div>
+      <div class="actions">
+        <a class="btn solid" href="mailto:info@slou.lt?subject=<%= product.name %>"><%= t.product.order %></a>
+        <a class="btn" href="/"><%= t.product.back %></a>
+      </div>
+    </div>
+  </section>
+</div>

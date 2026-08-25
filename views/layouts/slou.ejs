@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="<%= typeof t !== 'undefined' ? t.htmlLang : 'lt-LT' %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= typeof pageTitle !== 'undefined' ? pageTitle : 'SLOU — rankų darbo oda' %></title>
+  <style>
+    :root {
+      --paper:   #f1e9db;
+      --paper-2: #ece2d0;
+      --card:    #f7f1e6;
+      --ink:     #29241f;
+      --muted:   #86796a;
+      --line:    #ddd2be;
+      --leather: #a6794a;
+      --leather-dark: #6f4d2c;
+      --accent:  #8a6a44;
+      /* Helvetica throughout — headings and body alike. All system faces, so
+         nothing is downloaded. (assets/fonts/Inter-Variable.woff2 is no longer
+         referenced; it can be deleted if Inter is not coming back.) */
+      --serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--sans);
+      color: var(--ink);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      background-color: #efe6d5;
+      background-image:
+        radial-gradient(1100px 700px at 78% -8%, rgba(201,168,119,.42), transparent 60%),
+        radial-gradient(900px 700px at 8% 12%, rgba(233,222,201,.55), transparent 55%),
+        radial-gradient(1000px 900px at 60% 108%, rgba(160,120,74,.30), transparent 60%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.35 0 0 0 0 0.26 0 0 0 0 0.15 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-attachment: fixed, fixed, fixed, scroll;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    .wrap { max-width: 1140px; margin: 0 auto; padding: 0 28px; }
+
+    /* Announcement bar */
+    .topbar {
+      background: var(--ink); color: #f0e6d4;
+      font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase; text-align: center;
+      padding: 9px 16px;
+    }
+
+    /* Head bar — brand on the left, language switcher on the right, both
+       vertically centred. On the homepage the title sits centred between them,
+       so there is no separate hero band above the videos. */
+    /* 1000px of inner width plus 28px padding each side is exactly the video
+       row's box (.vrow is max-width 1000 inside .wrap's 28px padding), so the
+       brand lines up with the left edge of the first clip and the language
+       switcher with the right edge of the last one — at every viewport width. */
+    /* The band spans the full viewport and carries the background; the row
+       inside it stays constrained so the brand and switcher keep their
+       alignment with the video row. */
+    .headband { border-bottom: 1px solid var(--line); }
+    .headband--home { background: #efe6d6 url('/images/hero-bg.svg') center / cover no-repeat; }
+    .headbar { display: flex; align-items: center; justify-content: space-between; gap: 24px;
+      max-width: 1056px; margin: 0 auto; padding: 18px 28px; }
+    .headbar--home { padding: 26px 28px 30px; }
+    .brand { font-family: var(--serif); font-weight: 600; font-size: 30px; letter-spacing: 8px; flex: none; }
+
+    .headbar__mid { flex: 1 1 auto; min-width: 0; text-align: center; }
+    .headbar__mid .eyebrow { font-size: 11.5px; letter-spacing: 4px; text-transform: uppercase; color: var(--leather-dark); margin-bottom: 7px; }
+    .headbar__mid h1 { font-family: var(--serif); font-weight: 300; font-size: clamp(24px, 3.4vw, 40px); line-height: 1.06; }
+    .langsw { position: relative; font-size: 13px; flex: none; }
+    .langsw > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 2px; color: var(--ink); background: rgba(247,241,230,.6); user-select: none; letter-spacing: 1px; }
+    .langsw > summary::-webkit-details-marker { display: none; }
+    .langsw > summary:hover { border-color: var(--leather); }
+    .langsw > summary svg { width: 15px; height: 15px; stroke: var(--leather-dark); fill: none; stroke-width: 1.4; }
+    .langsw .caret { font-size: 9px; color: var(--muted); transition: transform .2s; }
+    .langsw[open] .caret { transform: rotate(180deg); }
+    .langmenu { position: absolute; right: 0; top: calc(100% + 8px); min-width: 184px; background: var(--card); border: 1px solid var(--line); border-radius: 3px; box-shadow: 0 16px 40px -16px rgba(70,48,25,.5); padding: 6px; list-style: none; z-index: 40; }
+    .langmenu a { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 2px; color: var(--ink); font-size: 14px; letter-spacing: .3px; transition: background .15s, color .15s; }
+    .langmenu a .code { font-size: 11px; letter-spacing: 1px; color: var(--muted); width: 22px; flex: none; }
+    .langmenu a:hover { background: rgba(166,124,74,.12); color: var(--leather-dark); }
+    .langmenu a.active { background: rgba(166,124,74,.16); font-weight: 600; }
+    .langmenu a.active .code { color: var(--leather-dark); }
+    /* Buttons */
+    .btn {
+      display: inline-block; padding: 15px 40px; border: 1px solid var(--ink);
+      font-family: inherit; color: inherit; font-size: 12.5px; letter-spacing: 2.5px;
+      text-transform: uppercase; transition: .25s; background: transparent; cursor: pointer;
+    }
+    .btn:hover { background: var(--ink); color: var(--paper); }
+    .btn.solid { background: var(--ink); color: var(--paper); }
+    .btn.solid:hover { background: var(--leather-dark); border-color: var(--leather-dark); }
+
+    /* ---------- Homepage video row ---------- */
+    /* Every clip is a 576x1024 (9:16) portrait video, so the frames are a
+       fixed 9/16 box and the file is cropped to fill it. */
+    .vrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 38px 26px; margin: 44px auto 0; max-width: 1000px; }
+    .vcard { width: 100%; min-width: 0; max-width: 306px; margin: 0 auto; }
+
+    /* Matted frame — a paper mount with a thin line around the clip itself. */
+    .vmat { padding: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 6px;
+      box-shadow: 0 16px 40px -24px rgba(70,48,25,.75); transition: box-shadow .35s ease, transform .35s ease; }
+    .vcard:hover .vmat { box-shadow: 0 26px 54px -24px rgba(70,48,25,.85); transform: translateY(-4px); }
+
+    .vframe { position: relative; aspect-ratio: 9 / 16; overflow: hidden; border-radius: 3px; cursor: pointer;
+      user-select: none; -webkit-user-select: none;
+      border: 1px solid var(--line); background: linear-gradient(135deg, #d8c6ad 0%, #b7986b 100%); }
+    .vframe video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
+      opacity: 0; transition: opacity .45s ease; }
+    .vframe.is-ready video { opacity: 1; }
+
+    /* Placeholder behind the clip, shown until the poster frame is decoded. */
+    .vph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 16px; transition: opacity .45s ease;
+      background: repeating-linear-gradient(45deg, #cdb490, #cdb490 12px, #c7ac86 12px, #c7ac86 24px);
+      color: #5c4529; font-family: var(--serif); font-size: 17px; letter-spacing: 1px; }
+    .vframe.is-ready .vph { opacity: 0; }
+
+    /* Play / pause toggle, top left — same size as the fullscreen button.
+       Clips never autoplay; nothing is fetched until the visitor presses play
+       (or clicks the clip itself, which does the same thing). */
+    .vplay { position: absolute; top: 10px; left: 10px; z-index: 3;
+      width: 40px; height: 40px; padding: 0; cursor: pointer; opacity: 0;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(241,233,219,.45); border-radius: 50%;
+      background: rgba(41,36,31,.45); backdrop-filter: blur(4px);
+      transition: background .2s, border-color .2s, opacity .3s; }
+    .vframe.is-ready .vplay { opacity: 1; }
+    .vplay:hover { background: rgba(41,36,31,.8); border-color: var(--paper); }
+    .vplay svg { width: 19px; height: 19px; fill: #f2e9d8; stroke: none; margin-left: 3px; }
+    .vframe.is-playing .vplay { opacity: 0; pointer-events: none; }
+
+    /* Fullscreen toggle, top right of each clip. */
+    .vfull { position: absolute; top: 10px; right: 10px; z-index: 3;
+      width: 40px; height: 40px; padding: 0; cursor: pointer; opacity: 0;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(241,233,219,.45); border-radius: 50%;
+      background: rgba(41,36,31,.45); backdrop-filter: blur(4px);
+      transition: background .2s, border-color .2s, opacity .3s; }
+    .vframe.is-ready .vfull { opacity: 1; }
+    .vfull:hover { background: rgba(41,36,31,.8); border-color: var(--paper); }
+    .vfull svg { width: 19px; height: 19px; fill: none; stroke: #f2e9d8; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .vfull .ic-collapse { display: none; }
+    .vframe.is-full .vfull .ic-collapse { display: block; }
+    .vframe.is-full .vfull .ic-expand { display: none; }
+
+    /* In fullscreen the frame fills the screen instead of holding its 9/16 box.
+       The prefixed selector must be its own rule — browsers drop a whole
+       selector list containing one they do not recognise. */
+    .vframe:fullscreen { aspect-ratio: auto; width: 100%; height: 100%;
+      border: none; border-radius: 0; background: #100d0b; }
+    .vframe:fullscreen video { object-fit: contain; opacity: 1; }
+    .vframe:fullscreen .vph { display: none; }
+    .vframe:fullscreen .vctrl { opacity: 1; padding: 34px 22px 18px; }
+    .vframe:fullscreen .vfull { top: 18px; right: 22px; width: 50px; height: 50px; }
+    .vframe:fullscreen .vplay { top: 18px; left: 22px; width: 50px; height: 50px; }
+    .vframe:fullscreen .vfull svg,
+    .vframe:fullscreen .vplay svg { width: 23px; height: 23px; }
+    .vframe:-webkit-full-screen { aspect-ratio: auto; width: 100%; height: 100%;
+      border: none; border-radius: 0; background: #100d0b; }
+    .vframe:-webkit-full-screen video { object-fit: contain; opacity: 1; }
+    .vframe:-webkit-full-screen .vph { display: none; }
+
+    /* Playback controls: elapsed time, a scrubbable progress bar and the sound
+       toggle. Revealed on hover, while playing, and once a clip has been
+       started (so it can still be scrubbed after pausing). */
+    .vctrl { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2;
+      display: flex; align-items: center; gap: 9px; padding: 24px 10px 9px;
+      opacity: 0; transition: opacity .25s;
+      background: linear-gradient(to top, rgba(24,20,17,.74), rgba(24,20,17,0)); }
+    .vframe.is-ready:hover .vctrl,
+    .vframe.is-playing .vctrl,
+    .vframe.has-started .vctrl { opacity: 1; }
+
+    .vtime { flex: none; font-size: 11px; letter-spacing: .4px; color: #f2e9d8;
+      font-variant-numeric: tabular-nums; text-shadow: 0 1px 2px rgba(0,0,0,.55); }
+
+    /* touch-action: none keeps a drag from scrolling the mobile carousel. */
+    .vbar { position: relative; flex: 1 1 auto; height: 16px; cursor: pointer;
+      display: flex; align-items: center; touch-action: none; }
+    .vbar::before { content: ""; position: absolute; left: 0; right: 0; height: 3px;
+      border-radius: 999px; background: rgba(242,233,216,.34); }
+    .vbar__fill { position: absolute; left: 0; width: 0; height: 3px;
+      border-radius: 999px; background: var(--leather); }
+    .vbar__thumb { position: absolute; top: 50%; left: 0; width: 11px; height: 11px;
+      margin-left: -5.5px; border-radius: 50%; background: #f2e9d8;
+      box-shadow: 0 1px 4px rgba(0,0,0,.55);
+      transform: translateY(-50%) scale(0); transition: transform .18s; }
+    .vbar:hover .vbar__thumb,
+    .vbar.is-scrubbing .vbar__thumb { transform: translateY(-50%) scale(1); }
+    .vbar:focus-visible { outline: 2px solid var(--paper); outline-offset: 4px; border-radius: 999px; }
+
+    .vsound { flex: none; width: 30px; height: 30px; padding: 0; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid rgba(241,233,219,.45); border-radius: 50%;
+      background: rgba(41,36,31,.45); transition: background .2s, border-color .2s; }
+    .vsound:hover { background: rgba(41,36,31,.8); border-color: var(--paper); }
+    .vsound svg { width: 15px; height: 15px; fill: none; stroke: #f2e9d8; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    .vsound .ic-loud { display: none; }
+    .vsound[aria-pressed="true"] .ic-loud { display: block; }
+    .vsound[aria-pressed="true"] .ic-muted { display: none; }
+
+    /* The strip under each clip, all on one line: product name on the left,
+       then the original struck through, the saving as a badge, and the price
+       you pay. The name shrinks (and ellipsises if it must) so the prices are
+       never pushed onto a second line. */
+    .vbuy { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 14px;
+      padding: 13px 16px; border: 1px solid var(--ink); border-radius: 2px;
+      font-size: 12px; letter-spacing: 1.6px; text-transform: uppercase;
+      color: var(--ink); }
+    /* Ordering from the strip is off for now, so it is inert: no cursor
+       change, no hover, nothing to click or focus. Remove this rule (and
+       restore the <a> in partials/video-row.ejs) to turn it back on. */
+    .vbuy { pointer-events: none; cursor: default; user-select: none; }
+    .vbuy .vname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .vprices { display: flex; align-items: baseline; gap: 7px; flex: none; letter-spacing: .6px; }
+    /* Darker than --muted (which only reached ~3.5:1 on paper) and a step
+       larger, so the digits stay readable under the strike.
+       `line-through` can only draw horizontally, so the rule is a rotated
+       pseudo-element instead. inline-block anchors it to the text box, and the
+       small negative insets let it overhang both ends like a real pen stroke. */
+    .vwas { position: relative; display: inline-block; font-size: 12.5px;
+      color: #5f574c; text-decoration: none; }
+    .vwas::after { content: ""; position: absolute; left: -3px; right: -3px; top: 50%;
+      height: 1px; background: rgba(111,77,44,.75);
+      transform: translateY(-50%) rotate(-12deg); }
+    .voff { font-size: 9.5px; font-weight: 700; letter-spacing: .4px; padding: 2px 6px;
+      border-radius: 999px; background: var(--leather); color: #f7f1e6; }
+    .vnow { font-size: 15px; font-weight: 700; letter-spacing: .3px; color: var(--leather-dark); }
+
+    /* ---------- Homepage order box ---------- */
+    .orderbox { max-width: 820px; margin: 74px auto 0; padding: 44px 46px 40px; background: var(--card);
+      border: 1px solid var(--line); border-radius: 4px; box-shadow: 0 20px 50px -30px rgba(70,48,25,.7); }
+    .orderbox h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(26px, 3.4vw, 38px); margin: 0 0 10px; }
+    .orderbox__lead { color: #554d42; margin-bottom: 26px; }
+    .order-who { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .orderbox textarea { min-height: 230px; }
+    .orderbox .btn { margin-top: 8px; }
+
+    /* Story band */
+    .band { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 96px auto; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; background: var(--card); }
+    @media (max-width: 820px){ .band { grid-template-columns: 1fr; } }
+    .band .media { min-height: 420px; background: #9c7043 url('/images/leather.svg') center / cover no-repeat; }
+    .band .copy { padding: 60px 56px; display: flex; flex-direction: column; justify-content: center; }
+    .band .eyebrow { font-size: 12px; letter-spacing: 4px; text-transform: uppercase; color: var(--leather-dark); margin-bottom: 12px; }
+    .band h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(26px, 3.4vw, 38px); margin-bottom: 16px; }
+    .band p { color: #554d42; margin-bottom: 14px; }
+
+    /* Article / content pages */
+    .page { max-width: 780px; margin: 0 auto; padding: 84px 28px 100px; }
+    .page .kicker { text-transform: uppercase; letter-spacing: 4px; font-size: 12px; color: var(--leather-dark); margin-bottom: 14px; }
+    .page h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(34px, 5vw, 52px); letter-spacing: .5px; margin-bottom: 10px; }
+    .page > p:first-of-type { font-size: 19px; color: #4a443d; }
+    .page h2 { font-family: var(--serif); font-weight: 600; font-size: 23px; margin: 40px 0 10px; }
+    .page p { margin-bottom: 14px; color: #4a443d; }
+    .page ul { margin: 0 0 14px 22px; color: #4a443d; }
+    .page ul li { margin-bottom: 6px; }
+    .page a.inline { color: var(--leather-dark); text-decoration: underline; text-underline-offset: 3px; }
+    .page hr { border: none; border-top: 1px solid var(--line); margin: 34px 0; }
+
+    /* Product detail */
+    .product { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; padding: 64px 0 40px; }
+    @media (max-width: 760px) { .product { grid-template-columns: 1fr; } }
+    .product .media { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 2px; border: 1px solid var(--line);
+      background: linear-gradient(135deg, #d8c6ad 0%, #b7986b 100%); box-shadow: 0 20px 50px -26px rgba(70,48,25,.7); }
+    .product .media .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 22px; letter-spacing: 1px; color: #5c4529;
+      background: repeating-linear-gradient(45deg, #cdb490, #cdb490 12px, #c7ac86 12px, #c7ac86 24px); }
+    .product .media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .product .info { display: flex; flex-direction: column; justify-content: center; }
+    .product .info .cat { text-transform: uppercase; letter-spacing: 3px; font-size: 12px; color: var(--leather-dark); }
+    .product .info h1 { font-family: var(--serif); font-weight: 500; font-size: clamp(34px, 5vw, 50px); letter-spacing: .5px; margin: 8px 0 18px; }
+    .product .info .long { color: #4a443d; font-size: 17px; margin-bottom: 22px; }
+    .product .info .meta { border-top: 1px solid var(--line); padding-top: 18px; color: var(--muted); font-size: 14.5px; }
+    .product .info .meta p { margin-bottom: 4px; }
+    .product .actions { display: flex; gap: 14px; margin-top: 26px; flex-wrap: wrap; }
+
+    /* Form fields — used by the homepage order box. */
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .field input, .field textarea { width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: 2px; background: #fff; font: inherit; font-size: 15px; color: var(--ink); }
+    .field input:focus, .field textarea:focus { outline: none; border-color: var(--leather); box-shadow: 0 0 0 3px rgba(166,124,74,.12); }
+    .field textarea { resize: vertical; min-height: 112px; }
+    .form-note { margin-top: 14px; font-size: 14.5px; text-align: center; line-height: 1.5; }
+    .form-note.ok { color: #5d7c3c; }
+    .form-note.err { color: #a6482f; }
+
+    /* ---------- Mobile ---------- */
+    @media (max-width: 820px) {
+      .topbar { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: clamp(7.5px, 2.6vw, 11px); letter-spacing: .3px; padding: 8px 10px; }
+
+      /* Brand and language share the top row, the title panel sits beneath.
+         28px padding keeps the brand aligned with the first card, which the
+         bleeding video row also insets by 28px. */
+      .headbar { flex-wrap: wrap; gap: 12px; padding: 12px 28px 14px; }
+      .headbar--home { padding: 12px 28px 18px; }
+      .brand { font-size: 24px; letter-spacing: 5px; }
+      .headbar__mid { order: 3; flex-basis: 100%; margin-top: 10px; }
+      .headbar__mid h1 { font-size: clamp(23px, 6.4vw, 32px); }
+      .headbar__mid .eyebrow { margin-bottom: 5px; letter-spacing: 3px; }
+
+      /* One clip per view, with the neighbouring ones peeking in at the edges. */
+      .vrow { display: flex; grid-template-columns: none; max-width: none; gap: 14px; margin: 26px -28px 0;
+        padding: 4px 28px 16px; overflow-x: auto; scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch; scrollbar-width: none; align-items: flex-start; }
+      .vrow::-webkit-scrollbar { display: none; }
+      /* min-width: 0 is what actually pins the width: without it a flex item
+         cannot shrink below its own content, and since .vprices never shrinks
+         each card's floor depends on how long its price string is — so cards
+         with longer prices come out bigger. margin: 0 because auto margins on
+         a flex item absorb free space. */
+      .vcard { flex: 0 0 76%; min-width: 0; max-width: none; margin: 0; scroll-snap-align: center; }
+
+      /* Smaller price type so the one-line row fits well inside the pinned
+         width instead of straining against it. */
+      .vbuy { padding: 12px 14px; gap: 10px; letter-spacing: 1.3px; }
+      .vprices { gap: 6px; }
+      .vwas { font-size: 11.5px; }
+      .voff { font-size: 9px; padding: 2px 5px; }
+      .vnow { font-size: 14px; }
+
+      .orderbox { margin-top: 52px; padding: 32px 22px 30px; }
+      .order-who { grid-template-columns: 1fr; gap: 0; }
+      .orderbox textarea { min-height: 190px; }
+      .band { margin: 62px auto; }
+      .band .media { min-height: 240px; }
+      .band .copy { padding: 40px 28px; }
+      .product { padding: 34px 0 16px; gap: 30px; }
+      .page { padding: 58px 22px 72px; }
+      .langmenu { min-width: 168px; }
+    }
+
+    @media (max-width: 460px) {
+      .brand { font-size: 22px; letter-spacing: 4px; }
+      .langsw > summary span:not(.caret) { display: none; }
+      .langsw > summary { gap: 6px; padding: 8px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar"><%= t.topbar %></div>
+
+  <% var langNames = { lt: 'Lietuvių', en: 'English', pt: 'Português', fr: 'Français', de: 'Deutsch', es: 'Español', it: 'Italiano' }; %>
+  <% var isHome = typeof active !== 'undefined' && active === 'home'; %>
+  <div class="headband<%= isHome ? ' headband--home' : '' %>">
+    <div class="headbar<%= isHome ? ' headbar--home' : '' %>">
+      <a href="/" class="brand">SLOU</a>
+
+      <% if (isHome) { %>
+        <div class="headbar__mid">
+          <p class="eyebrow"><%= t.hero.eyebrow %></p>
+          <h1><%= t.hero.title %></h1>
+        </div>
+      <% } %>
+
+      <details class="langsw" id="langsw">
+        <summary>
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15.5 0 18M12 3c-2.5 2.5-2.5 15.5 0 18"/></svg>
+          <span><%= t.langLabel %></span>
+          <span class="caret">▾</span>
+        </summary>
+        <ul class="langmenu">
+          <% locales.forEach(function(l){ %>
+            <li><a href="/language/<%= l.code %>" class="<%= locale === l.code ? 'active' : '' %>"><span class="code"><%= l.label %></span><%= langNames[l.code] || l.label %></a></li>
+          <% }); %>
+        </ul>
+      </details>
+    </div>
+  </div>
+
+  <%- body %>
+
+
+  <script>
+    // ---- Language dropdown ----
+    (function () {
+      var lang = document.getElementById('langsw');
+      if (!lang) { return; }
+      document.addEventListener('click', function (e) {
+        if (lang.open && !lang.contains(e.target)) { lang.open = false; }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { lang.open = false; }
+      });
+    })();
+
+    // ---- Homepage product videos ----
+    // Nothing autoplays. As a card nears the viewport we swap in its poster
+    // frame (~40 KB); the video file itself is only requested the first time
+    // the visitor presses play or drags the progress bar, so a page load costs
+    // no video bytes at all.
+    (function () {
+      var players = [].slice.call(document.querySelectorAll('.vplayer'));
+      if (!players.length) { return; }
+
+      function frameOf(v) { return v.closest('.vframe'); }
+
+      function fullscreenEl() {
+        return document.fullscreenElement || document.webkitFullscreenElement || null;
+      }
+
+      // Fullscreen the frame rather than the <video> so our own controls stay
+      // on top. iOS Safari cannot fullscreen an arbitrary element, so there we
+      // fall back to the video's native fullscreen.
+      function toggleFullscreen(frame, video) {
+        if (fullscreenEl()) {
+          var exit = document.exitFullscreen || document.webkitExitFullscreen;
+          if (exit) { exit.call(document); }
+          return;
+        }
+        var request = frame.requestFullscreen || frame.webkitRequestFullscreen;
+        if (request) {
+          var r = request.call(frame);
+          if (r && r.catch) { r.catch(function () {}); }
+        } else if (video.webkitEnterFullscreen) {
+          if (video.dataset.src) { attachSrc(video); }
+          video.webkitEnterFullscreen();
+        }
+      }
+
+      function fmt(sec) {
+        if (!isFinite(sec) || sec < 0) { sec = 0; }
+        var m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+        return m + ':' + (s < 10 ? '0' : '') + s;
+      }
+
+      function render(v) {
+        var ui = v.ui;
+        if (!ui) { return; }
+        var d = v.duration;
+        var pct = (isFinite(d) && d > 0) ? (v.currentTime / d) * 100 : 0;
+        ui.fill.style.width = pct + '%';
+        ui.thumb.style.left = pct + '%';
+        ui.bar.setAttribute('aria-valuenow', String(Math.round(pct)));
+        ui.time.textContent = fmt(v.currentTime) +
+          ((isFinite(d) && d > 0) ? ' / ' + fmt(d) : '');
+      }
+
+      // Decode the poster before showing it, so the card never flashes empty.
+      function showPoster(v) {
+        var url = v.dataset.poster;
+        if (!url) { return; }
+        delete v.dataset.poster;
+        var img = new Image();
+        img.onload = img.onerror = function () {
+          v.poster = url;
+          var f = frameOf(v);
+          if (f) { f.classList.add('is-ready'); }
+        };
+        img.src = url;
+      }
+
+      function attachSrc(v) {
+        if (!v.dataset.src) { return; }
+        v.preload = 'auto';
+        v.src = v.dataset.src;
+        delete v.dataset.src;
+      }
+
+      function start(v) {
+        attachSrc(v);
+        players.forEach(function (other) {   // only one clip at a time
+          if (other !== v && !other.paused) { other.pause(); }
+        });
+        var promise = v.play();
+        if (promise && promise.catch) { promise.catch(function () {}); }
+      }
+
+      function syncState(v) {
+        var f = frameOf(v);
+        if (!f) { return; }
+        var playing = !v.paused && !v.ended;
+        f.classList.toggle('is-playing', playing);
+        if (playing) { f.classList.add('has-started'); }
+      }
+
+      // Seek to whatever point of the bar was clicked or dragged to. If the
+      // file has not been fetched yet there is no duration to scale against,
+      // so remember the fraction and apply it once metadata arrives.
+      function seekTo(v, clientX) {
+        var ui = v.ui;
+        var rect = ui.bar.getBoundingClientRect();
+        if (!rect.width) { return; }
+        var frac = (clientX - rect.left) / rect.width;
+        frac = Math.max(0, Math.min(1, frac));
+        if (isFinite(v.duration) && v.duration > 0) {
+          v.currentTime = frac * v.duration;
+          render(v);
+        } else {
+          v.pendingSeek = frac;
+          attachSrc(v);
+        }
+      }
+
+      players.forEach(function (v) {
+        var frame = frameOf(v);
+        if (!frame) { return; }
+        v.ui = {
+          bar: frame.querySelector('.vbar'),
+          fill: frame.querySelector('.vbar__fill'),
+          thumb: frame.querySelector('.vbar__thumb'),
+          time: frame.querySelector('.vtime'),
+        };
+        var bar = v.ui.bar;
+
+        ['play', 'pause', 'ended'].forEach(function (evt) {
+          v.addEventListener(evt, function () { syncState(v); });
+        });
+        ['timeupdate', 'seeked', 'durationchange', 'progress'].forEach(function (evt) {
+          v.addEventListener(evt, function () { render(v); });
+        });
+        v.addEventListener('loadedmetadata', function () {
+          if (v.pendingSeek != null && isFinite(v.duration) && v.duration > 0) {
+            v.currentTime = v.pendingSeek * v.duration;
+            v.pendingSeek = null;
+          }
+          render(v);
+        });
+
+        var fullBtn = frame.querySelector('.vfull');
+        if (fullBtn) {
+          fullBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleFullscreen(frame, v);
+          });
+        }
+
+        // The play button acts immediately — an explicit press should never
+        // wait on the double-click window below.
+        var playBtn = frame.querySelector('.vplay');
+        if (playBtn) {
+          playBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (v.paused) { start(v); } else { v.pause(); }
+          });
+        }
+
+        // Clicking the clip toggles playback, double-clicking goes fullscreen.
+        // A double-click also fires two plain clicks, which would toggle play
+        // twice and land back where it started, so the single-click action is
+        // held for the double-click window and dropped if a second click lands.
+        // The buttons and control strip are exempt: scrubbing or muting must
+        // not also pause the video.
+        var clickHold = null;
+        function onControl(e) {
+          return e.target.closest('.vctrl') || e.target.closest('.vfull') ||
+                 e.target.closest('.vplay');
+        }
+
+        frame.addEventListener('click', function (e) {
+          if (onControl(e) || clickHold) { return; }
+          clickHold = setTimeout(function () {
+            clickHold = null;
+            if (v.paused) { start(v); } else { v.pause(); }
+          }, 230);
+        });
+
+        frame.addEventListener('dblclick', function (e) {
+          if (onControl(e)) { return; }
+          if (clickHold) { clearTimeout(clickHold); clickHold = null; }
+          toggleFullscreen(frame, v);
+        });
+
+        if (!bar) { return; }
+        bar.addEventListener('pointerdown', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          bar.classList.add('is-scrubbing');
+          if (bar.setPointerCapture) { bar.setPointerCapture(e.pointerId); }
+          seekTo(v, e.clientX);
+        });
+        bar.addEventListener('pointermove', function (e) {
+          if (!bar.classList.contains('is-scrubbing')) { return; }
+          seekTo(v, e.clientX);
+        });
+        ['pointerup', 'pointercancel'].forEach(function (evt) {
+          bar.addEventListener(evt, function (e) {
+            bar.classList.remove('is-scrubbing');
+            if (bar.releasePointerCapture && bar.hasPointerCapture &&
+                bar.hasPointerCapture(e.pointerId)) {
+              bar.releasePointerCapture(e.pointerId);
+            }
+          });
+        });
+        bar.addEventListener('keydown', function (e) {
+          var step = e.key === 'ArrowLeft' ? -5 : (e.key === 'ArrowRight' ? 5 : 0);
+          if (!step) { return; }
+          e.preventDefault();
+          e.stopPropagation();
+          if (isFinite(v.duration) && v.duration > 0) {
+            v.currentTime = Math.max(0, Math.min(v.duration, v.currentTime + step));
+            render(v);
+          }
+        });
+      });
+
+      if ('IntersectionObserver' in window) {
+        var near = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) { return; }
+            near.unobserve(entry.target);
+            showPoster(entry.target);
+          });
+        }, { rootMargin: '400px 0px' });
+
+        // Stop a clip once it is fully scrolled past — nobody wants audio
+        // coming from a card they can no longer see.
+        var gone = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting && !entry.target.paused) { entry.target.pause(); }
+          });
+        }, { threshold: 0 });
+
+        players.forEach(function (v) { near.observe(v); gone.observe(v); });
+      } else {
+        players.forEach(showPoster);
+      }
+
+      // Keep the expand/collapse icon in step with the actual fullscreen state
+      // (which the user can also leave with Escape).
+      ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (evt) {
+        document.addEventListener(evt, function () {
+          var active = fullscreenEl();
+          players.forEach(function (v) {
+            var f = frameOf(v);
+            if (f) { f.classList.toggle('is-full', f === active); }
+          });
+        });
+      });
+
+      // Sound toggle — clips play with sound, this mutes an individual one.
+      document.querySelectorAll('.vsound').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          var frame = btn.closest('.vframe');
+          var video = frame && frame.querySelector('.vplayer');
+          if (!video) { return; }
+          video.muted = !video.muted;
+          btn.setAttribute('aria-pressed', video.muted ? 'false' : 'true');
+        });
+      });
+    })();
+
+    // ---- Homepage order box ----
+    (function () {
+      var form = document.getElementById('orderForm');
+      if (!form) { return; }
+      var btn = document.getElementById('oSubmit');
+      var note = document.getElementById('oNote');
+
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        btn.disabled = true;
+        btn.textContent = form.dataset.sending;
+        note.hidden = true;
+
+        fetch('/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: form.elements.name.value,
+            email: form.elements.email.value,
+            message: form.elements.message.value
+          })
+        }).then(function (res) {
+          if (!res.ok) { throw new Error('bad'); }
+          note.textContent = form.dataset.ok;
+          note.className = 'form-note ok';
+          note.hidden = false;
+          form.reset();
+        }).catch(function () {
+          note.textContent = form.dataset.error;
+          note.className = 'form-note err';
+          note.hidden = false;
+        }).then(function () {
+          btn.disabled = false;
+          btn.textContent = form.dataset.send;
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>

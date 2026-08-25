@@ -1,0 +1,54 @@
+<%
+/**
+ * homepage.ejs
+ *
+ * The title lives in the shared head bar (views/layouts/slou.ejs), so the
+ * page itself starts with the product video row (the main event), the order box, then the story band. The full catalogue lives
+ * on the individual product pages rather than being repeated here. There is
+ * no footer — the layout ends with the page content.
+ */
+%>
+<div class="wrap">
+
+  <%- include('../partials/video-row', { featured: featured, t: t }) %>
+
+  <section class="orderbox" id="order">
+    <h2><%= t.order.title %></h2>
+    <p class="orderbox__lead"><%= t.order.lead %></p>
+
+    <form id="orderForm"
+          data-send="<%= t.order.send %>"
+          data-sending="<%= t.order.sending %>"
+          data-ok="<%= t.order.ok %>"
+          data-error="<%= t.order.error %>">
+      <div class="order-who">
+        <div class="field">
+          <label for="oName"><%= t.order.name %></label>
+          <input id="oName" name="name" type="text" maxlength="120" required>
+        </div>
+        <div class="field">
+          <label for="oEmail"><%= t.order.email %></label>
+          <input id="oEmail" name="email" type="email" pattern="[^@\s]+@[^@\s]+\.[A-Za-z]{2,}" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="oMsg"><%= t.order.details %></label>
+        <textarea id="oMsg" name="message" maxlength="4000" required
+                  placeholder="<%= t.order.placeholder %>"></textarea>
+      </div>
+      <button type="submit" class="btn solid" id="oSubmit"><%= t.order.send %></button>
+      <div class="form-note" id="oNote" hidden></div>
+    </form>
+  </section>
+
+  <section class="band">
+    <div class="media" aria-hidden="true"></div>
+    <div class="copy">
+      <p class="eyebrow"><%= t.story.eyebrow %></p>
+      <h2><%= t.story.title %></h2>
+      <p><%= t.story.p1 %></p>
+      <p><%= t.story.p2 %></p>
+    </div>
+  </section>
+
+</div>
