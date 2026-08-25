@@ -104,6 +104,12 @@ nothing else. Keep generic words like `spider` or `crawler` out of that list:
 that is exactly what let `meta-externalagent` through, since its user agent
 ends with `.../webmasters/crawler)`.
 
+`config/log.js` keeps the pm2 logs quiet: Sails is silenced below `warn`, and
+its `debug` output is re-pointed at stdout, because captains-log sends debug to
+stderr by default and its startup banner is debug — so every restart wrote ten
+lines into the *error* log. The app's own `console.log` output is unaffected by
+either setting.
+
 A submitted order prints `[ORDER]` to stdout as it lands — the same flattened
 line that goes into `orders.log`, plus IP, country and user agent — so a sale
 shows up in `pm2 logs` immediately. A submission rejected for missing fields
