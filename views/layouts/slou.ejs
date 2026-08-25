@@ -290,6 +290,12 @@
     .field input, .field textarea { width: 100%; padding: 11px 13px; border: 1px solid var(--line); border-radius: 2px; background: #fff; font: inherit; font-size: 15px; color: var(--ink); }
     .field input:focus, .field textarea:focus { outline: none; border-color: var(--leather); box-shadow: 0 0 0 3px rgba(166,124,74,.12); }
     .field textarea { resize: vertical; min-height: 112px; }
+    /* Invalid fields are marked by the .invalid class the validation adds, not
+       by :invalid — the browser applies :invalid from page load, which would
+       paint every required field red before anyone has typed a thing. */
+    .field input.invalid, .field textarea.invalid { border-color: #a6482f; background: #fffaf9; }
+    .field input.invalid:focus, .field textarea.invalid:focus { border-color: #a6482f; box-shadow: 0 0 0 3px rgba(166,72,47,.13); }
+    .field-err { margin-top: 6px; font-size: 13px; line-height: 1.4; color: #a6482f; }
     .form-note { margin-top: 14px; font-size: 14.5px; text-align: center; line-height: 1.5; }
     .form-note.ok { color: #5d7c3c; }
     .form-note.err { color: #a6482f; }
@@ -658,8 +664,65 @@
       var btn = document.getElementById('oSubmit');
       var note = document.getElementById('oNote');
 
+      // Same rule the field's `pattern` attribute carries and the same one the
+      // server applies: something, an @, something, a dot, a 2+ letter TLD.
+      // Deliberately loose — the only test that truly proves an address works
+      // is mail arriving at it, and a stricter regex mostly rejects valid
+      // addresses (apostrophes, +tags, long new TLDs) rather than catching
+      // typos.
+      var EMAIL = /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/;
+
+      // field -> its error slot -> the message, from the form's data-* attrs.
+      var CHECKS = [
+        { el: form.elements.name,    err: 'oNameErr',  msg: form.dataset.errName,
+          bad: function (v) { return !v; } },
+        { el: form.elements.email,   err: 'oEmailErr', msg: form.dataset.errEmail,
+          bad: function (v) { return !EMAIL.test(v); } },
+        { el: form.elements.message, err: 'oMsgErr',   msg: form.dataset.errDetails,
+          bad: function (v) { return !v; } },
+      ];
+
+      function setError(check, show) {
+        var slot = document.getElementById(check.err);
+        if (!slot) { return; }
+        slot.textContent = show ? check.msg : '';
+        slot.hidden = !show;
+        check.el.classList.toggle('invalid', !!show);
+        // Announced by a screen reader through aria-describedby on the field.
+        check.el.setAttribute('aria-invalid', show ? 'true' : 'false');
+      }
+
+      // Returns the first invalid field, or null. Every field is checked (not
+      // just up to the first failure) so all the problems show at once rather
+      // than one per attempt.
+      function firstInvalid() {
+        var first = null;
+        CHECKS.forEach(function (check) {
+          var bad = check.bad(check.el.value.trim());
+          setError(check, bad);
+          if (bad && !first) { first = check; }
+        });
+        return first;
+      }
+
+      // Clear a field's error as soon as it becomes valid, so the message goes
+      // away while typing rather than only on the next submit.
+      CHECKS.forEach(function (check) {
+        check.el.addEventListener('input', function () {
+          if (!check.bad(check.el.value.trim())) { setError(check, false); }
+        });
+      });
+
       form.addEventListener('submit', function (e) {
         e.preventDefault();
+
+        var invalid = firstInvalid();
+        if (invalid) {
+          invalid.el.focus();
+          note.hidden = true;
+          return;   // nothing is sent until every field passes
+        }
+
         btn.disabled = true;
         btn.textContent = form.dataset.sending;
         note.hidden = true;
@@ -678,6 +741,8 @@
           note.className = 'form-note ok';
           note.hidden = false;
           form.reset();
+          // reset() empties the fields but leaves any error slots showing.
+          CHECKS.forEach(function (check) { setError(check, false); });
         }).catch(function () {
           note.textContent = form.dataset.error;
           note.className = 'form-note err';

@@ -75,6 +75,17 @@ function describeVisitor(req) {
   };
 }
 
+// The same rule the order form applies in the browser and the same one the
+// field's `pattern` attribute carries. Repeated here because the browser check
+// is a courtesy to the customer, not a guarantee: POST /order is reachable
+// directly, and without this an address of "asdf" would land in orders.log and
+// there would be no way to reply to the order.
+//
+// Deliberately loose. The only test that proves an address works is mail
+// arriving at it; a stricter regex mostly rejects valid addresses rather than
+// catching typos.
+var EMAIL = /^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$/;
+
 // Country for an address, or '-' for a private/unresolvable one. Kept here
 // rather than in describeVisitor() so the per-request visitor line stays free
 // of a geoip lookup it does not need.
@@ -153,6 +164,12 @@ module.exports = {
       console.log('[ORDER-REJECTED]', new Date().toISOString(),
         'ip=' + who.ip + ' | missing fields | ua=' + who.ua);
       return res.badRequest({ error: 'missing_fields' });
+    }
+
+    if (!EMAIL.test(email)) {
+      console.log('[ORDER-REJECTED]', new Date().toISOString(),
+        'ip=' + who.ip + ' | bad email "' + email + '" | ua=' + who.ua);
+      return res.badRequest({ error: 'invalid_email' });
     }
 
     var line = [

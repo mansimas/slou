@@ -16,25 +16,45 @@
     <h2><%= t.order.title %></h2>
     <p class="orderbox__lead"><%= t.order.lead %></p>
 
-    <form id="orderForm"
+    <%
+      /* `novalidate` turns OFF the browser's own validation on purpose. Left
+         on, the browser blocks submission and shows its bubble before our
+         handler ever runs — in the BROWSER's language, which on this site is
+         routinely not the language the visitor chose. The checks below replace
+         it with the same rules in `t`'s language.
+
+         `required` and `pattern` stay on the fields anyway: they still
+         describe the field to assistive technology, and they are what the
+         validation would fall back to if this attribute were ever removed. */
+    %>
+    <form id="orderForm" novalidate
           data-send="<%= t.order.send %>"
           data-sending="<%= t.order.sending %>"
           data-ok="<%= t.order.ok %>"
-          data-error="<%= t.order.error %>">
+          data-error="<%= t.order.error %>"
+          data-err-name="<%= t.order.errName %>"
+          data-err-email="<%= t.order.errEmail %>"
+          data-err-details="<%= t.order.errDetails %>">
       <div class="order-who">
         <div class="field">
           <label for="oName"><%= t.order.name %></label>
-          <input id="oName" name="name" type="text" maxlength="120" required>
+          <input id="oName" name="name" type="text" maxlength="120" required
+                 aria-describedby="oNameErr">
+          <p class="field-err" id="oNameErr" hidden></p>
         </div>
         <div class="field">
           <label for="oEmail"><%= t.order.email %></label>
-          <input id="oEmail" name="email" type="email" pattern="[^@\s]+@[^@\s]+\.[A-Za-z]{2,}" required>
+          <input id="oEmail" name="email" type="email" pattern="[^@\s]+@[^@\s]+\.[A-Za-z]{2,}" required
+                 aria-describedby="oEmailErr">
+          <p class="field-err" id="oEmailErr" hidden></p>
         </div>
       </div>
       <div class="field">
         <label for="oMsg"><%= t.order.details %></label>
         <textarea id="oMsg" name="message" maxlength="4000" required
+                  aria-describedby="oMsgErr"
                   placeholder="<%= t.order.placeholder %>"></textarea>
+        <p class="field-err" id="oMsgErr" hidden></p>
       </div>
       <button type="submit" class="btn solid" id="oSubmit"><%= t.order.send %></button>
       <div class="form-note" id="oNote" hidden></div>
