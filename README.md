@@ -14,6 +14,16 @@ npm install
 npm start          # NODE_ENV=production node app.js
 ```
 
+In production it runs under pm2 as a single fork-mode process on port 1437:
+
+```
+pm2 startOrReload ecosystem.config.js
+```
+
+Never `pm2 start all` / `pm2 stop all` on this box — the neighbouring apps
+(chess 1337, chessarena 1339, gridess 1429, matchess 4005/4006) would go down
+with it.
+
 No `.env` and no environment variables are required. The port comes from
 `config/local.js` (defaulting to 3000), and there is no database to point at.
 
