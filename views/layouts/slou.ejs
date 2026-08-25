@@ -484,11 +484,31 @@
         delete v.dataset.src;
       }
 
+      // Tell the server a clip was played, so /estats can show which ones
+      // people actually watch. Fire-and-forget: keepalive so it still goes out
+      // if the press is the last thing before the tab closes, and every
+      // failure is swallowed — a statistic must never break playback.
+      function reportPlay(v) {
+        var slug = v && v.dataset && v.dataset.slug;
+        if (!slug || !window.fetch) { return; }
+        try {
+          fetch('/vplay', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ slug: slug }),
+            keepalive: true,
+          }).catch(function () {});
+        } catch (e) { /* nothing to do about it */ }
+      }
+
       function start(v) {
         attachSrc(v);
         players.forEach(function (other) {   // only one clip at a time
           if (other !== v && !other.paused) { other.pause(); }
         });
+        // Counted here rather than on the button: clicking the clip itself
+        // also starts it, and both routes come through here.
+        reportPlay(v);
         var promise = v.play();
         if (promise && promise.catch) { promise.catch(function () {}); }
       }

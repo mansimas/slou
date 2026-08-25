@@ -66,6 +66,7 @@ anywhere in the app.
 
 ```js
 Log.order('name | email | locale | message');   // -> logs/orders.log
+Log.video('slug | country | device | ip')       // -> logs/videos.log
 Log.contact(...)                                // -> logs/contacts.log
 Log.req(...)                                    // -> logs/requests.log
 Log.visit(...)                                  // -> logs/visits.log

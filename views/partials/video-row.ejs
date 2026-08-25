@@ -19,7 +19,14 @@
       <div class="vmat">
         <div class="vframe">
           <div class="vph"><span><%= p.name %></span></div>
+          <%
+            /* data-slug identifies the clip when a play is reported to
+               /vplay. Not data-src: that attribute is deleted the moment the
+               file is attached, so it is gone by the time anyone presses
+               play a second time. */
+          %>
           <video class="vplayer"
+                 data-slug="<%= p.slug %>"
                  data-src="/videos/<%= p.video %>"
                  data-poster="/videos/posters/<%= p.video.replace('.mp4', '') %>.jpg"
                  preload="none"

@@ -2,6 +2,7 @@
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
 
+[2026-08-25 19:30] - Count video plays - The player posts to /vplay when a clip starts, from start() so pressing play and clicking the clip both count. /estats gains a table of plays per clip: today, 7 days and total, unplayed clips included. Slug is checked against the catalogue; the beacon is exempt from rate limiting.
 [2026-08-25 19:15] - Add empty footer band - With the story band gone the order box was the last thing on the page and ended flush against the window, looking cut off. Adds 96px under the box and an empty 90px footer, 56 and 55 on mobile. No content in it, hidden from screen readers.
 [2026-08-25 19:05] - Remove About SLOU band - The story section is gone from the homepage: markup, the .band styles it alone used, and the story copy in all seven locales. The page is now the video row and the order box. assets/images/leather.svg was its background and is now unreferenced.
 [2026-08-25 18:55] - Count only real page visits - /elist and /estats counted their own hits, and /language/* counted as visits though it is a 301 back to where you came from - with seven links in the header one crawler visit became eight lines. Both now excluded from the list and the numbers.

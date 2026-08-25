@@ -71,6 +71,34 @@
     <% } %>
   <% } %>
 
+  <h2 class="stat-h">Vaizdo įrašų paspaudimai</h2>
+  <% if (!videos.length) { %>
+    <p class="stat-empty">Kataloge nėra vaizdo įrašų.</p>
+  <% } else { %>
+    <div class="orders-scroll">
+      <table class="orders stats">
+        <thead>
+          <tr>
+            <th>Gaminys</th>
+            <th>Šiandien</th>
+            <th>7 dienos</th>
+            <th>Viso</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% videos.forEach(function (v) { %>
+            <tr>
+              <td><%= v.name %></td>
+              <td><%= v.today ? v.today : '—' %></td>
+              <td><%= v.week ? v.week : '—' %></td>
+              <td><%= v.plays ? v.plays : '—' %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+
   <% table('Pagal dieną', stats.days, 'Kol kas nėra duomenų.') %>
   <% table('Pagal savaitę', stats.weeks, 'Kol kas nėra duomenų.') %>
   <% table('Pagal mėnesį', stats.months, 'Kol kas nėra duomenų.') %>

@@ -32,6 +32,7 @@ module.exports.routes = {
   '/':                     'PagesController.home',
   'GET /language/:locale': 'PagesController.setLang',
   'POST /order':           'PagesController.createOrder',
+  'POST /vplay':           'PagesController.videoPlay',
 
   // The orders page is deliberately NOT declared here. This file is committed
   // to a public repository, so any path written in it is published along with

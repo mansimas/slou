@@ -42,6 +42,11 @@ module.exports = {
     return dashboard();
   },
 
+  // Plays per clip, most played first: [{ slug, name, plays, today, week }]
+  videoPlays: function () {
+    return video_plays();
+  },
+
   // The most recent visits, newest first, at most `limit`. Everything is
   // included — admin pages too, since a hit on one of those from an address
   // that is not yours is the single most useful thing this list can show you.
@@ -456,4 +461,58 @@ function recent_visits(limit) {
   var rows = entries.map(visit_row);
   rows.reverse();                 // newest first
   return rows.slice(0, limit);
+}
+
+
+// ---------------------------------------------------------------------------
+// Video plays
+// ---------------------------------------------------------------------------
+
+// logs/videos.log holds one line per play: `slug | country | device | ip=…`.
+// Counted for all time, for today, and for the last 7 days — a total alone
+// cannot tell you whether a clip is still being watched or was popular once.
+function video_plays() {
+  var counts = {};
+  var now = Date.now();
+  var today = day_start(now);
+  var week = today - 6 * 86400000;
+
+  var entries = [];
+  read_log_lines('videos.log').forEach(function (line) {
+    var parsed = parse_line(line);
+    if (parsed) { entries.push(parsed); }
+  });
+  assign_years(entries);
+
+  entries.forEach(function (entry) {
+    var slug = String(entry.payload).split(' | ')[0].trim();
+    if (!slug) { return; }
+    if (!counts[slug]) { counts[slug] = { plays: 0, today: 0, week: 0 }; }
+    counts[slug].plays++;
+    if (entry.t >= today) { counts[slug].today++; }
+    if (entry.t >= week) { counts[slug].week++; }
+  });
+
+  // Every clip in the catalogue is listed, including ones nobody has played —
+  // a zero is a finding, and a clip missing from the table just looks like a
+  // bug in the counting.
+  var products = (typeof sails !== 'undefined' && sails.config && sails.config.catalog)
+    ? sails.config.catalog.products
+    : [];
+
+  var rows = products.filter(function (p) {
+    return !!p.video;
+  }).map(function (p) {
+    var c = counts[p.slug] || { plays: 0, today: 0, week: 0 };
+    return {
+      slug: p.slug,
+      name: (p.t && p.t.lt && p.t.lt.name) ? p.t.lt.name : p.slug,
+      plays: c.plays,
+      today: c.today,
+      week: c.week,
+    };
+  });
+
+  rows.sort(function (a, b) { return b.plays - a.plays; });
+  return rows;
 }

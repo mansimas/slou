@@ -273,7 +273,12 @@ function hostileRequest(req) {
 // would block people rather than bots.
 // ---------------------------------------------------------------------------
 
-var ASSETS = /^\/(videos|images|styles|fonts|js|dependencies)\/|^\/favicon\.ico/;
+// Requests that are not a person looking at a page: static files, and the
+// /vplay beacon the video player fires in the background. Neither is logged as
+// a visit, and neither counts toward the rate limit — someone playing five
+// clips in ten seconds is engaged, not a crawler, and must not be refused for
+// it.
+var ASSETS = /^\/(videos|images|styles|fonts|js|dependencies)\/|^\/favicon\.ico|^\/vplay/;
 
 var RATE_WINDOW_MS = 10000;   // sliding window
 var RATE_MAX = 12;            // page requests allowed per address per window

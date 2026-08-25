@@ -223,6 +223,26 @@ module.exports = {
     }
   },
 
+  // A clip was played. Called by the beacon in the video player, not by a
+  // person navigating, so it answers with 204 and no body.
+  //
+  // The slug is checked against the catalogue rather than trusted: this is a
+  // public endpoint, and without that check anyone could post arbitrary text
+  // and it would end up in logs/videos.log and on the statistics page.
+  videoPlay: function (req, res) {
+    var slug = String(req.param('slug') || '').trim();
+    var known = sails.config.catalog.products.some(function (p) {
+      return p.slug === slug && p.video;
+    });
+    if (!known) {
+      return res.status(400).json({ error: 'unknown_slug' });
+    }
+
+    var c = VisitService.context(req);
+    Log.video(slug + ' | ' + c.country + ' | ' + c.device + ' | ip=' + c.ip);
+    return res.status(204).send();
+  },
+
   // The unlisted order list. Renders straight from logs/orders.log, newest
   // first. Its route is declared in config/local.js. Unlisted, not protected:
   // nothing on the site links to it and `noindex` keeps it out of search
@@ -251,6 +271,7 @@ module.exports = {
       pageTitle: 'Statistika — SLOU',
       noindex: true,
       stats: StatsService.dashboard(),
+      videos: StatsService.videoPlays(),
     });
   },
 

@@ -45,6 +45,11 @@ var Log = {
     return visit(msg, rest_params);
   },
 
+  // One line per video play, for the per-clip counts on the statistics page.
+  video: function (msg, ...rest_params) {
+    return video(msg, rest_params);
+  },
+
   // Scanner probes refused at the door. Rare and interesting, unlike the
   // UA-based refusals, which are constant and deliberately not logged.
   blocked: function (msg, ...rest_params) {
@@ -78,6 +83,10 @@ function req(msg, rest_params) {
 
 function visit(msg, rest_params) {
   do_log('logs/visits.log', msg, 'info', '', rest_params);
+}
+
+function video(msg, rest_params) {
+  do_log('logs/videos.log', msg, 'info', '', rest_params);
 }
 
 function blocked(msg, rest_params) {
