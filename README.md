@@ -97,10 +97,12 @@ this app does not have, which is the interesting half, would never be seen.
   device, referrer, and whether the UA looks like a bot. Static assets are
   skipped. URLs that don't exist are logged too — that's the point.
 
-Search crawlers (Google, Bing, the AI crawlers) are deliberately **not**
-refused, or the shop would drop out of search results. `ALLOW_CRAWLERS` at the
-top of the block list in `VisitService.js` makes the rejection absolute if that
-is what you want.
+Bot traffic is refused outright — search engines included. `ALLOW_CRAWLERS` in
+`VisitService.js` is `false`; while it is, the shop is not indexed by anyone.
+Flipping it to `true` re-opens the door to the engines in `SEARCH_ENGINES` and
+nothing else. Keep generic words like `spider` or `crawler` out of that list:
+that is exactly what let `meta-externalagent` through, since its user agent
+ends with `.../webmasters/crawler)`.
 
 A submitted order prints `[ORDER]` to stdout as it lands — the same flattened
 line that goes into `orders.log`, plus IP, country and user agent — so a sale

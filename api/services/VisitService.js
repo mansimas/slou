@@ -10,9 +10,9 @@
  *   isBot(req)      - is this a bot? Crawlers included. Bots ARE served; this
  *                     only marks them so the request log can tell people from
  *                     machines.
- *   blockedBot(req) - is this a probe to refuse at the door? A narrower, more
- *                     conservative set: no-UA fetches and generic HTTP clients.
- *                     Search crawlers are never in it.
+ *   blockedBot(req) - refuse this one at the door? Everything isBot() flags,
+ *                     plus no-UA fetches and generic HTTP clients. Search
+ *                     engines are refused too while ALLOW_CRAWLERS is off.
  */
 
 module.exports = {
@@ -26,6 +26,10 @@ module.exports = {
     return isBot(ua, parse(ua));
   },
 
+  // Is this a request to refuse at the door? Everything the bot detector
+  // recognises, plus no-UA fetches and generic HTTP clients. Refused silently
+  // and before any other middleware, so a bot costs one regex and never
+  // reaches a controller, a cookie or a video file.
   blockedBot: function (req) {
     return blockedBot(req);
   },
@@ -138,15 +142,25 @@ function isBot(ua, parsed) {
 // Refusing traffic
 // ---------------------------------------------------------------------------
 
-// UAs that must be let through: the search engines and AI crawlers the shop
-// wants to be found by. Checked BEFORE the block list, so a crawler is never
-// caught by an overlapping generic-client pattern.
+// Bot traffic is REFUSED. Not throttled, not merely uncounted — refused.
 //
-// This is why "reject all bots" is not literally all: refusing these would
-// take the shop out of Google. Set ALLOW_CRAWLERS to false below to make the
-// rejection absolute — the site then serves people only, and is not indexed.
-var ALLOW_CRAWLERS = true;
-var GOOD_CRAWLERS = /googlebot|googleinspectiontool|bingbot|bingpreview|duckduckbot|baiduspider|yandex|sogou|exabot|ia_archiver|archive\.org|applebot|facebookexternalhit|linkedinbot|twitterbot|slackbot|discordbot|telegrambot|whatsapp|viber|gptbot|oai-searchbot|chatgpt-user|openai|claudebot|anthropic-ai|perplexitybot|gemini|google-extended|ccbot|dotbot|rogerbot|semrushbot|ahrefsbot|mj12bot|petalbot|spider|crawler/i;
+// ALLOW_CRAWLERS re-opens the door to the search engines in SEARCH_ENGINES
+// below, and nothing else. It is off: the shop is not indexed while it is off,
+// which is the trade being made deliberately. Flip this one constant to true
+// to be findable in Google and Bing again.
+var ALLOW_CRAWLERS = false;
+
+// If ALLOW_CRAWLERS is ever turned back on, ONLY these get through: search
+// engines a shop actually gains customers from.
+//
+// This list used to be far longer and included a bare `spider|crawler`
+// alternative. That is what let meta-externalagent hammer the site — its user
+// agent ends with `.../webmasters/crawler)`, so the word "crawler" appearing
+// anywhere in the string, a URL included, exempted it. Never put a generic
+// word in here: match the agent's NAME, and keep the list short. Ad-tech
+// scrapers, SEO tools and AI training crawlers are not on it on purpose —
+// they cost bandwidth and bring nobody.
+var SEARCH_ENGINES = /googlebot|googleinspectiontool|bingbot|bingpreview|duckduckbot|yandex(bot|images)|baiduspider|applebot/i;
 
 // Generic HTTP clients and scanner toolkits. A browser never sends these, and
 // they never render the page — they just hammer it.
@@ -154,14 +168,25 @@ var BAD_TOOLS = /curl|wget|python|go-http-client|java|okhttp|libwww|perl|scrapy|
 
 function blockedBot(req) {
   var ua = req.headers['user-agent'] || '';
-  if (ALLOW_CRAWLERS && GOOD_CRAWLERS.test(ua)) { return false; }
+
   // Only page fetches are judged this way. The order form POSTs from a real
   // browser, but keeping POST out of this rule means a UA check can never be
   // the reason an order fails to reach the log.
   if (req.method !== 'GET' && req.method !== 'HEAD') { return false; }
+
+  // No user agent at all: a monitor or a scanner. A browser always sends one.
   if (!ua) { return true; }
+
+  if (ALLOW_CRAWLERS && SEARCH_ENGINES.test(ua)) { return false; }
+
+  // A generic HTTP client or scanner toolkit — a browser never sends these.
   if (BAD_TOOLS.test(ua)) { return true; }
-  return false;
+
+  // Anything the bot detector recognises. This line is the one that matters:
+  // without it, blockedBot only ever caught empty UAs and the BAD_TOOLS list,
+  // so a self-identifying crawler like facebookexternalhit or
+  // meta-externalagent sailed straight through while being logged as bot=yes.
+  return isBot(ua, parse(ua));
 }
 
 // This site is not WordPress and not PHP, so a request looking for either is a

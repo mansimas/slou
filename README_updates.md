@@ -2,6 +2,7 @@
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
 
+[2026-08-25 17:20] - Actually reject bot traffic - meta-externalagent hammered the site every few seconds: GOOD_CRAWLERS had a bare `crawler` alternative and its UA ends with /webmasters/crawler). blockedBot also never consulted isBot, so any self-identifying crawler passed. Now refuses everything isBot flags; ALLOW_CRAWLERS false, allowlist narrowed to real search engines.
 [2026-08-25 17:05] - Add statistics page - New StatsService and pages/statistics.ejs, routed in config/local.js: visits, unique visitors, bot hits and orders per day, week and month, read from requests.log and orders.log including rotated files. Admin pages excluded from their own numbers, read from the live route table so renaming a route keeps it correct.
 [2026-08-25 17:00] - Log year and visitor id - Statistics needed exact dates and a real unique count. Log stamps now carry the year, so buckets stop being reconstructed by guesswork; readers accept both shapes since old lines have none. New vid cookie identifies a visitor better than an IP, which merges a household and splits a roaming phone.
 [2026-08-25 16:55] - Stop console logging visits - Opening the orders page printed a line to stdout, burying the [ORDER] lines worth watching. Visits now go to logs/visits.log only; the console is orders alone.

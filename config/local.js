@@ -31,7 +31,7 @@ module.exports = {
   // Change the path by editing the line below; there is nothing else to update.
   routes: {
     'GET /eglei': 'PagesController.orders',
-    'GET /elge_statistics': 'PagesController.statistics',
+    'GET /estats': 'PagesController.statistics',
   },
 
 };
