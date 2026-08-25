@@ -9,6 +9,9 @@
  * žmogus, atsidaręs septynis puslapius, čia yra viena eilutė su naujausiu
  * savo apsilankymu, o kiek kartų jis buvo — rodoma prie datos („×7").
  *
+ * Rodomi TIK žmonės: botai ir skeneriai — atmesti (žr. StatsService.is_probe;
+ * jie ir taip nebepatenka į requests.log, nes atmetami dar prie durų).
+ *
  * Viena eilutė ir telefone: šis puslapis
  * sąmoningai neišskaido eilučių į korteles, kaip daro užsakymų lentelė.
  * Siaurame ekrane lentelė slenkama į šoną. IP nerodomas.
@@ -18,7 +21,8 @@
   <p class="kicker">SLOU</p>
   <h1>Lankytojai</h1>
   <p>Paskutiniai <strong><%= visits.length %></strong> lankytojai, naujausi viršuje.
-    Viena eilutė — vienas lankytojas; „×3" prie datos reiškia, kad jis lankėsi tris kartus.</p>
+    Viena eilutė — vienas lankytojas; „×3" prie datos reiškia, kad jis lankėsi tris kartus.
+    Botai ir skeneriai (tie, kurie ieško /login ar /.env) čia nerodomi.</p>
 
   <% if (!visits.length) { %>
     <p class="stat-empty">Kol kas nėra nė vieno įrašo.</p>

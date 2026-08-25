@@ -242,6 +242,21 @@ function normalize_path(url) {
 //     came from, and with seven of them in the header a crawler following
 //     every link turned ONE visit into EIGHT lines
 //   - /vplay, the video player's background beacon
+// A request for a path this site does not have — /login, /.env, /graphql and
+// the rest of the scanner vocabulary. The judgement lives in VisitService,
+// which reads it off the live route table, so the door and the statistics can
+// never disagree about what this site consists of.
+//
+// Requests like these are refused at the door now and no longer reach
+// requests.log at all; this exists for the history already in the files.
+function is_probe(url) {
+  try {
+    return !require('./VisitService').routedPath(url);
+  } catch (unusedErr) {
+    return false;   // never let this be the reason a visit goes missing
+  }
+}
+
 function counts_as_visit(url) {
   if (!url || url === '-') { return false; }
 
@@ -323,14 +338,15 @@ function dashboard() {
   var months = {};
 
   requests.forEach(function (entry) {
-    if (!counts_as_visit(field(entry.payload, 'url'))) { return; }
+    var url = field(entry.payload, 'url');
+    if (!counts_as_visit(url)) { return; }
 
-    var is_bot = field(entry.payload, 'bot') === 'yes';
-    // The visitor cookie identifies a person far better than an address does.
-    // Lines older than that cookie carry no vid, so they fall back to the ip —
-    // which is what the whole history was counted by before.
-    var vid = field(entry.payload, 'vid');
-    var who = (vid && vid !== '-') ? vid : field(entry.payload, 'ip');
+    // A probe counts as a bot, not as a visit. The scanners that hit this site
+    // wear an ordinary Chrome user agent, so `bot=no` on the line means
+    // nothing; what gives them away is that they ask for /login, /.env or
+    // /graphql, and this site has no such pages. See is_probe().
+    var is_bot = field(entry.payload, 'bot') === 'yes' || is_probe(url);
+    var who = visitor_key(entry.payload);
 
     [bucket_of(days, day_start(entry.t)),
       bucket_of(weeks, week_start(entry.t)),
@@ -466,16 +482,21 @@ function dash(v) {
   return v.length ? v : '-';
 }
 
-// Kas tas lankytojas. Slapukas (vid) atsako geriausiai: tas pats žmogus,
-// kelis kartus atsidaręs puslapį, turi tą patį vid. Senesnėse eilutėse (ir
-// pas tuos, kas slapuko nepriima — būtent taip atrodo vienodų „Chrome 120 /
-// Windows 10" pliūpsnių eilės) vid nėra, todėl atsargiai griebiamasi ip +
-// User-Agent poros: adresas vienas gali sujungti visą biurą ar mobilųjį
-// operatorių į vieną, o kartu su UA klysta kur kas rečiau.
+// Who this visitor is: the address plus the full user agent.
+//
+// NOT the `vid` cookie, which looks like the right answer and is not. The
+// cookie is minted on the way IN, before the browser has had a chance to send
+// one back, so a client that does not keep cookies — every scanner, and the
+// in-app browsers that clear them between opens — gets a brand new vid on
+// every single request. Counting those as distinct visitors is exactly how a
+// burst of one scanner arrived as twenty identical-looking rows.
+//
+// The address alone would merge an office or a mobile carrier into one person;
+// together with the user agent it is wrong far less often. It still cannot see
+// through the same person moving from wifi to mobile data — that is two rows,
+// and short of a login there is no fixing it.
 function visitor_key(payload) {
-  var vid = field(payload, 'vid');
-  if (vid && vid !== '-') { return 'vid:' + vid; }
-  return 'ip:' + (field(payload, 'ip') || '?') + ' | ' + (field(payload, 'ua') || '-');
+  return (field(payload, 'ip') || '?') + ' | ' + (field(payload, 'ua') || '-');
 }
 
 // Paskutiniai `limit` LANKYTOJAI, ne apsilankymai: viena eilutė vienam
@@ -494,27 +515,45 @@ function recent_visits(limit) {
   read_recent_lines('requests.log', limit * 40).forEach(function (line) {
     var parsed = parse_line(line);
     if (!parsed) { return; }
-    if (!counts_as_visit(field(parsed.payload, 'url'))) { return; }
+
+    var url = field(parsed.payload, 'url');
+    if (!counts_as_visit(url)) { return; }
+    // People only. A self-identified crawler and a scanner probing /login are
+    // both machines, and this page is for looking at customers.
+    if (field(parsed.payload, 'bot') === 'yes') { return; }
+    if (is_probe(url)) { return; }
+
     entries.push(parsed);
   });
   assign_years(entries);
 
-  // Einama nuo naujausio: pirmas sutiktas įrašas ir yra tas, kurį rodome,
-  // o visi senesni to paties lankytojo tik pridedami prie skaitiklio.
+  // Walked newest-first: the first line seen for a visitor is the one shown,
+  // every older one only adds to the counter. The `when` comparison is there
+  // because the file is only USUALLY in order — a line written while the clock
+  // was adjusted, or a rotation boundary, must not leave a visitor stamped
+  // with an older time than one of their own later visits.
   var seen = Object.create(null);
   var rows = [];
   for (var i = entries.length - 1; i >= 0; i--) {
     var key = visitor_key(entries[i].payload);
+    var row = visit_row(entries[i]);
+
     if (seen[key]) {
       seen[key].hits++;
+      if (row.when > seen[key].when) {
+        seen[key].when = row.when;
+        seen[key].t = row.t;
+      }
       continue;
     }
-    var row = visit_row(entries[i]);
+
     row.hits = 1;
     seen[key] = row;
     rows.push(row);
   }
 
+  // `when` is `YYYY-MM-DD HH:MM`, so comparing the strings sorts by time.
+  rows.sort(function (a, b) { return a.when < b.when ? 1 : (a.when > b.when ? -1 : 0); });
   return rows.slice(0, limit);
 }
 

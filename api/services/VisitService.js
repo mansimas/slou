@@ -39,6 +39,21 @@ module.exports = {
     return hostileRequest(req);
   },
 
+  // Does this site have this path at all? Static files and the conventional
+  // addresses a browser or crawler asks for by itself (robots.txt and friends)
+  // count as known: they are not routes, but they are not probes either.
+  knownPath: function (url) {
+    return known_path(url, true);
+  },
+
+  // Stricter: is this one of the app's OWN routes? A page, in other words.
+  // /robots.txt is knownPath but not routedPath — nobody visited anything.
+  // Used by the statistics side to keep everything that is not a page view out
+  // of the visit list.
+  routedPath: function (url) {
+    return known_path(url, false);
+  },
+
   // Is this address going faster than a person can? See RATE_* below.
   rateLimited: function (req) {
     return rate_limited(req);
@@ -245,6 +260,13 @@ function hostileRequest(req) {
 
   if (/\/wp-|\.php(\/|$|\?)/i.test(decoded)) { return true; }
 
+  // A path this site does not have. This is the rule that catches the probes
+  // wearing an ordinary Chrome user agent — the /login, /signup, /register and
+  // /api/auth/signin burst, the /.env and /config.js sweep, the /graphql
+  // POSTs. None of them can be a customer, because there is nothing at any of
+  // those addresses; the shop is four paths wide (see known_path).
+  if (!known_path(decoded, true)) { return true; }
+
   // Matched against the URL, not just req.query. This runs as the very first
   // middleware, ahead of anything that populates parsed parameters, so relying
   // on req.query alone would silently miss every query-string probe.
@@ -258,6 +280,84 @@ function hostileRequest(req) {
   return false;
 }
 
+
+// ---------------------------------------------------------------------------
+// Paths this site has
+// ---------------------------------------------------------------------------
+
+// Read from the live route table rather than written out here: the admin
+// pages live in config/local.js, which is not in the repository, so hardcoding
+// them would both publish them and go stale the day one is renamed.
+//
+// Computed once — the route table does not change while the process runs.
+var known_cache = null;
+
+function known_routes() {
+  if (known_cache) { return known_cache; }
+
+  var routes = (typeof sails !== 'undefined' && sails.config && sails.config.routes) || null;
+  // No route table yet (very early boot): every path is treated as known, so
+  // this check can never be the reason a real page is refused.
+  if (!routes) { return null; }
+
+  var exact = [];
+  var prefixes = [];
+
+  Object.keys(routes).forEach(function (address) {
+    // 'GET /language/:locale' -> '/language/:locale'; '/' stays '/'.
+    var route = String(address).replace(/^\s*[a-zA-Z]+\s+/, '').split('?')[0];
+    var param = route.indexOf('/:');
+    if (param >= 0) {
+      // '/language/:locale' -> anything under '/language/'.
+      prefixes.push(route.slice(0, param + 1));
+    } else {
+      exact.push(strip_slash(route));
+    }
+  });
+
+  known_cache = { exact: exact, prefixes: prefixes };
+  return known_cache;
+}
+
+// Not routes, but not probes either: a crawler asks for these by convention,
+// and they should keep reaching the 404 they get today rather than a refusal —
+// the day ALLOW_CRAWLERS goes back on, a 403 on robots.txt is read by some
+// crawlers as "stay out of the whole site".
+var CONVENTIONAL = /^\/(robots\.txt|sitemap\.xml|favicon\.ico|apple-touch-icon[a-z0-9.-]*\.png|\.well-known\/)/i;
+
+function strip_slash(path) {
+  var out = String(path || '');
+  while (out.length > 1 && out.charAt(out.length - 1) === '/') {
+    out = out.slice(0, -1);
+  }
+  return out;
+}
+
+// `conventional` says whether static files and the by-convention addresses
+// count as known. At the door they must (refusing them is either pointless or
+// harmful); to the statistics they must not (a favicon fetch is not a visit).
+function known_path(url, conventional) {
+  var raw = String(url || '');
+  if (!raw) { return false; }
+
+  // Static files first: they are served by serve-static and the asset
+  // pipeline, not by the router, so they are in no route table.
+  if (ASSETS.test(raw)) { return !!conventional; }
+
+  var path = strip_slash(raw.split('?')[0].split('#')[0]);
+  if (!path) { return false; }
+  if (CONVENTIONAL.test(path)) { return !!conventional; }
+
+  var known = known_routes();
+  if (!known) { return true; }   // route table not up yet — fail open
+
+  if (known.exact.indexOf(path) >= 0) { return true; }
+
+  for (var i = 0; i < known.prefixes.length; i++) {
+    if (path.indexOf(known.prefixes[i]) === 0) { return true; }
+  }
+  return false;
+}
 
 // ---------------------------------------------------------------------------
 // Rate limiting
