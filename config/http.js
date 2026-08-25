@@ -121,8 +121,10 @@ module.exports.http = {
     order: [
       'botGuard',
       'visitLogger',
+      // cookieParser stays: the language cookie is read through req.cookies.
+      // 'session' is gone — the hook is off in .sailsrc, so naming it here
+      // would be a reference to middleware that no longer exists.
       'cookieParser',
-      'session',
       'bodyParser',
       'compress',
       'poweredBy',

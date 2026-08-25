@@ -107,13 +107,14 @@ function featuredVideoProducts(locale) {
 
 module.exports = {
 
-  // Switch language and return to the previous page.
+  // Switch language and return to the previous page. Stored in a cookie, not a
+  // session — see config/custom.js.
   setLang: function (req, res) {
     var supported = Object.keys(sails.config.content);
     var requested = req.param('locale');
     var locale = supported.indexOf(requested) >= 0 ? requested : 'lt';
-    if (!req.session) { req.session = {}; }
-    req.session.lang = locale;
+    var cookie = sails.config.custom.langCookie;
+    res.cookie(cookie.name, locale, cookie.options);
     var back = req.get('Referer') || '/';
     return res.redirect(back);
   },

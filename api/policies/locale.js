@@ -5,12 +5,18 @@
  * list of available locales to every controller and view via `res.locals`.
  *
  * Priority:
- *   1. An explicit choice saved in the session (set via /language/:locale) — this
- *      always wins and stays the visitor's main language.
+ *   1. An explicit choice saved in the `lang` cookie (set via /language/:locale)
+ *      — this always wins and stays the visitor's main language.
  *   2. Otherwise, auto-detect from the visitor's browser locale
  *      (`Accept-Language` header) on the first visit, and remember it in the
- *      session so it persists.
+ *      cookie so it persists.
  *   3. Fallback to `lt`.
+ *
+ * A cookie, not a session: the language is the only thing this site ever
+ * remembered about a visitor, and express-session's MemoryStore never evicts,
+ * so it grew with every unique visitor until the process restarted. The
+ * session hook is switched off in .sailsrc; see config/custom.js for the
+ * cookie itself.
  *
  * Applied globally in config/policies.js.
  */
@@ -31,15 +37,19 @@ function detectFromHeader(req, supported) {
 
 module.exports = function (req, res, next) {
   var supported = Object.keys(sails.config.content);
+  var cookie = sails.config.custom.langCookie;
+  var saved = req.cookies ? req.cookies[cookie.name] : null;
   var locale;
 
-  if (req.session && supported.indexOf(req.session.lang) >= 0) {
+  if (supported.indexOf(saved) >= 0) {
     // Explicit / previously resolved choice — keep it.
-    locale = req.session.lang;
+    locale = saved;
   } else {
-    // First visit: detect from the browser locale, then remember it.
+    // First visit: detect from the browser locale, then remember it. Also the
+    // path taken when the cookie holds a locale that is no longer supported,
+    // which re-detects rather than leaving the visitor on a dead value.
     locale = detectFromHeader(req, supported) || 'lt';
-    if (req.session) { req.session.lang = locale; }
+    res.cookie(cookie.name, locale, cookie.options);
   }
 
   res.locals.locale = locale;

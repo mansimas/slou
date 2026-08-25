@@ -167,6 +167,10 @@ module.exports = {
   * > this section from your `config/env/production.js` file.                *
   *                                                                          *
   ***************************************************************************/
+  // INERT: the session hook is switched off in .sailsrc. This app keeps no
+  // sessions — the language, the only thing it remembered, is a cookie now
+  // (config/custom.js). Left in place as scaffolding for the day something
+  // actually needs a session; nothing below is read today.
   session: {
 
     /***************************************************************************

@@ -24,8 +24,14 @@ Never `pm2 start all` / `pm2 stop all` on this box — the neighbouring apps
 (chess 1337, chessarena 1339, gridess 1429, matchess 4005/4006) would go down
 with it.
 
-No `.env` and no environment variables are required. The port comes from
-`config/local.js` (defaulting to 3000), and there is no database to point at.
+No `.env` and no environment variables are required. The port is 1437 in every
+environment (`config/port.js`; override with `PORT`), and there is no database
+to point at.
+
+There are no sessions either — the session hook is off in `.sailsrc`. The
+chosen language, the only thing this site remembered about a visitor, lives in
+a `lang` cookie defined in `config/custom.js`. That keeps express-session's
+MemoryStore, which never evicts, from growing with every unique visitor.
 
 
 ### Reachable URLs

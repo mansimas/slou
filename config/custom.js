@@ -10,6 +10,25 @@
 
 module.exports.custom = {
 
+  // The language cookie. This site keeps no sessions — the chosen language is
+  // the only thing it ever remembered about a visitor, and a cookie holds it
+  // without a server-side store, a session secret, or MemoryStore's unbounded
+  // growth. Read by api/policies/locale.js, written by PagesController.setLang.
+  //
+  // httpOnly: nothing in the browser reads it, only the server.
+  // sameSite lax: it must survive arriving from an external link.
+  // No `secure` flag yet — the site is served over plain http on 1437, and a
+  // secure cookie would simply never be stored. Add it the day TLS lands.
+  langCookie: {
+    name: 'lang',
+    options: {
+      maxAge: 365 * 24 * 60 * 60 * 1000,   // a year
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/',
+    },
+  },
+
   /***************************************************************************
   *                                                                          *
   * Any other custom config this Sails app should use during development.    *
