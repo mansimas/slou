@@ -155,3 +155,15 @@ lib-cov
 ################################################
 
 www
+
+
+################################################
+# Runtime logs
+#
+# logs/orders.log is the live record of customer
+# orders — real names and email addresses. It
+# belongs on the server, never in the repo.
+################################################
+
+logs/*.log
+logs/*.log.*

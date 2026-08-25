@@ -4,7 +4,10 @@
  * Renders the localized SLOU storefront pages. Product data comes from
  * `sails.config.catalog.products` and UI copy from `sails.config.content`.
  * The active locale is set by the `locale` policy (res.locals.locale / .t).
- * No database or plugins involved — purely view rendering.
+ *
+ * There is no database. Orders submitted through the homepage box are appended
+ * to logs/orders.log by the Log service, and the orders page reads that same
+ * file back — see api/services/Log.js for both ends of that format.
  */
 
 // Money is handled in whole cents so a percentage never leaves a rounding
@@ -88,8 +91,18 @@ module.exports = {
     });
   },
 
-  // Handle the homepage order box (AJAX). Stored as a Message with kind 'order'.
-  createOrder: async function (req, res) {
+  // Handle the homepage order box (AJAX). One line appended to
+  // logs/orders.log — that file is the only record of the order.
+  //
+  // winston writes asynchronously, so the catch below only sees a synchronous
+  // failure; a transport-level one (full disk, bad permissions) surfaces
+  // through the logger's own error handler in api/services/Log.js.
+  //
+  // The four fields are joined with ' | ' because that is what
+  // Log.read_orders() splits on. Newlines in the customer's message are
+  // flattened for the same reason: one order must stay one line, or the reader
+  // sees the tail of a message as a truncated order of its own.
+  createOrder: function (req, res) {
     var name = (req.param('name') || '').trim();
     var email = (req.param('email') || '').trim();
     var message = (req.param('message') || '').trim();
@@ -99,29 +112,28 @@ module.exports = {
     }
 
     try {
-      await Message.create({
-        name: name,
-        email: email,
-        message: message,
-        locale: res.locals.locale,
-        kind: 'order',
-      });
+      Log.order([
+        name.replace(/\s+/g, ' '),
+        email.replace(/\s+/g, ''),
+        res.locals.locale,
+        message.replace(/\s*\n\s*/g, '  ↵  '),
+      ].join(' | '));
       return res.json({ ok: true });
     } catch (err) {
-      sails.log.warn('Order failed:', err.message || err);
-      return res.status(422).json({ error: 'invalid' });
+      Log.err('Order failed to write', err && (err.message || err));
+      return res.status(500).json({ error: 'not_saved' });
     }
   },
 
-  // Admin-ish list of every contact/order message stored in MongoDB.
-  // Reachable at GET /orders123.
-  orders: async function (req, res) {
-    var messages = await Message.find().sort('createdAt DESC');
+  // The unlisted order list, GET /orders123. Renders straight from
+  // logs/orders.log, newest first.
+  orders: function (req, res) {
+    var orders = Log.read_orders(req.param('page'), 200);
     return res.view('pages/orders', {
       layout: 'layouts/slou',
       active: 'orders',
       pageTitle: 'Užsakymai — SLOU',
-      messages: messages,
+      orders: orders,
     });
   },
 

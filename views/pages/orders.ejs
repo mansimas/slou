@@ -1,9 +1,9 @@
 <article class="page page--wide">
   <p class="kicker">SLOU</p>
-  <h1>Užsakymai / Žinutės</h1>
-  <p>Visos per kontaktų formą ir pagrindinio puslapio užsakymų langą pateiktos žinutės, išsaugotos MongoDB. Iš viso: <strong><%= messages.length %></strong>.</p>
+  <h1>Užsakymai</h1>
+  <p>Visi per pagrindinio puslapio užsakymų langą pateikti užsakymai, įrašyti į <code>logs/orders.log</code>. Iš viso: <strong><%= orders.total %></strong>.</p>
 
-  <% if (messages.length === 0) { %>
+  <% if (orders.total === 0) { %>
     <p style="margin-top:22px;color:var(--muted);">Kol kas nėra nė vieno įrašo.</p>
   <% } else { %>
     <div class="orders-scroll">
@@ -16,19 +16,21 @@
             <th>El. paštas</th>
             <th>Žinutė</th>
             <th>Kalba</th>
-            <th>Tipas</th>
           </tr>
         </thead>
         <tbody>
-          <% messages.forEach(function (m, i) { %>
+          <%
+            /* Numeravimas nuo naujausio: rows jau surikiuotas naujausi
+               pirmi, todėl #1 yra paskutinis užsakymas. */
+          %>
+          <% orders.rows.forEach(function (o, i) { %>
             <tr>
-              <td data-label="#"><%= i + 1 %></td>
-              <td data-label="Data" class="nowrap"><%= m.createdAt ? new Date(m.createdAt).toLocaleString('lt-LT') : '—' %></td>
-              <td data-label="Vardas"><%= m.name %></td>
-              <td data-label="El. paštas"><a class="inline" href="mailto:<%= m.email %>"><%= m.email %></a></td>
-              <td data-label="Žinutė" class="msg"><%= m.message %></td>
-              <td data-label="Kalba"><%= m.locale %></td>
-              <td data-label="Tipas"><span class="kind kind--<%= m.kind || 'contact' %>"><%= (m.kind || 'contact') === 'order' ? 'Užsakymas' : 'Žinutė' %></span></td>
+              <td data-label="#"><%= (orders.page * orders.per_page) + i + 1 %></td>
+              <td data-label="Data" class="nowrap"><%= o.when %></td>
+              <td data-label="Vardas"><%= o.name %></td>
+              <td data-label="El. paštas"><a class="inline" href="mailto:<%= o.email %>"><%= o.email %></a></td>
+              <td data-label="Žinutė" class="msg"><%= o.message %></td>
+              <td data-label="Kalba"><%= o.locale %></td>
             </tr>
           <% }); %>
         </tbody>
@@ -53,11 +55,6 @@
   table.orders th:nth-child(3), table.orders td:nth-child(3) { width: 130px; }
   table.orders th:nth-child(4), table.orders td:nth-child(4) { width: 190px; }
   table.orders th:nth-child(6), table.orders td:nth-child(6) { width: 70px; }
-  table.orders th:nth-child(7), table.orders td:nth-child(7) { width: 104px; }
-  /* Užsakymai iš pagrindinio puslapio atskiriami nuo kontaktų žinučių. */
-  .kind { display: inline-block; font-size: 11px; letter-spacing: .4px; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
-  .kind--order { background: rgba(166,121,74,.18); color: var(--leather-dark); }
-  .kind--contact { background: rgba(134,121,106,.14); color: var(--muted); }
   table.orders td.msg { white-space: pre-wrap; word-break: break-word; }
   table.orders td:nth-child(4) { word-break: break-word; }
 

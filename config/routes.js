@@ -19,11 +19,17 @@ module.exports.routes = {
   *                                                                          *
   ***************************************************************************/
 
+  //
+  // Deliberately only two pages are reachable: the homepage and the unlisted
+  // orders list. The other two entries are not pages — they are the homepage's
+  // own mechanics (the form it posts to, and the flag links in its header), so
+  // taking them out would break the page that is meant to stay up.
+  //
+  // The product, shipping/returns, privacy and cookie pages are switched off:
+  // their actions in PagesController and their views under views/pages/ are
+  // left in place, so re-enabling one is a matter of putting its line back.
+  //
   '/':                     'PagesController.home',
-  'GET /products/:slug':   'PagesController.product',
-  'GET /shipping-returns': 'PagesController.returns',
-  'GET /privacy-policy':   'PagesController.privacy',
-  'GET /cookie-policy':    'PagesController.cookies',
   'GET /language/:locale': 'PagesController.setLang',
   'POST /order':           'PagesController.createOrder',
   'GET /orders123':        'PagesController.orders',

@@ -38,7 +38,9 @@ module.exports.globals = {
   *                                                                           *
   ****************************************************************************/
 
-  models: true,
+  // No ORM: the orm hook is not installed and there are no models. Orders live
+  // in logs/orders.log (api/services/Log.js).
+  models: false,
 
   /****************************************************************************
   *                                                                           *

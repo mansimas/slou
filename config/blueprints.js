@@ -11,13 +11,20 @@
 
 module.exports.blueprints = {
 
+  // All three are switched off below. Left at their defaults, Sails
+  // auto-exposes a REST and shortcut API for every model — GET /message would
+  // list every order ever submitted, and the shortcut routes would let anyone
+  // create or destroy rows straight from a browser address bar. That is the
+  // closest thing this app had to an admin panel, and it is now gone: every
+  // reachable URL is declared explicitly in config/routes.js.
+
   /***************************************************************************
   *                                                                          *
   * Automatically expose implicit routes for every action in your app?       *
   *                                                                          *
   ***************************************************************************/
 
-  // actions: false,
+  actions: false,
 
 
   /***************************************************************************
@@ -26,7 +33,7 @@ module.exports.blueprints = {
   *                                                                          *
   ***************************************************************************/
 
-  // rest: true,
+  rest: false,
 
 
   /***************************************************************************
@@ -36,6 +43,6 @@ module.exports.blueprints = {
   *                                                                          *
   ***************************************************************************/
 
-  // shortcuts: true,
+  shortcuts: false,
 
 };
