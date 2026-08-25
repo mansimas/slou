@@ -66,7 +66,61 @@ module.exports.http = {
     *                                                                          *
     ***************************************************************************/
 
+    // Refuse scanners and generic HTTP clients before anything else runs — no
+    // session, no body parsing, and crucially no `videos`, so a scanner can
+    // never pull down 22MB of MP4. See api/services/VisitService.js for what
+    // counts as blockable; search crawlers are deliberately exempt.
+    botGuard: (function _botGuard() {
+      var VisitService = require('../api/services/VisitService');
+      var Log = require('../api/services/Log');
+
+      return function _botGuardMiddleware(req, res, next) {
+        // A scanner probe: logged, because these are rare and worth seeing.
+        if (VisitService.hostileRequest(req)) {
+          Log.blocked('PROBE | ' + VisitService.line(req));
+          return res.status(403).send('Forbidden');
+        }
+        // A no-UA or generic-client fetch: refused silently. These arrive
+        // every second or two, and a log line each would just relocate the
+        // noise into a file nobody can read.
+        if (VisitService.blockedBot(req)) {
+          return res.status(403).send('Forbidden');
+        }
+        return next();
+      };
+    })(),
+
+    // Every request that gets served, written to logs/requests.log — the
+    // homepage, the unlisted orders page, and any URL someone tries that does
+    // not exist.
+    //
+    // This is middleware rather than a policy on purpose: a policy only runs
+    // for a request that MATCHED a route, so every probe for a URL this app
+    // does not have — the interesting half — would never be seen.
+    visitLogger: (function _visitLogger() {
+      var VisitService = require('../api/services/VisitService');
+      var Log = require('../api/services/Log');
+
+      // Static files are served by the hundred per page view and say nothing
+      // about who is visiting; the page request next to them already did.
+      var ASSETS = /^\/(videos|images|styles|fonts|js|dependencies)\/|^\/favicon\.ico/;
+
+      return function _visitLoggerMiddleware(req, res, next) {
+        var url = req.originalUrl || req.url || '';
+        if (!ASSETS.test(url)) {
+          try {
+            Log.req(VisitService.line(req));
+          } catch (unusedErr) {
+            // Logging must never be the reason a page fails to render.
+          }
+        }
+        return next();
+      };
+    })(),
+
     order: [
+      'botGuard',
+      'visitLogger',
       'cookieParser',
       'session',
       'bodyParser',

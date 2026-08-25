@@ -42,6 +42,12 @@ module.exports.globals = {
   // in logs/orders.log (api/services/Log.js).
   models: false,
 
+  // Stated explicitly because the app depends on it: `Log` and `VisitService`
+  // are used as globals in the controller. Sails' services hook defaults this
+  // to true, so leaving it out worked, but the dependency is not something to
+  // leave resting on a framework default.
+  services: true,
+
   /****************************************************************************
   *                                                                           *
   * Whether to expose the Sails app instance as a global variable (`sails`),  *

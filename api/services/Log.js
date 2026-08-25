@@ -39,6 +39,18 @@ var Log = {
     return req(msg, rest_params);
   },
 
+  // Every hit on the unlisted orders page. The console line is the one you
+  // watch live; this file is what is still here after a restart.
+  visit: function (msg, ...rest_params) {
+    return visit(msg, rest_params);
+  },
+
+  // Scanner probes refused at the door. Rare and interesting, unlike the
+  // UA-based refusals, which are constant and deliberately not logged.
+  blocked: function (msg, ...rest_params) {
+    return blocked(msg, rest_params);
+  },
+
   err: function (msg, ...rest_params) {
     return err(msg, rest_params);
   },
@@ -62,6 +74,14 @@ function contact(msg, rest_params) {
 
 function req(msg, rest_params) {
   do_log('logs/requests.log', msg, 'info', '', rest_params);
+}
+
+function visit(msg, rest_params) {
+  do_log('logs/visits.log', msg, 'info', '', rest_params);
+}
+
+function blocked(msg, rest_params) {
+  do_log('logs/blocked.log', msg, 'info', '', rest_params);
 }
 
 function err(msg, rest_params) {

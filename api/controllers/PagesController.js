@@ -48,6 +48,33 @@ function localizedProducts(locale) {
   });
 }
 
+// Who is on the other end of a request, as far as HTTP can tell.
+//
+// req.ip is the socket address, which behind nginx/Cloudflare is the proxy
+// itself (127.0.0.1) rather than the visitor — so X-Forwarded-For comes first,
+// taking its LEFTMOST entry, which is the original client. Caveat worth
+// knowing: `trustProxy` is not enabled, so a request arriving directly (not
+// through the proxy) can put anything it likes in that header. Treat the
+// address as a strong hint, not proof.
+function describeVisitor(req) {
+  var forwarded = req.headers['x-forwarded-for'];
+  var ip = forwarded
+    ? String(forwarded).split(',')[0].trim()
+    : (req.ip || (req.connection && req.connection.remoteAddress) || '?');
+
+  return {
+    ip: ip,
+    ua: req.get('User-Agent') || '-',
+    // Where they came from. Usually '-': typing an unlisted URL leaves no
+    // referrer, so anything OTHER than '-' here means the link exists
+    // somewhere it shouldn't and is worth a look.
+    referer: req.get('Referer') || '-',
+    lang: req.get('Accept-Language') || '-',
+    // Only meaningful if the proxy chain is longer than one hop.
+    chain: forwarded ? String(forwarded) : '-',
+  };
+}
+
 // The products shown in the homepage video row, in catalog order.
 function featuredVideoProducts(locale) {
   return localizedProducts(locale).filter(function (p) {
@@ -130,6 +157,21 @@ module.exports = {
   // declared in the gitignored config/local.js, so the public repo does not
   // publish it. `noindex` keeps it out of search results.
   orders: function (req, res) {
+    var who = describeVisitor(req);
+    var line = 'ip=' + who.ip +
+      ' | ua=' + who.ua +
+      ' | from=' + who.referer +
+      ' | lang=' + who.lang +
+      ' | xff=' + who.chain;
+
+    // Straight to stdout so it shows up live in `pm2 logs` / the terminal.
+    // Tagged ORDERS-VISIT rather than after the URL itself: this file is in a
+    // public repo, and a tag naming the path would give away the very thing
+    // keeping the path out of config/routes.js is meant to protect.
+    console.log('[ORDERS-VISIT]', new Date().toISOString(), line);
+    // ...and to disk, because console scrollback does not survive a restart.
+    Log.visit(line);
+
     var orders = Log.read_orders(req.param('page'), 200);
     return res.view('pages/orders', {
       layout: 'layouts/slou',

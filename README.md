@@ -53,6 +53,8 @@ anywhere in the app.
 Log.order('name | email | locale | message');   // -> logs/orders.log
 Log.contact(...)                                // -> logs/contacts.log
 Log.req(...)                                    // -> logs/requests.log
+Log.visit(...)                                  // -> logs/visits.log
+Log.blocked(...)                                // -> logs/blocked.log
 Log.err(...)                                    // -> logs/errors.log
 ```
 
@@ -61,6 +63,34 @@ customer names and email addresses, so it is gitignored and must stay off the
 repo. The unlisted orders page renders it via `Log.read_orders()`; the writing
 and the parsing sit next to each other in that file, so changing one shows you
 the other.
+
+### Request logging and bot rejection
+
+`api/services/VisitService.js` (ported from vogames) answers two separate
+questions about a request: *who is this* and *should we serve them at all*.
+Both are wired up as **middleware** in `config/http.js`, not as policies — a
+policy only runs for a request that matched a route, so every probe for a URL
+this app does not have, which is the interesting half, would never be seen.
+
+- `botGuard` refuses scanners before any other middleware runs — no session, no
+  body parsing, and no `videos`, so a scanner can never pull down 22MB of MP4.
+  WordPress/PHP probes are logged to `logs/blocked.log`; no-UA and generic
+  HTTP-client fetches (curl, python, scanner toolkits) get a silent 403,
+  because they arrive constantly and logging each one just relocates the noise.
+- `visitLogger` writes every served request to `logs/requests.log`: IP (via
+  `X-Forwarded-For`, so a reverse proxy doesn't mask it), country, browser, OS,
+  device, referrer, and whether the UA looks like a bot. Static assets are
+  skipped. URLs that don't exist are logged too — that's the point.
+
+Search crawlers (Google, Bing, the AI crawlers) are deliberately **not**
+refused, or the shop would drop out of search results. `ALLOW_CRAWLERS` at the
+top of the block list in `VisitService.js` makes the rejection absolute if that
+is what you want.
+
+The unlisted orders page additionally prints an `[ORDERS-VISIT]` line to stdout
+on every hit — visible live in `pm2 logs` — and appends to `logs/visits.log`.
+A referrer other than `-` on those lines means the link exists somewhere it
+shouldn't.
 
 Two rules when adding a channel:
 
