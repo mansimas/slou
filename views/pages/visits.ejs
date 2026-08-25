@@ -2,10 +2,14 @@
 /**
  * visits.ejs
  *
- * Paskutiniai 50 apsilankymų, naujausi viršuje. Skaitoma iš
+ * Paskutiniai 50 LANKYTOJŲ, naujausi viršuje. Skaitoma iš
  * logs/requests.log (žr. StatsService.recentVisits).
  *
- * Viena eilutė — vienas apsilankymas, TAIP PAT ir telefone: šis puslapis
+ * Viena eilutė — vienas lankytojas, ne vienas užklausos įrašas: tas pats
+ * žmogus, atsidaręs septynis puslapius, čia yra viena eilutė su naujausiu
+ * savo apsilankymu, o kiek kartų jis buvo — rodoma prie datos („×7").
+ *
+ * Viena eilutė ir telefone: šis puslapis
  * sąmoningai neišskaido eilučių į korteles, kaip daro užsakymų lentelė.
  * Siaurame ekrane lentelė slenkama į šoną. IP nerodomas.
  */
@@ -13,7 +17,8 @@
 <article class="page page--wide">
   <p class="kicker">SLOU</p>
   <h1>Lankytojai</h1>
-  <p>Paskutiniai <strong><%= visits.length %></strong> apsilankymai, naujausi viršuje.</p>
+  <p>Paskutiniai <strong><%= visits.length %></strong> lankytojai, naujausi viršuje.
+    Viena eilutė — vienas lankytojas; „×3" prie datos reiškia, kad jis lankėsi tris kartus.</p>
 
   <% if (!visits.length) { %>
     <p class="stat-empty">Kol kas nėra nė vieno įrašo.</p>
@@ -41,7 +46,11 @@
                  kalba atrodo įtartinai vienodos. */
             %>
             <tr<%= v.is_bot ? ' class="is-bot"' : '' %> title="<%= v.ua %>">
-              <td class="t"><%= v.when %></td>
+              <%
+                /* Kartų skaičius rodomas tik tada, kai jų daugiau nei vienas —
+                   „×1" prie kiekvienos eilutės būtų vien triukšmas. */
+              %>
+              <td class="t"><%= v.when %><% if (v.hits > 1) { %> <span class="hits">×<%= v.hits %></span><% } %></td>
               <td class="c"><%= v.country %></td>
               <td><%= v.city %></td>
               <td class="dim"><%= v.place %></td>
@@ -85,6 +94,7 @@
   table.visits tbody tr:hover { background: rgba(166,121,74,.06); }
 
   table.visits td.t { font-variant-numeric: tabular-nums; color: var(--muted); }
+  table.visits .hits { font-weight: 600; color: var(--ink, inherit); }
   table.visits td.c { font-weight: 600; }
   table.visits td.dim { color: var(--muted); }
   /* Vienintelis stulpelis, kuriam leidžiama trumpėti — nuorodos būna ilgos. */

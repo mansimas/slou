@@ -47,9 +47,12 @@ module.exports = {
     return video_plays();
   },
 
-  // The most recent visits, newest first, at most `limit`. Everything is
-  // included — admin pages too, since a hit on one of those from an address
-  // that is not yours is the single most useful thing this list can show you.
+  // The most recent VISITORS, newest first, at most `limit`. One row per
+  // person, not per request: a visitor who opened five pages is one row,
+  // stamped with the newest of them and carrying `hits: 5`. Without that the
+  // list is mostly the same handful of visitors repeated, and the newest
+  // genuinely different visitor can be pushed off the bottom of the page by a
+  // single busy one.
   recentVisits: function (limit) {
     return recent_visits(limit);
   },
@@ -463,14 +466,32 @@ function dash(v) {
   return v.length ? v : '-';
 }
 
+// Kas tas lankytojas. Slapukas (vid) atsako geriausiai: tas pats žmogus,
+// kelis kartus atsidaręs puslapį, turi tą patį vid. Senesnėse eilutėse (ir
+// pas tuos, kas slapuko nepriima — būtent taip atrodo vienodų „Chrome 120 /
+// Windows 10" pliūpsnių eilės) vid nėra, todėl atsargiai griebiamasi ip +
+// User-Agent poros: adresas vienas gali sujungti visą biurą ar mobilųjį
+// operatorių į vieną, o kartu su UA klysta kur kas rečiau.
+function visitor_key(payload) {
+  var vid = field(payload, 'vid');
+  if (vid && vid !== '-') { return 'vid:' + vid; }
+  return 'ip:' + (field(payload, 'ip') || '?') + ' | ' + (field(payload, 'ua') || '-');
+}
+
+// Paskutiniai `limit` LANKYTOJAI, ne apsilankymai: viena eilutė vienam
+// žmogui, rodomas naujausias jo apsilankymas, o kiek kartų jis buvo per
+// perskaitytą log'o gabalą — eilutės `hits` lauke.
 function recent_visits(limit) {
   limit = parseInt(limit, 10) || 50;
   if (limit < 1) { limit = 1; }
 
-  // Read more lines than are wanted, because most of them will be filtered
-  // out: admin pages and /language/* redirects are the bulk of the file.
+  // Skaitoma gerokai daugiau eilučių, nei bus parodyta: dalis jų iškrenta
+  // (admin puslapiai, /language/* peradresavimai), o likusios susitraukia,
+  // kai to paties lankytojo apsilankymai suplaukia į vieną eilutę. Vienas
+  // aktyvus lankytojas gali užimti dešimtis log'o eilučių, todėl ir imamas
+  // toks atsargos dydis.
   var entries = [];
-  read_recent_lines('requests.log', limit * 10).forEach(function (line) {
+  read_recent_lines('requests.log', limit * 40).forEach(function (line) {
     var parsed = parse_line(line);
     if (!parsed) { return; }
     if (!counts_as_visit(field(parsed.payload, 'url'))) { return; }
@@ -478,8 +499,22 @@ function recent_visits(limit) {
   });
   assign_years(entries);
 
-  var rows = entries.map(visit_row);
-  rows.reverse();                 // newest first
+  // Einama nuo naujausio: pirmas sutiktas įrašas ir yra tas, kurį rodome,
+  // o visi senesni to paties lankytojo tik pridedami prie skaitiklio.
+  var seen = Object.create(null);
+  var rows = [];
+  for (var i = entries.length - 1; i >= 0; i--) {
+    var key = visitor_key(entries[i].payload);
+    if (seen[key]) {
+      seen[key].hits++;
+      continue;
+    }
+    var row = visit_row(entries[i]);
+    row.hits = 1;
+    seen[key] = row;
+    rows.push(row);
+  }
+
   return rows.slice(0, limit);
 }
 
