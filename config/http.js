@@ -86,6 +86,13 @@ module.exports.http = {
         if (VisitService.blockedBot(req)) {
           return res.status(403).send('Forbidden');
         }
+        // Going faster than a person can. This is the only check that catches
+        // a crawler wearing an ordinary Chrome user agent, which the two checks
+        // above cannot see through: they read the user agent, and it says
+        // nothing but "Chrome". This one reads behaviour instead.
+        if (VisitService.rateLimited(req)) {
+          return res.status(429).send('Too Many Requests');
+        }
         return next();
       };
     })(),
@@ -101,13 +108,13 @@ module.exports.http = {
       var VisitService = require('../api/services/VisitService');
       var Log = require('../api/services/Log');
 
-      // Static files are served by the hundred per page view and say nothing
-      // about who is visiting; the page request next to them already did.
-      var ASSETS = /^\/(videos|images|styles|fonts|js|dependencies)\/|^\/favicon\.ico/;
-
       return function _visitLoggerMiddleware(req, res, next) {
         var url = req.originalUrl || req.url || '';
-        if (!ASSETS.test(url)) {
+        // Static files are served by the hundred per page view and say
+        // nothing about who is visiting; the page request beside them already
+        // did. The test lives in VisitService so the logger and the rate
+        // limiter cannot disagree about what counts as a page request.
+        if (!VisitService.isAsset(url)) {
           try {
             // The visitor id is minted here rather than in a controller so it
             // is assigned on the FIRST request of a visit, whatever that

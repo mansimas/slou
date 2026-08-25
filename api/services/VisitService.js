@@ -39,6 +39,18 @@ module.exports = {
     return hostileRequest(req);
   },
 
+  // Is this address going faster than a person can? See RATE_* below.
+  rateLimited: function (req) {
+    return rate_limited(req);
+  },
+
+  // Static files: served by the hundred per page view, so they are neither
+  // logged nor rate limited. Defined here so the logger and the rate limiter
+  // cannot disagree about what counts as a page request.
+  isAsset: function (url) {
+    return ASSETS.test(url || '');
+  },
+
   // Reads the visitor id off the request, minting one if this is a first
   // visit. Returns { id, isNew } — isNew tells the caller it still has to be
   // sent to the browser.
@@ -243,5 +255,99 @@ function hostileRequest(req) {
   for (var key in params) {
     if (key === 'phpinfo' || key === 'pp' || key === 'rest_route') { return true; }
   }
+  return false;
+}
+
+
+// ---------------------------------------------------------------------------
+// Rate limiting
+//
+// The last line of defence, and the only one that works on a crawler wearing an
+// ordinary browser's user agent — which is what the datacenter traffic hitting
+// this site does. It is judged on BEHAVIOUR instead: one address asked for the
+// homepage and all seven language links, twice, inside 0.66 seconds. No person
+// does that.
+//
+// Only page requests count. A real visitor loading the homepage also pulls
+// stylesheets, fonts and six poster frames in the same second; counting those
+// would block people rather than bots.
+// ---------------------------------------------------------------------------
+
+var ASSETS = /^\/(videos|images|styles|fonts|js|dependencies)\/|^\/favicon\.ico/;
+
+var RATE_WINDOW_MS = 10000;   // sliding window
+var RATE_MAX = 12;            // page requests allowed per address per window
+var RATE_BLOCK_MS = 300000;   // how long a tripped address stays refused: 5 min
+var RATE_MAX_IPS = 5000;      // addresses tracked before the oldest is dropped
+
+// ip -> timestamps of its recent page requests. A Map because its insertion
+// order gives the eviction order for free.
+var rate_hits = new Map();
+// ip -> time the refusal expires.
+var rate_blocked = new Map();
+
+// The penalty box is the part that matters.
+//
+// A bare cap is nearly useless here: a burst of 16 gets 12 served and 4
+// refused, and the crawler that hit this site came back every three minutes
+// with the window long since reset — so it would have been served, over and
+// over, forever. Tripping the cap now refuses the address outright for five
+// minutes, which turns a partial block into a real one and makes repeat
+// visits cost the crawler everything and this server nothing.
+function rate_limited(req) {
+  var ip = clientIp(req);
+  if (!ip || ip === '?') { return false; }
+
+  var now = Date.now();
+
+  // Already in the penalty box: refuse everything, assets included. A blocked
+  // address has no business pulling 22MB of video either.
+  var until = rate_blocked.get(ip);
+  if (until !== undefined) {
+    if (until > now) { return true; }
+    rate_blocked.delete(ip);
+  }
+
+  // Only page requests are counted. A real visitor loading the homepage also
+  // pulls stylesheets, fonts and six poster frames in the same second;
+  // counting those would block people rather than bots.
+  var url = req.originalUrl || req.url || '';
+  if (ASSETS.test(url)) { return false; }
+
+  var cutoff = now - RATE_WINDOW_MS;
+
+  // Drop what has fallen out of the window. This also bounds the array: an
+  // address can never accumulate more than a window's worth.
+  var times = rate_hits.get(ip) || [];
+  var recent = [];
+  for (var i = 0; i < times.length; i++) {
+    if (times[i] > cutoff) { recent.push(times[i]); }
+  }
+  recent.push(now);
+
+  // Deleting before setting moves this address to the end of the Map, so the
+  // eviction below always drops the least recently seen one.
+  rate_hits.delete(ip);
+  rate_hits.set(ip, recent);
+
+  while (rate_hits.size > RATE_MAX_IPS) {
+    var oldest = rate_hits.keys().next();
+    if (oldest.done) { break; }
+    rate_hits.delete(oldest.value);
+  }
+
+  if (recent.length > RATE_MAX) {
+    rate_blocked.set(ip, now + RATE_BLOCK_MS);
+    rate_hits.delete(ip);
+    // Logged once, on the way in — not per refused request, or a crawler
+    // would fill the file with the record of being ignored.
+    if (typeof Log !== 'undefined' && Log.blocked) {
+      Log.blocked('RATE | ' + recent.length + ' page requests in ' +
+        (RATE_WINDOW_MS / 1000) + 's | blocked ' + (RATE_BLOCK_MS / 60000) + 'min | ip=' + ip +
+        ' | url=' + url + ' | ua=' + (req.headers['user-agent'] || '-'));
+    }
+    return true;
+  }
+
   return false;
 }

@@ -186,6 +186,25 @@ var ADMIN_ACTIONS = [
   'PagesController.visits',
 ];
 
+// What counts as a visit: a request for a real page.
+//
+// Excluded, and why:
+//   - the admin pages, or opening the statistics inflates the number it is
+//     about to show
+//   - /language/*, which is not a page at all. It is a 301 straight back to
+//     where you came from, and because the header offers seven of them, a
+//     crawler that follows every link turned ONE visit into EIGHT log lines.
+//     That is what filled the list with duplicates.
+//
+// Today that leaves the homepage alone, which is the only public page there
+// is. Adding a page later makes it count with no change here.
+function counts_as_visit(url, admin) {
+  if (!url || url === '-') { return false; }
+  if (admin.indexOf(url) >= 0) { return false; }
+  if (url.indexOf('/language/') === 0) { return false; }
+  return true;
+}
+
 // The admin pages must not count as visits — otherwise opening the statistics
 // page inflates the number it is about to show. Their paths are read from the
 // live route table rather than hardcoded, so renaming a route in
@@ -274,8 +293,7 @@ function dashboard() {
   var months = {};
 
   requests.forEach(function (entry) {
-    var url = field(entry.payload, 'url');
-    if (admin.indexOf(url) >= 0) { return; }   // don't count looking at the numbers
+    if (!counts_as_visit(field(entry.payload, 'url'), admin)) { return; }
 
     var is_bot = field(entry.payload, 'bot') === 'yes';
     // The visitor cookie identifies a person far better than an address does.
@@ -422,10 +440,16 @@ function recent_visits(limit) {
   limit = parseInt(limit, 10) || 50;
   if (limit < 1) { limit = 1; }
 
+  var admin = admin_paths();
+
+  // Read more lines than are wanted, because most of them will be filtered
+  // out: admin pages and /language/* redirects are the bulk of the file.
   var entries = [];
-  read_recent_lines('requests.log', limit).forEach(function (line) {
+  read_recent_lines('requests.log', limit * 10).forEach(function (line) {
     var parsed = parse_line(line);
-    if (parsed) { entries.push(parsed); }
+    if (!parsed) { return; }
+    if (!counts_as_visit(field(parsed.payload, 'url'), admin)) { return; }
+    entries.push(parsed);
   });
   assign_years(entries);
 

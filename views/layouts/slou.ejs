@@ -377,7 +377,15 @@
         </summary>
         <ul class="langmenu">
           <% locales.forEach(function(l){ %>
-            <li><a href="/language/<%= l.code %>" class="<%= locale === l.code ? 'active' : '' %>"><span class="code"><%= l.label %></span><%= langNames[l.code] || l.label %></a></li>
+            <%
+              /* rel="nofollow": these are actions, not content. A crawler that
+                 follows every link on the page turns one visit into eight —
+                 the homepage plus all seven of these — which is exactly what
+                 filled the request log with duplicates. Nothing is lost by
+                 not having them crawled: they redirect straight back to the
+                 page you came from, they are not separate pages. */
+            %>
+            <li><a href="/language/<%= l.code %>" rel="nofollow" class="<%= locale === l.code ? 'active' : '' %>"><span class="code"><%= l.label %></span><%= langNames[l.code] || l.label %></a></li>
           <% }); %>
         </ul>
       </details>
