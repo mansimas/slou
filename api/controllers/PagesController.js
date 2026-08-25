@@ -198,9 +198,9 @@ module.exports = {
   },
 
   // The unlisted order list. Renders straight from logs/orders.log, newest
-  // first. Its path is not written here or in config/routes.js — it is
-  // declared in the gitignored config/local.js, so the public repo does not
-  // publish it. `noindex` keeps it out of search results.
+  // first. Its route is declared in config/local.js. Unlisted, not protected:
+  // nothing on the site links to it and `noindex` keeps it out of search
+  // results, but there is no password on it.
   orders: function (req, res) {
     var who = describeVisitor(req);
     var line = 'ip=' + who.ip +

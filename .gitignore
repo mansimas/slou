@@ -45,7 +45,10 @@
 #
 ################################################
 
-config/local.js
+# config/local.js is NOT ignored. It holds the orders-page route, and keeping
+# it out of the repo meant every deploy needed that file placed on the server
+# by hand — `git pull` could not deliver it. It is tracked so a deploy is just
+# a pull. Do not put credentials in this file.
 
 
 ################################################

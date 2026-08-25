@@ -44,11 +44,10 @@ Only two pages are served. Everything else 404s, on purpose.
 | `POST /order`       | the order box posts here (not a page)             |
 | `/language/:locale` | language switcher in the header (not a page)      |
 
-There is also an unlisted page listing submitted orders. Its path is not
-recorded in this repository on purpose — it is declared in `config/local.js`,
-which is gitignored, because a secret URL written into a public repo is not a
-secret. Nothing links to it and it sends `noindex, nofollow`. A fresh clone
-therefore has no orders page until `config/local.js` is placed on the server.
+There is also an unlisted page listing submitted orders, routed in
+`config/local.js`. It is unlisted, not protected: nothing on the site links to
+it, it is absent from the nav and footer, and it sends `noindex, nofollow` so
+it stays out of search results. There is no password on it.
 
 The product, shipping/returns, privacy and cookie pages still exist as
 actions in `api/controllers/PagesController.js` and views under

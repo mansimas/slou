@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <%
-    /* The orders page passes noindex. It is unlisted rather than protected, so
-       the one way it realistically reaches a search engine is a referrer or a
-       synced browser history — this is what stops it being indexed if it does.
-       Deliberately not a robots.txt Disallow: that file is public, and naming
-       the path in it would advertise exactly what it is meant to hide. */
+    /* The orders page passes noindex. Nothing links to it, so the one way it
+       realistically reaches a search engine is a referrer or a synced browser
+       history — this is what stops it being indexed if it does. Deliberately
+       not a robots.txt Disallow: that file is fetched by anyone, so naming the
+       path there would advertise the page instead of hiding it. */
   %>
   <% if (typeof noindex !== 'undefined' && noindex) { %>
   <meta name="robots" content="noindex, nofollow">
