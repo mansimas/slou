@@ -87,6 +87,12 @@ refused, or the shop would drop out of search results. `ALLOW_CRAWLERS` at the
 top of the block list in `VisitService.js` makes the rejection absolute if that
 is what you want.
 
+A submitted order prints `[ORDER]` to stdout as it lands — the same flattened
+line that goes into `orders.log`, plus IP, country and user agent — so a sale
+shows up in `pm2 logs` immediately. A submission rejected for missing fields
+prints `[ORDER-REJECTED]`, and a failed write prints `[ORDER-FAILED]` to
+stderr.
+
 The unlisted orders page additionally prints an `[ORDERS-VISIT]` line to stdout
 on every hit — visible live in `pm2 logs` — and appends to `logs/visits.log`.
 A referrer other than `-` on those lines means the link exists somewhere it

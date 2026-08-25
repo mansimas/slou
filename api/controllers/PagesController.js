@@ -75,6 +75,18 @@ function describeVisitor(req) {
   };
 }
 
+// Country for an address, or '-' for a private/unresolvable one. Kept here
+// rather than in describeVisitor() so the per-request visitor line stays free
+// of a geoip lookup it does not need.
+function countryOf(ip) {
+  try {
+    var geo = require('geoip-country').lookup(ip);
+    return (geo && geo.country) || '-';
+  } catch (unusedErr) {
+    return '-';
+  }
+}
+
 // The products shown in the homepage video row, in catalog order.
 function featuredVideoProducts(locale) {
   return localizedProducts(locale).filter(function (p) {
@@ -133,21 +145,36 @@ module.exports = {
     var name = (req.param('name') || '').trim();
     var email = (req.param('email') || '').trim();
     var message = (req.param('message') || '').trim();
+    var who = describeVisitor(req);
 
     if (!name || !email || !message) {
+      // Worth seeing too: a rejected submission is either a broken form or
+      // somebody poking the endpoint, and both are invisible otherwise.
+      console.log('[ORDER-REJECTED]', new Date().toISOString(),
+        'ip=' + who.ip + ' | missing fields | ua=' + who.ua);
       return res.badRequest({ error: 'missing_fields' });
     }
 
+    var line = [
+      name.replace(/\s+/g, ' '),
+      email.replace(/\s+/g, ''),
+      res.locals.locale,
+      message.replace(/\s*\n\s*/g, '  ↵  '),
+    ].join(' | ');
+
     try {
-      Log.order([
-        name.replace(/\s+/g, ' '),
-        email.replace(/\s+/g, ''),
-        res.locals.locale,
-        message.replace(/\s*\n\s*/g, '  ↵  '),
-      ].join(' | '));
+      Log.order(line);
+      // Live on stdout as well as on disk, so a sale shows up in `pm2 logs`
+      // the moment it lands rather than only when someone opens the file.
+      // The same flattened `line` is printed, so what is on screen and what is
+      // in orders.log cannot drift apart.
+      console.log('[ORDER]', new Date().toISOString(), line +
+        ' | ip=' + who.ip + ' | country=' + countryOf(who.ip) + ' | ua=' + who.ua);
       return res.json({ ok: true });
     } catch (err) {
       Log.err('Order failed to write', err && (err.message || err));
+      console.error('[ORDER-FAILED]', new Date().toISOString(),
+        line + ' | ' + (err && (err.message || err)));
       return res.status(500).json({ error: 'not_saved' });
     }
   },
