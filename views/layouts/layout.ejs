@@ -31,9 +31,22 @@
             + Use a different or additional preprocessor, like SASS, SCSS or Stylus
     -->
 
-    <!--STYLES-->
-    <link rel="stylesheet" href="/styles/importer.css">
-    <!--STYLES END-->
+    <%
+      /* The STYLES / SCRIPTS marker blocks that used to sit here are gone on
+         purpose. sails-linker rewrote whatever was between them on every lift
+         (tasks/config/sails-linker.js targets every .ejs view), swapping the
+         dev tags for the minified bundle — so this tracked file came back
+         modified after every single `pm2 reload`, and the next `git pull` on
+         production hit a conflict over a file nobody had edited.
+
+         Nothing needed what it injected: every page renders through
+         layouts/slou.ejs, which carries all of its CSS and JS inline, and the
+         404/500 pages style themselves inline too. With no markers left, the
+         linker has nothing to rewrite and the file stays clean.
+
+         If a page ever does need the built bundle, put the markers back and
+         accept the churn — or link the file directly and leave them out. */
+    %>
   </head>
 
   <body>
@@ -105,8 +118,10 @@
 
     -->
 
-    <!--SCRIPTS-->
-    <script src="/dependencies/sails.io.js"></script>
-    <!--SCRIPTS END-->
+    <%
+      /* Was the SCRIPTS marker block — see the note in <head>. It linked
+         sails.io.js, the socket client, which this app has no use for either:
+         sails-hook-sockets is uninstalled. */
+    %>
   </body>
 </html>
