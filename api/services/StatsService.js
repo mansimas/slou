@@ -399,6 +399,8 @@ function visit_row(entry) {
     // "VL" and "Europe/Vilnius" are both more use than an empty cell.
     place: dash(region) !== '-' ? region : dash(tz),
     device: dash(field(entry.payload, 'device')),
+    os: dash(field(entry.payload, 'os')),
+    browser: dash(field(entry.payload, 'browser')),
     // `lt-LT,lt;q=0.9,en;q=0.8` is a preference list; the first entry is the
     // language the browser is actually set to and the only part worth a column.
     lang: dash(String(field(entry.payload, 'lang')).split(',')[0]),

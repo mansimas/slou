@@ -27,18 +27,27 @@
             <th>Miestas</th>
             <th>Vieta</th>
             <th>Įrenginys</th>
+            <th>OS</th>
+            <th>Naršyklė</th>
             <th>Kalba</th>
             <th>Iš kur</th>
           </tr>
         </thead>
         <tbody>
           <% visits.forEach(function (v) { %>
-            <tr<%= v.is_bot ? ' class="is-bot"' : '' %>>
+            <%
+              /* Visas User-Agent — pele užvedus ant eilutės. Būtent jis
+                 pasako, kas iš tikrųjų buvo tas apsilankymas, kai šalis ir
+                 kalba atrodo įtartinai vienodos. */
+            %>
+            <tr<%= v.is_bot ? ' class="is-bot"' : '' %> title="<%= v.ua %>">
               <td class="t"><%= v.when %></td>
               <td class="c"><%= v.country %></td>
               <td><%= v.city %></td>
               <td class="dim"><%= v.place %></td>
               <td class="dim"><%= v.device %></td>
+              <td><%= v.os %></td>
+              <td><%= v.browser %></td>
               <td><%= v.lang %></td>
               <%
                 /* Nuoroda, iš kurios atėjo. „-" reiškia, kad adresas suvestas

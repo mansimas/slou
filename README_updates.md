@@ -2,6 +2,7 @@
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
 
+[2026-08-25 18:35] - Show OS and browser - /elist gains OS and browser columns plus the full user agent as a row tooltip - the field that tells you what a burst of identical rows really was. Both were logged already but had been dropped from the row when the table was made compact.
 [2026-08-25 18:20] - One row per record - Orders and statistics tables folded each record into a stacked card under 720px, so one order took seven lines. Both stay tables at every width now, nothing wraps to a second line, and wider content scrolls sideways - matching the visits list.
 [2026-08-25 18:10] - Console log admin page hits - Opening the orders, statistics or visits page now prints an [ADMIN] line tagged ORDERS, STATS or LIST with address, country/city, browser, device and referrer. Nothing links to those pages, so a hit that is not yours means the URL leaked. Full line still goes to visits.log.
 [2026-08-25 18:00] - Add recent visits list - New /elist page: last 50 requests newest first, showing date, country, city, location, device, language and referrer, no IP. One row per visit on mobile too. Switched to geoip-lite for city and timezone; lines logged before those fields fall back to a lookup from the stored address.
