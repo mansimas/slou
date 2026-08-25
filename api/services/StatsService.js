@@ -185,27 +185,71 @@ function field(payload, key) {
   return m ? m[1].trim() : '';
 }
 
-// What counts as a visit: someone looking at the shop.
-//
-// A whitelist — the homepage, and nothing else. It was a blacklist
-// (everything except the admin pages and /language/*) and that is the wrong
-// shape for this: it depended on the live route table, it matched paths
-// exactly so `/estats?x=1` or `/estats/` slipped through, and anything added
-// later was counted by default. Inverted, a page can only be counted on
-// purpose.
-//
-// Adding a real public page later means adding it here. That is the trade,
-// and it is the right way round: forgetting leaves a page uncounted rather
-// than quietly refilling the list with admin hits and redirects.
-function counts_as_visit(url) {
-  if (!url || url === '-') { return false; }
-  // Drop the query string and any trailing slash: `/`, `/?utm_source=x` and
-  // `/?lang=lt` are all one page view.
-  var path = String(url).split('?')[0].split('#')[0];
+// The controller actions behind the admin pages. Paths are read from the live
+// route table rather than written here, so renaming a route in
+// config/local.js keeps the exclusion correct with nothing else to update.
+var ADMIN_ACTIONS = [
+  'PagesController.orders',
+  'PagesController.statistics',
+  'PagesController.visits',
+];
+
+// Computed once. The route table does not change while the process runs, and
+// this is asked for every line of the log.
+var admin_paths_cache = null;
+
+function admin_paths() {
+  if (admin_paths_cache) { return admin_paths_cache; }
+
+  var out = [];
+  var routes = (typeof sails !== 'undefined' && sails.config && sails.config.routes) || {};
+  Object.keys(routes).forEach(function (address) {
+    var target = routes[address];
+    // A route can be a string ('PagesController.orders') or a dictionary
+    // ({ action: '...' }); both shapes appear in a Sails app.
+    var action = (typeof target === 'string') ? target : (target && (target.action || target.controller));
+    if (!action || ADMIN_ACTIONS.indexOf(action) < 0) { return; }
+    // "GET /eglei" -> "/eglei"
+    var parts = String(address).split(' ');
+    out.push(normalize_path(parts[parts.length - 1]));
+  });
+
+  admin_paths_cache = out;
+  return out;
+}
+
+// `/estats?x=1`, `/estats/` and `/estats` are one page. Comparing raw URLs
+// missed the first two, which is how admin hits kept appearing in the list.
+function normalize_path(url) {
+  var path = String(url || '').split('?')[0].split('#')[0];
   while (path.length > 1 && path.charAt(path.length - 1) === '/') {
     path = path.slice(0, -1);
   }
-  return path === '' || path === '/';
+  return path;
+}
+
+// What counts as a visit: a person looking at a page of the shop.
+//
+// A blacklist, so a page added to the site later is counted without anyone
+// having to remember to come here. Only three kinds of request are dropped:
+//
+//   - the admin pages, or opening the statistics inflates the numbers it is
+//     about to show
+//   - /language/*, which is not a page. It is a 301 straight back to where you
+//     came from, and with seven of them in the header a crawler following
+//     every link turned ONE visit into EIGHT lines
+//   - /vplay, the video player's background beacon
+function counts_as_visit(url) {
+  if (!url || url === '-') { return false; }
+
+  var path = normalize_path(url);
+  if (!path) { return false; }
+
+  if (path.indexOf('/language/') === 0) { return false; }
+  if (path === '/vplay') { return false; }
+  if (admin_paths().indexOf(path) >= 0) { return false; }
+
+  return true;
 }
 
 // ---------------------------------------------------------------------------
