@@ -185,47 +185,27 @@ function field(payload, key) {
   return m ? m[1].trim() : '';
 }
 
-var ADMIN_ACTIONS = [
-  'PagesController.orders',
-  'PagesController.statistics',
-  'PagesController.visits',
-];
-
-// What counts as a visit: a request for a real page.
+// What counts as a visit: someone looking at the shop.
 //
-// Excluded, and why:
-//   - the admin pages, or opening the statistics inflates the number it is
-//     about to show
-//   - /language/*, which is not a page at all. It is a 301 straight back to
-//     where you came from, and because the header offers seven of them, a
-//     crawler that follows every link turned ONE visit into EIGHT log lines.
-//     That is what filled the list with duplicates.
+// A whitelist — the homepage, and nothing else. It was a blacklist
+// (everything except the admin pages and /language/*) and that is the wrong
+// shape for this: it depended on the live route table, it matched paths
+// exactly so `/estats?x=1` or `/estats/` slipped through, and anything added
+// later was counted by default. Inverted, a page can only be counted on
+// purpose.
 //
-// Today that leaves the homepage alone, which is the only public page there
-// is. Adding a page later makes it count with no change here.
-function counts_as_visit(url, admin) {
+// Adding a real public page later means adding it here. That is the trade,
+// and it is the right way round: forgetting leaves a page uncounted rather
+// than quietly refilling the list with admin hits and redirects.
+function counts_as_visit(url) {
   if (!url || url === '-') { return false; }
-  if (admin.indexOf(url) >= 0) { return false; }
-  if (url.indexOf('/language/') === 0) { return false; }
-  return true;
-}
-
-// The admin pages must not count as visits — otherwise opening the statistics
-// page inflates the number it is about to show. Their paths are read from the
-// live route table rather than hardcoded, so renaming a route in
-// config/local.js keeps the exclusion correct with no change here.
-function admin_paths() {
-  var out = [];
-  var routes = (typeof sails !== 'undefined' && sails.config && sails.config.routes) || {};
-  Object.keys(routes).forEach(function (address) {
-    var target = routes[address];
-    if (typeof target !== 'string') { return; }
-    if (ADMIN_ACTIONS.indexOf(target) < 0) { return; }
-    // "GET /eglei" -> "/eglei"
-    var parts = address.split(' ');
-    out.push(parts[parts.length - 1]);
-  });
-  return out;
+  // Drop the query string and any trailing slash: `/`, `/?utm_source=x` and
+  // `/?lang=lt` are all one page view.
+  var path = String(url).split('?')[0].split('#')[0];
+  while (path.length > 1 && path.charAt(path.length - 1) === '/') {
+    path = path.slice(0, -1);
+  }
+  return path === '' || path === '/';
 }
 
 // ---------------------------------------------------------------------------
@@ -283,8 +263,6 @@ function bucket_of(map, key) {
 }
 
 function dashboard() {
-  var admin = admin_paths();
-
   // --- requests ---
   var requests = [];
   read_log_lines('requests.log').forEach(function (line) {
@@ -298,7 +276,7 @@ function dashboard() {
   var months = {};
 
   requests.forEach(function (entry) {
-    if (!counts_as_visit(field(entry.payload, 'url'), admin)) { return; }
+    if (!counts_as_visit(field(entry.payload, 'url'))) { return; }
 
     var is_bot = field(entry.payload, 'bot') === 'yes';
     // The visitor cookie identifies a person far better than an address does.
@@ -445,15 +423,13 @@ function recent_visits(limit) {
   limit = parseInt(limit, 10) || 50;
   if (limit < 1) { limit = 1; }
 
-  var admin = admin_paths();
-
   // Read more lines than are wanted, because most of them will be filtered
   // out: admin pages and /language/* redirects are the bulk of the file.
   var entries = [];
   read_recent_lines('requests.log', limit * 10).forEach(function (line) {
     var parsed = parse_line(line);
     if (!parsed) { return; }
-    if (!counts_as_visit(field(parsed.payload, 'url'), admin)) { return; }
+    if (!counts_as_visit(field(parsed.payload, 'url'))) { return; }
     entries.push(parsed);
   });
   assign_years(entries);
