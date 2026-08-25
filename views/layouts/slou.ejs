@@ -239,7 +239,10 @@
     .vnow { font-size: 15px; font-weight: 700; letter-spacing: .3px; color: var(--leather-dark); }
 
     /* ---------- Homepage order box ---------- */
-    .orderbox { max-width: 820px; margin: 74px auto 0; padding: 44px 46px 40px; background: var(--card);
+    /* The empty tail of the page. Height rather than margin so it cannot
+       collapse into the section above it. */
+    .foot { height: 90px; }
+    .orderbox { max-width: 820px; margin: 74px auto 96px; padding: 44px 46px 40px; background: var(--card);
       border: 1px solid var(--line); border-radius: 4px; box-shadow: 0 20px 50px -30px rgba(70,48,25,.7); }
     .orderbox h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(26px, 3.4vw, 38px); margin: 0 0 10px; }
     .orderbox__lead { color: #554d42; margin-bottom: 26px; }
@@ -248,13 +251,6 @@
     .orderbox .btn { margin-top: 8px; }
 
     /* Story band */
-    .band { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin: 96px auto; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; background: var(--card); }
-    @media (max-width: 820px){ .band { grid-template-columns: 1fr; } }
-    .band .media { min-height: 420px; background: #9c7043 url('/images/leather.svg') center / cover no-repeat; }
-    .band .copy { padding: 60px 56px; display: flex; flex-direction: column; justify-content: center; }
-    .band .eyebrow { font-size: 12px; letter-spacing: 4px; text-transform: uppercase; color: var(--leather-dark); margin-bottom: 12px; }
-    .band h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(26px, 3.4vw, 38px); margin-bottom: 16px; }
-    .band p { color: #554d42; margin-bottom: 14px; }
 
     /* Article / content pages */
     .page { max-width: 780px; margin: 0 auto; padding: 84px 28px 100px; }
@@ -334,12 +330,10 @@
       .voff { font-size: 9px; padding: 2px 5px; }
       .vnow { font-size: 14px; }
 
-      .orderbox { margin-top: 52px; padding: 32px 22px 30px; }
+      .orderbox { margin-top: 52px; margin-bottom: 56px; padding: 32px 22px 30px; }
+      .foot { height: 55px; }
       .order-who { grid-template-columns: 1fr; gap: 0; }
       .orderbox textarea { min-height: 190px; }
-      .band { margin: 62px auto; }
-      .band .media { min-height: 240px; }
-      .band .copy { padding: 40px 28px; }
       .product { padding: 34px 0 16px; gap: 30px; }
       .page { padding: 58px 22px 72px; }
       .langmenu { min-width: 168px; }
@@ -393,6 +387,15 @@
   </div>
 
   <%- body %>
+
+  <%
+    /* Deliberately empty. Since the story band was removed the order box is
+       the last thing on the page, and without this it ended flush against the
+       bottom of the window — the form looked like it had been cut off rather
+       than finished. This is breathing room, not a footer with content in it,
+       so it carries no links and is hidden from screen readers. */
+  %>
+  <footer class="foot" aria-hidden="true"></footer>
 
 
   <script>

@@ -3,7 +3,8 @@
  * homepage.ejs
  *
  * The title lives in the shared head bar (views/layouts/slou.ejs), so the
- * page itself starts with the product video row (the main event), the order box, then the story band. The full catalogue lives
+ * page itself starts with the product video row (the main event), then the
+ * order box. The full catalogue lives
  * on the individual product pages rather than being repeated here. There is
  * no footer — the layout ends with the page content.
  */
@@ -61,14 +62,5 @@
     </form>
   </section>
 
-  <section class="band">
-    <div class="media" aria-hidden="true"></div>
-    <div class="copy">
-      <p class="eyebrow"><%= t.story.eyebrow %></p>
-      <h2><%= t.story.title %></h2>
-      <p><%= t.story.p1 %></p>
-      <p><%= t.story.p2 %></p>
-    </div>
-  </section>
 
 </div>

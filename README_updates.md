@@ -2,6 +2,8 @@
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
 
+[2026-08-25 19:15] - Add empty footer band - With the story band gone the order box was the last thing on the page and ended flush against the window, looking cut off. Adds 96px under the box and an empty 90px footer, 56 and 55 on mobile. No content in it, hidden from screen readers.
+[2026-08-25 19:05] - Remove About SLOU band - The story section is gone from the homepage: markup, the .band styles it alone used, and the story copy in all seven locales. The page is now the video row and the order box. assets/images/leather.svg was its background and is now unreferenced.
 [2026-08-25 18:55] - Count only real page visits - /elist and /estats counted their own hits, and /language/* counted as visits though it is a 301 back to where you came from - with seven links in the header one crawler visit became eight lines. Both now excluded from the list and the numbers.
 [2026-08-25 18:50] - Rate limit by behaviour - Datacenter crawlers send an ordinary Chrome user agent, so no user-agent list catches them; one fetched the homepage and all seven language links twice in 0.66s. botGuard now refuses over 12 page requests per 10s per address and holds it blocked for 5 minutes. Assets uncounted.
 [2026-08-25 18:45] - Nofollow on language links - A crawler following every link turned one visit into eight. The links are actions, not content: they redirect back to the page you came from, so nothing is lost by keeping them out of a crawl.
