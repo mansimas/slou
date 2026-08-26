@@ -35,6 +35,40 @@
     </div>
   </div>
 
+  <h2 class="stat-h">Iš kur atėjo</h2>
+  <p class="stat-note">
+    Skaičiuojami <strong>lankytojai</strong>, ne užklausos: vienas žmogus,
+    atsivertęs penkis puslapius, čia yra vienas. Šaltinis atpažįstamas iš
+    nuorodos, iš kurios ateita (<code>l.instagram.com</code>,
+    <code>facebook.com</code>), iš <code>utm_source</code> žymos ir iš to,
+    kurioje programėlėje puslapis buvo atidarytas — TikTok nuorodos atėjimo
+    vietos nesiunčia, todėl juos parodo tik programėlės naršyklė.
+    <strong>Tiesiogiai</strong> — adresas suvestas ranka, atidaryta iš
+    žymelės arba vaikščiota po pačią svetainę.
+  </p>
+  <div class="orders-scroll">
+    <table class="orders stats">
+      <thead>
+        <tr>
+          <th>Šaltinis</th>
+          <th>Šiandien</th>
+          <th>7 dienos</th>
+          <th>Viso</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% stats.sources.forEach(function (s) { %>
+          <tr>
+            <td class="nowrap"><%= s.label %></td>
+            <td><%= s.today ? s.today : '—' %></td>
+            <td><%= s.week ? s.week : '—' %></td>
+            <td><%= s.total ? s.total : '—' %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+
   <%
     /* Trys vienodos lentelės — viena funkcija, kad eilutė būtų apibrėžta
        vienoje vietoje ir visos trys negalėtų išsiskirti. */
@@ -116,6 +150,7 @@
     text-transform: uppercase; color: var(--muted); }
 
   .stat-h { font-family: var(--serif); font-weight: 500; font-size: 24px; margin: 34px 0 0; }
+  .stat-note { margin-top: 8px; font-size: 13px; color: var(--muted); }
   .stat-empty { margin-top: 12px; color: var(--muted); }
 
   /* Bendra su užsakymų lentele: rėmelis, antraštės, mobilios kortelės. */

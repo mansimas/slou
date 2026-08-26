@@ -22,6 +22,9 @@
  *   bots    - requests whose user agent identified as a crawler. Shown rather
  *             than hidden so `visits` is never quietly inflated by them.
  *   orders  - lines in orders.log, which is one line per submitted order
+ *   sources - where the visitors came from (Instagram, Facebook, TikTok,
+ *             YouTube, search, direct), counted in visitors rather than
+ *             requests. See traffic_source().
  */
 
 var fs = require('fs');
@@ -36,8 +39,9 @@ var MONTHS = 24;
 
 module.exports = {
 
-  // -> { days: [row], weeks: [row], months: [row], totals: {...} }
+  // -> { days: [row], weeks: [row], months: [row], totals: {...}, sources: [row] }
   // row = { label, from, visits, unique, bots, orders }
+  // sources row = { key, label, today, week, total } — see source_tally()
   dashboard: function () {
     return dashboard();
   },
@@ -336,6 +340,7 @@ function dashboard() {
   var days = {};
   var weeks = {};
   var months = {};
+  var sources = source_tally();
 
   requests.forEach(function (entry) {
     var url = field(entry.payload, 'url');
@@ -361,6 +366,11 @@ function dashboard() {
         b.unique++;
       }
     });
+
+    // Kur lankytojas rado nuorodą. Skaičiuojami žmonės, ne užklausos, todėl
+    // tai daroma iš tos pačios eilutės kaip ir „unikalūs" — dukart to paties
+    // log'o skaityti nereikia.
+    if (!is_bot) { sources.add(who, entry.t, traffic_source(entry.payload)); }
   });
 
   // --- orders ---
@@ -382,6 +392,7 @@ function dashboard() {
     weeks: rows(weeks, week_label, WEEKS),
     months: rows(months, month_label, MONTHS),
     totals: totals(months),
+    sources: sources.rows(),
   };
 }
 
@@ -557,6 +568,193 @@ function recent_visits(limit) {
   return rows.slice(0, limit);
 }
 
+
+// ---------------------------------------------------------------------------
+// Iš kur atėjo lankytojai
+// ---------------------------------------------------------------------------
+
+// The platforms worth a row of their own, in the order they are shown when the
+// counts tie. `direct` and `other` are last on purpose: they are what is left
+// when nothing identified the visitor's origin, not findings in themselves.
+var SOURCES = [
+  { key: 'instagram', label: 'Instagram' },
+  { key: 'facebook', label: 'Facebook' },
+  { key: 'tiktok', label: 'TikTok' },
+  { key: 'youtube', label: 'YouTube' },
+  { key: 'search', label: 'Paieška' },
+  { key: 'other', label: 'Kita' },
+  { key: 'direct', label: 'Tiesiogiai' },
+];
+
+// Which answer wins when one visitor's requests disagree. A named platform
+// beats everything: a visitor who arrived from Instagram and then reloaded the
+// page with no referrer came from Instagram, and the reload must not quietly
+// turn them into a direct visit.
+var SOURCE_RANK = { direct: 3, other: 2, search: 1 };
+
+function source_rank(key) {
+  return SOURCE_RANK[key] || 0;
+}
+
+// This site's own addresses. A referrer pointing at one of them is one page of
+// the shop linking to another, not an arrival from somewhere else. localhost is
+// here so that browsing the site while developing does not pile up under
+// "kita".
+var OWN_HOSTS = ['slou.lt', 'localhost', '127.0.0.1'];
+
+// `https://l.instagram.com/x?y` -> `l.instagram.com`. Blank for '-' and for
+// anything that is not an absolute address.
+function host_of(url) {
+  var m = String(url || '').match(/^[a-z][a-z0-9+.-]*:\/\/([^/?#]+)/i);
+  if (!m) { return ''; }
+  return m[1].toLowerCase().replace(/^www\./, '').split(':')[0];
+}
+
+function host_is(host, domain) {
+  return host === domain || host.slice(-(domain.length + 1)) === '.' + domain;
+}
+
+// The platform a referring HOST belongs to, or '' for a host we have no name
+// for. l.instagram.com and l.facebook.com are the apps' own link wrappers —
+// nearly all social traffic arrives wearing one of those rather than the bare
+// domain.
+function source_of_host(host) {
+  if (!host) { return ''; }
+  if (host_is(host, 'instagram.com') || host_is(host, 'ig.me')) { return 'instagram'; }
+  if (host_is(host, 'facebook.com') || host_is(host, 'fb.com') ||
+      host_is(host, 'fb.me') || host_is(host, 'fb.watch') ||
+      host_is(host, 'messenger.com')) { return 'facebook'; }
+  if (host_is(host, 'tiktok.com')) { return 'tiktok'; }
+  if (host_is(host, 'youtube.com') || host_is(host, 'youtu.be')) { return 'youtube'; }
+  if (host_is(host, 'google.com') || /(^|\.)google\.[a-z.]+$/.test(host) ||
+      host_is(host, 'bing.com') || host_is(host, 'duckduckgo.com') ||
+      host_is(host, 'yahoo.com') || host_is(host, 'ecosia.org') ||
+      host_is(host, 'yandex.ru')) { return 'search'; }
+  return '';
+}
+
+// The platform named by the campaign tags on an address. Both the landing url
+// and the referrer are looked at: the link in the Instagram bio carries
+// `utm_source=ig`, and the app hands it back as part of a referrer pointing at
+// this site itself.
+function source_of_query(url) {
+  var q = String(url || '');
+  if (q.indexOf('?') < 0) { return ''; }
+
+  var utm = (q.match(/[?&]utm_source=([^&#]*)/i) || [])[1];
+  utm = decodeURIComponent(String(utm || '')).toLowerCase();
+  if (/^(ig|instagram)$/.test(utm)) { return 'instagram'; }
+  if (/^(fb|facebook|meta)$/.test(utm)) { return 'facebook'; }
+  if (/^(tt|tiktok)$/.test(utm)) { return 'tiktok'; }
+  if (/^(yt|youtube)$/.test(utm)) { return 'youtube'; }
+  if (/^(google|bing|search)$/.test(utm)) { return 'search'; }
+
+  if (/[?&]igshid=/i.test(q)) { return 'instagram'; }
+  if (/[?&]ttclid=/i.test(q)) { return 'tiktok'; }
+  if (/[?&]gclid=/i.test(q)) { return 'search'; }
+  return '';
+}
+
+// The app the page was opened INSIDE. Instagram, Facebook and TikTok all open
+// links in a browser of their own that says so in the user agent, and that is
+// the only evidence left when the app sends no referrer at all — which is how
+// TikTok traffic arrives.
+function source_of_app(browser) {
+  var b = String(browser || '').toLowerCase();
+  if (b.indexOf('instagram') === 0) { return 'instagram'; }
+  if (b.indexOf('facebook') === 0) { return 'facebook'; }
+  if (b.indexOf('tiktok') === 0) { return 'tiktok'; }
+  if (b.indexOf('youtube') === 0) { return 'youtube'; }
+  return '';
+}
+
+// Where one logged request came from.
+//
+// Read in order of how much the evidence is worth: an explicit campaign tag,
+// then the referring site, then Meta's click id (which both Instagram and
+// Facebook stamp, so the app the page opened in decides which of the two it
+// was), then the app itself, and only then "nobody said".
+function traffic_source(payload) {
+  var from = field(payload, 'from');
+  var url = field(payload, 'url');
+  var app = source_of_app(field(payload, 'browser'));
+
+  var tagged = source_of_query(url) || source_of_query(from);
+  if (tagged) { return tagged; }
+
+  var host = host_of(from);
+  var named = source_of_host(host);
+  if (named) { return named; }
+
+  // fbclid says "a Meta app sent this" and no more. In-app browser first,
+  // Facebook as the fallback — the link wrapper only stamps it on links
+  // opened from Facebook or Instagram.
+  if (/[?&]fbclid=/i.test(url) || /[?&]fbclid=/i.test(from)) {
+    return app === 'instagram' ? 'instagram' : 'facebook';
+  }
+
+  if (app) { return app; }
+
+  // No referrer: the address was typed, opened from a bookmark, or came from
+  // an app that strips it. A referrer pointing at this site itself is a click
+  // from one page of the shop to another, not an arrival.
+  if (!from || from === '-') { return 'direct'; }
+  if (host && OWN_HOSTS.some(function (own) { return host_is(host, own); })) { return 'direct'; }
+
+  return 'other';
+}
+
+// Counts visitors, not requests: a visitor who opened eight pages came from
+// Instagram once. Held as three sets of visitor -> source (today, the last
+// seven days, everything the logs hold) rather than one, because the same
+// person may well arrive from Instagram today and from a bookmark last week.
+function source_tally() {
+  var today = day_start(Date.now());
+  var week = today - 6 * 86400000;
+  var maps = { today: {}, week: {}, total: {} };
+
+  function keep(map, who, src) {
+    if (!map[who] || source_rank(src) < source_rank(map[who])) { map[who] = src; }
+  }
+
+  return {
+    add: function (who, t, src) {
+      if (!who) { return; }
+      keep(maps.total, who, src);
+      if (t >= week) { keep(maps.week, who, src); }
+      if (t >= today) { keep(maps.today, who, src); }
+    },
+
+    rows: function () {
+      var counts = {};
+      Object.keys(maps).forEach(function (period) {
+        counts[period] = {};
+        Object.keys(maps[period]).forEach(function (who) {
+          var src = maps[period][who];
+          counts[period][src] = (counts[period][src] || 0) + 1;
+        });
+      });
+
+      return SOURCES.map(function (s) {
+        return {
+          key: s.key,
+          label: s.label,
+          today: counts.today[s.key] || 0,
+          week: counts.week[s.key] || 0,
+          total: counts.total[s.key] || 0,
+        };
+      }).sort(function (a, b) {
+        // Biggest first, but only among the platforms: "tiesiogiai" and "kita"
+        // are kept at the bottom whatever their size, so the table always
+        // reads as a ranking of the places traffic was won from.
+        var ra = source_rank(a.key);
+        var rb = source_rank(b.key);
+        if (ra !== rb) { return ra - rb; }
+        return b.total - a.total;
+      });
+    },
+  };
+}
 
 // ---------------------------------------------------------------------------
 // Video plays
