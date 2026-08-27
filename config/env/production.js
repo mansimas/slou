@@ -311,7 +311,13 @@ module.exports = {
   *                                                                         *
   ***************************************************************************/
   log: {
-    level: 'debug'
+    // 'warn', not 'debug'. This key overrides `level` from config/log.js in
+    // production, and 'debug' was letting Sails' lift banner back in — the
+    // rule, the timestamp, Environment, Port — on every pm2 restart. Sails
+    // prints those with bare `sails.log(...)`, i.e. captains-log's debug
+    // level, so only a level above debug silences them. See config/log.js for
+    // the full reasoning; keep the two in step.
+    level: 'warn'
   },
 
 
