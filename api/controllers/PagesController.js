@@ -24,6 +24,15 @@ function pricing(product) {
     return { now: '€00', was: null, off: null };   // price not set yet
   }
   var cents = Math.round(Number(product.price) * 100);
+  // A fixed sale price wins over a percentage; see `sale` in config/catalog.js.
+  if (product.sale !== null && product.sale !== undefined && Number(product.sale) < Number(product.price)) {
+    var saleCents = Math.round(Number(product.sale) * 100);
+    return {
+      now: money(saleCents),
+      was: money(cents),
+      off: '\u2212' + Math.round((cents - saleCents) * 100 / cents) + '%',
+    };
+  }
   var percent = Number(product.discount) || 0;
   if (percent <= 0) {
     return { now: money(cents), was: null, off: null };
@@ -154,6 +163,36 @@ function posterInfo(req) {
   };
 }
 
+// The Christmas offer for the homepage, or null when it is switched off.
+// Prices are formatted here with money() so the offer and the video row can
+// never print the same amount two different ways.
+function christmasOffer(t) {
+  var x = sails.config.catalog.christmas;
+  if (!x || !x.enabled) { return null; }
+  return {
+    bulkFrom: x.bulkFrom,
+    items: x.items.map(function (i) {
+      var price = Math.round(i.price * 100);
+      var sale = Math.round(i.sale * 100);
+      return {
+        key: i.key,
+        name: t.xmas[i.name],
+        desc: t.xmas[i.desc],
+        was: money(price),
+        now: money(sale),
+        bulk: money(Math.round(i.bulk * 100)),
+        off: '\u2212' + Math.round((price - sale) * 100 / price) + '%',
+        video: '/videos/' + i.video,
+        poster: '/videos/' + i.poster,
+        photos: (i.photos || []).map(function (ph) {
+          return { full: '/videos/' + ph.full, thumb: '/videos/' + ph.thumb };
+        }),
+        prefill: t.xmas.prefill.replace('{name}', t.xmas[i.name]),
+      };
+    }),
+  };
+}
+
 // The products shown in the homepage video row, in catalog order.
 function featuredVideoProducts(locale) {
   return localizedProducts(locale).filter(function (p) {
@@ -181,6 +220,7 @@ module.exports = {
       active: 'home',
       pageTitle: res.locals.t.titles.home,
       featured: featuredVideoProducts(res.locals.locale),
+      xmas: christmasOffer(res.locals.t),
     });
   },
 
@@ -306,6 +346,35 @@ module.exports = {
       Log.err('Message failed to write', err && (err.message || err));
       return res.status(500).json({ error: 'not_saved' });
     }
+  },
+
+  // The customer deleting their conversation from the homepage box. Hidden
+  // from them, kept for the shop — see ConversationService.remove().
+  conversationDelete: function (req, res) {
+    var id = req.param('id');
+    try {
+      if (!ConversationService.remove(id, req.param('key'))) {
+        return res.status(404).json({ error: 'not_found' });
+      }
+      console.log('[CONV-DELETED]', new Date().toISOString(), 'conv=' + id);
+      return res.json({ ok: true });
+    } catch (err) {
+      Log.err('Conversation delete failed', err && (err.message || err));
+      return res.status(500).json({ error: 'not_deleted' });
+    }
+  },
+
+  // Undo a customer's delete, from the conversations page. Same shape as
+  // reply(): a plain form POST that goes back to the thread.
+  restore: function (req, res) {
+    var id = req.param('id');
+    adminVisit(req, 'RESTORE ' + id);
+    try {
+      ConversationService.restore(id);
+    } catch (err) {
+      Log.err('Restore failed', err && (err.message || err));
+    }
+    return res.redirect('/eposts#c-' + id);
   },
 
   // How long a visitor kept a page open, sent by the layout's beacon when the

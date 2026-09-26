@@ -213,6 +213,7 @@ var ADMIN_ACTIONS = [
   'PagesController.visits',
   'PagesController.posts',
   'PagesController.reply',
+  'PagesController.restore',
 ];
 
 // Computed once. The route table does not change while the process runs, and

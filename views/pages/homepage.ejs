@@ -28,6 +28,8 @@
            data-sending="<%= t.conversation.sending %>"
            data-error="<%= t.conversation.error %>"
            data-empty="<%= t.conversation.empty %>"
+           data-delete-confirm="<%= t.conversation.deleteConfirm %>"
+           data-delete-error="<%= t.conversation.deleteError %>"
            data-locale="<%= t.htmlLang %>">
     <h2><%= t.conversation.title %></h2>
     <p class="convbox__lead"><%= t.conversation.lead %></p>
@@ -40,9 +42,16 @@
                   placeholder="<%= t.conversation.placeholder %>"></textarea>
         <p class="field-err" id="cMsgErr" hidden></p>
       </div>
-      <button type="submit" class="btn solid" id="cSubmit"><%= t.conversation.send %></button>
+      <div class="convbox__actions">
+        <button type="submit" class="btn solid" id="cSubmit"><%= t.conversation.send %></button>
+        <button type="button" class="convbox__delete" id="cDelete"><%= t.conversation.delete %></button>
+      </div>
     </form>
   </section>
+
+  <% if (typeof xmas !== 'undefined' && xmas) { %>
+    <%- include('../partials/xmas-offer', { xmas: xmas, t: t }) %>
+  <% } %>
 
   <%- include('../partials/video-row', { featured: featured, t: t }) %>
 

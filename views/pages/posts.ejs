@@ -18,19 +18,20 @@
     var langNames = { lt: 'lietuvių', en: 'anglų', pt: 'portugalų', fr: 'prancūzų', de: 'vokiečių', es: 'ispanų', it: 'italų' };
   %>
   <% var waitingCount = conversations.filter(function (c) { return c.waiting; }).length; %>
-  <p class="posts-count">Iš viso: <strong><%= conversations.length %></strong><% if (waitingCount) { %> · laukia atsakymo: <strong class="conv-wait-count"><%= waitingCount %></strong><% } %>.</p>
+  <p class="posts-count">Iš viso: <strong><%= conversations.length %></strong><% if (waitingCount) { %> · laukia atsakymo: <strong class="conv-wait-count"><%= waitingCount %></strong><% } %><% var deletedCount = conversations.filter(function (c) { return c.deleted; }).length; if (deletedCount) { %> · ištrinta pirkėjų: <strong><%= deletedCount %></strong><% } %>.</p>
 
   <% if (!conversations.length) { %>
     <p style="color:var(--muted);">Kol kas nėra nė vieno pokalbio.</p>
   <% } %>
   <div class="aconvs">
     <% conversations.forEach(function (c) { %>
-      <details class="aconv<%= c.waiting ? ' aconv--waiting' : '' %>" id="c-<%= c.id %>"<%= c.waiting ? ' open' : '' %>>
+      <details class="aconv<%= c.waiting ? ' aconv--waiting' : '' %><%= c.deleted ? ' aconv--deleted' : '' %>" id="c-<%= c.id %>"<%= c.waiting ? ' open' : '' %>>
         <summary>
           <span class="aconv__name"><%= c.name %></span>
           <% if (c.email) { %><a class="inline" href="mailto:<%= c.email %>"><%= c.email %></a><% } %>
           <span class="aconv__meta"><%= c.locale %> · <%= c.messages.length %> žin. · <%= new Date(c.updated).toLocaleString('lt-LT') %></span>
           <% if (c.waiting) { %><span class="aconv__badge">Laukia atsakymo</span><% } %>
+          <% if (c.deleted) { %><span class="aconv__badge aconv__badge--deleted">Ištrinta pirkėjo · <%= new Date(c.deleted).toLocaleString('lt-LT') %></span><% } %>
         </summary>
         <%
           /* Kas rašė: vieta ir įrenginys užfiksuoti užsakymo metu; kalbos —
@@ -82,6 +83,19 @@
             </div>
             <p class="avisits__note">Naujas apsilankymas prasideda po 30 min. pertraukos (paryškinta linija). Rodoma iki 100 naujausių peržiūrų.</p>
           </dialog>
+        <% } %>
+
+        <% if (c.deleted) { %>
+          <%
+            /* Pirkėjas pokalbį ištrynė: jis jo nebemato, bet raktas liko jo
+               naršyklėje. „Atkurti“ grąžina pokalbį — kitą kartą užėjęs į
+               svetainę pirkėjas vėl jį matys puslapio viršuje. */
+          %>
+          <form method="post" action="/eposts/restore" class="aconv__restore">
+            <input type="hidden" name="id" value="<%= c.id %>">
+            <span>Pirkėjas šio pokalbio nebemato.</span>
+            <button type="submit" class="btn">Atkurti pokalbį</button>
+          </form>
         <% } %>
 
         <ol class="aconv__log">
@@ -153,6 +167,11 @@
   .aconv > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
   .aconv__name { font-weight: 600; }
   .aconv__meta { color: var(--muted); font-size: 13px; }
+  .aconv--deleted { opacity: .72; border-style: dashed; }
+  .aconv--deleted[open] { opacity: 1; }
+  .aconv__badge--deleted { background: #8a8177 !important; }
+  .aconv__restore { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 16px 12px; padding: 10px 14px; background: #f3e7e2; border: 1px solid #e3cfc6; border-radius: 8px; font-size: 13.5px; color: #7a3b2a; }
+  .aconv__restore .btn { padding: 7px 14px; font-size: 11px; }
   .aconv__badge { font-size: 11px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--leather); color: #f7f1e6; }
   .conv-wait-count { color: var(--leather-dark); }
   .aconv__log { list-style: none; margin: 0; padding: 4px 16px 0; display: flex; flex-direction: column; gap: 8px; }

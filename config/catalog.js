@@ -13,9 +13,17 @@
  * the struck-through original, the badge and the final price are all derived
  * from these two in PagesController, so the arithmetic lives in one place.
  *
+ * `sale` (optional) is a fixed sale price in EUR, used instead of `discount`
+ * when the offer is a round price rather than a round percentage (99 -> 59
+ * is 40.4%, which no whole-number discount produces). The badge percentage is
+ * worked out from it.
+ *
  * `video` (optional) names a file in the `videos/` folder at the project
  * root, served at /videos/<file> (see config/http.js). The six products
  * that have one are featured in the homepage video row.
+ *
+ * `christmas` at the bottom is the seasonal offer shown at the top of the
+ * homepage. Set `enabled: false` to take it down; nothing else needs to change.
  */
 
 module.exports.catalog = {
@@ -59,7 +67,9 @@ module.exports.catalog = {
     {
       slug: 'slim-wallet',
       price: 99,
-      discount: 25,
+      // The Christmas offer price (see `christmas` below), so the video row
+      // shows the same price as the offer. Back to `discount: 25` after it.
+      sale: 59,
       video: 'card_wallet.mp4',
       size: {
         lt: 'Dydis: 10 cm x 7.5 cm', en: 'Size: 10 cm x 7.5 cm', pt: 'Tamanho: 10 cm x 7,5 cm',
@@ -214,6 +224,38 @@ module.exports.catalog = {
       }
     }
 
-  ]
+  
+  ],
+
+  // The Christmas offer at the top of the homepage. Prices in EUR: `price` is
+  // the full price (struck through), `sale` the offer price, `bulk` the price
+  // per piece from `bulkFrom` pieces. Text comes from `xmas` in
+  // config/content.js (`name`/`desc` name its keys there). Media files live in
+  // videos/christmas/: `video` is a short silent loop, `poster` its first
+  // frame, `photos` extra pictures opened from thumbnails.
+  christmas: {
+    enabled: true,
+    bulkFrom: 10,
+    items: [
+      {
+        key: 'wallet', name: 'wallet', desc: 'walletDesc',
+        price: 99, sale: 59, bulk: 49,
+        video: 'christmas/card_wallet.mp4',
+        poster: 'christmas/card_wallet.jpg',
+        photos: [1, 2, 3, 4].map(function (n) {
+          return { full: 'christmas/card_wallet-' + n + '.jpg', thumb: 'christmas/card_wallet-' + n + '-thumb.jpg' };
+        }),
+      },
+      {
+        key: 'keys', name: 'keys', desc: 'keysDesc',
+        price: 29, sale: 19, bulk: 15,
+        video: 'christmas/keychains.mp4',
+        poster: 'christmas/keychains.jpg',
+        photos: [2, 3, 4, 5].map(function (n) {
+          return { full: 'christmas/keychains-' + n + '.jpg', thumb: 'christmas/keychains-' + n + '-thumb.jpg' };
+        }),
+      },
+    ],
+  },
 
 };

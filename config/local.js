@@ -34,6 +34,7 @@ module.exports = {
     // Customer conversations, and the reply form on that page.
     'GET /eposts': 'PagesController.posts',
     'POST /eposts/reply': 'PagesController.reply',
+    'POST /eposts/restore': 'PagesController.restore',
     'GET /estats': 'PagesController.statistics',
     'GET /elist': 'PagesController.visits',
   },

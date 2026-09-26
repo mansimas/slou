@@ -118,7 +118,7 @@ module.exports = {
   // not match a thread (deleted, mistyped, or someone guessing).
   read: function (id, key) {
     var conv = load(id);
-    return key_matches(conv, key) ? public_view(conv) : null;
+    return (key_matches(conv, key) && !conv.deleted) ? public_view(conv) : null;
   },
 
   // Append a message. `from` is 'customer' (must present the key) or 'shop'
@@ -128,7 +128,9 @@ module.exports = {
   add: function (id, from, text, key, vid) {
     var conv = load(id);
     if (!conv) { return null; }
-    if (from === 'customer' && !key_matches(conv, key)) { return null; }
+    // A deleted thread takes no more customer messages: an order placed after
+    // deleting starts a fresh conversation instead of reviving the old one.
+    if (from === 'customer' && (!key_matches(conv, key) || conv.deleted)) { return null; }
     if (conv.messages.length >= MAX_MESSAGES) { return null; }
 
     text = clean_text(text);
@@ -143,6 +145,39 @@ module.exports = {
     }
     save(conv);
     return public_view(conv);
+  },
+
+  // The customer deleting their own thread. Not removed from disk: it is
+  // marked `deleted`, which hides it from the customer (read() and add()
+  // treat it as absent) while the conversations page still shows it, marked,
+  // with a button to restore it. The customer's browser keeps the key, so a
+  // restored thread reappears for them on their next visit.
+  // Returns true when the key matched.
+  remove: function (id, key) {
+    var conv = load(id);
+    if (!key_matches(conv, key)) { return false; }
+    if (!conv.deleted) {
+      conv.deleted = new Date().toISOString();
+      save(conv);
+    }
+    return true;
+  },
+
+  // Is the thread for this { id, key } one the customer deleted? Lets the
+  // homepage tell "deleted, keep the key in case it is restored" apart from
+  // "gone for good, forget the key".
+  isDeleted: function (id, key) {
+    var conv = load(id);
+    return key_matches(conv, key) && !!conv.deleted;
+  },
+
+  // The shop undoing a customer's delete, from the conversations page.
+  restore: function (id) {
+    var conv = load(id);
+    if (!conv || !conv.deleted) { return false; }
+    delete conv.deleted;
+    save(conv);
+    return true;
   },
 
   // Every thread, most recently active first, for the admin page. `waiting`
@@ -169,7 +204,8 @@ module.exports = {
         vids: conv.vids || [],
         created: conv.created,
         updated: conv.updated,
-        waiting: conv.messages[conv.messages.length - 1].from === 'customer',
+        deleted: conv.deleted || null,
+        waiting: !conv.deleted && conv.messages[conv.messages.length - 1].from === 'customer',
         messages: conv.messages,
       });
     });

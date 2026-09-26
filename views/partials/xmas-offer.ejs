@@ -1,0 +1,120 @@
+<%
+/**
+ * xmas-offer.ejs
+ *
+ * The Christmas offer band at the top of the homepage. Data comes from
+ * `christmas` in config/catalog.js (prices, media) via christmasOffer() in
+ * PagesController; the words from `xmas` in config/content.js.
+ *
+ * The clips are short silent loops, so unlike the video row they DO play by
+ * themselves — but only while on screen, and only once the script in
+ * layouts/slou.ejs attaches `data-src`, so a page load that never scrolls
+ * past them costs just the two posters. Visitors who ask for reduced motion
+ * get the poster only.
+ *
+ * "Order" fills the order form's message with the product name and scrolls to
+ * it, so the order arrives saying which offer it is for.
+ *
+ * Expects: `xmas` (non-null) and `t`.
+ */
+%>
+<section class="xmas" aria-labelledby="xmasTitle">
+  <%
+    /* The night sky behind the offer: twinkling stars, spells of snow,
+       shooting stars and gusts of wind, drawn by the script in
+       layouts/slou.ejs. Decoration only, so hidden from screen readers. */
+  %>
+  <canvas class="xmas__sky" aria-hidden="true"></canvas>
+
+  <header class="xmas__head">
+    <p class="xmas__eyebrow"><span aria-hidden="true">✦</span> <%= t.xmas.eyebrow %> <span aria-hidden="true">✦</span></p>
+    <h2 id="xmasTitle"><%= t.xmas.title %></h2>
+    <p class="xmas__lead"><%= t.xmas.lead %></p>
+  </header>
+
+  <div class="xmas__grid">
+    <% xmas.items.forEach(function (it) { %>
+      <article class="xcard">
+        <div class="xcard__media">
+          <%
+            /* data-full / data-group: the clip is also the first slide of the
+               product's slideshow, opened by clicking it or the corner icon. */
+          %>
+          <video class="xcard__video" muted loop playsinline preload="none"
+                 poster="<%= it.poster %>" data-src="<%= it.video %>"
+                 data-full="<%= it.video %>" data-group="<%= it.key %>"
+                 aria-label="<%= it.name %>"></video>
+          <button type="button" class="xcard__expand" data-group="<%= it.key %>" aria-label="<%= t.xmas.expand %>">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          </button>
+          <span class="xcard__off"><%= it.off %></span>
+        </div>
+
+        <div class="xcard__body">
+          <h3><%= it.name %></h3>
+          <p class="xcard__desc"><%= it.desc %></p>
+
+          <p class="xcard__prices">
+            <span class="sr-only"><%= t.xmas.was %>:</span>
+            <s class="xcard__was"><%= it.was %></s>
+            <span class="sr-only"><%= t.xmas.now %>:</span>
+            <strong class="xcard__now"><%= it.now %></strong>
+          </p>
+
+          <%
+            /* data-text feeds the glowing copy of each word that the shine
+               draws on top (see .xcard__bulk in layouts/slou.ejs). */
+          %>
+          <p class="xcard__bulk">
+            <span data-text="<%= t.xmas.bulk %>"><%= t.xmas.bulk %></span>
+            <strong data-text="<%= it.bulk %>"><%= it.bulk %></strong> <%= t.xmas.each %>
+          </p>
+
+          <p class="xcard__engrave">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg>
+            <%= t.xmas.engrave %>
+          </p>
+
+
+          <a href="#order" class="btn solid xcard__cta" data-prefill="<%= it.prefill %>"><%= t.xmas.cta %></a>
+        </div>
+
+        <% if (it.photos.length) { %>
+          <div class="xcard__photos" aria-label="<%= t.xmas.photos %>">
+            <% it.photos.forEach(function (ph, n) { %>
+              <button type="button" class="xthumb" data-full="<%= ph.full %>" data-group="<%= it.key %>" data-index="<%= n %>"
+                      aria-label="<%= t.xmas.photos %> <%= n + 1 %>">
+                <img src="<%= ph.thumb %>" alt="" loading="lazy" width="180" height="180">
+              </button>
+            <% }); %>
+          </div>
+        <% } %>
+      </article>
+    <% }); %>
+  </div>
+
+  <%
+    /* The photo slideshow. Its slides are built by the script in
+       layouts/slou.ejs from the thumbnails of whichever product was clicked,
+       so one dialog serves every product. Arrows, the keyboard (← → Esc) and
+       swiping all move between photos. */
+  %>
+  <dialog class="xlight" id="xlight" aria-label="<%= t.xmas.photos %>">
+    <div class="xlight__stage">
+      <div class="xlight__track"></div>
+      <button type="button" class="xlight__nav xlight__prev" aria-label="‹">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button type="button" class="xlight__nav xlight__next" aria-label="›">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="xlight__bar">
+      <span class="xlight__count" aria-live="polite"></span>
+      <div class="xlight__dots"></div>
+      <button type="button" class="xlight__close" aria-label="<%= t.xmas.close %>">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  </dialog>
+</section>

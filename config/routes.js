@@ -40,6 +40,7 @@ module.exports.routes = {
   // POST both, so the key travels in the body and never in a URL.
   'POST /conversation':         'PagesController.conversation',
   'POST /conversation/message': 'PagesController.conversationMessage',
+  'POST /conversation/delete':  'PagesController.conversationDelete',
 
   // The orders page is deliberately NOT declared here. This file is committed
   // to a public repository, so any path written in it is published along with
