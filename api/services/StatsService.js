@@ -57,6 +57,18 @@ module.exports = {
   // list is mostly the same handful of visitors repeated, and the newest
   // genuinely different visitor can be pushed off the bottom of the page by a
   // single busy one.
+  // Page views, visits and time on site for the given `vid` cookies, read
+  // out of requests.log and times.log. -> { vid: activity } for each vid seen.
+  // See visitor_activity().
+  visitorActivity: function (vids) {
+    return visitor_activity(vids);
+  },
+
+  // Several vids of the same customer -> one activity, or null if none.
+  mergeActivity: function (list) {
+    return merge_activity(list);
+  },
+
   recentVisits: function (limit) {
     return recent_visits(limit);
   },
@@ -199,6 +211,8 @@ var ADMIN_ACTIONS = [
   'PagesController.orders',
   'PagesController.statistics',
   'PagesController.visits',
+  'PagesController.posts',
+  'PagesController.reply',
 ];
 
 // Computed once. The route table does not change while the process runs, and
@@ -268,7 +282,9 @@ function counts_as_visit(url) {
   if (!path) { return false; }
 
   if (path.indexOf('/language/') === 0) { return false; }
-  if (path === '/vplay') { return false; }
+  if (path === '/vplay' || path === '/vtime') { return false; }
+  // Background calls from the homepage's conversation box, not page views.
+  if (path.indexOf('/conversation') === 0) { return false; }
   if (admin_paths().indexOf(path) >= 0) { return false; }
 
   return true;
@@ -807,4 +823,120 @@ function video_plays() {
 
   rows.sort(function (a, b) { return b.plays - a.plays; });
   return rows;
+}
+
+
+// ---------------------------------------------------------------------------
+// One customer's activity (the conversations page)
+// ---------------------------------------------------------------------------
+
+// A gap longer than this between two page views starts a new visit — the
+// usual web-analytics session rule.
+var VISIT_GAP_MS = 30 * 60 * 1000;
+var MAX_VIEWS_SHOWN = 100;
+
+function entry_ms(e) {
+  return e.t + ((e.hour * 60 + e.min) * 60 + e.sec) * 1000;
+}
+
+function stamp(ms) {
+  var d = new Date(ms);
+  return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) +
+    ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+}
+
+// vids -> { vid: { views: [{ ms, url, from, place, device }], seconds } }.
+//
+// Reads the whole of requests.log (with rotations) once for all the vids on
+// the page, not once per conversation. Page views are filtered the way the
+// statistics count them: no admin pages, no language redirects, no beacons.
+function visitor_activity(vids) {
+  var want = Object.create(null);
+  (vids || []).forEach(function (v) { if (v) { want[v] = true; } });
+  var out = Object.create(null);
+  if (!Object.keys(want).length) { return out; }
+
+  function slot(vid) {
+    if (!out[vid]) { out[vid] = { views: [], seconds: 0 }; }
+    return out[vid];
+  }
+
+  var entries = [];
+  read_log_lines('requests.log').forEach(function (line) {
+    var parsed = parse_line(line);
+    if (!parsed) { return; }
+    var vid = field(parsed.payload, 'vid');
+    if (!want[vid]) { return; }
+    if (!counts_as_visit(field(parsed.payload, 'url'))) { return; }
+    parsed.vid = vid;
+    entries.push(parsed);
+  });
+  assign_years(entries);
+
+  entries.forEach(function (e) {
+    var city = dash(field(e.payload, 'city'));
+    var country = dash(field(e.payload, 'country'));
+    slot(e.vid).views.push({
+      ms: entry_ms(e),
+      url: dash(field(e.payload, 'url')),
+      method: dash(field(e.payload, 'method')),
+      from: dash(field(e.payload, 'from')),
+      place: country + (city !== '-' ? ' / ' + city : ''),
+      device: dash(field(e.payload, 'device')),
+    });
+  });
+
+  // times.log: `vid | seconds | path`
+  read_log_lines('times.log').forEach(function (line) {
+    var parsed = parse_line(line);
+    if (!parsed) { return; }
+    var parts = String(parsed.payload).split(' | ');
+    if (!want[parts[0]]) { return; }
+    var secs = parseInt(parts[1], 10);
+    if (secs > 0) { slot(parts[0]).seconds += secs; }
+  });
+
+  return out;
+}
+
+// -> { pageViews, visits, seconds, first, last, views: [row] (newest first) }
+function merge_activity(list) {
+  var views = [];
+  var seconds = 0;
+  var any = false;
+  (list || []).forEach(function (a) {
+    if (!a) { return; }
+    any = true;
+    views = views.concat(a.views);
+    seconds += a.seconds;
+  });
+  if (!any) { return null; }
+
+  views.sort(function (a, b) { return a.ms - b.ms; });
+
+  var visits = 0;
+  var prev = null;
+  views.forEach(function (v) {
+    if (prev === null || v.ms - prev > VISIT_GAP_MS) { visits++; v.newVisit = true; }
+    prev = v.ms;
+  });
+
+  return {
+    pageViews: views.length,
+    visits: visits,
+    seconds: seconds,
+    first: views.length ? stamp(views[0].ms) : '-',
+    last: views.length ? stamp(views[views.length - 1].ms) : '-',
+    views: views.slice(-MAX_VIEWS_SHOWN).reverse().map(function (v) {
+      return {
+        when: stamp(v.ms),
+        url: v.url,
+        method: v.method,
+        from: v.from,
+        place: v.place,
+        device: v.device,
+        newVisit: !!v.newVisit,
+      };
+    }),
+  };
 }

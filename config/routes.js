@@ -33,6 +33,13 @@ module.exports.routes = {
   'GET /language/:locale': 'PagesController.setLang',
   'POST /order':           'PagesController.createOrder',
   'POST /vplay':           'PagesController.videoPlay',
+  'POST /vtime':           'PagesController.visitTime',
+
+  // The customer's conversation with the shop, shown at the top of the
+  // homepage to whoever holds its key (kept in their browser's localStorage).
+  // POST both, so the key travels in the body and never in a URL.
+  'POST /conversation':         'PagesController.conversation',
+  'POST /conversation/message': 'PagesController.conversationMessage',
 
   // The orders page is deliberately NOT declared here. This file is committed
   // to a public repository, so any path written in it is published along with

@@ -11,20 +11,12 @@
 
 module.exports.bootstrap = async function() {
 
-  // By convention, this is a good place to set up fake data during development.
-  //
-  // For example:
-  // ```
-  // // Set up fake development data (or if we already have some, avast)
-  // if (await User.count() > 0) {
-  //   return;
-  // }
-  //
-  // await User.createEach([
-  //   { emailAddress: 'ry@example.com', fullName: 'Ryan Dahl', },
-  //   { emailAddress: 'rachael@example.com', fullName: 'Rachael Shaw', },
-  //   // etc.
-  // ]);
-  // ```
+  // "lifted on Master", the same line matchess prints, so a start is visibly
+  // a start. Printed on 'lifted' — after the port is bound, not merely when
+  // bootstrap runs — so seeing it means the site really answers. console.log
+  // rather than sails.log so no log level can hide it.
+  sails.on('lifted', function () {
+    console.log('lifted on Master  ->  http://localhost:' + sails.config.port);
+  });
 
 };

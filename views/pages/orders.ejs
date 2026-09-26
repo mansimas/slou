@@ -28,7 +28,7 @@
               <td><%= (orders.page * orders.per_page) + i + 1 %></td>
               <td class="nowrap"><%= o.when %></td>
               <td><%= o.name %></td>
-              <td><a class="inline" href="mailto:<%= o.email %>"><%= o.email %></a></td>
+              <td><% if (o.email && o.email !== '-') { %><a class="inline" href="mailto:<%= o.email %>"><%= o.email %></a><% } else { %>—<% } %></td>
               <td class="msg"><%= o.message %></td>
               <td><%= o.locale %></td>
             </tr>

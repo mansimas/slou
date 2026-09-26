@@ -60,7 +60,7 @@ module.exports.catalog = {
       slug: 'slim-wallet',
       price: 99,
       discount: 25,
-      video: 'korteline.mp4',
+      video: 'card_wallet.mp4',
       size: {
         lt: 'Dydis: 10 cm x 7.5 cm', en: 'Size: 10 cm x 7.5 cm', pt: 'Tamanho: 10 cm x 7,5 cm',
         fr: 'Taille : 10 cm x 7,5 cm', de: 'Größe: 10 cm x 7,5 cm', es: 'Tamaño: 10 cm x 7,5 cm', it: 'Dimensioni: 10 cm x 7,5 cm'

@@ -24,22 +24,16 @@ module.exports.log = {
   *                                                                          *
   ***************************************************************************/
 
-  // Only warnings and errors from Sails itself.
+  // The normal Sails startup output — "Server lifted", Environment, Port —
+  // but without the ASCII ship, the same as matchess. The level is left at
+  // Sails' default, so a lift says clearly that it worked and where.
   //
-  // Sails prints its startup banner — the ASCII ship, the rule, the timestamp,
-  // Environment, Port — with bare `sails.log(...)` calls (lib/app/lift.js),
-  // which is captains-log's DEBUG level. That was ~10 lines on every restart.
+  // It used to be 'warn', which hid "Server lifted" too and left a bare
+  // "Starting app..." that looked exactly like a hang.
   //
-  // 'warn' is the setting that removes them, not 'info'. captains-log ranks
-  // levels npm-style, where debug (3) sits ABOVE info (2) — see logLevels in
-  // captains-log/lib/defaults.js and the gate in lib/write.js — so 'info'
-  // shows debug as well, and is the default in any case.
-  //
-  // The cost is that `Server lifted in ...` goes quiet too. What this does NOT
-  // touch is the app's own output: [ORDER] and friends are console.log calls
-  // in the controller, not sails.log, so orders still print. That is the point
-  // — stdout becomes the order feed and nothing else.
-  level: 'warn',
+  // The app's own output ([ORDER], [MESSAGE] and friends) is console.log in
+  // the controller, not sails.log, so it prints whatever this is set to.
+  noShip: true,
 
   // Send `debug` to stdout instead of stderr.
   //

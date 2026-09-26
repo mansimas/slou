@@ -11,6 +11,39 @@
 %>
 <div class="wrap">
 
+  <%
+    /* The visitor's own conversation with the shop. Empty and hidden in the
+       HTML: the server does not know who is looking (no login, no session),
+       only the browser does — it holds the conversation's key in localStorage
+       from the order it placed. The script in layouts/slou.ejs fetches the
+       thread with that key and fills this in, so it sits at the very top for
+       anyone coming back to read the reply, and stays hidden for everyone
+       else. */
+  %>
+  <section class="convbox" id="conv" hidden
+           data-you="<%= t.conversation.you %>"
+           data-shop="<%= t.conversation.shop %>"
+           data-waiting="<%= t.conversation.waiting %>"
+           data-send="<%= t.conversation.send %>"
+           data-sending="<%= t.conversation.sending %>"
+           data-error="<%= t.conversation.error %>"
+           data-empty="<%= t.conversation.empty %>"
+           data-locale="<%= t.htmlLang %>">
+    <h2><%= t.conversation.title %></h2>
+    <p class="convbox__lead"><%= t.conversation.lead %></p>
+    <ol class="convlog" id="convLog" aria-live="polite"></ol>
+    <form id="convForm" novalidate>
+      <div class="field">
+        <label for="cMsg" class="sr-only"><%= t.conversation.placeholder %></label>
+        <textarea id="cMsg" name="message" maxlength="4000" required
+                  aria-describedby="cMsgErr"
+                  placeholder="<%= t.conversation.placeholder %>"></textarea>
+        <p class="field-err" id="cMsgErr" hidden></p>
+      </div>
+      <button type="submit" class="btn solid" id="cSubmit"><%= t.conversation.send %></button>
+    </form>
+  </section>
+
   <%- include('../partials/video-row', { featured: featured, t: t }) %>
 
   <section class="orderbox" id="order">
@@ -45,8 +78,9 @@
         </div>
         <div class="field">
           <label for="oEmail"><%= t.order.email %></label>
-          <input id="oEmail" name="email" type="email" pattern="[^@\s]+@[^@\s]+\.[A-Za-z]{2,}" required
-                 aria-describedby="oEmailErr">
+          <input id="oEmail" name="email" type="email" pattern="[^@\s]+@[^@\s]+\.[A-Za-z]{2,}"
+                 aria-describedby="oEmailHint oEmailErr">
+          <p class="field-hint" id="oEmailHint"><%= t.order.emailHint %></p>
           <p class="field-err" id="oEmailErr" hidden></p>
         </div>
       </div>

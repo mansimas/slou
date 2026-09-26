@@ -31,6 +31,9 @@ module.exports = {
   // Change the path by editing the line below; there is nothing else to update.
   routes: {
     'GET /eglei': 'PagesController.orders',
+    // Customer conversations, and the reply form on that page.
+    'GET /eposts': 'PagesController.posts',
+    'POST /eposts/reply': 'PagesController.reply',
     'GET /estats': 'PagesController.statistics',
     'GET /elist': 'PagesController.visits',
   },

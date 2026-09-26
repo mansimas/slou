@@ -1,0 +1,166 @@
+<article class="page page--wide">
+  <p class="kicker">SLOU</p>
+  <h1>Pokalbiai</h1>
+  <%
+    /* Pokalbiai su pirkėjais. Pirkėjas juos mato pagrindinio puslapio
+       viršuje (raktas saugomas jo naršyklėje), o čia į juos atsakoma.
+       „Laukia atsakymo“ — paskutinę žinutę parašė pirkėjas. Tokie pokalbiai
+       atskleisti iš karto, kiti suskleisti. */
+  %>
+  <%
+    // 75 -> "1 min 15 s", 3700 -> "1 val. 1 min".
+    function dur(secs) {
+      secs = secs || 0;
+      if (secs < 60) { return secs + ' s'; }
+      var h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), r = secs % 60;
+      return h ? (h + ' val. ' + m + ' min') : (m + ' min' + (r ? ' ' + r + ' s' : ''));
+    }
+    var langNames = { lt: 'lietuvių', en: 'anglų', pt: 'portugalų', fr: 'prancūzų', de: 'vokiečių', es: 'ispanų', it: 'italų' };
+  %>
+  <% var waitingCount = conversations.filter(function (c) { return c.waiting; }).length; %>
+  <p class="posts-count">Iš viso: <strong><%= conversations.length %></strong><% if (waitingCount) { %> · laukia atsakymo: <strong class="conv-wait-count"><%= waitingCount %></strong><% } %>.</p>
+
+  <% if (!conversations.length) { %>
+    <p style="color:var(--muted);">Kol kas nėra nė vieno pokalbio.</p>
+  <% } %>
+  <div class="aconvs">
+    <% conversations.forEach(function (c) { %>
+      <details class="aconv<%= c.waiting ? ' aconv--waiting' : '' %>" id="c-<%= c.id %>"<%= c.waiting ? ' open' : '' %>>
+        <summary>
+          <span class="aconv__name"><%= c.name %></span>
+          <% if (c.email) { %><a class="inline" href="mailto:<%= c.email %>"><%= c.email %></a><% } %>
+          <span class="aconv__meta"><%= c.locale %> · <%= c.messages.length %> žin. · <%= new Date(c.updated).toLocaleString('lt-LT') %></span>
+          <% if (c.waiting) { %><span class="aconv__badge">Laukia atsakymo</span><% } %>
+        </summary>
+        <%
+          /* Kas rašė: vieta ir įrenginys užfiksuoti užsakymo metu; kalbos —
+             svetainės kalba, kurią jis pasirinko, ir naršyklės kalba;
+             apsilankymai ir laikas — iš logs/requests.log ir logs/times.log
+             pagal jo `vid` slapuką. Senesni pokalbiai (sukurti prieš šią
+             funkciją) šių duomenų neturi. */
+          var v = c.visitor, a = c.activity;
+        %>
+        <div class="aposter">
+          <div class="aposter__item"><span>Vieta</span><%= v ? (v.country + (v.city && v.city !== '-' ? ' / ' + v.city : '') + (v.region && v.region !== '-' ? ' (' + v.region + ')' : '')) : '—' %></div>
+          <div class="aposter__item"><span>Svetainės kalba</span><%= c.locale ? (c.locale.toUpperCase() + (langNames[c.locale] ? ' · ' + langNames[c.locale] : '')) : '—' %></div>
+          <div class="aposter__item"><span>Naršyklės kalba</span><%= v ? v.lang : '—' %></div>
+          <div class="aposter__item"><span>Laikas svetainėje</span><%= a ? dur(a.seconds) : '—' %></div>
+          <div class="aposter__item"><span>Įrenginys</span><%= v ? (v.device + ' · ' + v.os + ' · ' + v.browser) : '—' %></div>
+          <div class="aposter__item"><span>IP</span><%= v ? v.ip : '—' %></div>
+          <% if (a) { %>
+            <button type="button" class="btn aposter__btn" data-dialog="v-<%= c.id %>">Apsilankymai: <%= a.visits %></button>
+          <% } %>
+        </div>
+
+        <% if (a) { %>
+          <dialog class="avisits" id="v-<%= c.id %>">
+            <div class="avisits__head">
+              <h3><%= c.name %> — apsilankymai</h3>
+              <button type="button" class="avisits__close" aria-label="Uždaryti">×</button>
+            </div>
+            <div class="avisits__sum">
+              <div><strong><%= a.visits %></strong><span>apsilankymai</span></div>
+              <div><strong><%= a.pageViews %></strong><span>peržiūros</span></div>
+              <div><strong><%= dur(a.seconds) %></strong><span>laikas svetainėje</span></div>
+            </div>
+            <p class="avisits__range">Pirmas: <%= a.first %> · Paskutinis: <%= a.last %></p>
+            <div class="avisits__scroll">
+              <table class="avisits__table">
+                <thead><tr><th>Laikas</th><th>Puslapis</th><th>Vieta</th><th>Įrenginys</th><th>Iš kur</th></tr></thead>
+                <tbody>
+                  <% a.views.forEach(function (row) { %>
+                    <tr class="<%= row.newVisit ? 'is-new-visit' : '' %>">
+                      <td class="nowrap"><%= row.when %></td>
+                      <td><%= row.method !== 'GET' && row.method !== '-' ? row.method + ' ' : '' %><%= row.url %></td>
+                      <td class="nowrap"><%= row.place %></td>
+                      <td><%= row.device %></td>
+                      <td class="from"><%= row.from %></td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+            <p class="avisits__note">Naujas apsilankymas prasideda po 30 min. pertraukos (paryškinta linija). Rodoma iki 100 naujausių peržiūrų.</p>
+          </dialog>
+        <% } %>
+
+        <ol class="aconv__log">
+          <% c.messages.forEach(function (m) { %>
+            <li class="amsg amsg--<%= m.from === 'shop' ? 'shop' : 'customer' %>">
+              <div class="amsg__who"><%= m.from === 'shop' ? 'SLOU' : c.name %> · <%= new Date(m.at).toLocaleString('lt-LT') %></div>
+              <div class="amsg__text"><%= m.text %></div>
+            </li>
+          <% }); %>
+        </ol>
+        <form method="post" action="/eposts/reply" class="aconv__reply">
+          <input type="hidden" name="id" value="<%= c.id %>">
+          <textarea name="message" maxlength="4000" required placeholder="Atsakymas pirkėjui…"></textarea>
+          <button type="submit" class="btn solid">Atsakyti</button>
+        </form>
+      </details>
+    <% }); %>
+  </div>
+
+</article>
+
+<script>
+  // Mygtukas „Apsilankymai“ atidaro savo <dialog>; uždaroma × mygtuku,
+  // Escape klavišu arba paspaudus už lango ribų.
+  (function () {
+    document.querySelectorAll('[data-dialog]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var d = document.getElementById(btn.getAttribute('data-dialog'));
+        if (d && d.showModal) { d.showModal(); }
+      });
+    });
+    document.querySelectorAll('dialog.avisits').forEach(function (d) {
+      d.querySelector('.avisits__close').addEventListener('click', function () { d.close(); });
+      d.addEventListener('click', function (e) { if (e.target === d) { d.close(); } });
+    });
+  })();
+</script>
+
+<style>
+  /* Informacija apie rašiusįjį */
+  .aposter { display: flex; flex-wrap: wrap; gap: 8px 22px; align-items: flex-end; padding: 4px 16px 12px; margin-bottom: 8px; border-bottom: 1px dashed var(--line); font-size: 13.5px; }
+  .aposter__item span { display: block; font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .aposter__btn { padding: 7px 14px; font-size: 11px; margin-left: auto; }
+
+  /* Apsilankymų langas */
+  dialog.avisits { width: min(860px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); }
+  dialog.avisits::backdrop { background: rgba(41,36,31,.45); }
+  .avisits__head { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px 8px; }
+  .avisits__head h3 { font-size: 18px; font-weight: 600; margin: 0; }
+  .avisits__close { border: none; background: none; font-size: 26px; line-height: 1; cursor: pointer; color: var(--muted); padding: 0 4px; }
+  .avisits__sum { display: flex; gap: 12px; padding: 4px 20px 6px; flex-wrap: wrap; }
+  .avisits__sum div { flex: 1 1 120px; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; }
+  .avisits__sum strong { display: block; font-size: 24px; font-weight: 600; }
+  .avisits__sum span { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .avisits__range, .avisits__note { padding: 4px 20px; font-size: 12.5px; color: var(--muted); margin: 0; }
+  .avisits__note { padding-bottom: 16px; }
+  .avisits__scroll { overflow: auto; max-height: 50vh; margin: 8px 20px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  .avisits__table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .avisits__table th, .avisits__table td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .avisits__table th { position: sticky; top: 0; background: var(--paper-2, #efe6d6); font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+  .avisits__table td.from { max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
+  .avisits__table tr.is-new-visit td { border-top: 2px solid var(--leather); }
+
+  .page--wide { max-width: 900px; }
+  /* Pokalbiai */
+  .aconvs { display: flex; flex-direction: column; gap: 10px; margin: 14px 0 10px; }
+  .aconv { border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+  .aconv--waiting { border-color: var(--leather); }
+  .aconv > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+  .aconv__name { font-weight: 600; }
+  .aconv__meta { color: var(--muted); font-size: 13px; }
+  .aconv__badge { font-size: 11px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: var(--leather); color: #f7f1e6; }
+  .conv-wait-count { color: var(--leather-dark); }
+  .aconv__log { list-style: none; margin: 0; padding: 4px 16px 0; display: flex; flex-direction: column; gap: 8px; }
+  .amsg { max-width: 85%; padding: 9px 13px; border-radius: 10px; border: 1px solid var(--line); background: #fff; }
+  .amsg--shop { align-self: flex-end; background: #efe4d2; border-color: #e2d3bb; }
+  .amsg__who { font-size: 11.5px; color: var(--muted); margin-bottom: 2px; }
+  .amsg__text { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14.5px; }
+  .aconv__reply { padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .aconv__reply textarea { width: 100%; min-height: 80px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 2px; background: #fff; font: inherit; font-size: 14.5px; resize: vertical; }
+
+</style>

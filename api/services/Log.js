@@ -10,6 +10,7 @@
  *   Log.order(msg, ...)   -> logs/orders.log     every submitted order form
  *   Log.contact(msg, ...) -> logs/contacts.log   non-order enquiries
  *   Log.req(msg, ...)     -> logs/requests.log   page hits
+ *   Log.time(msg, ...)    -> logs/times.log      seconds a visitor spent on a page
  *   Log.err(msg, ...)     -> logs/errors.log     anything that threw
  *
  * The rules that matter when adding a channel:
@@ -50,6 +51,13 @@ var Log = {
     return video(msg, rest_params);
   },
 
+  // Time spent on a page, reported by the browser when the tab is hidden or
+  // closed: `vid | seconds | path`. Summed per visitor on the conversations
+  // page.
+  time: function (msg, ...rest_params) {
+    return time(msg, rest_params);
+  },
+
   // Scanner probes refused at the door. Rare and interesting, unlike the
   // UA-based refusals, which are constant and deliberately not logged.
   blocked: function (msg, ...rest_params) {
@@ -87,6 +95,10 @@ function visit(msg, rest_params) {
 
 function video(msg, rest_params) {
   do_log('logs/videos.log', msg, 'info', '', rest_params);
+}
+
+function time(msg, rest_params) {
+  do_log('logs/times.log', msg, 'info', '', rest_params);
 }
 
 function blocked(msg, rest_params) {

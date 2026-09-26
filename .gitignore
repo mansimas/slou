@@ -170,3 +170,15 @@ www
 
 logs/*.log
 logs/*.log.*
+
+
+################################################
+# Customer conversations
+#
+# data/conversations/ holds each customer thread
+# (names, emails, messages) written by
+# api/services/ConversationService.js. Like the
+# order log, it belongs on the server only.
+################################################
+
+data/
