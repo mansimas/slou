@@ -166,10 +166,16 @@ www
 # logs/orders.log is the live record of customer
 # orders — real names and email addresses. It
 # belongs on the server, never in the repo.
+#
+# Everything in logs/ is ignored, not just
+# *.log: rotated files, pm2 output or anything
+# else a process drops in here showed up as
+# untracked on the server. Only .gitkeep is
+# tracked, so the folder exists on a fresh clone.
 ################################################
 
-logs/*.log
-logs/*.log.*
+logs/*
+!logs/.gitkeep
 
 
 ################################################
