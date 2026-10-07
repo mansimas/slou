@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-07 13:12] - Restart script reloads slou - package.json: new scripts.restart = sails www --prod && pm2 reload slou, so rr / npm run restart touches only slou on the shared pm2 box
 
 [2026-08-25 19:45] - Normalise admin exclusion - Admin pages still showed on /elist: paths were compared raw, so /estats?x=1 and /estats/ slipped past. Query strings and trailing slashes are now stripped before comparing, and the paths come from the live route table. Any other page still counts, so new links need no change.
 [2026-08-25 19:30] - Count video plays - The player posts to /vplay when a clip starts, from start() so pressing play and clicking the clip both count. /estats gains a table of plays per clip: today, 7 days and total, unplayed clips included. Slug is checked against the catalogue; the beacon is exempt from rate limiting.
