@@ -309,7 +309,16 @@
   // where the ends are cut and melted flush on the back
   var meltMat = new THREE.MeshStandardMaterial({ roughness: 0.3 });
   var meltGeo = new THREE.SphereGeometry(0.05, 12, 8);
-  var holeMat = new THREE.MeshStandardMaterial({ roughness: 1 });
+  // Stitch slit: a narrow dark cut, darkest in the middle and fading at its
+  // rim, so it reads as an opening in the leather, not a flat shape on top.
+  var slitAlpha = (function () {
+    var c = document.createElement('canvas'); c.width = c.height = 64;
+    var g = c.getContext('2d'), grad = g.createRadialGradient(32, 32, 4, 32, 32, 32);
+    grad.addColorStop(0, '#fff'); grad.addColorStop(0.55, '#bbb'); grad.addColorStop(1, '#000');
+    g.fillStyle = grad; g.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(c);
+  })();
+  var holeMat = new THREE.MeshStandardMaterial({ roughness: 1, alphaMap: slitAlpha, transparent: true, depthWrite: false, side: THREE.DoubleSide });
   var ringMat = new THREE.MeshStandardMaterial({ metalness: 1, roughness: 0.22 });
   var RINGS = { silver: ['#d8d8dc', 0.22], brass: ['#c9a04a', 0.28], black: ['#1d1d1f', 0.45] };
 
@@ -320,7 +329,8 @@
     edgeMat.color.copy(c).multiplyScalar(0.55);
     threadMat.color.set(state.thread);
     meltMat.color.set(state.thread).multiplyScalar(0.8);
-    holeMat.color.copy(c).multiplyScalar(0.25);
+    holeMat.color.copy(c).multiplyScalar(0.12);
+    dimpleMat.color.copy(c).multiplyScalar(0.3);
     ringMat.color.set(RINGS[state.ring][0]);
     ringMat.roughness = RINGS[state.ring][1];
   }
@@ -369,18 +379,36 @@
   // leather with a round cap.
   var stitchLen = 0.2 + 0.08;
   var stitchGeo = new THREE.CylinderGeometry(0.04, 0.04, stitchLen, 10, 28, true);
+  // Every stitch meets its slit at the same angle (the lean and the slit are
+  // both set off the stitch chord), front and mirrored back alike. Work it
+  // out once for a straight run, as the end's sideways slope in the strand's
+  // own (unscaled) units.
+  var endTurn = (function () {
+    var sl = slit({ x: 1, y: 0 }, 1);
+    var ux = STITCH_PITCH - 2 * SLIT_HALF * sl.x, uy = -2 * SLIT_HALF * sl.y, L = Math.hypot(ux, uy);
+    ux /= L; uy /= L;
+    var xl = sl.x * uy - sl.y * ux, yl = sl.x * ux + sl.y * uy;   // slit in the strand's frame
+    var sx = 1.3, sy = (L + 0.08) / stitchLen;                     // the usual instance scale
+    return (xl / yl) * (sy / sx);
+  })();
   (function () {
     var pos = stitchGeo.attributes.position, uv = stitchGeo.attributes.uv, half = stitchLen / 2;
     for (var k = 0; k < pos.count; k++) {
       var y = pos.getY(k), t = Math.abs(y) / half;
       // even v along the length, for the ply twist
       uv.setY(k, y / stitchLen + 0.5);
-      // round taper over the last 30%, closing to a thin tip
-      var c = Math.max(0, (t - 0.7) / 0.3), f = Math.sqrt(Math.max(0.04, 1 - c * c));
-      // dive: from 45% of the way out, ends curve down into the hole
-      var dv = Math.max(0, (t - 0.45) / 0.55);
-      pos.setX(k, pos.getX(k) * f);
-      pos.setZ(k, pos.getZ(k) * f - 0.07 * dv * dv);
+      // narrows over the last 40% as it tucks into the slit, closing to a tip
+      var c = Math.max(0, (t - 0.55) / 0.45), f = 0.5 + 0.5 * Math.sqrt(Math.max(0, 1 - c * c));
+      // the last 8% closes as a small dome: a rounded tip, neither pointed nor cut flat
+      var e = Math.max(0, (t - 0.92) / 0.08); f *= Math.sqrt(Math.max(0, 1 - e * e));
+      // dive: only the last stretch curves down, after the thread has
+      // narrowed, going under right at the slit: pulled into the hole
+      var dv = Math.max(0, (t - 0.82) / 0.18);
+      // turn: the end curves sideways until, at the tip, it runs
+      // along the slit's line, so the thread enters the cut lengthwise
+      var bt = Math.max(0, Math.abs(y) - half * 0.55), span = half * 0.45;
+      pos.setX(k, pos.getX(k) * f + endTurn * Math.sign(y) * bt * bt / (2 * span));
+      pos.setZ(k, pos.getZ(k) * f - 0.06 * dv * dv);
     }
     stitchGeo.computeVertexNormals();
   })();
@@ -388,7 +416,10 @@
   // local -z (where the ends dive) points into the leather there too.
   var flipBack = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
   // The diamond chisel hole showing at each end of a stitch.
-  var holeGeo = new THREE.BoxGeometry(0.05, 0.05, 0.01).rotateZ(Math.PI / 4);
+  var holeGeo = new THREE.CircleGeometry(0.035, 24);   // scaled into a slim slot per hole
+  // soft shadow round each hole: the leather pressed in where the thread is
+  // pulled tight into it
+  var dimpleMat = new THREE.MeshStandardMaterial({ roughness: 1, alphaMap: slitAlpha, transparent: true, opacity: 0.65, depthWrite: false, side: THREE.DoubleSide });
 
   // Hole positions along a closed outline, spaced like walking dividers along
   // it: every hole is the same straight distance from the previous one, so
@@ -504,6 +535,7 @@
     var stitches = new THREE.InstancedMesh(stitchGeo, threadMat, n * 2 + OVERLAP * 4);
     var extra = n * 2;   // next free instance: 2 threads x 2 faces per joint stitch
     var holes = new THREE.InstancedMesh(holeGeo, holeMat, n * 2);
+    var dimples = new THREE.InstancedMesh(holeGeo, dimpleMat, n * 2);
     var m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), zAxis = new THREE.Vector3(0, 0, 1);
     var from = new THREE.Vector3(), to = new THREE.Vector3(), dir = new THREE.Vector3();
     var pos = new THREE.Vector3(), scl = new THREE.Vector3();
@@ -556,9 +588,10 @@
           m.makeScale(0, 0, 0);   // replaced by the two threads below
           var inward = new THREE.Vector3(-d.y, d.x, 0);   // outline runs CCW
           [[0, 0], [JOINT_GAP, side * 0.004]].forEach(function (t) {
-            // the second also slides a little along the line (down the left
-            // side), nearly touching the next stitch
-            var along = new THREE.Vector3(d.x, d.y, 0).multiplyScalar(t[0] ? JOINT_DROP : 0);
+            // the second also slides a little along the line, nearly touching
+            // the next stitch: down the left side on the front; mirrored on
+            // the back, where the stitches lean the other way
+            var along = new THREE.Vector3(d.x, d.y, 0).multiplyScalar(t[0] ? JOINT_DROP * side : 0);
             var fa = from.clone().addScaledVector(inward, t[0]).add(along);
             var tb = to.clone().addScaledVector(inward, t[0]).add(along);
             var td = tb.clone().sub(fa), tl = td.length();
@@ -579,9 +612,13 @@
         scl.set(0.7, inJoint ? 2.8 : 1.9, 1);
         m.compose(pos, q, scl);
         holes.setMatrixAt(k * 2 + i, m);
+        pos.setZ(z + side * 0.001);
+        scl.set(2.6, inJoint ? 4.2 : 3.4, 1);
+        m.compose(pos, q, scl);
+        dimples.setMatrixAt(k * 2 + i, m);
       });
     }
-    fob.add(holes, stitches);
+    fob.add(dimples, holes, stitches);
     [OVERLAP - 1, OVERLAP].forEach(function (j) {
       var p = holesAt[(E + j) % n], d = chords[(E + j) % n];
       var melt = new THREE.Mesh(meltGeo, meltMat);
