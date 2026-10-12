@@ -398,9 +398,9 @@
       // even v along the length, for the ply twist
       uv.setY(k, y / stitchLen + 0.5);
       // narrows over the last 40% as it tucks into the slit, closing to a tip
-      var c = Math.max(0, (t - 0.55) / 0.45), f = 0.5 + 0.5 * Math.sqrt(Math.max(0, 1 - c * c));
-      // the last 8% closes as a small dome: a rounded tip, neither pointed nor cut flat
-      var e = Math.max(0, (t - 0.92) / 0.08); f *= Math.sqrt(Math.max(0, 1 - e * e));
+      var c = Math.max(0, (t - 0.75) / 0.25), f = 0.75 + 0.25 * Math.sqrt(Math.max(0, 1 - c * c));
+      // the last 4% closes as a small dome: a rounded tip, neither pointed nor cut flat
+      var e = Math.max(0, (t - 0.96) / 0.04); f *= Math.sqrt(Math.max(0, 1 - e * e));
       // dive: only the last stretch curves down, after the thread has
       // narrowed, going under right at the slit: pulled into the hole
       var dv = Math.max(0, (t - 0.82) / 0.18);
