@@ -224,6 +224,14 @@ module.exports = {
     });
   },
 
+  editor: function (req, res) {
+    return res.view('pages/editor', {
+      layout: 'layouts/slou',
+      active: 'editor',
+      pageTitle: res.locals.t.editor.pageTitle,
+    });
+  },
+
   product: function (req, res) {
     var product = localizedProducts(res.locals.locale).find(function (p) {
       return p.slug === req.param('slug');

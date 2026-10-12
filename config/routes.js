@@ -35,6 +35,9 @@ module.exports.routes = {
   'POST /vplay':           'PagesController.videoPlay',
   'POST /vtime':           'PagesController.visitTime',
 
+  // 3D keyfob designer (three.js, loaded from a CDN by the view itself).
+  'GET /editor':           'PagesController.editor',
+
   // The customer's conversation with the shop, shown at the top of the
   // homepage to whoever holds its key (kept in their browser's localStorage).
   // POST both, so the key travels in the body and never in a URL.
