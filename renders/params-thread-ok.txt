@@ -1,0 +1,23 @@
+  154:  var STITCH_PITCH = 0.385;    // saddle stitch, 3.85 mm diamond chisel spacing
+  158:  var SLIT_ANGLE = 45 * Math.PI / 180;
+  159:  var SLIT_HALF = 0.05;
+  387:  var THREAD_R = 0.0275;   // the owner sews with 0.55 mm thread
+  392:  var TURN = 0.2;
+  444:    var s = new THREE.Shape(), L = 0.06, W = 0.017, TIP = 0.02;
+      // which is about the thread's own thickness. Deepen it (it was 1.1 mm)
+      // and the cord disappears at every hole, so the run reads as separate
+      // pieces with bare leather between instead of one continuous thread; the
+      // owner's own work keeps the thread visible through the dip.
+      var dv = Math.max(0, (t - 0.72) / 0.28);
+      pos.setZ(k, pos.getZ(k) * f - 0.055 * dv * dv);
+    }
+        // piece. Running hole centre to hole centre instead lands the ends on
+        // the holes but straightens the run; the owner wants the slant, so the
+        // ends stay on the tips.
+        from.set(a.x + sl.x * SLIT_HALF, a.y + sl.y * SLIT_HALF, 0);
+        to.set(b.x - sl.x * SLIT_HALF, b.y - sl.y * SLIT_HALF, 0);
+        // the same hole. Round in section (1.05 x 0.9), not the flat ribbon it
+        // was, and a touch sunk, so it sits on the leather rather than on top of
+        // it — a waxed thread pulled tight spreads into the grain.
+        scl.set(1, (len + 0.07) / stitchLen, 1);
+        if (!doubled) {

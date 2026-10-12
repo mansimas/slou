@@ -305,12 +305,14 @@
     tex.colorSpace = THREE.SRGBColorSpace;
     return tex;
   })();
-  var threadMat = new THREE.MeshStandardMaterial({ roughness: 0.5, map: plyTex, bumpMap: plyTex, bumpScale: 0.6 });
+  // A waxed thread: the ply twist is there but shallow. At bumpScale 0.6 it read
+  // as a twisted rope rather than a smooth cord.
+  var threadMat = new THREE.MeshStandardMaterial({ roughness: 0.5, map: plyTex, bumpMap: plyTex, bumpScale: 0.25 });
   // where the ends are cut and melted flush on the back
   var meltMat = new THREE.MeshStandardMaterial({ roughness: 0.3 });
   var meltGeo = new THREE.SphereGeometry(0.05, 12, 8);
-  // Stitch slit: a narrow dark cut, darkest in the middle and fading at its
-  // rim, so it reads as an opening in the leather, not a flat shape on top.
+  // The leather pressed in around a hole: soft, because it is not a shape on
+  // the grain but the grain being pulled down towards the cut.
   var slitAlpha = (function () {
     var c = document.createElement('canvas'); c.width = c.height = 64;
     var g = c.getContext('2d'), grad = g.createRadialGradient(32, 32, 4, 32, 32, 32);
@@ -318,7 +320,9 @@
     g.fillStyle = grad; g.fillRect(0, 0, 64, 64);
     return new THREE.CanvasTexture(c);
   })();
-  var holeMat = new THREE.MeshStandardMaterial({ roughness: 1, alphaMap: slitAlpha, transparent: true, depthWrite: false, side: THREE.DoubleSide });
+  // The cut itself is solid, not a gradient: an iron cuts the leather rather
+  // than denting it, so the slit stays dark and sharp-edged at any zoom.
+  var holeMat = new THREE.MeshStandardMaterial({ color: 0x120b06, roughness: 0.9, side: THREE.DoubleSide });
   var ringMat = new THREE.MeshStandardMaterial({ metalness: 1, roughness: 0.22 });
   var RINGS = { silver: ['#d8d8dc', 0.22], brass: ['#c9a04a', 0.28], black: ['#1d1d1f', 0.45] };
 
@@ -374,11 +378,21 @@
 
   // One saddle stitch: a plump waxed-thread strand along Y, 0.28 long. Built
   // from a finely ringed cylinder so its shape can be set along the length:
-  // full round in the middle, tapering at the ends, and the ends bending down
-  // (local -z) so the thread dives into its hole instead of resting on the
-  // leather with a round cap.
+  // round in the middle, narrowing a little towards the ends, and each end
+  // bending down (local -z) into the slit it came through, the way thread does
+  // when it is drawn into a hole. It does not lean sideways on the way in: a
+  // stitch swung round to the slit's own angle crosses the next stitch in the
+  // hole, and the two read as tangled rather than sewn.
   var stitchLen = 0.2 + 0.08;
-  var stitchGeo = new THREE.CylinderGeometry(0.04, 0.04, stitchLen, 10, 28, true);
+  var THREAD_R = 0.0275;   // the owner sews with 0.55 mm thread
+  // How far the thread turns towards the slit on the way in, as a fraction of
+  // the slit's own angle. This is the "curl" dial, and the owner wants it low:
+  // the end should drop into the cut, not hook round towards the centre. At 1
+  // the ends hook visibly; at 0.2 they barely turn and just drop.
+  var TURN = 0.2;
+  // capped, not open: the ends are buried, but where the cord crosses the grain
+  // an open tube showed its dark inside as a hole at the end of every stitch
+  var stitchGeo = new THREE.CylinderGeometry(THREAD_R, THREAD_R, stitchLen, 10, 28, false);
   // Every stitch meets its slit at the same angle (the lean and the slit are
   // both set off the stitch chord), front and mirrored back alike. Work it
   // out once for a straight run, as the end's sideways slope in the strand's
@@ -388,7 +402,7 @@
     var ux = STITCH_PITCH - 2 * SLIT_HALF * sl.x, uy = -2 * SLIT_HALF * sl.y, L = Math.hypot(ux, uy);
     ux /= L; uy /= L;
     var xl = sl.x * uy - sl.y * ux, yl = sl.x * ux + sl.y * uy;   // slit in the strand's frame
-    var sx = 1.3, sy = (L + 0.08) / stitchLen;                     // the usual instance scale
+    var sx = 1, sy = (L + 0.07) / stitchLen;                    // the usual instance scale
     return (xl / yl) * (sy / sx);
   })();
   (function () {
@@ -397,29 +411,51 @@
       var y = pos.getY(k), t = Math.abs(y) / half;
       // even v along the length, for the ply twist
       uv.setY(k, y / stitchLen + 0.5);
-      // narrows over the last 40% as it tucks into the slit, closing to a tip
-      var c = Math.max(0, (t - 0.75) / 0.25), f = 0.75 + 0.25 * Math.sqrt(Math.max(0, 1 - c * c));
-      // the last 4% closes as a small dome: a rounded tip, neither pointed nor cut flat
-      var e = Math.max(0, (t - 0.96) / 0.04); f *= Math.sqrt(Math.max(0, 1 - e * e));
-      // dive: only the last stretch curves down, after the thread has
-      // narrowed, going under right at the slit: pulled into the hole
-      var dv = Math.max(0, (t - 0.82) / 0.18);
-      // turn: the end curves sideways until, at the tip, it runs
-      // along the slit's line, so the thread enters the cut lengthwise
-      var bt = Math.max(0, Math.abs(y) - half * 0.55), span = half * 0.45;
-      pos.setX(k, pos.getX(k) * f + endTurn * Math.sign(y) * bt * bt / (2 * span));
-      pos.setZ(k, pos.getZ(k) * f - 0.06 * dv * dv);
+      // Keeps its thickness the whole way in. A 0.55 mm thread is not squeezed
+      // through a 1.5 mm cut, and any real taper here is seen from the side as a
+      // cone driving into the hole — which is what this looked like at 30% over
+      // the outer half. What is left is barely a shave, at the very end.
+      var c = Math.max(0, (t - 0.7) / 0.3), f = 1 - 0.08 * Math.sin(c * Math.PI / 2);
+      // turn: only a hair of sideways lean on the way in. At the slit's full
+      // angle the two threads that meet in a hole swing across each other
+      var bt = Math.max(0, Math.abs(y) - half * 0.58), span = half * 0.42;
+      pos.setX(k, pos.getX(k) * f + endTurn * TURN * Math.sign(y) * bt * bt / (2 * span));
+      // dive: a shallow, even dip into each hole — 0.55 mm over the outer 28%,
+      // which is about the thread's own thickness. Deepen it (it was 1.1 mm)
+      // and the cord disappears at every hole, so the run reads as separate
+      // pieces with bare leather between instead of one continuous thread; the
+      // owner's own work keeps the thread visible through the dip.
+      var dv = Math.max(0, (t - 0.72) / 0.28);
+      pos.setZ(k, pos.getZ(k) * f - 0.025 * dv * dv);
     }
     stitchGeo.computeVertexNormals();
   })();
   // Back-face stitches are turned half a turn about their own axis, so their
   // local -z (where the ends dive) points into the leather there too.
   var flipBack = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
-  // The diamond chisel hole showing at each end of a stitch.
-  var holeGeo = new THREE.CircleGeometry(0.035, 24);   // scaled into a slim slot per hole
+  // The slit a pricking iron cuts, seen from above, leaning at SLIT_ANGLE to
+  // the stitch line. Off a pricked sample at this same 3.85 mm spacing the dark
+  // mark is a blunt chip: nearly parallel sides with only the corners knocked
+  // off, about 1.5 mm long and 0.5 mm wide. A pricking iron is a flat chisel —
+  // the cut it leaves is a slot, not a lens, and a lens (two curves meeting at
+  // points, which is what this was) narrows to a needle at both ends and reads
+  // as a scratch rather than a cut.
+  var holeGeo = (function () {
+    var s = new THREE.Shape(), L = 0.06, W = 0.017, TIP = 0.02;
+    s.moveTo(0, -L);
+    s.lineTo(W, -L + TIP);
+    s.lineTo(W, L - TIP);
+    s.lineTo(0, L);
+    s.lineTo(-W, L - TIP);
+    s.lineTo(-W, -L + TIP);
+    s.closePath();
+    return new THREE.ShapeGeometry(s, 24);
+  })();
+  // what is left of the old blob: the shadow of grain pressed in round a slit
+  var dimpleGeo = new THREE.CircleGeometry(0.035, 24);
   // soft shadow round each hole: the leather pressed in where the thread is
   // pulled tight into it
-  var dimpleMat = new THREE.MeshStandardMaterial({ roughness: 1, alphaMap: slitAlpha, transparent: true, opacity: 0.65, depthWrite: false, side: THREE.DoubleSide });
+  var dimpleMat = new THREE.MeshStandardMaterial({ roughness: 1, alphaMap: slitAlpha, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide });
 
   // Hole positions along a closed outline, spaced like walking dividers along
   // it: every hole is the same straight distance from the previous one, so
@@ -535,7 +571,7 @@
     var stitches = new THREE.InstancedMesh(stitchGeo, threadMat, n * 2 + OVERLAP * 4);
     var extra = n * 2;   // next free instance: 2 threads x 2 faces per joint stitch
     var holes = new THREE.InstancedMesh(holeGeo, holeMat, n * 2);
-    var dimples = new THREE.InstancedMesh(holeGeo, dimpleMat, n * 2);
+    var dimples = new THREE.InstancedMesh(dimpleGeo, dimpleMat, n * 2);
     var m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), zAxis = new THREE.Vector3(0, 0, 1);
     var from = new THREE.Vector3(), to = new THREE.Vector3(), dir = new THREE.Vector3();
     var pos = new THREE.Vector3(), scl = new THREE.Vector3();
@@ -567,15 +603,28 @@
       [1, -1].forEach(function (side, i) {
         var z = side * zTop;
         var sl = slit(d, side), sh = slit(dh, side);
+        // The strand runs between the slit *tips*, which puts each end ~0.4 mm
+        // to the side of its hole — and that same offset is what tilts the
+        // stitch line ~13° off the row of holes, as measured on the owner's own
+        // piece. Running hole centre to hole centre instead lands the ends on
+        // the holes but straightens the run; the owner wants the slant, so the
+        // ends stay on the tips.
         from.set(a.x + sl.x * SLIT_HALF, a.y + sl.y * SLIT_HALF, 0);
         to.set(b.x - sl.x * SLIT_HALF, b.y - sl.y * SLIT_HALF, 0);
         dir.subVectors(to, from);
         var len = dir.length(); dir.normalize();
-        // thread sits half sunk into the grain
-        pos.addVectors(from, to).multiplyScalar(0.5).setZ(z - side * 0.012);
+        // The thread rides in the grain about 40% of its thickness, not 77%:
+        // it was sunk to suit the old 0.8 mm cord, and at 0.55 mm that left a
+        // flat sliver showing instead of a rounded cord.
+        pos.addVectors(from, to).multiplyScalar(0.5).setZ(z + side * 0.005);
         q.setFromUnitVectors(up, dir);
         if (side < 0) { q.multiply(flipBack); }
-        scl.set(1.3, (len + 0.08) / stitchLen, 0.8);
+        // the strand reaches 0.02 past each slit's inner end: just far enough
+        // that its end is inside the cut, no further, or two stitches overlap in
+        // the same hole. Round in section (1.05 x 0.9), not the flat ribbon it
+        // was, and a touch sunk, so it sits on the leather rather than on top of
+        // it — a waxed thread pulled tight spreads into the grain.
+        scl.set(1, (len + 0.07) / stitchLen, 1);
         if (!doubled) {
           m.compose(pos, q, scl);
         } else {
@@ -596,9 +645,9 @@
             var tb = to.clone().addScaledVector(inward, t[0]).add(along);
             var td = tb.clone().sub(fa), tl = td.length();
             var tm = new THREE.Matrix4().compose(
-              fa.clone().add(tb).multiplyScalar(0.5).setZ(z - side * 0.012 + t[1]),
+              fa.clone().add(tb).multiplyScalar(0.5).setZ(z + side * 0.005 + t[1]),
               new THREE.Quaternion().setFromUnitVectors(up, td.normalize()).multiply(side < 0 ? flipBack : new THREE.Quaternion()),
-              new THREE.Vector3(1.1, (tl + 0.08) / stitchLen, 0.8));
+              new THREE.Vector3(1, (tl + 0.07) / stitchLen, 1));
             stitches.setMatrixAt(extra++, tm);
           });
         }
@@ -609,11 +658,16 @@
         var nudge = inJoint ? JOINT_GAP / 2 : 0;
         pos.set(a.x - d.y * nudge, a.y + d.x * nudge, z + side * 0.002);
         q.setFromUnitVectors(up, dir.set(sh.x, sh.y, 0));
-        scl.set(0.7, inJoint ? 2.8 : 1.9, 1);
+        // Every hole is the same punch, the joint's included: two threads
+        // through one hole is the finishing and the tying-off, and nothing
+        // enlarges the hole for it
+        scl.set(1, 1, 1);
         m.compose(pos, q, scl);
         holes.setMatrixAt(k * 2 + i, m);
-        pos.setZ(z + side * 0.001);
-        scl.set(2.6, inJoint ? 4.2 : 3.4, 1);
+        // the grain pressed in around the cut, which the thread pulls tight:
+        // kept small, or it reads as a smudge rather than a cut
+        pos.set(a.x - d.y * nudge, a.y + d.x * nudge, z + side * 0.001);
+        scl.set(0.5, 0.7, 1);
         m.compose(pos, q, scl);
         dimples.setMatrixAt(k * 2 + i, m);
       });
