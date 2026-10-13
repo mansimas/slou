@@ -4,6 +4,12 @@
      pipeline. The leather grain is drawn on a canvas at load time — no image
      files. Units in the scene are centimetres. */
   var e = t.editor;
+  /* The key ring the owner uses (Buckleguy B2020, solid iron, all four
+     finishes): a split ring of flat strip wire, and only ever the 1″ one.
+     `id` is the ring's *inside* diameter — the dimension the product is sold
+     by — and `wire` the width of the strip; both in cm. The model in the scene
+     (RING below) is built from it. */
+  var ring = { id: 2.60, wire: 0.34 };   // 26.0 mm bore, 3.4 mm strip
 %>
 <style>
   .kf { padding: 40px 0 70px; }
@@ -99,7 +105,7 @@
         <div>
           <span class="kf__label"><%= e.ring %></span>
           <div class="kf__opts" data-group="ring">
-            <% ['silver', 'brass', 'black'].forEach(function (k, i) { %>
+            <% ['silver', 'brass', 'black', 'gold'].forEach(function (k, i) { %>
               <button type="button" class="kf__btn" data-value="<%= k %>" aria-pressed="<%= i === 0 %>"><%= e.rings[k] %></button>
             <% }); %>
           </div>
@@ -166,6 +172,14 @@
   var TEX_SPAN = 10;           // cm covered by the leather texture
   var TEX_N = 1024;            // texture resolution
 
+  // Key ring: the size above, as the scene wants it. It is one strip of flat
+  // wire wound two turns — a single spiral, not two rings. RING_GAP is the
+  // angle between its two cut ends (the split), RING_RAMP the arc over which
+  // the wire crosses from the back turn to the front one.
+  var RING = <%- JSON.stringify(ring) %>;
+  var RING_GAP = 0.22;
+  var RING_RAMP = 0.35;
+
   var state = { shape: 'arch', leather: '#9a5527', thread: '#eadcbf', ring: 'silver', text: '' };
 
   // ---------- scene ----------
@@ -189,6 +203,10 @@
   controls.enablePan = false;
   controls.minDistance = 7;
   controls.maxDistance = 30;
+  // Zoom towards the pointer, not the middle of the screen: the wheel carries
+  // the target in to whatever is under the cursor, so you can close in on the
+  // initials or the ring without having to rotate the fob back to centre first.
+  controls.zoomToCursor = true;
   controls.target.set(0, 0.8, 0);
   controls.autoRotate = true;
   controls.autoRotateSpeed = 1.2;
@@ -260,7 +278,7 @@
     g.save();
     g.translate(TEX_N / 2 + L.x * px, TEX_N / 2 - L.y * px);
     if (vertical) { g.rotate(-Math.PI / 2); }
-    g.font = '600 ' + size + 'px Georgia, "Times New Roman", serif';
+    g.font = '600 ' + size + 'px Helvetica, "Helvetica Neue", Arial, sans-serif';
     g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillStyle = style;
     g.filter = 'blur(1px)';
@@ -275,7 +293,7 @@
       g.filter = 'none';
       g.drawImage(grain, 0, 0);
       g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(0, 0, TEX_N, TEX_N);
-      if (i === 0) { drawText(g, 'rgba(40,20,5,.45)'); }
+      if (i === 0) { drawText(g, 'rgba(28,13,2,.62)'); }
       tex.needsUpdate = true;
     });
     // bump: grain + pressed-in letters
@@ -308,9 +326,6 @@
   // A waxed thread: the ply twist is there but shallow. At bumpScale 0.6 it read
   // as a twisted rope rather than a smooth cord.
   var threadMat = new THREE.MeshStandardMaterial({ roughness: 0.5, map: plyTex, bumpMap: plyTex, bumpScale: 0.25 });
-  // where the ends are cut and melted flush on the back
-  var meltMat = new THREE.MeshStandardMaterial({ roughness: 0.3 });
-  var meltGeo = new THREE.SphereGeometry(0.05, 12, 8);
   // The leather pressed in around a hole: soft, because it is not a shape on
   // the grain but the grain being pulled down towards the cut.
   var slitAlpha = (function () {
@@ -323,8 +338,52 @@
   // The cut itself is solid, not a gradient: an iron cuts the leather rather
   // than denting it, so the slit stays dark and sharp-edged at any zoom.
   var holeMat = new THREE.MeshStandardMaterial({ color: 0x120b06, roughness: 0.9, side: THREE.DoubleSide });
-  var ringMat = new THREE.MeshStandardMaterial({ metalness: 1, roughness: 0.22 });
-  var RINGS = { silver: ['#d8d8dc', 0.22], brass: ['#c9a04a', 0.28], black: ['#1d1d1f', 0.45] };
+  // The metal is a flat band, so the room it reflects lands on one spot: at full
+  // metalness and mirror roughness the ring read as black plastic rather than
+  // nickel. Nine tenths metal with a satin roughness keeps the highlight but lets
+  // the band read as its finish.
+  var ringMat = new THREE.MeshStandardMaterial({ metalness: 0.9, roughness: 0.4 });
+  var RINGS = { silver: ['#d8d8dc', 0.40], brass: ['#c9a04a', 0.36], black: ['#1d1d1f', 0.48], gold: ['#e2c05a', 0.36] };
+
+  // The wire of a key ring: its flat section (a chamfered rectangle, `w` across
+  // and `t` thick) swept round the arc at radius `R` and capped at both ends.
+  // Built by hand: a lathe leaves those ends open, and a lathe's or a tube's
+  // section is round — the real ring is flat strip, its wide face outwards.
+  // `yAt(u)`, u running 0→1 over the sweep, is where the wire sits along the
+  // ring's axis as it winds: that one function is what makes the two turns a
+  // single spiral — both turns of the ring go through here, as one sweep.
+  function bandGeo(R, w, t, a0, span, yAt) {
+    var hw = w / 2, ht = t / 2, ch = ht * 0.35;
+    var sec = [[-hw + ch, -ht], [hw - ch, -ht], [hw, -ht + ch], [hw, ht - ch],
+               [hw - ch, ht], [-hw + ch, ht], [-hw, ht - ch], [-hw, -ht + ch]];
+    var n = sec.length, steps = Math.max(8, Math.round(span * 32)), v = [], idx = [], i, j;
+    for (i = 0; i <= steps; i++) {
+      var u = i / steps, a = a0 + span * u, sa = Math.sin(a), ca = Math.cos(a), y = yAt(u);
+      for (j = 0; j < n; j++) { v.push((R + sec[j][0]) * sa, y + sec[j][1], (R + sec[j][0]) * ca); }
+    }
+    for (i = 0; i < steps; i++) {
+      for (j = 0; j < n; j++) {
+        var k = (j + 1) % n, p = i * n + j, q = i * n + k,
+            r = (i + 1) * n + k, s = (i + 1) * n + j;
+        // wound so the surface faces outwards — and the section runs CCW in
+        // (radial, axial), which is what makes the end fans come out right
+        idx.push(p, r, q, p, s, r);
+      }
+    }
+    [0, steps].forEach(function (e, end) {
+      var u = e / steps, a = a0 + span * u, sa = Math.sin(a), ca = Math.cos(a), mid = v.length / 3;
+      v.push(R * sa, yAt(u), R * ca);
+      for (j = 0; j < n; j++) {
+        var p = e * n + j, q = e * n + (j + 1) % n;
+        idx.push(mid, end === 0 ? p : q, end === 0 ? q : p);
+      }
+    });
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+    g.setIndex(idx);
+    g.computeVertexNormals();
+    return g;
+  }
 
   function applyColors() {
     var c = new THREE.Color(state.leather);
@@ -332,7 +391,6 @@
     backMat.color.copy(c).multiplyScalar(0.9);
     edgeMat.color.copy(c).multiplyScalar(0.55);
     threadMat.color.set(state.thread);
-    meltMat.color.set(state.thread).multiplyScalar(0.8);
     holeMat.color.copy(c).multiplyScalar(0.12);
     dimpleMat.color.copy(c).multiplyScalar(0.3);
     ringMat.color.set(RINGS[state.ring][0]);
@@ -534,7 +592,7 @@
   var current = null;   // the stitch layout last built, for the pattern PDF
 
   function build() {
-    fob.children.slice().forEach(function (m) { fob.remove(m); if (m.geometry !== stitchGeo && m.geometry !== holeGeo && m.geometry !== meltGeo) { m.geometry.dispose(); } });
+    fob.children.slice().forEach(function (m) { fob.remove(m); if (m.geometry !== stitchGeo && m.geometry !== holeGeo) { m.geometry.dispose(); } });
 
     // Rebuilt from points with near-duplicates dropped: the arc that closes the
     // outline ends a rounding error away from where it starts, and that sliver
@@ -652,11 +710,14 @@
           });
         }
         stitches.setMatrixAt(k * 2 + i, m);
-        // the slit itself; the joint's slits carry two threads, so they're a
-        // bit longer and sit half a thread inward, under both
-        var inJoint = (k - E + n) % n <= OVERLAP;
-        var nudge = inJoint ? JOINT_GAP / 2 : 0;
-        pos.set(a.x - d.y * nudge, a.y + d.x * nudge, z + side * 0.002);
+        // the slit itself, on the punch line like every other hole. It used to
+        // be nudged half a thread inward (`JOINT_GAP / 2`) to sit centred under
+        // the pair — but both joint threads *end* where an ordinary stitch's
+        // thread ends, on the line, so the cut stuck out past them on the inner
+        // side and read as a hole beside the second thread. On the line it is
+        // covered by the first thread, the second lies on the leather beside it,
+        // and the cut disappears — measured at 84 exposed pixels before, 10 now.
+        pos.set(a.x, a.y, z + side * 0.002);
         q.setFromUnitVectors(up, dir.set(sh.x, sh.y, 0));
         // Every hole is the same punch, the joint's included: two threads
         // through one hole is the finishing and the tying-off, and nothing
@@ -666,28 +727,39 @@
         holes.setMatrixAt(k * 2 + i, m);
         // the grain pressed in around the cut, which the thread pulls tight:
         // kept small, or it reads as a smudge rather than a cut
-        pos.set(a.x - d.y * nudge, a.y + d.x * nudge, z + side * 0.001);
+        pos.set(a.x, a.y, z + side * 0.001);
         scl.set(0.5, 0.7, 1);
         m.compose(pos, q, scl);
         dimples.setMatrixAt(k * 2 + i, m);
       });
     }
     fob.add(dimples, holes, stitches);
-    [OVERLAP - 1, OVERLAP].forEach(function (j) {
-      var p = holesAt[(E + j) % n], d = chords[(E + j) % n];
-      var melt = new THREE.Mesh(meltGeo, meltMat);
-      // just beside the hole, on the inner side of the line
-      melt.position.set(p.x - d.y * 0.07, p.y + d.x * 0.07, -zTop - 0.004);
-      melt.scale.set(1, 1, 0.45);
-      fob.add(melt);
-    });
 
-    // key ring threaded through the hole
-    var RR = 1.3;
-    var ring = new THREE.Mesh(new THREE.TorusGeometry(RR, 0.09, 24, 120), ringMat);
-    ring.rotation.y = Math.PI / 2;
-    ring.position.set(0, HOLE_Y + RR, 0);
-    fob.add(ring);
+    // Key ring threaded through the hole: one length of flat strip wound two
+    // turns, and one mesh — the two turns are the same sweep of `bandGeo`, the
+    // wire ramping from the back turn to the front one over `RING_RAMP` where
+    // its two cut ends sit. It is a spiral, not two rings: build the turns as
+    // separate arcs and the ends of the two read as four, which is what the
+    // owner objected to (2026-10-13).
+    //
+    // Both turns are at the same radius — a close-wound coil, so the band is
+    // two wires wide with a groove between them, as in the photos — and the
+    // strip's thickness apart along the axis, so they touch. The stated inside
+    // diameter is the bore, so the band is `wire` across and the ring is
+    // id + 2 · wire over all — 3.4 mm of band, comfortable in the Ø 8 mm hole.
+    var wire = RING.wire, ri = RING.id / 2, th = wire * 0.5;
+    var TURN = Math.PI * 2, total = TURN * 2 - RING_GAP;
+    function yAt(u) {
+      var a = u * total;
+      if (a <= TURN) { return -th / 2; }                        // the back turn, flat
+      if (a >= TURN + RING_RAMP) { return th / 2; }             // the front turn, flat
+      var s = (a - TURN) / RING_RAMP;                           // the ramp: eased, so the
+      return th * (s * s * (3 - 2 * s) - 0.5);                  // wire does not kink over
+    }
+    var r = new THREE.Mesh(bandGeo(ri + wire / 2, wire, th, 0, total, yAt), ringMat);
+    r.rotation.z = Math.PI / 2;   // stand the ring up in the fob's plane
+    r.position.set(0, HOLE_Y + ri + wire / 2, 0);   // the band centred on the hole
+    fob.add(r);
   }
 
   // ---------- grid & measurements ----------
@@ -819,6 +891,7 @@
       if (!btn) { return; }
       grp.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === btn)); });
       state[grp.dataset.group] = btn.dataset.value;
+      // the shape is geometry; the rest is colour
       if (grp.dataset.group === 'shape') { build(); } else { applyColors(); }
     });
   });

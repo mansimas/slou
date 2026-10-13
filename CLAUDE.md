@@ -12,11 +12,58 @@ Sails.js storefront for handmade leather goods (slou.lt). No database.
 
 ## /editor: 3D leather keyfob designer
 Route `GET /editor` → `PagesController.editor` → `views/pages/editor.ejs` (layout `slou`). three.js 0.160.0 comes from jsDelivr via an import map. Scene units are **cm**. The page has:
-- options for shape (rect / arch / point), leather colour, thread colour, ring and initials
+- options for shape (rect / arch / point), leather colour, thread colour, ring (finish and size) and initials
 - a grid & measurements toggle, with a "lock top view" mode (pan instead of rotate)
 - fullscreen, "Download image" (PNG) and "Download pattern" (1:1 A4 PDF)
 
 All text is in `content.<locale>.editor`.
+
+### The key ring
+Modelled on the rings the owner actually uses — Buckleguy **B2020**, solid iron, a
+*split* ring. Photographed in the hand (`renders/14923–14925.jpg`) and from the
+product page: flat strip wire wound **two turns**, and the two turns lie side by
+side along the ring's axis, touching — a close-wound coil, so the band is two
+wires wide with a groove between them and the pair is one wire's thickness apart.
+It is **one continuous spiral, not two rings**: `bandGeo()` is called once, over
+two turns, and `yAt(u)` (u running 0→1 over the sweep) is where the wire sits
+along the axis as it winds — flat on the back turn, then eased across to the
+front turn over `RING_RAMP 0.35` rad, flat again. Building each turn as its own
+arc (what the code did until 2026-10-13) left four ends showing and read as two
+rings stacked; the owner's photos — and the object — have one wire with two cut
+ends, which sit `RING_GAP 0.22` rad apart at the split, one layer apart, exactly
+as the hand photos show. Both turns are at the **same** radius: a coil is wound
+on one mandrel, and the turns have to be free to slide along each other or the
+ring cannot open. (An earlier version nested the back turn `wire * 0.28` further
+in, which is not physical and is gone with the two-arc build.)
+
+`bandGeo()` sweeps the wire's chamfered-rectangle section round an arc and caps
+both ends by hand: a lathe leaves those ends open, and a lathe or tube section is
+round where the real wire is flat, its wide face outwards. Wound so the surface
+faces out; the section runs CCW in (radial, axial), which is what makes the end
+fans come out right too — get it backwards and the band shades black.
+
+`ring` (top of the view) gives the **inside** diameter and the wire width — the two
+figures the product is sold by: 26.0 mm bore, 3.4 mm strip, in the scene
+`2.60 / 0.34`. **Only the 1″ ring is offered** (the owner's call, 2026-10-13);
+there is no size control, so no size labels in `content.*.editor` either. The
+stated inside diameter is the bore, so the band is `wire` across and the ring is
+`id + 2 · wire` over all — 3.4 mm of band, comfortable in the Ø 8 mm hole
+(`y = HOLE_Y + ri + wire/2` centres the band on the hole). Four finishes in
+`RINGS`, one per thing the owner stocks: silver (nickel plate), brass, matt
+black, gold.
+
+The finish is the one place the metal is not physical: at `metalness 1` with the
+mirror roughness the finishes used to have, the *flat* band reflected one dark
+corner of the studio environment and read as black plastic rather than nickel. It
+is now `metalness 0.9` with satin roughness (0.36–0.48 in `RINGS`), which keeps a
+highlight and lets the band read as its finish.
+
+### The initials stamp
+Drawn into the leather texture by `drawText()`: Helvetica (it was Georgia), and
+`rgba(28,13,2,.62)` — darker than the 0.45 it was, at the owner's request. Debossed,
+so the same pass draws the letters into the bump map in black; `textLayout()` is
+shared with the pattern PDF, which still sets them in embedded DejaVu Sans (it
+needs the Lithuanian letters).
 
 ### The stitching is APPROVED and LOCKED
 It was tuned step by step against photos of the owner's real keyfob. Change it only when explicitly asked, and reuse it as-is for new items (wallets, straps…) by adding new `outline()` shapes only.
@@ -36,7 +83,7 @@ How it works:
 - **`outline(kind, i)`:** only forms an iron can follow (straight runs + gentle arcs meeting at real corners), with exact insets. The body uses `outline(BEVEL)` so the outer size is exact (30 × 80 × 3.5 mm, Ø8 ring hole).
 - **`stitchHoles` + `divide`:** holes spaced at equal chord length, with a hole forced on every sharp corner (tangent jump > 20°). Each run is bisected to close evenly. A run with no corners starts at the top centre.
 - **Each stitch** runs between the inner ends of two slits, so its ends sit ~0.4 mm to the side of the holes they run into, and that offset is what tilts the stitch line ~13° off the row of holes (measured on the owner's own piece). Running hole centre to hole centre was tried and rejected: it lands the ends on the holes but straightens the run, and the owner wants the slant. Nor can a straight strand do both — only one that curves into the slit (`TURN` near 1) manages it, and that bend was rejected too. The back is mirrored (`side = -1`, `flipBack` turns back-face strands so their ends dive into the leather).
-- **Thread strand:** a ringed capped cylinder (r 0.0275 — 0.55 mm thread, the size the owner sews with — length 0.28, 28 rings) with a shallow 3-ply texture (`bumpScale 0.25`; at 0.6 it read as twisted rope). Round in section: the instance scale is `1 × 1` and was `1.3 × 0.8`, which made a flat ribbon. Capped rather than open-ended: the ends are buried, but where the cord crosses the grain an open tube showed its dark inside as a hole at the end of every stitch. Every strand uses that one radius — the joint's two threads included (the second was scaled to 0.92, i.e. 0.51 mm, a leftover from the old 1.3/1.1 ratio). The only places the thread is not 0.55 mm are the barely-tapered ends below and the melted nubs on the back, which are a 1 mm ball flattened to 0.45 in z. The cord rides in the grain about 40% of its thickness (`z + side * 0.005`; it was `z - side * 0.015`, i.e. 77% buried, which was right for the old 0.8 mm cord and left only a flat sliver showing at 0.55 mm). `len` is the distance between slit inner tips; the strand is `len + 0.07`. What the other lengths did, on this geometry: `len + 0.17` overshot both holes by ~0.5 mm and the thread read as lying across the top of the hole; `len + 0.08` pushed the two ends through each other at the hole centre; `len + 0.055` left a gap of bare leather between stitches; `len + 0.07` is where the two end faces meet edge to edge. (On the hole-to-hole line the equivalent is `len + 0.01`.) Its ends:
+- **Thread strand:** a ringed capped cylinder (r 0.0275 — 0.55 mm thread, the size the owner sews with — length 0.28, 28 rings) with a shallow 3-ply texture (`bumpScale 0.25`; at 0.6 it read as twisted rope). Round in section: the instance scale is `1 × 1` and was `1.3 × 0.8`, which made a flat ribbon. Capped rather than open-ended: the ends are buried, but where the cord crosses the grain an open tube showed its dark inside as a hole at the end of every stitch. Every strand uses that one radius — the joint's two threads included (the second was scaled to 0.92, i.e. 0.51 mm, a leftover from the old 1.3/1.1 ratio). The only place the thread is not 0.55 mm is the barely-tapered ends below. The cord rides in the grain about 40% of its thickness (`z + side * 0.005`; it was `z - side * 0.015`, i.e. 77% buried, which was right for the old 0.8 mm cord and left only a flat sliver showing at 0.55 mm). `len` is the distance between slit inner tips; the strand is `len + 0.07`. What the other lengths did, on this geometry: `len + 0.17` overshot both holes by ~0.5 mm and the thread read as lying across the top of the hole; `len + 0.08` pushed the two ends through each other at the hole centre; `len + 0.055` left a gap of bare leather between stitches; `len + 0.07` is where the two end faces meet edge to edge. (On the hole-to-hole line the equivalent is `len + 0.01`.) Its ends:
   - barely narrow at all: 8% over the last 30%. A real taper is seen from the side as a cone driving into the hole — at 30% over the outer half that is exactly what it looked like. A 0.55 mm thread is not squeezed through a 1.5 mm cut, so keep this near zero.
   - turn into the slit by `TURN 0.2` of the slit's own angle, from 58% out (`endTurn` computed once). The owner's call: keep it low. The stitch should drop *down* into the hole, not curl round to run along the cut — at 1 the ends bend visibly and the run reads as a braid, so it sits between 0.1 (ends barely turn at all) and 0.3.
   - dive: a shallow, even dip into each hole — 0.25 mm over the outer 28% of the end. It was 0.55 mm, and before that 1.1 mm. This is the dial that decides whether the run reads as one thread or as separate pieces, and it only shows from a low viewing angle: deepen it (it was 1.1 mm) and the cord disappears at every hole, so the run breaks into beads with bare leather between them, which is what made the ends look like they were not going into the hole at all. Measure against the sample from the side, not from directly above.
@@ -45,8 +92,8 @@ How it works:
 - **Thread joint** (as on the real piece): on the left straight side, ~37% down from the top; `OVERLAP = 2` stitches sewn twice.
   - The first thread sits where a single stitch would.
   - The second sits on the inner side by `JOINT_GAP 0.045` and slides `JOINT_DROP 0.04` along the line (multiplied by `side`, so it is mirrored on the back). It is almost flush, with ends level.
-  - The joint's holes are the same size as every other hole — two threads through one hole is the finishing and the tying-off, and nothing enlarges it. (They used to be cut 1.47× longer.) Its slit is still nudged inward by `JOINT_GAP/2` so it sits centred under the two threads — that is position, not size.
-  - Two melted thread-end nubs sit on the back.
+  - The joint's holes are the same size as every other hole — two threads through one hole is the finishing and the tying-off, and nothing enlarges it. (They used to be cut 1.47× longer.) Its slit sits on the punch line, like every other hole. It used to be nudged inward by `JOINT_GAP/2` to sit centred under the pair — but both joint threads *end* where a single stitch's thread ends (on the line), so the cut stuck out past them on the inner side and read as a hole beside the second thread (the owner's complaint of 2026-10-13). On the line the first thread covers it and the second lies on the leather beside it: exposed-cut pixels 84 → 10.
+  - The two melted thread-end nubs that used to sit on the back are gone (they read as dots beside the joint; the owner asked for them removed).
 - **Pattern PDF (`makePattern`):** jsPDF 2.5.1 (cdnjs) + DejaVu Sans (for LT letters), both lazy-loaded on the first click.
   - Cut line and ring hole.
   - Iron slits drawn 1.6 × 0.45 mm.

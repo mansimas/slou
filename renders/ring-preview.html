@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="lt-LT">
+<head>
+<meta charset="UTF-8">
+<style>
+:root {
+      --paper:   #f1e9db;
+      --paper-2: #ece2d0;
+      --card:    #f7f1e6;
+      --ink:     #29241f;
+      --muted:   #86796a;
+      --line:    #ddd2be;
+      --leather: #a6794a;
+      --leather-dark: #6f4d2c;
+      --accent:  #8a6a44;
+      /* Helvetica throughout — headings and body alike. All system faces, so
+         nothing is downloaded. (assets/fonts/Inter-Variable.woff2 is no longer
+         referenced; it can be deleted if Inter is not coming back.) */
+      --serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      --sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+
+<style>
+  .kf { padding: 40px 0 70px; }
+  .kf__head { text-align: center; max-width: 640px; margin: 0 auto 28px; }
+  .kf__eyebrow { font-size: 12px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent); }
+  .kf__head h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4vw, 40px); line-height: 1.2; margin: 6px 0 10px; }
+  .kf__head p { color: var(--muted); }
+  .kf__grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; }
+  .kf__stage { position: relative; height: min(72vh, 640px); border-radius: 18px; overflow: hidden;
+    background: radial-gradient(circle at 50% 40%, #fbf6ee, #e6dac5); border: 1px solid var(--line); }
+  .kf__stage canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+  .kf__stage canvas:active { cursor: grabbing; }
+  .kf__hint { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; font-size: 12px; color: var(--muted); pointer-events: none; }
+  .kf__panel { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; display: grid; gap: 20px; }
+  .kf__label { display: block; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .kf__opts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .kf__btn { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; }
+  .kf__btn[aria-pressed="true"] { background: var(--ink); color: #f7f1e6; border-color: var(--ink); }
+  .kf__sw { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0; }
+  .kf__sw[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
+  .kf__input { width: 100%; font: inherit; font-size: 16px; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: #fff; text-transform: uppercase; letter-spacing: 2px; }
+  .kf__actions { display: grid; gap: 10px; }
+  .kf__cta { display: block; text-align: center; font: inherit; font-size: 15px; padding: 12px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--leather-dark); background: var(--leather-dark); color: #f7f1e6; }
+  .kf__cta--ghost { background: transparent; color: var(--leather-dark); }
+  .kf__labels { position: absolute; inset: 0; pointer-events: none; }
+  .kf__full { position: absolute; top: 12px; right: 12px; z-index: 2; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line);
+    background: rgba(255,255,255,.85); color: var(--ink); cursor: pointer; display: grid; place-items: center; }
+  .kf__full:hover { background: #fff; }
+  .kf__full svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .kf__full .kf__shrink, .kf__stage.is-full .kf__full .kf__grow { display: none; }
+  .kf__stage.is-full .kf__full .kf__shrink { display: block; }
+  /* Fullscreen API, or the fixed-position fallback where it is missing (iPhone). */
+  .kf__stage.is-full { position: fixed; inset: 0; z-index: 1000; height: auto; border-radius: 0; border: 0; }
+  .kf__stage:fullscreen { height: 100%; border-radius: 0; }
+  .kf__dim { font-size: 12px; line-height: 1; padding: 4px 7px; border-radius: 999px; background: rgba(41,36,31,.88); color: #f7f1e6; white-space: nowrap; }
+  .kf__specs { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; font-size: 14px; margin-top: 12px; }
+  .kf__specs dt { color: var(--muted); }
+  .kf__specs dd { font-variant-numeric: tabular-nums; text-align: right; }
+  .kf__specs[hidden] { display: none; }
+  @media (max-width: 860px) {
+    .kf__grid { grid-template-columns: minmax(0, 1fr); }
+    .kf__stage { height: 56vh; }
+  }
+</style>
+
+<section class="kf">
+  <div class="wrap">
+    <header class="kf__head">
+      <p class="kf__eyebrow">Kūrimo įrankis</p>
+      <h1>Susikurkite raktų pakabuką</h1>
+      <p>Pasirinkite formą, odos ir siūlų spalvą, įrašykite raides — ir apžiūrėkite iš visų pusių.</p>
+    </header>
+
+    <div class="kf__grid">
+      <div class="kf__stage" id="kfStage">
+        <p class="kf__hint" id="kfHint" data-rotate="Tempkite, kad pasuktumėte, slinkite, kad priartintumėte" data-pan="Tempkite, kad paslinktumėte, slinkite, kad priartintumėte">Tempkite, kad pasuktumėte, slinkite, kad priartintumėte</p>
+        <button type="button" class="kf__full" id="kfFull" aria-label="Visas ekranas" title="Visas ekranas"
+                data-enter="Visas ekranas" data-exit="Išeiti iš viso ekrano">
+          <svg class="kf__grow" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+          <svg class="kf__shrink" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
+        </button>
+      </div>
+
+      <div class="kf__panel">
+        <div>
+          <span class="kf__label">Forma</span>
+          <div class="kf__opts" data-group="shape">
+            
+              <button type="button" class="kf__btn" data-value="rect" aria-pressed="false">Stačiakampis</button>
+            
+              <button type="button" class="kf__btn" data-value="arch" aria-pressed="true">Arka</button>
+            
+              <button type="button" class="kf__btn" data-value="point" aria-pressed="false">Smaigalys</button>
+            
+          </div>
+        </div>
+
+        <div>
+          <span class="kf__label">Odos spalva</span>
+          <div class="kf__opts" data-group="leather">
+            
+              <button type="button" class="kf__sw" data-value="#c08a55" style="background:#c08a55" title="Natūrali" aria-label="Natūrali" aria-pressed="false"></button>
+            
+              <button type="button" class="kf__sw" data-value="#9a5527" style="background:#9a5527" title="Konjakas" aria-label="Konjakas" aria-pressed="true"></button>
+            
+              <button type="button" class="kf__sw" data-value="#5a3820" style="background:#5a3820" title="Ruda" aria-label="Ruda" aria-pressed="false"></button>
+            
+              <button type="button" class="kf__sw" data-value="#222020" style="background:#222020" title="Juoda" aria-label="Juoda" aria-pressed="false"></button>
+            
+              <button type="button" class="kf__sw" data-value="#5e1f24" style="background:#5e1f24" title="Bordo" aria-label="Bordo" aria-pressed="false"></button>
+            
+              <button type="button" class="kf__sw" data-value="#5b5a35" style="background:#5b5a35" title="Alyvuogių" aria-label="Alyvuogių" aria-pressed="false"></button>
+            
+          </div>
+        </div>
+
+        <div>
+          <span class="kf__label">Siūlų spalva</span>
+          <div class="kf__opts" data-group="thread">
+            
+              <button type="button" class="kf__sw" data-value="#eadcbf" style="background:#eadcbf" title="Kreminė" aria-label="Kreminė" aria-pressed="true"></button>
+            
+              <button type="button" class="kf__sw" data-value="#f6f6f2" style="background:#f6f6f2" title="Balta" aria-label="Balta" aria-pressed="false"></button>
+            
+              <button type="button" class="kf__sw" data-value="#4a2e1a" style="background:#4a2e1a" title="Ruda" aria-label="Ruda" aria-pressed="false"></button>
+            
+              <button type="button" class="kf__sw" data-value="#1b1b1b" style="background:#1b1b1b" title="Juoda" aria-label="Juoda" aria-pressed="false"></button>
+            
+              <button type="button" class="kf__sw" data-value="#a32a26" style="background:#a32a26" title="Raudona" aria-label="Raudona" aria-pressed="false"></button>
+            
+          </div>
+        </div>
+
+        <div>
+          <span class="kf__label">Žiedas</span>
+          <div class="kf__opts" data-group="ring">
+            
+              <button type="button" class="kf__btn" data-value="silver" aria-pressed="true">Sidabrinis</button>
+            
+              <button type="button" class="kf__btn" data-value="brass" aria-pressed="false">Žalvarinis</button>
+            
+              <button type="button" class="kf__btn" data-value="black" aria-pressed="false">Juodas</button>
+            
+              <button type="button" class="kf__btn" data-value="gold" aria-pressed="false">Auksinis</button>
+            
+          </div>
+        </div>
+
+        <div>
+          <span class="kf__label">Žiedo dydis</span>
+          <div class="kf__opts" data-group="ringSize">
+            
+              <button type="button" class="kf__btn" data-value="1/2" aria-pressed="false">1/2″</button>
+            
+              <button type="button" class="kf__btn" data-value="7/8" aria-pressed="false">7/8″</button>
+            
+              <button type="button" class="kf__btn" data-value="1" aria-pressed="true">1″</button>
+            
+              <button type="button" class="kf__btn" data-value="1 1/4" aria-pressed="false">1 1/4″</button>
+            
+          </div>
+        </div>
+
+        <div>
+          <label class="kf__label" for="kfText">Raidės</label>
+          <input class="kf__input" id="kfText" type="text" maxlength="8" autocomplete="off" placeholder="pvz. EM">
+        </div>
+
+        <div>
+          <div class="kf__opts">
+            <button type="button" class="kf__btn" id="kfMeasure" aria-pressed="false">Tinklelis ir matmenys</button>
+            <button type="button" class="kf__btn" id="kfLock" aria-pressed="false" hidden>Fiksuoti vaizdą iš viršaus</button>
+          </div>
+          <dl class="kf__specs" id="kfSpecs" hidden>
+            
+              <dt>Plotis</dt><dd data-spec="width"></dd>
+            
+              <dt>Aukštis</dt><dd data-spec="height"></dd>
+            
+              <dt>Storis</dt><dd data-spec="thickness"></dd>
+            
+              <dt>Skylė</dt><dd data-spec="hole"></dd>
+            
+              <dt>Dygsnio žingsnis</dt><dd data-spec="spacing"></dd>
+            
+              <dt>Siūlė nuo krašto</dt><dd data-spec="inset"></dd>
+            
+          </dl>
+        </div>
+
+        <div class="kf__actions">
+          <a class="kf__cta" href="/#order">Užsisakyti tokį</a>
+          <button type="button" class="kf__cta kf__cta--ghost" id="kfPattern">Atsisiųsti lekalą</button>
+          <button type="button" class="kf__cta kf__cta--ghost" id="kfShot">Atsisiųsti vaizdą</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type="application/json" id="kfI18n">{"pattern":{"btn":"Atsisiųsti lekalą","loading":"Ruošiama…","title":"Raktų pakabuko lekalas","print":"Spausdinkite 100 % (tikru dydžiu, be „pritaikyti puslapiui“). Patikrinkite: kvadratas turi būti lygiai 10 × 10 mm.","how":"Iškirpkite, uždėkite ant odos, apibrėžkite kontūrą ir pradurkite skyles tiesiai per lekalą.","cut":"Pjovimo linija","holes":"Skylės: 3,85 mm durtuvas, įpjovos 45° kampu","corner":"Kampinė skylė: pradurkite yla, durtuvą statykite nuo čia","joint":"Siūlo sujungimas: 2 dygsniai siuvami dukart","ring":"Žiedo skylė","initials":"Raidės","stitches":"Dygsnių","leather":"Oda","thread":"Siūlas","check":"10 mm"},"measure":{"toggle":"Tinklelis ir matmenys","width":"Plotis","height":"Aukštis","thickness":"Storis","hole":"Skylė","spacing":"Dygsnio žingsnis","inset":"Siūlė nuo krašto"}}</script>
+
+<script type="importmap">
+  { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  } }
+</script>
+<script type="module">
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+  import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+  import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+  var W = 3, H = 8;            // keyfob outline, cm
+  var BEVEL = 0.04;            // rounded edge; the outline is inset by it so outer size stays exact
+  var THICK = 0.35;            // leather thickness, 3.5 mm
+  var DEPTH = THICK - 2 * BEVEL;
+  var STITCH_INSET = 0.28;     // stitch line distance from the edge (measured: 2.8 mm)
+  var STITCH_PITCH = 0.385;    // saddle stitch, 3.85 mm diamond chisel spacing
+  // Pricking iron slits, measured on the real punched keyfob: ~45 deg to the
+  // stitch line, ~1.2 mm long. The thread runs between the inner ends of two
+  // slits, so it leans the opposite way to them, ~13 deg off the line.
+  var SLIT_ANGLE = 45 * Math.PI / 180;
+  var SLIT_HALF = 0.05;
+  var ARC_R = 1.8;             // end arc radius
+  var CORNER_R = 0.25;         // rectangle's cut corners
+  var OVERLAP = 2;             // stitches sewn twice where the thread ends
+  var JOINT_GAP = 0.045;       // centre-to-centre of the joint's two threads
+  var JOINT_DROP = 0.04;       // the second thread's slide along the line
+  var HOLE_Y = H / 2 - 1.0, HOLE_R = 0.4;   // 8 mm hole
+  var TEX_SPAN = 10;           // cm covered by the leather texture
+  var TEX_N = 1024;            // texture resolution
+
+  // Key ring: the sizes above, as the scene wants them — the split ring is one
+  // strip of flat wire wound two turns, the second nested just outside the first
+  // (that nesting is what lets a split ring open). RING_GAP is how far short of a
+  // full circle each turn stops: that is the split.
+  var RING_SIZES = [{"key":"1/2","label":"1/2″","id":1.27,"wire":0.23},{"key":"7/8","label":"7/8″","id":2.22,"wire":0.305},{"key":"1","label":"1″","id":2.6,"wire":0.34},{"key":"1 1/4","label":"1 1/4″","id":3.18,"wire":0.34}];
+  var RING_GAP = 0.22;
+
+  var state = { shape: 'arch', leather: '#9a5527', thread: '#eadcbf', ring: 'silver', ringSize: '1', text: '' };
+
+  // ---------- scene ----------
+  var stage = document.getElementById('kfStage');
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  stage.insertBefore(renderer.domElement, stage.firstChild);
+  var labelRenderer = new CSS2DRenderer();
+  labelRenderer.domElement.className = 'kf__labels';
+  stage.appendChild(labelRenderer.domElement);
+
+  var scene = new THREE.Scene();
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+
+  var camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+  camera.position.set(4, 2, 19);
+
+  var controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.enablePan = false;
+  controls.minDistance = 7;
+  controls.maxDistance = 30;
+  controls.target.set(0, 0.8, 0);
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 1.2;
+  controls.addEventListener('start', function () { controls.autoRotate = false; });
+
+  var sun = new THREE.DirectionalLight(0xfff3e0, 2.2);
+  sun.position.set(5, 8, 10);
+  var backLight = new THREE.DirectionalLight(0xfff3e0, 1.2);   // so the back isn't left in shadow
+  backLight.position.set(-4, 5, -10);
+  scene.add(sun, backLight, new THREE.HemisphereLight(0xfff8ee, 0x8a6a44, 0.6));
+
+  var fob = new THREE.Group();
+  scene.add(fob);
+
+  // ---------- leather texture ----------
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  // Grayscale grain: pebbles + fine creases, shared by colour and bump maps.
+  var grain = (function () {
+    var c = document.createElement('canvas'); c.width = c.height = TEX_N;
+    var g = c.getContext('2d');
+    g.fillStyle = '#808080'; g.fillRect(0, 0, TEX_N, TEX_N);
+    for (var k = 0; k < 70000; k++) {
+      var r = rnd(1, 2.6);
+      g.fillStyle = Math.random() < 0.5 ? 'rgba(255,255,255,.09)' : 'rgba(0,0,0,.11)';
+      g.beginPath(); g.ellipse(rnd(0, TEX_N), rnd(0, TEX_N), r, r * rnd(0.6, 1.2), rnd(0, 3), 0, 7); g.fill();
+    }
+    g.lineCap = 'round';
+    for (k = 0; k < 160; k++) {
+      var x = rnd(0, TEX_N), y = rnd(0, TEX_N), a = rnd(0, 7);
+      g.strokeStyle = 'rgba(0,0,0,.13)'; g.lineWidth = rnd(0.6, 1.6);
+      g.beginPath(); g.moveTo(x, y);
+      for (var j = 0; j < 8; j++) { a += rnd(-0.4, 0.4); x += Math.cos(a) * 8; y += Math.sin(a) * 8; g.lineTo(x, y); }
+      g.stroke();
+    }
+    var out = document.createElement('canvas'); out.width = out.height = TEX_N;
+    var o = out.getContext('2d');
+    o.filter = 'blur(0.7px)'; o.drawImage(c, 0, 0);
+    return out;
+  })();
+
+  function canvasTex(srgb) {
+    var c = document.createElement('canvas'); c.width = c.height = TEX_N;
+    var tex = new THREE.CanvasTexture(c);
+    tex.repeat.set(1 / TEX_SPAN, 1 / TEX_SPAN);
+    tex.offset.set(0.5, 0.5);
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    if (srgb) { tex.colorSpace = THREE.SRGBColorSpace; }
+    return tex;
+  }
+  var colorTex = canvasTex(true), bumpTex = canvasTex(false), backColorTex = canvasTex(true);
+
+  // Where the initials go, in shape coordinates (cm): centre, letter size,
+  // and whether they run along the length. Shared with the pattern PDF.
+  function textLayout() {
+    var txt = state.text.trim().toUpperCase();
+    if (!txt) { return null; }
+    var vertical = txt.length > 3;
+    var room = vertical ? H - 4.4 : W - 1;   // stays inside the stitching
+    return { txt: txt, vertical: vertical, x: 0, y: vertical ? -0.4 : -1.3,
+             size: Math.min(vertical ? 0.8 : 1.1, room / (txt.length * 0.72)) };
+  }
+
+  // Draws the initials, debossed, onto a texture canvas.
+  function drawText(g, style) {
+    var L = textLayout();
+    if (!L) { return; }
+    var px = TEX_N / TEX_SPAN, txt = L.txt, vertical = L.vertical, size = L.size * px;
+    g.save();
+    g.translate(TEX_N / 2 + L.x * px, TEX_N / 2 - L.y * px);
+    if (vertical) { g.rotate(-Math.PI / 2); }
+    g.font = '600 ' + size + 'px Helvetica, "Helvetica Neue", Arial, sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = style;
+    g.filter = 'blur(1px)';
+    g.fillText(txt, 0, 0);
+    g.restore();
+  }
+
+  function paintTextures() {
+    // colour: light grain (multiplied by material colour) + darker burnished letters
+    [colorTex, backColorTex].forEach(function (tex, i) {
+      var g = tex.image.getContext('2d');
+      g.filter = 'none';
+      g.drawImage(grain, 0, 0);
+      g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(0, 0, TEX_N, TEX_N);
+      if (i === 0) { drawText(g, 'rgba(28,13,2,.62)'); }
+      tex.needsUpdate = true;
+    });
+    // bump: grain + pressed-in letters
+    var b = bumpTex.image.getContext('2d');
+    b.filter = 'none';
+    b.drawImage(grain, 0, 0);
+    drawText(b, '#000');
+    bumpTex.needsUpdate = true;
+  }
+  paintTextures();
+
+  // ---------- materials ----------
+  var leatherMat = new THREE.MeshStandardMaterial({ map: colorTex, bumpMap: bumpTex, bumpScale: 1.5, roughness: 0.72 });
+  var backMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: bumpTex, bumpScale: 1, roughness: 0.85 });
+  var edgeMat = new THREE.MeshStandardMaterial({ roughness: 0.45 });  // burnished edge
+  // Twisted waxed thread: diagonal plies wound round each stitch.
+  var plyTex = (function () {
+    // three plies round the thread; repeat set so they run at ~45 deg
+    var c = document.createElement('canvas'); c.width = 48; c.height = 48;
+    var g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, 48, 48);
+    g.strokeStyle = 'rgba(0,0,0,.3)'; g.lineWidth = 5;
+    for (var k = -48; k < 96; k += 16) { g.beginPath(); g.moveTo(k, 0); g.lineTo(k + 48, 48); g.stroke(); }
+    var tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(1, 1.2);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  })();
+  // A waxed thread: the ply twist is there but shallow. At bumpScale 0.6 it read
+  // as a twisted rope rather than a smooth cord.
+  var threadMat = new THREE.MeshStandardMaterial({ roughness: 0.5, map: plyTex, bumpMap: plyTex, bumpScale: 0.25 });
+  // The leather pressed in around a hole: soft, because it is not a shape on
+  // the grain but the grain being pulled down towards the cut.
+  var slitAlpha = (function () {
+    var c = document.createElement('canvas'); c.width = c.height = 64;
+    var g = c.getContext('2d'), grad = g.createRadialGradient(32, 32, 4, 32, 32, 32);
+    grad.addColorStop(0, '#fff'); grad.addColorStop(0.55, '#bbb'); grad.addColorStop(1, '#000');
+    g.fillStyle = grad; g.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(c);
+  })();
+  // The cut itself is solid, not a gradient: an iron cuts the leather rather
+  // than denting it, so the slit stays dark and sharp-edged at any zoom.
+  var holeMat = new THREE.MeshStandardMaterial({ color: 0x120b06, roughness: 0.9, side: THREE.DoubleSide });
+  // The metal is a flat band, so the room it reflects lands on one spot: at full
+  // metalness and mirror roughness the ring read as black plastic rather than
+  // nickel. Nine tenths metal with a satin roughness keeps the highlight but lets
+  // the band read as its finish.
+  var ringMat = new THREE.MeshStandardMaterial({ metalness: 0.9, roughness: 0.4 });
+  var RINGS = { silver: ['#d8d8dc', 0.40], brass: ['#c9a04a', 0.36], black: ['#1d1d1f', 0.48], gold: ['#e2c05a', 0.36] };
+
+  // One turn of a key ring: the wire's flat section (a chamfered rectangle,
+  // `w` across and `t` thick) swept round the arc at radius `R` and capped at
+  // both ends. Built by hand: a lathe leaves those ends open, and a lathe's or a
+  // tube's section is round — the real ring is flat strip, its wide face outwards.
+  function bandGeo(R, w, t, a0, span) {
+    var hw = w / 2, ht = t / 2, ch = ht * 0.35;
+    var sec = [[-hw + ch, -ht], [hw - ch, -ht], [hw, -ht + ch], [hw, ht - ch],
+               [hw - ch, ht], [-hw + ch, ht], [-hw, ht - ch], [-hw, -ht + ch]];
+    var n = sec.length, steps = Math.max(8, Math.round(span * 16)), v = [], idx = [], i, j;
+    for (i = 0; i <= steps; i++) {
+      var a = a0 + span * i / steps, sa = Math.sin(a), ca = Math.cos(a);
+      for (j = 0; j < n; j++) { v.push((R + sec[j][0]) * sa, sec[j][1], (R + sec[j][0]) * ca); }
+    }
+    for (i = 0; i < steps; i++) {
+      for (j = 0; j < n; j++) {
+        var k = (j + 1) % n, p = i * n + j, q = i * n + k,
+            r = (i + 1) * n + k, s = (i + 1) * n + j;
+        // wound so the surface faces outwards — and the section runs CCW in
+        // (radial, axial), which is what makes the end fans come out right
+        idx.push(p, r, q, p, s, r);
+      }
+    }
+    [0, steps].forEach(function (e, end) {
+      var a = a0 + span * e / steps, sa = Math.sin(a), ca = Math.cos(a), mid = v.length / 3;
+      v.push(R * sa, 0, R * ca);
+      for (j = 0; j < n; j++) {
+        var p = e * n + j, q = e * n + (j + 1) % n;
+        idx.push(mid, end === 0 ? p : q, end === 0 ? q : p);
+      }
+    });
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
+    g.setIndex(idx);
+    g.computeVertexNormals();
+    return g;
+  }
+
+  function applyColors() {
+    var c = new THREE.Color(state.leather);
+    leatherMat.color.copy(c);
+    backMat.color.copy(c).multiplyScalar(0.9);
+    edgeMat.color.copy(c).multiplyScalar(0.55);
+    threadMat.color.set(state.thread);
+    holeMat.color.copy(c).multiplyScalar(0.12);
+    dimpleMat.color.copy(c).multiplyScalar(0.3);
+    ringMat.color.set(RINGS[state.ring][0]);
+    ringMat.roughness = RINGS[state.ring][1];
+  }
+
+  // ---------- geometry ----------
+  // Outline of each shape, shrunk by `i` (used for the stitch line).
+  // The forms a straight pricking iron can follow: straight runs and gentle
+  // arcs, meeting at corners that get a hole of their own. The end arc is
+  // taken from the real keyfob (radius ~18 mm, rising ~8 mm over its 30 mm
+  // width). Insets are exact: arcs stay concentric, sides stay parallel.
+  function outline(kind, i) {
+    var s = new THREE.Shape(), x = W / 2 - i, PI = Math.PI;
+    var ra = ARC_R - i, cyT = H / 2 - ARC_R;
+    var aC = Math.acos(x / ra);                      // arc angle at the corners
+    var yTop = cyT + ra * Math.sin(aC);
+    if (kind === 'rect') {
+      // small cut corners; inset past their radius the stitch line goes square
+      var r = CORNER_R - i, y0 = -H / 2 + i, y1 = H / 2 - i;
+      if (r > 0.001) {
+        s.moveTo(-x + r, y0); s.lineTo(x - r, y0); s.absarc(x - r, y0 + r, r, -PI / 2, 0);
+        s.lineTo(x, y1 - r); s.absarc(x - r, y1 - r, r, 0, PI / 2);
+        s.lineTo(-x + r, y1); s.absarc(-x + r, y1 - r, r, PI / 2, PI);
+        s.lineTo(-x, y0 + r); s.absarc(-x + r, y0 + r, r, PI, PI * 1.5);
+      } else {
+        s.moveTo(-x, y0); s.lineTo(x, y0); s.lineTo(x, y1); s.lineTo(-x, y1); s.lineTo(-x, y0);
+      }
+    } else if (kind === 'arch') {
+      // like the real one: an arc at both ends
+      var cyB = -cyT, yBot = -yTop;
+      s.moveTo(x, yBot); s.lineTo(x, yTop); s.absarc(0, cyT, ra, aC, PI - aC);
+      s.lineTo(-x, yBot); s.absarc(0, cyB, ra, PI + aC, 2 * PI - aC);
+    } else {
+      // arc on top, V at the bottom; the tip rises by i / cos(edge angle)
+      var slope = 1.3 / (W / 2);
+      var tip = -H / 2 + i * Math.sqrt(1 + slope * slope), shoulder = tip + x * slope;
+      s.moveTo(0, tip); s.lineTo(x, shoulder); s.lineTo(x, yTop); s.absarc(0, cyT, ra, aC, PI - aC);
+      s.lineTo(-x, shoulder); s.lineTo(0, tip);
+    }
+    return s;
+  }
+
+  // One saddle stitch: a plump waxed-thread strand along Y, 0.28 long. Built
+  // from a finely ringed cylinder so its shape can be set along the length:
+  // round in the middle, narrowing a little towards the ends, and each end
+  // bending down (local -z) into the slit it came through, the way thread does
+  // when it is drawn into a hole. It does not lean sideways on the way in: a
+  // stitch swung round to the slit's own angle crosses the next stitch in the
+  // hole, and the two read as tangled rather than sewn.
+  var stitchLen = 0.2 + 0.08;
+  var THREAD_R = 0.0275;   // the owner sews with 0.55 mm thread
+  // How far the thread turns towards the slit on the way in, as a fraction of
+  // the slit's own angle. This is the "curl" dial, and the owner wants it low:
+  // the end should drop into the cut, not hook round towards the centre. At 1
+  // the ends hook visibly; at 0.2 they barely turn and just drop.
+  var TURN = 0.2;
+  // capped, not open: the ends are buried, but where the cord crosses the grain
+  // an open tube showed its dark inside as a hole at the end of every stitch
+  var stitchGeo = new THREE.CylinderGeometry(THREAD_R, THREAD_R, stitchLen, 10, 28, false);
+  // Every stitch meets its slit at the same angle (the lean and the slit are
+  // both set off the stitch chord), front and mirrored back alike. Work it
+  // out once for a straight run, as the end's sideways slope in the strand's
+  // own (unscaled) units.
+  var endTurn = (function () {
+    var sl = slit({ x: 1, y: 0 }, 1);
+    var ux = STITCH_PITCH - 2 * SLIT_HALF * sl.x, uy = -2 * SLIT_HALF * sl.y, L = Math.hypot(ux, uy);
+    ux /= L; uy /= L;
+    var xl = sl.x * uy - sl.y * ux, yl = sl.x * ux + sl.y * uy;   // slit in the strand's frame
+    var sx = 1, sy = (L + 0.07) / stitchLen;                    // the usual instance scale
+    return (xl / yl) * (sy / sx);
+  })();
+  (function () {
+    var pos = stitchGeo.attributes.position, uv = stitchGeo.attributes.uv, half = stitchLen / 2;
+    for (var k = 0; k < pos.count; k++) {
+      var y = pos.getY(k), t = Math.abs(y) / half;
+      // even v along the length, for the ply twist
+      uv.setY(k, y / stitchLen + 0.5);
+      // Keeps its thickness the whole way in. A 0.55 mm thread is not squeezed
+      // through a 1.5 mm cut, and any real taper here is seen from the side as a
+      // cone driving into the hole — which is what this looked like at 30% over
+      // the outer half. What is left is barely a shave, at the very end.
+      var c = Math.max(0, (t - 0.7) / 0.3), f = 1 - 0.08 * Math.sin(c * Math.PI / 2);
+      // turn: only a hair of sideways lean on the way in. At the slit's full
+      // angle the two threads that meet in a hole swing across each other
+      var bt = Math.max(0, Math.abs(y) - half * 0.58), span = half * 0.42;
+      pos.setX(k, pos.getX(k) * f + endTurn * TURN * Math.sign(y) * bt * bt / (2 * span));
+      // dive: a shallow, even dip into each hole — 0.55 mm over the outer 28%,
+      // which is about the thread's own thickness. Deepen it (it was 1.1 mm)
+      // and the cord disappears at every hole, so the run reads as separate
+      // pieces with bare leather between instead of one continuous thread; the
+      // owner's own work keeps the thread visible through the dip.
+      var dv = Math.max(0, (t - 0.72) / 0.28);
+      pos.setZ(k, pos.getZ(k) * f - 0.025 * dv * dv);
+    }
+    stitchGeo.computeVertexNormals();
+  })();
+  // Back-face stitches are turned half a turn about their own axis, so their
+  // local -z (where the ends dive) points into the leather there too.
+  var flipBack = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI);
+  // The slit a pricking iron cuts, seen from above, leaning at SLIT_ANGLE to
+  // the stitch line. Off a pricked sample at this same 3.85 mm spacing the dark
+  // mark is a blunt chip: nearly parallel sides with only the corners knocked
+  // off, about 1.5 mm long and 0.5 mm wide. A pricking iron is a flat chisel —
+  // the cut it leaves is a slot, not a lens, and a lens (two curves meeting at
+  // points, which is what this was) narrows to a needle at both ends and reads
+  // as a scratch rather than a cut.
+  var holeGeo = (function () {
+    var s = new THREE.Shape(), L = 0.06, W = 0.017, TIP = 0.02;
+    s.moveTo(0, -L);
+    s.lineTo(W, -L + TIP);
+    s.lineTo(W, L - TIP);
+    s.lineTo(0, L);
+    s.lineTo(-W, L - TIP);
+    s.lineTo(-W, -L + TIP);
+    s.closePath();
+    return new THREE.ShapeGeometry(s, 24);
+  })();
+  // what is left of the old blob: the shadow of grain pressed in round a slit
+  var dimpleGeo = new THREE.CircleGeometry(0.035, 24);
+  // soft shadow round each hole: the leather pressed in where the thread is
+  // pulled tight into it
+  var dimpleMat = new THREE.MeshStandardMaterial({ roughness: 1, alphaMap: slitAlpha, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide });
+
+  // Hole positions along a closed outline, spaced like walking dividers along
+  // it: every hole is the same straight distance from the previous one, so
+  // stitches on curves are exactly as long as on the straights. Holes are
+  // forced only onto sharp corners (the point shape's tip and shoulders);
+  // between them the step is fine-tuned around 3.85 mm so each run closes evenly.
+  function stitchHoles(shape) {
+    var curves = shape.curves.filter(function (c) { return c.getLength() > 1e-4; });
+    var nc = curves.length, sharp = [];
+    curves.forEach(function (c, i) {
+      var prev = curves[(i + nc - 1) % nc];
+      if (prev.getTangentAt(1).dot(c.getTangentAt(0)) < Math.cos(Math.PI / 9)) { sharp.push(i); }
+    });
+    var closed = !sharp.length;
+    if (closed) { sharp = [0]; }
+    var out = [];
+    sharp.forEach(function (start, r) {
+      var end = sharp[(r + 1) % sharp.length], i = start, poly = [];
+      do {
+        var c = curves[i], k = Math.max(8, Math.ceil(c.getLength() / 0.005));
+        for (var j = 0; j < k; j++) { poly.push(c.getPointAt(j / k)); }
+        i = (i + 1) % nc;
+      } while (i !== end);
+      poly.push(curves[(end + nc - 1) % nc].getPointAt(1));
+      if (closed) {
+        // No corners to start from: start at the top centre instead. The ring
+        // wire covers that spot from the front, so a hole goes there rather
+        // than a stitch the wire would cut in half. That also makes the
+        // stitching mirror-symmetric.
+        poly.pop();
+        var top = 0;
+        poly.forEach(function (p, k) { if (p.y - 10 * Math.abs(p.x) > poly[top].y - 10 * Math.abs(poly[top].x)) { top = k; } });
+        poly = poly.slice(top).concat(poly.slice(0, top));
+        poly.push(poly[0]);
+      }
+      out.push.apply(out, divide(poly));
+    });
+    return out;
+  }
+
+  // Equal-chord holes on an open polyline, first point included, last left for
+  // the next run.
+  function divide(poly) {
+    var L = 0;
+    for (var i = 1; i < poly.length; i++) { L += poly[i].distanceTo(poly[i - 1]); }
+    var count = Math.max(1, Math.round(L / STITCH_PITCH));
+    var last = poly[poly.length - 1];
+    // count - 1 steps of `step`; returns the holes and how far the final gap
+    // misses `step` (positive: step too short)
+    function walk(step) {
+      var pts = [poly[0]], cur = poly[0], j = 0;
+      for (var n = 1; n < count; n++) {
+        while (j < poly.length - 1 && cur.distanceTo(poly[j + 1]) < step) { j++; }
+        if (j >= poly.length - 1) { return { pts: pts, miss: -1 }; }
+        var d0 = cur.distanceTo(poly[j]), d1 = cur.distanceTo(poly[j + 1]);
+        cur = poly[j].clone().lerp(poly[j + 1], d1 > d0 ? (step - d0) / (d1 - d0) : 0);
+        pts.push(cur);
+      }
+      return { pts: pts, miss: cur.distanceTo(last) - step };
+    }
+    var lo = STITCH_PITCH * 0.7, hi = STITCH_PITCH * 1.3, res = walk(STITCH_PITCH);
+    for (var it = 0; it < 40; it++) {
+      var mid = (lo + hi) / 2;
+      res = walk(mid);
+      if (res.miss > 0) { lo = mid; } else { hi = mid; }
+    }
+    return res.pts;
+  }
+
+  // Unit direction of a slit at a hole with tangent t (mirrored on the back).
+  function slit(t, side) {
+    var a = side * SLIT_ANGLE, c = Math.cos(a), s = Math.sin(a);
+    return { x: t.x * c - t.y * s, y: t.x * s + t.y * c };
+  }
+
+  var current = null;   // the stitch layout last built, for the pattern PDF
+
+  function build() {
+    fob.children.slice().forEach(function (m) { fob.remove(m); if (m.geometry !== stitchGeo && m.geometry !== holeGeo) { m.geometry.dispose(); } });
+
+    // Rebuilt from points with near-duplicates dropped: the arc that closes the
+    // outline ends a rounding error away from where it starts, and that sliver
+    // edge breaks the bevel.
+    var shape = new THREE.Shape(outline(state.shape, BEVEL).getPoints(24).filter(function (p, i, all) {
+      return p.distanceTo(all[(i + 1) % all.length]) > 1e-4;
+    }));
+    var hole = new THREE.Path(); hole.absarc(0, HOLE_Y, HOLE_R + BEVEL, 0, Math.PI * 2, true);
+    shape.holes.push(hole);
+
+    var geo = new THREE.ExtrudeGeometry(shape, {
+      depth: DEPTH, bevelEnabled: true, bevelThickness: BEVEL, bevelSize: BEVEL, bevelSegments: 3, curveSegments: 48,
+    });
+    // ExtrudeGeometry puts back and front caps in one group (back first, then
+    // front, same size): split it so the initials only go on the front.
+    var caps = geo.groups[0], half = caps.count / 2;
+    geo.clearGroups();
+    geo.addGroup(0, half, 2);
+    geo.addGroup(half, half, 0);
+    geo.addGroup(caps.count, Infinity, 1);
+    geo.translate(0, 0, -DEPTH / 2);
+
+    var body = new THREE.Mesh(geo, [leatherMat, edgeMat, backMat]);
+    fob.add(body);
+
+    // Saddle stitch on both faces. Holes are diamond-chisel slits on the
+    // stitch line, about 3.85 mm apart, cut at an angle to it. Each stitch runs
+    // from the far end of one slit to the near end of the next, so the stitches
+    // lie parallel along the line with the familiar slight lean. Every side and
+    // corner of the outline gets its own whole number of stitches, so a hole
+    // always lands on each corner and joint. The back is the mirror image.
+    var holesAt = stitchHoles(outline(state.shape, STITCH_INSET));
+    var n = holesAt.length;
+    var stitches = new THREE.InstancedMesh(stitchGeo, threadMat, n * 2 + OVERLAP * 4);
+    var extra = n * 2;   // next free instance: 2 threads x 2 faces per joint stitch
+    var holes = new THREE.InstancedMesh(holeGeo, holeMat, n * 2);
+    var dimples = new THREE.InstancedMesh(dimpleGeo, dimpleMat, n * 2);
+    var m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), zAxis = new THREE.Vector3(0, 0, 1);
+    var from = new THREE.Vector3(), to = new THREE.Vector3(), dir = new THREE.Vector3();
+    var pos = new THREE.Vector3(), scl = new THREE.Vector3();
+    var zTop = DEPTH / 2 + BEVEL;
+    // stitch k runs from hole k to hole k + 1; both its slits lean off that
+    // chord, so every stitch has the same length and lean
+    var chords = holesAt.map(function (p, k) {
+      var q2 = holesAt[(k + 1) % n];
+      return new THREE.Vector2(q2.x - p.x, q2.y - p.y).normalize();
+    });
+    // Thread ending: the closing round is sewn on over the first OVERLAP
+    // stitches, so there two threads share the same holes and lie side by
+    // side, the second one crossing slightly over the first. Then both ends
+    // come out on the back, are cut and melted flush. Placed as on the real
+    // keyfob: on the left straight side, about 37% down from the top.
+    var jx = -(W / 2 - STITCH_INSET), jy = H / 2 - 0.37 * H, J = 0;
+    holesAt.forEach(function (p, k) {
+      if (Math.hypot(p.x - jx, p.y - jy) < Math.hypot(holesAt[J].x - jx, holesAt[J].y - jy)) { J = k; }
+    });
+    var E = (J - 1 + n) % n;   // the two doubled stitches meet at hole J
+    // which holes are corners: the pattern PDF marks those as pinned dots
+    var corner = holesAt.map(function (p, k) { return chords[(k + n - 1) % n].dot(chords[k]) < Math.cos(Math.PI / 9); });
+    current = { holes: holesAt, chords: chords, E: E, corner: corner };
+    for (var k = 0; k < n; k++) {
+      var a = holesAt[k], b = holesAt[(k + 1) % n], d = chords[k];
+      var doubled = (k - E + n) % n < OVERLAP;
+      // a slit sits between two stitches: lean it off their average direction
+      var dh = chords[(k + n - 1) % n].clone().add(d).normalize();
+      [1, -1].forEach(function (side, i) {
+        var z = side * zTop;
+        var sl = slit(d, side), sh = slit(dh, side);
+        // The strand runs between the slit *tips*, which puts each end ~0.4 mm
+        // to the side of its hole — and that same offset is what tilts the
+        // stitch line ~13° off the row of holes, as measured on the owner's own
+        // piece. Running hole centre to hole centre instead lands the ends on
+        // the holes but straightens the run; the owner wants the slant, so the
+        // ends stay on the tips.
+        from.set(a.x + sl.x * SLIT_HALF, a.y + sl.y * SLIT_HALF, 0);
+        to.set(b.x - sl.x * SLIT_HALF, b.y - sl.y * SLIT_HALF, 0);
+        dir.subVectors(to, from);
+        var len = dir.length(); dir.normalize();
+        // The thread rides in the grain about 40% of its thickness, not 77%:
+        // it was sunk to suit the old 0.8 mm cord, and at 0.55 mm that left a
+        // flat sliver showing instead of a rounded cord.
+        pos.addVectors(from, to).multiplyScalar(0.5).setZ(z + side * 0.005);
+        q.setFromUnitVectors(up, dir);
+        if (side < 0) { q.multiply(flipBack); }
+        // the strand reaches 0.02 past each slit's inner end: just far enough
+        // that its end is inside the cut, no further, or two stitches overlap in
+        // the same hole. Round in section (1.05 x 0.9), not the flat ribbon it
+        // was, and a touch sunk, so it sits on the leather rather than on top of
+        // it — a waxed thread pulled tight spreads into the grain.
+        scl.set(1, (len + 0.07) / stitchLen, 1);
+        if (!doubled) {
+          m.compose(pos, q, scl);
+        } else {
+          // Two threads through the same pair of slits: the first exactly
+          // where a single stitch would be, the second right beside it on the
+          // inner side (towards the centre), same start and end, so the pair
+          // lines up with the neighbouring stitches and both ends sit level.
+          // Kept almost flush in height, so perspective doesn't lift one end.
+          // Drawn like every other stitch.
+          m.makeScale(0, 0, 0);   // replaced by the two threads below
+          var inward = new THREE.Vector3(-d.y, d.x, 0);   // outline runs CCW
+          [[0, 0], [JOINT_GAP, side * 0.004]].forEach(function (t) {
+            // the second also slides a little along the line, nearly touching
+            // the next stitch: down the left side on the front; mirrored on
+            // the back, where the stitches lean the other way
+            var along = new THREE.Vector3(d.x, d.y, 0).multiplyScalar(t[0] ? JOINT_DROP * side : 0);
+            var fa = from.clone().addScaledVector(inward, t[0]).add(along);
+            var tb = to.clone().addScaledVector(inward, t[0]).add(along);
+            var td = tb.clone().sub(fa), tl = td.length();
+            var tm = new THREE.Matrix4().compose(
+              fa.clone().add(tb).multiplyScalar(0.5).setZ(z + side * 0.005 + t[1]),
+              new THREE.Quaternion().setFromUnitVectors(up, td.normalize()).multiply(side < 0 ? flipBack : new THREE.Quaternion()),
+              new THREE.Vector3(1, (tl + 0.07) / stitchLen, 1));
+            stitches.setMatrixAt(extra++, tm);
+          });
+        }
+        stitches.setMatrixAt(k * 2 + i, m);
+        // the slit itself, on the punch line like every other hole. It used to
+        // be nudged half a thread inward (`JOINT_GAP / 2`) to sit centred under
+        // the pair — but both joint threads *end* where an ordinary stitch's
+        // thread ends, on the line, so the cut stuck out past them on the inner
+        // side and read as a hole beside the second thread. On the line it is
+        // covered by the first thread, the second lies on the leather beside it,
+        // and the cut disappears — measured at 84 exposed pixels before, 10 now.
+        pos.set(a.x, a.y, z + side * 0.002);
+        q.setFromUnitVectors(up, dir.set(sh.x, sh.y, 0));
+        // Every hole is the same punch, the joint's included: two threads
+        // through one hole is the finishing and the tying-off, and nothing
+        // enlarges the hole for it
+        scl.set(1, 1, 1);
+        m.compose(pos, q, scl);
+        holes.setMatrixAt(k * 2 + i, m);
+        // the grain pressed in around the cut, which the thread pulls tight:
+        // kept small, or it reads as a smudge rather than a cut
+        pos.set(a.x, a.y, z + side * 0.001);
+        scl.set(0.5, 0.7, 1);
+        m.compose(pos, q, scl);
+        dimples.setMatrixAt(k * 2 + i, m);
+      });
+    }
+    fob.add(dimples, holes, stitches);
+
+    // Key ring threaded through the hole. The two turns of the coil lie one
+    // behind the other, not side by side: the band you see is a single wire
+    // wide, and the second turn — behind by one wire's thickness, and `inner`
+    // further in — shows only as its edge, a line just inside the band. (Nesting
+    // them radially, each turn a wire out from the last, doubled the band and
+    // made a fat ring nothing like the real one.) The ring's stated inside
+    // diameter is the bore of the turn at the back, so the band is
+    // id + 2 · (inner + wire) across — 4.4 mm of it at the 1″ size, with room to
+    // spare in the Ø 8 mm hole.
+    var sz = RING_SIZES.filter(function (s) { return s.key === state.ringSize; })[0] || RING_SIZES[2];
+    var wire = sz.wire, ri = sz.id / 2, th = wire * 0.5, inner = wire * 0.28;
+    [[ri + inner + wire / 2, th / 2, RING_GAP], [ri + wire / 2, -th / 2, 0]].forEach(function (turn) {
+      var r = new THREE.Mesh(bandGeo(turn[0], wire, th, turn[2], Math.PI * 2 - RING_GAP), ringMat);
+      r.rotation.z = Math.PI / 2;   // stand the ring up in the fob's plane
+      r.position.set(turn[1], HOLE_Y + ri + inner / 2 + wire / 2, 0);
+      fob.add(r);
+    });
+  }
+
+  // ---------- grid & measurements ----------
+  function mm(cm) { return +(cm * 10).toFixed(2) + ' mm'; }
+
+  var measures = new THREE.Group();
+  measures.visible = false;
+  scene.add(measures);
+
+  // Grid in the keyfob's plane, just behind it: 5 mm minor, 1 cm major lines.
+  var GRID = 40, gridZ = -THICK / 2 - 0.3;
+  [[GRID * 2, '#e2d6c2'], [GRID, '#bba88a']].forEach(function (g) {
+    var grid = new THREE.GridHelper(GRID, g[0], g[1], g[1]);
+    grid.rotation.x = Math.PI / 2;
+    grid.position.set(0, 1, gridZ);
+    measures.add(grid);
+  });
+
+  var dimMat = new THREE.LineBasicMaterial({ color: '#3b2f24' });
+  var labels = [];
+  function segs(list) {
+    var geo = new THREE.BufferGeometry().setFromPoints(list.map(function (p) { return new THREE.Vector3(p[0], p[1], 0); }));
+    measures.add(new THREE.LineSegments(geo, dimMat));
+  }
+  function label(text, x, y) {
+    var el = document.createElement('span');
+    el.className = 'kf__dim';
+    el.textContent = text;
+    var obj = new CSS2DObject(el);
+    obj.position.set(x, y, 0);
+    obj.visible = false;
+    labels.push(obj);
+    measures.add(obj);
+  }
+  var T = 0.12;  // end tick half-length
+  // width, under the keyfob
+  var wy = -H / 2 - 0.8;
+  segs([[-W / 2, wy], [W / 2, wy], [-W / 2, wy - T], [-W / 2, wy + T], [W / 2, wy - T], [W / 2, wy + T],
+        [-W / 2, -H / 2 - 0.15], [-W / 2, wy - 0.2], [W / 2, -H / 2 - 0.15], [W / 2, wy - 0.2]]);
+  label(mm(W), 0, wy);
+  // height, to the right
+  var hx = W / 2 + 0.8;
+  segs([[hx, -H / 2], [hx, H / 2], [hx - T, -H / 2], [hx + T, -H / 2], [hx - T, H / 2], [hx + T, H / 2],
+        [W / 2 + 0.15, -H / 2], [hx + 0.2, -H / 2], [W / 2 + 0.15, H / 2], [hx + 0.2, H / 2]]);
+  label(mm(H), hx, 0);
+  // hole, with a leader line out to the left
+  var c45 = Math.SQRT1_2 * HOLE_R;
+  segs([[-c45, HOLE_Y + c45], [-W / 2 - 0.5, HOLE_Y + 0.9], [-W / 2 - 0.5, HOLE_Y + 0.9], [-W / 2 - 1.1, HOLE_Y + 0.9]]);
+  label('\u00d8 ' + mm(HOLE_R * 2), -W / 2 - 1.6, HOLE_Y + 0.9);
+
+  var SPECS = { width: mm(W), height: mm(H), thickness: mm(THICK), hole: '\u00d8 ' + mm(HOLE_R * 2), spacing: mm(STITCH_PITCH), inset: mm(STITCH_INSET) };
+  document.querySelectorAll('[data-spec]').forEach(function (dd) { dd.textContent = SPECS[dd.dataset.spec]; });
+
+  document.getElementById('kfMeasure').addEventListener('click', function (ev) {
+    var on = ev.currentTarget.getAttribute('aria-pressed') !== 'true';
+    ev.currentTarget.setAttribute('aria-pressed', String(on));
+    document.getElementById('kfSpecs').hidden = !on;
+    measures.visible = on;
+    // CSS2D labels ignore their parent's visibility, so switch them one by one
+    labels.forEach(function (l) { l.visible = on; });
+    lockBtn.hidden = !on;
+    if (on) {
+      faceFront();
+    } else {
+      setLock(false);
+    }
+  });
+
+  // Face the keyfob straight on so the measurements read true.
+  function faceFront() {
+    controls.autoRotate = false;
+    camera.position.set(0, 0.3, 22);
+    controls.target.set(0, 0.3, 0);
+    camera.up.set(0, 1, 0);
+  }
+
+  // Locked top view: no rotating; a drag (one finger on touch) moves the
+  // image instead, and zoom goes in close enough to read the stitch spacing.
+  var lockBtn = document.getElementById('kfLock');
+  var hint = document.getElementById('kfHint');
+  function setLock(on) {
+    lockBtn.setAttribute('aria-pressed', String(on));
+    controls.enableRotate = !on;
+    controls.enablePan = on;
+    controls.screenSpacePanning = true;
+    controls.mouseButtons.LEFT = on ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
+    controls.touches.ONE = on ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE;
+    controls.minDistance = on ? 2 : 7;
+    if (!on) { controls.target.set(0, 0.8, 0); }     // re-centre, panning is over
+    hint.textContent = on ? hint.dataset.pan : hint.dataset.rotate;
+    if (on) { faceFront(); }
+  }
+  lockBtn.addEventListener('click', function () {
+    setLock(lockBtn.getAttribute('aria-pressed') !== 'true');
+  });
+
+  // ---------- fullscreen ----------
+  var fullBtn = document.getElementById('kfFull');
+  function fsElement() { return document.fullscreenElement || document.webkitFullscreenElement; }
+  function setFull(on) {
+    stage.classList.toggle('is-full', on);
+    var label = on ? fullBtn.dataset.exit : fullBtn.dataset.enter;
+    fullBtn.setAttribute('aria-label', label);
+    fullBtn.title = label;
+  }
+  fullBtn.addEventListener('click', function () {
+    var req = stage.requestFullscreen || stage.webkitRequestFullscreen;
+    if (fsElement()) {
+      (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else if (stage.classList.contains('is-full')) {
+      setFull(false);                       // leaving the fallback
+    } else if (req) {
+      req.call(stage);
+    } else {
+      setFull(true);                        // no Fullscreen API: fixed overlay
+    }
+  });
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+    document.addEventListener(ev, function () { setFull(fsElement() === stage); });
+  });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' && stage.classList.contains('is-full') && !fsElement()) { setFull(false); }
+  });
+
+  // ---------- ui ----------
+  document.querySelectorAll('.kf__opts[data-group]').forEach(function (grp) {
+    grp.addEventListener('click', function (ev) {
+      var btn = ev.target.closest('button');
+      if (!btn) { return; }
+      grp.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === btn)); });
+      state[grp.dataset.group] = btn.dataset.value;
+      // shape and ring size are geometry; the rest is colour
+      if (grp.dataset.group === 'shape' || grp.dataset.group === 'ringSize') { build(); } else { applyColors(); }
+    });
+  });
+
+  document.getElementById('kfText').addEventListener('input', function (ev) {
+    state.text = ev.target.value;
+    paintTextures();
+  });
+
+  // ---------- pattern PDF ----------
+  // A 1:1 A4 template: print at 100%, cut, lay on the leather, and punch
+  // through the marked slits. jsPDF and a font with Lithuanian letters
+  // (DejaVu Sans) are only fetched on the first click.
+  var I18N = JSON.parse(document.getElementById('kfI18n').textContent);
+  var pdfReady = null;
+  function loadPdf() {
+    if (pdfReady) { return pdfReady; }
+    var lib = new Promise(function (ok, fail) {
+      var el = document.createElement('script');
+      el.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      el.onload = ok; el.onerror = fail;
+      document.head.appendChild(el);
+    });
+    var font = fetch('https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans.ttf')
+      .then(function (r) { if (!r.ok) { throw new Error('font ' + r.status); } return r.arrayBuffer(); })
+      .then(function (buf) {
+        var bytes = new Uint8Array(buf), bin = '';
+        for (var k = 0; k < bytes.length; k += 0x8000) { bin += String.fromCharCode.apply(null, bytes.subarray(k, k + 0x8000)); }
+        return btoa(bin);
+      });
+    pdfReady = Promise.all([lib, font]).then(function (r) { return r[1]; });
+    pdfReady.catch(function () { pdfReady = null; });   // let a later click retry
+    return pdfReady;
+  }
+
+  function pressedLabel(group) {
+    var b = document.querySelector('[data-group="' + group + '"] [aria-pressed="true"]');
+    return b ? (b.getAttribute('aria-label') || b.textContent).trim() : '';
+  }
+
+  function makePattern(fontB64) {
+    var P = I18N.pattern, M = I18N.measure;
+    var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+    doc.addFileToVFS('DejaVuSans.ttf', fontB64);
+    doc.addFont('DejaVuSans.ttf', 'DejaVu', 'normal');
+    doc.setFont('DejaVu');
+    doc.setLineCap('round');
+
+    // shape cm -> page mm, y flipped; the keyfob sits left of centre, notes on the right
+    var OX = 62, OY = 150;
+    function X(x) { return OX + x * 10; }
+    function Y(y) { return OY - y * 10; }
+    function poly(pts) {
+      for (var k = 0; k < pts.length; k++) {
+        var a = pts[k], b = pts[(k + 1) % pts.length];
+        doc.line(X(a.x), Y(a.y), X(b.x), Y(b.y));
+      }
+    }
+
+    // heading
+    doc.setTextColor(40, 36, 31);
+    doc.setFontSize(18); doc.text('SLOU — ' + P.title, 15, 20);
+    doc.setFontSize(9); doc.setTextColor(110, 100, 90);
+    doc.text(doc.splitTextToSize(P.print, 180), 15, 27);
+    doc.text(doc.splitTextToSize(P.how, 180), 15, 36);
+
+    // cut line + ring hole
+    doc.setDrawColor(0); doc.setLineWidth(0.3);
+    poly(outline(state.shape, 0).getPoints(48).filter(function (p, k, all) {
+      return p.distanceTo(all[(k + 1) % all.length]) > 1e-4;
+    }));
+    doc.circle(X(0), Y(HOLE_Y), HOLE_R * 10);
+    doc.setLineWidth(0.1);
+    doc.line(X(0) - 1.5, Y(HOLE_Y), X(0) + 1.5, Y(HOLE_Y));
+    doc.line(X(0), Y(HOLE_Y) - 1.5, X(0), Y(HOLE_Y) + 1.5);
+
+    // stitch line, faint, then the slits exactly as the iron cuts them
+    var holes = current.holes, chords = current.chords, n = holes.length, E = current.E;
+    doc.setDrawColor(190); doc.setLineWidth(0.1);
+    poly(holes);
+    // Corner holes: pinned with an awl (dot), ringed, and showing the slit the
+    // iron leaves there coming from each side (along the run in and the run out).
+    doc.setDrawColor(0); doc.setFillColor(0);
+    // slit centred on hole p, leaning off `dir`; h = half length (mm)
+    function slitMark(p, dir, h, width) {
+      var sl = slit(dir, 1);
+      doc.setLineWidth(width);
+      doc.line(X(p.x) - sl.x * h, Y(p.y) + sl.y * h, X(p.x) + sl.x * h, Y(p.y) - sl.y * h);
+    }
+    holes.forEach(function (p, k) {
+      var cin = chords[(k + n - 1) % n], cout = chords[k];
+      if (current.corner[k]) {
+        // both slits only marked, not punched: grey with a black border
+        // (black stroke, then a narrower grey one on top); the awl dot is
+        // the only hole made here
+        [cin, cout].forEach(function (d) { doc.setDrawColor(0); slitMark(p, d, 0.8, 0.45); });
+        [cin, cout].forEach(function (d) { doc.setDrawColor(200); slitMark(p, d, 0.8, 0.25); });
+        doc.setDrawColor(0);
+        doc.circle(X(p.x), Y(p.y), 0.35, 'F');
+        doc.setLineWidth(0.15);
+        doc.circle(X(p.x), Y(p.y), 1.3);
+        return;
+      }
+      // drawn longer than the cut (1.6 mm) so it's easy to see and punch on
+      slitMark(p, cin.clone().add(cout).normalize(), 0.8, 0.45);
+    });
+
+    // thread joint: bracket beside the doubled stitches, outside the piece
+    var a = holes[E], b = holes[(E + OVERLAP) % n];
+    doc.setDrawColor(180, 40, 30); doc.setLineWidth(0.4);
+    var off = -(W / 2 - STITCH_INSET) * 10 - 6;   // left of the keyfob
+    doc.line(OX + off, Y(a.y), OX + off, Y(b.y));
+    doc.line(OX + off, Y(a.y), OX + off + 2, Y(a.y));
+    doc.line(OX + off, Y(b.y), OX + off + 2, Y(b.y));
+
+    // initials as a stamping guide
+    var L = textLayout();
+    if (L) {
+      doc.setTextColor(150);
+      doc.setFontSize(L.size * 10 * 72 / 25.4);
+      doc.text(L.txt, X(L.x), Y(L.y), { align: 'center', baseline: 'middle', angle: L.vertical ? 90 : 0 });
+    }
+
+    // legend + specs on the right
+    var lx = 118, ly = 70;
+    doc.setFontSize(9); doc.setTextColor(40, 36, 31);
+    function key(draw, label) {
+      var lines = doc.splitTextToSize(label, 195 - lx - 12);
+      draw(lx, ly - 1); doc.text(lines, lx + 12, ly); ly += 3 + 4 * lines.length;
+    }
+    key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
+    key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, P.holes);
+    key(function (x, y) {
+      [[0, 0.45], [200, 0.25]].forEach(function (st) {
+        doc.setDrawColor(st[0]); doc.setLineWidth(st[1]);
+        doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); doc.line(x + 3.4, y + 0.6, x + 4.6, y - 0.6);
+      });
+      doc.setDrawColor(0);
+      doc.setFillColor(0); doc.circle(x + 4, y, 0.35, 'F');
+      doc.setLineWidth(0.15); doc.circle(x + 4, y, 1.3);
+    }, P.corner);
+    key(function (x, y) { doc.setDrawColor(180, 40, 30); doc.setLineWidth(0.4); doc.line(x + 3, y - 2, x + 3, y + 2); }, P.joint);
+    key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.circle(x + 4, y, 2); }, P.ring + ' Ø ' + mm(HOLE_R * 2));
+
+    ly += 4;
+    var rows = [
+      [M.width + ' × ' + M.height, mm(W) + ' × ' + mm(H)],
+      [M.thickness, mm(THICK)],
+      [M.spacing, mm(STITCH_PITCH)],
+      [M.inset, mm(STITCH_INSET)],
+      [P.stitches, String(n)],
+      [P.leather, pressedLabel('leather')],
+      [P.thread, pressedLabel('thread')],
+    ];
+    if (L) { rows.push([P.initials, L.txt]); }
+    rows.forEach(function (r) {
+      doc.setTextColor(110, 100, 90); doc.text(r[0], lx, ly);
+      doc.setTextColor(40, 36, 31); doc.text(r[1], 195, ly, { align: 'right' });
+      ly += 6;
+    });
+
+    // scale check: a 10 mm square and a 50 mm ruler
+    ly += 6;
+    doc.setDrawColor(0); doc.setLineWidth(0.2);
+    doc.rect(lx, ly, 10, 10);
+    doc.text(P.check, lx + 13, ly + 6);
+    ly += 18;
+    doc.line(lx, ly, lx + 50, ly);
+    for (var t = 0; t <= 50; t++) { doc.line(lx + t, ly, lx + t, ly - (t % 10 === 0 ? 3 : t % 5 === 0 ? 2 : 1)); }
+    doc.setFontSize(7);
+    [0, 10, 20, 30, 40, 50].forEach(function (t) { doc.text(String(t), lx + t, ly + 3.5, { align: 'center' }); });
+
+    doc.save('slou-keyfob-pattern-' + state.shape + '.pdf');
+  }
+
+  document.getElementById('kfPattern').addEventListener('click', function (ev) {
+    var btn = ev.currentTarget, label = btn.textContent;
+    btn.disabled = true; btn.textContent = I18N.pattern.loading;
+    loadPdf().then(makePattern).catch(function (err) { console.error(err); }).then(function () {
+      btn.disabled = false; btn.textContent = label;
+    });
+  });
+
+  document.getElementById('kfShot').addEventListener('click', function () {
+    renderer.render(scene, camera);
+    var a = document.createElement('a');
+    a.download = 'slou-keyfob.png';
+    a.href = renderer.domElement.toDataURL('image/png');
+    a.click();
+  });
+
+  function resize() {
+    var w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    labelRenderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(stage);
+
+  build();
+  applyColors();
+  resize();
+  renderer.setAnimationLoop(function () {
+    controls.update();
+    renderer.render(scene, camera);
+    labelRenderer.render(scene, camera);
+  });
+</script>
+
+</body>
+</html>
