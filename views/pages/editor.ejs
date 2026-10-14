@@ -1112,7 +1112,7 @@
     // has typed those two measurements in they print 200 and 280 mm again and
     // the whole sheet is true size. Nothing else on the sheet is a test: the
     // keyfob plus these two rulers is the whole pattern.
-    var calHx = 1, calVy = 1, calHy = 250;      // page mm from the top
+    var calHx = 1, calVy = 8, calHy = 250;      // page mm from the top
     var calLenH = Math.min(200 * cfx, 209), calLenV = Math.min(280 * cfy, 296);
     doc.setDrawColor(0); doc.setLineWidth(0.2);
     doc.line(calHx, calHy, calHx + calLenH, calHy);          // 200 mm across
