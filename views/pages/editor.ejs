@@ -1064,6 +1064,23 @@
     doc.setFontSize(7);
     [0, 10, 20, 30, 40, 50].forEach(function (t) { doc.text(String(t), lx + t, ly + 3.5, { align: 'center' }); });
 
+    // Print test, asked for by the owner (2026-10-14): a line down the middle
+    // of the template, the full 80 mm, and four measuring lines at the foot of
+    // the sheet — 80, 60, 40 and 20 mm tall, 30 mm apart. A 10 mm square is a
+    // poor check because a printer that scales by 5% hides in it (half a
+    // millimetre); on the 80 mm line the same 5% is 4 mm and cannot be missed.
+    // The middle line runs from apex to apex, so it is the template's own
+    // length: lay the ruler on it and the keyfob is checked, not just the paper.
+    doc.setDrawColor(0); doc.setLineWidth(0.2);
+    doc.line(X(0), Y(H / 2), X(0), Y(-H / 2));
+    var tY = 280, tX = 30;
+    doc.setTextColor(40, 36, 31); doc.setFontSize(7);
+    [80, 60, 40, 20].forEach(function (h, k) {
+      var tx = tX + k * 30;
+      doc.line(tx, tY, tx, tY - h);
+      doc.text(String(h) + ' mm', tx, tY + 4, { align: 'center' });
+    });
+
     doc.save('slou-keyfob-pattern-' + state.shape + '.pdf');
   }
 
