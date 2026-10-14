@@ -99,25 +99,30 @@ How it works:
   - Iron slits drawn 1.6 × 0.45 mm.
   - Corner holes: a black awl dot, a circle, and both slits drawn grey with a black border (marked, not punched).
   - Red bracket at the joint, initials as a stamping guide, specs table.
-  - **Print calibration** (2026-10-14, asked for by the owner): his ML-2160
-    prints an A4 page small, and by a different amount on each axis — measured
-    at about 4% off the width and 2.5% off the height (it fits the page into its
-    printable area, ~202 × 291 mm). No printer setting changes it. So the
-    pattern carries **two rulers**: 200 mm across the foot of the sheet and
-    280 mm down its left edge. Both are drawn `cfx`/`cfy` long like everything
-    else that states a size, so on the first print (fields at 20 and 28) they
-    show the raw damage; once the owner has measured them and typed the two
-    lengths into the editor (kept in `localStorage`) they print 200 and 280 mm
-    again and the whole sheet — keyfob, slits, hole, initials, rulers — is true
-    size. Two factors, not one: the printer does not squeeze the two axes the
-    same, so `X(x)` uses `cfx` and `Y(y)` uses `cfy` (`cfx`/`cfy` are 1 while
-    the fields read 20 and 28). Drawn ruler lengths are clamped to the page
-    (209 / 296 mm) so nothing is ever drawn outside the A4 box, and the vertical
-    ruler is 280 rather than 290 mm because 290 with a 2.5% correction needs
-    297.4 mm of a 297 mm page.
+  - **Print calibration** (2026-10-14, asked for by the owner, and reported
+    working the same day: "viskas tiksliai atitinka, susikalibruoja tobulai"):
+    his ML-2160 prints an A4 page small, and by a different amount on each axis
+    — measured at about 4% off the width and 2.5% off the height (it fits the
+    page into its printable area, ~202 × 291 mm). No printer setting changes it,
+    and he has decided the customer should not have to touch the printer at all.
+    So the pattern carries **two rulers and a square**: a vertical 270 mm line
+    1 cm in from the left, centred vertically (equal distance from the top and
+    bottom edges — a print that comes out crooked or shifted then cannot lose
+    its ends in the printer's margin); a horizontal 180 mm line 4 cm up from the
+    bottom, centred horizontally; and a 50 × 50 mm square in the bottom right,
+    its right edge 15 mm from the page edge and its foot 1 cm above the
+    horizontal ruler. All three are drawn `cfx`/`cfy` long like everything else
+    that states a size, so on the first print (fields at their defaults, 18 and
+    27) they show the raw damage; once the owner has measured them and typed the
+    two lengths in (kept in `localStorage`) they print 270, 180 and 50 × 50 mm
+    again and the whole sheet — keyfob, slits, hole, initials, rulers, square —
+    is true size. Two factors, not one: the printer does not squeeze the two
+    axes the same, so `X(x)` uses `cfx` and `Y(y)` uses `cfy`. Drawn ruler
+    lengths are clamped to the page (292 / 198 mm) so nothing is ever drawn
+    outside the A4 box.
   - The sheet carries no other test marks: the middle line, the four measuring
-    lines, the 50 × 50 square and the old 10 mm square / 50 mm ruler were all
-    taken out again the same day, leaving the keyfob and the two rulers.
+    lines and the earlier 10 mm square / 50 mm ruler were taken out again the
+    same day, leaving the keyfob, the two rulers and the square.
 
 ### Status (2026-10-12)
 The stitching and pattern are approved. Work in progress, asked for by the owner, is to make the stitching read as French pricking-iron work, tuned against a reference photo of pricked and stitched samples at 2.7/3.0/3.38/3.85 mm (`renders/il_794xN.1989616036_szkp.webp`):

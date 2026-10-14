@@ -1121,11 +1121,11 @@
     // enlarged them (the clamps are only a backstop for an extreme printer).
     var calNomV = 270, calNomH = 180;
     var calLenV = Math.min(calNomV * cfy, 292);
-    var calVx = 20;                                  // the left side of the sheet
+    var calVx = 10;                                  // 1 cm in from the left
     var calVy = (297 - calLenV) / 2;                 // equal from top and bottom
     var calLenH = Math.min(calNomH * cfx, 198);
     var calHx = (210 - calLenH) / 2;                 // equal from left and right
-    var calHy = 297 - 50;                            // 5 cm up from the bottom
+    var calHy = 297 - 40;                            // 4 cm up from the bottom
     doc.setDrawColor(0); doc.setLineWidth(0.2);
     doc.line(calVx, calVy, calVx, calVy + calLenV);
     doc.line(calVx - 3, calVy, calVx + 3, calVy);
@@ -1137,6 +1137,18 @@
     doc.text(calNomV + ' mm', calVx + 5, calVy + calLenV - 3);
     doc.text(calNomH + ' mm', calHx, calHy - 5);
     doc.text(doc.splitTextToSize(P.calibNote, 175), calVx + 6, calHy + 9);   // clear of the vertical ruler
+
+    // And a 5 × 5 cm square in the bottom right corner, 1 cm above the
+    // horizontal ruler (2026-10-14): a short measurement in both directions at
+    // once, for anyone who would rather trust a square than a line. Drawn
+    // `cfx` by `cfy` so it comes out a true 50 × 50 mm, and its right edge kept
+    // 15 mm clear of the page edge.
+    var sqNom = 50, sqR = 195, sqB = calHy - 10;
+    var sqW = sqNom * cfx, sqH = sqNom * cfy;
+    doc.setDrawColor(0); doc.setLineWidth(0.2);
+    doc.rect(sqR - sqW, sqB - sqH, sqW, sqH);
+    doc.setTextColor(40, 36, 31); doc.setFontSize(7);
+    doc.text(sqNom + ' mm', sqR - sqW / 2, sqB + 4, { align: 'center' });
 
     doc.save('slou-keyfob-pattern-' + state.shape + '.pdf');
   }
