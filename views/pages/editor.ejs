@@ -134,9 +134,9 @@
         <div>
           <span class="kf__label"><%= e.calib.label %></span>
           <label class="kf__sub" for="kfCalibX"><%= e.calib.x %></label>
-          <input class="kf__input kf__num" id="kfCalibX" type="number" step="0.01" inputmode="decimal" value="20">
+          <input class="kf__input kf__num" id="kfCalibX" type="number" step="0.01" inputmode="decimal" value="18">
           <label class="kf__sub" for="kfCalibY"><%= e.calib.y %></label>
-          <input class="kf__input kf__num" id="kfCalibY" type="number" step="0.01" inputmode="decimal" value="28">
+          <input class="kf__input kf__num" id="kfCalibY" type="number" step="0.01" inputmode="decimal" value="27">
           <p class="kf__note" id="kfCalibNote"></p>
         </div>
 
@@ -961,8 +961,8 @@
     var v = parseFloat(input.value);
     return (v > nominal * 0.7 && v < nominal * 1.4) ? v : nominal;
   }
-  function calibXf() { return 20 / calibValue(calibX, 20); }
-  function calibYf() { return 28 / calibValue(calibY, 28); }
+  function calibXf() { return 18 / calibValue(calibX, 18); }
+  function calibYf() { return 27 / calibValue(calibY, 27); }
   function paintCalib() {
     calibNote.textContent = I18N.calib.hint + ' · × ' + calibXf().toFixed(3) + ' / × ' + calibYf().toFixed(3);
   }
@@ -1105,26 +1105,38 @@
     });
 
     // Calibration rulers, asked for by the owner (2026-10-14). Two of them, one
-    // per axis: 200 mm across the foot of the sheet and 280 mm down its left
-    // edge. Both are drawn `cfx`/`cfy` long like everything else that states a
-    // size — so on the first print (fields at 20 and 29) they are their true
-    // length and show what the printer does to each axis, and once the owner
-    // has typed those two measurements in they print 200 and 280 mm again and
-    // the whole sheet is true size. Nothing else on the sheet is a test: the
-    // keyfob plus these two rulers is the whole pattern.
-    var calHx = 1, calVy = 8, calHy = 250;      // page mm from the top
-    var calLenH = Math.min(200 * cfx, 209), calLenV = Math.min(280 * cfy, 296);
+    // per axis, and each centred on the sheet along its own direction — the
+    // vertical one an equal distance from the top and the bottom edge, the
+    // horizontal one an equal distance from the left and the right; the
+    // horizontal also sits 5 cm up from the bottom. Centring is what he asked
+    // for after a print came out crooked and the top of the vertical ruler was
+    // lost in the printer's margin: a line centred on the page keeps its ends
+    // well inside whatever the machine does with registration.
+    //
+    // Both are drawn `cfx`/`cfy` long like everything else that states a size.
+    // On the first print (fields at their defaults) they are their true length
+    // and show what the printer does to each axis; once the owner has typed the
+    // two measurements in, they print 270 and 180 mm again and the whole sheet
+    // is true size. Those lengths are what A4 leaves once the correction has
+    // enlarged them (the clamps are only a backstop for an extreme printer).
+    var calNomV = 270, calNomH = 180;
+    var calLenV = Math.min(calNomV * cfy, 292);
+    var calVx = 20;                                  // the left side of the sheet
+    var calVy = (297 - calLenV) / 2;                 // equal from top and bottom
+    var calLenH = Math.min(calNomH * cfx, 198);
+    var calHx = (210 - calLenH) / 2;                 // equal from left and right
+    var calHy = 297 - 50;                            // 5 cm up from the bottom
     doc.setDrawColor(0); doc.setLineWidth(0.2);
-    doc.line(calHx, calHy, calHx + calLenH, calHy);          // 200 mm across
+    doc.line(calVx, calVy, calVx, calVy + calLenV);
+    doc.line(calVx - 3, calVy, calVx + 3, calVy);
+    doc.line(calVx - 3, calVy + calLenV, calVx + 3, calVy + calLenV);
+    doc.line(calHx, calHy, calHx + calLenH, calHy);
     doc.line(calHx, calHy - 3, calHx, calHy + 3);
     doc.line(calHx + calLenH, calHy - 3, calHx + calLenH, calHy + 3);
-    doc.line(calVy, 1, calVy, 1 + calLenV);                  // 280 mm down
-    doc.line(calVy - 3, 1, calVy + 3, 1);
-    doc.line(calVy - 3, 1 + calLenV, calVy + 3, 1 + calLenV);
     doc.setTextColor(40, 36, 31); doc.setFontSize(7);
-    doc.text('200 mm', calHx, calHy - 5);
-    doc.text('280 mm', calVy + 6, 9);
-    doc.text(doc.splitTextToSize(P.calibNote, 185), calHx, calHy + 10);
+    doc.text(calNomV + ' mm', calVx + 5, calVy + calLenV - 3);
+    doc.text(calNomH + ' mm', calHx, calHy - 5);
+    doc.text(doc.splitTextToSize(P.calibNote, 175), calVx + 6, calHy + 9);   // clear of the vertical ruler
 
     doc.save('slou-keyfob-pattern-' + state.shape + '.pdf');
   }
