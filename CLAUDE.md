@@ -99,6 +99,23 @@ How it works:
   - Iron slits drawn 1.6 × 0.45 mm.
   - Corner holes: a black awl dot, a circle, and both slits drawn grey with a black border (marked, not punched).
   - Red bracket at the joint, initials as a stamping guide, specs table, 10 mm square and 50 mm ruler.
+  - **Print calibration** (2026-10-14, asked for by the owner): the owner's
+    ML-2160 prints an A4 page 2.5–4 % small — it fits the page to its printable
+    area (202 × 291 mm), which is 96 % across and 97.5 % down, and no printer
+    setting changes it. So the pattern now carries a **200 mm line down the left
+    edge of the sheet, always drawn at its true length** (it is the ruler, not
+    the thing measured — no calibration is applied to it), with the note that
+    says what to do, translated into all 7 locales. The owner measures that
+    line, types the real length in the editor field `KALIBRAVIMAS, CM` (kept in
+    `localStorage`), and everything the sheet states a size for — the template
+    (cut line, slits, hole, initials), the check square, the 50 mm ruler and
+    the four test lines — is drawn `cf = 200 / measured` times larger, so the
+    next print is true size. `cf` is 1 while the field reads 20.
+  - Also for the same reason: a line down the middle of the template (apex to
+    apex, the keyfob's own length) and, at the foot of the sheet, four lines of
+    80/60/40/20 mm 30 mm apart, plus a 50 × 50 mm square with an 80 mm line
+    through it. All of those are scaled by `cf` too, so after calibration they
+    print at the size they say.
 
 ### Status (2026-10-12)
 The stitching and pattern are approved. Work in progress, asked for by the owner, is to make the stitching read as French pricking-iron work, tuned against a reference photo of pricked and stitched samples at 2.7/3.0/3.38/3.85 mm (`renders/il_794xN.1989616036_szkp.webp`):

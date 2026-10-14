@@ -31,6 +31,8 @@
   .kf__sw { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); cursor: pointer; padding: 0; }
   .kf__sw[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
   .kf__input { width: 100%; font: inherit; font-size: 16px; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: #fff; text-transform: uppercase; letter-spacing: 2px; }
+  .kf__num { text-transform: none; letter-spacing: 0; }
+  .kf__note { font-size: 12px; color: var(--muted); margin: 6px 0 0; }
   .kf__actions { display: grid; gap: 10px; }
   .kf__cta { display: block; text-align: center; font: inherit; font-size: 15px; padding: 12px; border-radius: 999px; cursor: pointer;
     border: 1px solid var(--leather-dark); background: var(--leather-dark); color: #f7f1e6; }
@@ -128,6 +130,12 @@
           </dl>
         </div>
 
+        <div>
+          <label class="kf__label" for="kfCalib"><%= e.calib.label %>, cm</label>
+          <input class="kf__input kf__num" id="kfCalib" type="number" step="0.01" min="10" max="30" inputmode="decimal" value="20">
+          <p class="kf__note" id="kfCalibNote"></p>
+        </div>
+
         <div class="kf__actions">
           <a class="kf__cta" href="/#order"><%= e.order %></a>
           <button type="button" class="kf__cta kf__cta--ghost" id="kfPattern"><%= e.pattern.btn %></button>
@@ -138,7 +146,7 @@
   </div>
 </section>
 
-<script type="application/json" id="kfI18n"><%- JSON.stringify({ pattern: e.pattern, measure: e.measure }).replace(/</g, '\\u003c') %></script>
+<script type="application/json" id="kfI18n"><%- JSON.stringify({ pattern: e.pattern, measure: e.measure, calib: e.calib }).replace(/</g, '\\u003c') %></script>
 
 <script type="importmap">
   { "imports": {
@@ -932,6 +940,29 @@
     return b ? (b.getAttribute('aria-label') || b.textContent).trim() : '';
   }
 
+  // Print calibration. The pattern carries a 200 mm line down the edge of the
+  // sheet; the owner prints it, measures what actually came out and types that
+  // length here. The pattern is redrawn with every stated size multiplied by
+  // 20 / measured, so the next print is true size whatever the printer did to
+  // it. 20.00 cm means "the printer is already right" and changes nothing.
+  var calibInput = document.getElementById('kfCalib');
+  var calibNote = document.getElementById('kfCalibNote');
+  function calibValue() {
+    var v = parseFloat(calibInput.value);
+    return (v > 10 && v < 30) ? v : 20;
+  }
+  function paintCalib() {
+    calibNote.textContent = I18N.calib.hint + ' · × ' + (20 / calibValue()).toFixed(3);
+  }
+  try {
+    var savedCalib = window.localStorage.getItem('kfCalib');
+    if (savedCalib) { calibInput.value = savedCalib; }
+  } catch (err) { /* private mode: just do not remember it */ }
+  calibInput.addEventListener('input', function () {
+    try { window.localStorage.setItem('kfCalib', calibInput.value); } catch (err) {}
+    paintCalib();
+  });
+
   function makePattern(fontB64) {
     var P = I18N.pattern, M = I18N.measure;
     var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
@@ -940,10 +971,15 @@
     doc.setFont('DejaVu');
     doc.setLineCap('round');
 
-    // shape cm -> page mm, y flipped; the keyfob sits left of centre, notes on the right
+    // shape cm -> page mm, y flipped; the keyfob sits left of centre, notes on the right.
+    // `cf` is the calibration: everything the sheet states a size for is drawn
+    // that much larger, so the print comes out true size whatever the printer
+    // did to the page. cf = 1 (the untouched file) unless the owner has
+    // measured the 200 mm line and typed what it really came to.
+    var cf = 20 / calibValue();
     var OX = 62, OY = 150;
-    function X(x) { return OX + x * 10; }
-    function Y(y) { return OY - y * 10; }
+    function X(x) { return OX + x * 10 * cf; }
+    function Y(y) { return OY - y * 10 * cf; }
     function poly(pts) {
       for (var k = 0; k < pts.length; k++) {
         var a = pts[k], b = pts[(k + 1) % pts.length];
@@ -963,10 +999,10 @@
     poly(outline(state.shape, 0).getPoints(48).filter(function (p, k, all) {
       return p.distanceTo(all[(k + 1) % all.length]) > 1e-4;
     }));
-    doc.circle(X(0), Y(HOLE_Y), HOLE_R * 10);
+    doc.circle(X(0), Y(HOLE_Y), HOLE_R * 10 * cf);
     doc.setLineWidth(0.1);
-    doc.line(X(0) - 1.5, Y(HOLE_Y), X(0) + 1.5, Y(HOLE_Y));
-    doc.line(X(0), Y(HOLE_Y) - 1.5, X(0), Y(HOLE_Y) + 1.5);
+    doc.line(X(0) - 1.5 * cf, Y(HOLE_Y), X(0) + 1.5 * cf, Y(HOLE_Y));
+    doc.line(X(0), Y(HOLE_Y) - 1.5 * cf, X(0), Y(HOLE_Y) + 1.5 * cf);
 
     // stitch line, faint, then the slits exactly as the iron cuts them
     var holes = current.holes, chords = current.chords, n = holes.length, E = current.E;
@@ -978,8 +1014,8 @@
     // slit centred on hole p, leaning off `dir`; h = half length (mm)
     function slitMark(p, dir, h, width) {
       var sl = slit(dir, 1);
-      doc.setLineWidth(width);
-      doc.line(X(p.x) - sl.x * h, Y(p.y) + sl.y * h, X(p.x) + sl.x * h, Y(p.y) - sl.y * h);
+      doc.setLineWidth(width * cf);
+      doc.line(X(p.x) - sl.x * h * cf, Y(p.y) + sl.y * h * cf, X(p.x) + sl.x * h * cf, Y(p.y) - sl.y * h * cf);
     }
     holes.forEach(function (p, k) {
       var cin = chords[(k + n - 1) % n], cout = chords[k];
@@ -990,9 +1026,9 @@
         [cin, cout].forEach(function (d) { doc.setDrawColor(0); slitMark(p, d, 0.8, 0.45); });
         [cin, cout].forEach(function (d) { doc.setDrawColor(200); slitMark(p, d, 0.8, 0.25); });
         doc.setDrawColor(0);
-        doc.circle(X(p.x), Y(p.y), 0.35, 'F');
+        doc.circle(X(p.x), Y(p.y), 0.35 * cf, 'F');
         doc.setLineWidth(0.15);
-        doc.circle(X(p.x), Y(p.y), 1.3);
+        doc.circle(X(p.x), Y(p.y), 1.3 * cf);
         return;
       }
       // drawn longer than the cut (1.6 mm) so it's easy to see and punch on
@@ -1002,16 +1038,16 @@
     // thread joint: bracket beside the doubled stitches, outside the piece
     var a = holes[E], b = holes[(E + OVERLAP) % n];
     doc.setDrawColor(180, 40, 30); doc.setLineWidth(0.4);
-    var off = -(W / 2 - STITCH_INSET) * 10 - 6;   // left of the keyfob
-    doc.line(OX + off, Y(a.y), OX + off, Y(b.y));
-    doc.line(OX + off, Y(a.y), OX + off + 2, Y(a.y));
-    doc.line(OX + off, Y(b.y), OX + off + 2, Y(b.y));
+    var off = X(-W / 2) - 6;   // left of the keyfob
+    doc.line(off, Y(a.y), off, Y(b.y));
+    doc.line(off, Y(a.y), off + 2, Y(a.y));
+    doc.line(off, Y(b.y), off + 2, Y(b.y));
 
     // initials as a stamping guide
     var L = textLayout();
     if (L) {
       doc.setTextColor(150);
-      doc.setFontSize(L.size * 10 * 72 / 25.4);
+      doc.setFontSize(L.size * 10 * cf * 72 / 25.4);
       doc.text(L.txt, X(L.x), Y(L.y), { align: 'center', baseline: 'middle', angle: L.vertical ? 90 : 0 });
     }
 
@@ -1056,13 +1092,13 @@
     // scale check: a 10 mm square and a 50 mm ruler
     ly += 6;
     doc.setDrawColor(0); doc.setLineWidth(0.2);
-    doc.rect(lx, ly, 10, 10);
+    doc.rect(lx, ly, 10 * cf, 10 * cf);
     doc.text(P.check, lx + 13, ly + 6);
     ly += 18;
-    doc.line(lx, ly, lx + 50, ly);
-    for (var t = 0; t <= 50; t++) { doc.line(lx + t, ly, lx + t, ly - (t % 10 === 0 ? 3 : t % 5 === 0 ? 2 : 1)); }
+    doc.line(lx, ly, lx + 50 * cf, ly);
+    for (var t = 0; t <= 50; t++) { doc.line(lx + t * cf, ly, lx + t * cf, ly - (t % 10 === 0 ? 3 : t % 5 === 0 ? 2 : 1) * cf); }
     doc.setFontSize(7);
-    [0, 10, 20, 30, 40, 50].forEach(function (t) { doc.text(String(t), lx + t, ly + 3.5, { align: 'center' }); });
+    [0, 10, 20, 30, 40, 50].forEach(function (t) { doc.text(String(t), lx + t * cf, ly + 3.5, { align: 'center' }); });
 
     // Print test, asked for by the owner (2026-10-14): a line down the middle
     // of the template, the full 80 mm, and four measuring lines at the foot of
@@ -1073,13 +1109,41 @@
     // length: lay the ruler on it and the keyfob is checked, not just the paper.
     doc.setDrawColor(0); doc.setLineWidth(0.2);
     doc.line(X(0), Y(H / 2), X(0), Y(-H / 2));
-    var tY = 280, tX = 30;
+    var tY = 280, tX = 100;
     doc.setTextColor(40, 36, 31); doc.setFontSize(7);
     [80, 60, 40, 20].forEach(function (h, k) {
       var tx = tX + k * 30;
-      doc.line(tx, tY, tx, tY - h);
+      doc.line(tx, tY, tx, tY - h * cf);
       doc.text(String(h) + ' mm', tx, tY + 4, { align: 'center' });
     });
+
+    // And the owner's other check (2026-10-14): a 50 × 50 mm square with an
+    // 80 mm line through it. The line is longer than the square — 8 cm does not
+    // go into 5 cm — so it is centred on it and stands 15 mm out either side:
+    // the square reads a short measurement, the line a long one, and the two
+    // against the ruler say whether the print is 1:1 in both directions.
+    var cX = 50, cY = 75;                          // the square's centre
+    doc.setDrawColor(0); doc.setLineWidth(0.2);
+    doc.rect(cX - 25 * cf, cY - 25 * cf, 50 * cf, 50 * cf);
+    doc.line(cX - 40 * cf, cY, cX + 40 * cf, cY);
+    doc.text('50 mm', cX, cY + 25 * cf + 4, { align: 'center' });
+    doc.text('80 mm', cX - 40 * cf + 3, cY + 4);
+
+    // The calibration line, asked for by the owner (2026-10-14): 200 mm down
+    // the edge of the sheet, and — unlike everything else here — always drawn
+    // at its true length. It is the ruler, not the thing measured: print the
+    // sheet, measure this line, and type what it really comes to into the
+    // editor. The keyfob and all the checks are then redrawn larger or smaller
+    // to compensate, and this line stays put so the next measurement means the
+    // same thing. Worst case — the printer is honest — it reads 200 mm and
+    // nothing changes.
+    doc.setDrawColor(0); doc.setLineWidth(0.2);
+    doc.line(10, 30, 10, 230);
+    doc.line(7, 30, 13, 30);
+    doc.line(7, 230, 13, 230);
+    doc.setTextColor(40, 36, 31); doc.setFontSize(7);
+    doc.text('200 mm', 10, 236);
+    doc.text(doc.splitTextToSize(P.calibNote, 80), 10, 244);
 
     doc.save('slou-keyfob-pattern-' + state.shape + '.pdf');
   }
@@ -1109,6 +1173,7 @@
   }
   new ResizeObserver(resize).observe(stage);
 
+  paintCalib();
   build();
   applyColors();
   resize();
