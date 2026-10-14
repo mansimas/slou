@@ -1,6 +1,20 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-14 23:15] - Log every request here - Owner asked that this log be filled in for every request he makes, so the history and the reason behind each change survive. This entry is the first under that rule.
+[2026-10-14 23:05] - Keep calibration in browser - The two calibration numbers are saved in localStorage, so closing the browser and coming back keeps them (tested: written on one load, read back on the next). Deliberately not server-side: another PC means another printer and another pair of numbers.
+[2026-10-14 22:55] - Final calibration sheet layout - Vertical ruler 270 mm, 1 cm from the left, centred vertically; horizontal ruler 180 mm, 4 cm up from the bottom, centred horizontally; 50 x 50 mm square bottom right, its foot 1 cm above the ruler. Owner: "viskas tiksliai atitinka, susikalibruoja tobulai".
+[2026-10-14 22:45] - Centre both calibration rulers - A crooked print lost the top of the vertical ruler in the printer margin, so it is centred vertically now (equal distance from top and bottom) and the horizontal one centred horizontally.
+[2026-10-14 22:35] - Compensate the ruler as well - Printed with the value he entered and the ruler still read 19.12 cm: it had been left uncompensated on purpose as a fixed reference, which was the wrong call. It is now drawn long like everything else, so after calibrating it reads its true length.
+[2026-10-14 22:15] - Two rulers, two fields - One factor could not fix both axes: this printer takes 4% off the width and 2.5% off the height. Pattern gets a vertical and a horizontal ruler, the editor two fields, and X and Y are scaled by their own factor.
+[2026-10-14 22:05] - Only rulers left on sheet - Owner had the middle line, the four 80/60/40/20 lines, the 50 x 50 square and the old 10 mm square / 50 mm ruler taken off, leaving the keyfob and the calibration rulers.
+[2026-10-14 21:50] - Print calibration note on sheet - "If the pattern does not come out 3 x 8 cm, measure this line and enter its length on the editor page", in all seven locales, so a customer knows what to do without reading the site.
+[2026-10-14 21:30] - Calibration line in the editor - First version: a 200 mm line down the left edge plus one editor field, so the customer corrects the print in the editor instead of in printer settings. Superseded by the two-ruler version the same evening.
+[2026-10-14 21:20] - Measuring lines for diagnosis - At his request: a line down the middle of the keyfob and four lines of 80/60/40/20 mm, 30 mm apart, at the foot of the sheet. Taken off again an hour later.
+[2026-10-14 21:10] - Square and 80 mm line - Also for diagnosis: a 50 x 50 mm square with an 80 mm line through it, to compare a short and a long measurement in one place. Removed with the other test marks.
+[2026-10-14 17:10] - Dimensions were the printer - Owner reported the keyfob pattern was not 8 x 3 cm. The PDF's own coordinates say the cut line is exactly 30.000 x 80.000 mm, and his printed 50 mm ruler measured 48 mm: the ML-2160 fits the page into its printable area, ~4% short across and 2.5% down.
+[2026-10-14 17:00] - Read geometry out of PDF - Rasterising was slow and coarse for checking a print claim; reading the drawing operators from the PDF content stream gives exact millimetres (cut line x 47.000..77.000, y 107.000..187.000 mm). Now the way to check any pattern claim.
+
 [2026-10-07 13:12] - Restart script reloads slou - package.json: new scripts.restart = sails www --prod && pm2 reload slou, so rr / npm run restart touches only slou on the shared pm2 box
 
 [2026-08-25 19:45] - Normalise admin exclusion - Admin pages still showed on /elist: paths were compared raw, so /estats?x=1 and /estats/ slipped past. Query strings and trailing slashes are now stripped before comparing, and the paths come from the live route table. Any other page still counts, so new links need no change.

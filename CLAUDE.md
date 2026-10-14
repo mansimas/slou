@@ -9,6 +9,8 @@ Sails.js storefront for handmade leather goods (slou.lt). No database.
 - **Never `git commit` or `git push`.** Leave changes uncommitted for the owner.
 - **Change only what was asked.** Don't carry a tweak over to parts already approved (e.g. a PDF change must not touch the 3D stitching). Offer related changes in one line instead.
 - `config/routes.js` is in a public repo: unlisted pages (orders) are declared in `config/local.js`, which is gitignored.
+- **Keep `README_updates.md` up to date** (owner's rule, 2026-10-14): every request he makes gets one line there, in that file's format — `[date time] - [message, max 5 words] - [description, max 50 words]`, newest first, one line per entry, never wrapped — so the history and the reason behind each change survive. Say *why* it was done, not just what.
+- **Everything the browser can remember lives in `localStorage`, never on the server** (owner's rule, 2026-10-14): the calibration numbers are per PC, because another PC means another printer and another pair of numbers.
 
 ## /editor: 3D leather keyfob designer
 Route `GET /editor` → `PagesController.editor` → `views/pages/editor.ejs` (layout `slou`). three.js 0.160.0 comes from jsDelivr via an import map. Scene units are **cm**. The page has:

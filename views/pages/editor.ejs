@@ -971,10 +971,12 @@
       var saved = window.localStorage.getItem(pair[0]);
       if (saved) { pair[1].value = saved; }
     } catch (err) { /* private mode: just do not remember it */ }
-    pair[1].addEventListener('input', function () {
+    function keep() {
       try { window.localStorage.setItem(pair[0], pair[1].value); } catch (err) {}
       paintCalib();
-    });
+    }
+    pair[1].addEventListener('input', keep);
+    pair[1].addEventListener('change', keep);
   });
 
   function makePattern(fontB64) {
