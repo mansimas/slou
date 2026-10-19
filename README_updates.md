@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-19 13:39] - Auto commit, push, reload - Owner asked that every change be committed and pushed automatically, its message taken from this log; editing a line here rewrites that commit and force-pushes. The localhost:1337 server then restarts and the Chrome tab reloads, so the newest version is always on screen.
 [2026-10-14 23:15] - Log every request here - Owner asked that this log be filled in for every request he makes, so the history and the reason behind each change survive. This entry is the first under that rule.
 [2026-10-14 23:05] - Keep calibration in browser - The two calibration numbers are saved in localStorage, so closing the browser and coming back keeps them (tested: written on one load, read back on the next). Deliberately not server-side: another PC means another printer and another pair of numbers.
 [2026-10-14 22:55] - Final calibration sheet layout - Vertical ruler 270 mm, 1 cm from the left, centred vertically; horizontal ruler 180 mm, 4 cm up from the bottom, centred horizontally; 50 x 50 mm square bottom right, its foot 1 cm above the ruler. Owner: "viskas tiksliai atitinka, susikalibruoja tobulai".
