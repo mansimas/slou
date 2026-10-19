@@ -245,6 +245,10 @@ locked keyfob stitch, unchanged:
       its own narrow edge right to it. Easing down the side made the corner
       stick out. Easing along the top widened the glossy band into a bend
       (the owner, 2026-10-20).
+      At a sharp corner `leatherPiece` places the corner point where the two
+      set-in edges meet (each with its own rounding), not along the bisector.
+      So the top edge runs straight and horizontal right into the side, square
+      to it. A single bisector mitre ran it off at a slant.
     - `leatherPiece` adds no resample points within 2 mm of a sharp corner,
       because points closer than the edge's inset cross over and fold a flap.
     On the owner's piece the brown slit at the last hole still shows beside

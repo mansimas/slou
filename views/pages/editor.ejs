@@ -916,6 +916,17 @@
         var n1 = new THREE.Vector2(p.y - a.y, a.x - p.x).normalize(), n2 = new THREE.Vector2(b.y - p.y, p.x - b.x).normalize();
         var nb = n1.clone().add(n2).normalize(), miter = 1 / Math.max(0.5, nb.dot(n1));
         var s = stack(p, li > 0), ring = [], ex = ramp && !li ? ramp(p) : 0;
+        // At a sharp corner each side keeps its own rounding right up to it, and
+        // the corner point sits where the two set-in edges meet. A single mitre
+        // along the bisector made the edge run off at a slant there (the owner,
+        // 2026-10-20: the top edge must run straight across into the side).
+        var corner = n1.dot(n2) < Math.cos(Math.PI / 6), sA = corner ? stack(a, li > 0) : s, sB = corner ? stack(b, li > 0) : s;
+        var det = n1.x * n2.y - n1.y * n2.x;
+        function setIn(zz, d) {   // the point at height zz, d = the plain set-in
+          if (!corner) { return new THREE.Vector2(p.x - nb.x * d * miter, p.y - nb.y * d * miter); }
+          var dA = inset(zz, sA, ex) + (d - inset(zz, s, ex)), dB = inset(zz, sB, ex) + (d - inset(zz, s, ex));
+          return new THREE.Vector2(p.x - (dA * n2.y - n1.y * dB) / det, p.y - (n1.x * dB - dA * n2.x) / det);
+        }
         // the profile across the edge, front face to back, spaced by angle so
         // it is fine where the dome turns into the faces
         // In the stack each layer's edge runs on 0.08 mm past its faces, tucked
@@ -925,14 +936,14 @@
         for (var j = 0; j <= S; j++) {
           var fz = j === 0 ? z + h / 2 : j === S ? z - h / 2 : null;   // a face, if this is its edge
           var e = fz !== null && Math.abs(fz) < T - 1e-6 ? 0.008 * s : 0;   // glued faces only, not the stack's outer ones
-          var zz = z + (h / 2 + e) * Math.sin(Math.PI / 2 - j / S * Math.PI), d = (inset(zz, s, ex) + (e ? 0.003 : 0)) * miter;
+          var zz = z + (h / 2 + e) * Math.sin(Math.PI / 2 - j / S * Math.PI), d = inset(zz, s, ex) + (e ? 0.003 : 0), P = setIn(zz, d);
           // its own colour, darkened a touch within ~0.15 mm of a glued face:
           // the glue line
           var gd = 1e9;
           if (Math.abs(z + h / 2) < T - 1e-6) { gd = Math.abs(zz - z - h / 2); }
           if (Math.abs(z - h / 2) < T - 1e-6) { gd = Math.min(gd, Math.abs(zz - z + h / 2)); }
           var g = s * Math.exp(-Math.pow(gd / 0.012, 2));
-          var v = vert(p.x - nb.x * d, p.y - nb.y * d, zz, g ? ownCol.clone().multiplyScalar(1 - GLUE_LINE * g) : ownCol, true);
+          var v = vert(P.x, P.y, zz, g ? ownCol.clone().multiplyScalar(1 - GLUE_LINE * g) : ownCol, true);
           // the normal straight off the dome, not averaged from this piece's
           // own faces: so the shading runs on across the joints between layers
           var slope = (inset(zz + 1e-4, s, ex) - inset(zz - 1e-4, s, ex)) / 2e-4;
@@ -946,9 +957,8 @@
         // a glued face stops 0.1 mm short of the edge: run right out to it, its
         // rim showed through the joint as a light hairline
         var gf = Math.abs(z + h / 2) < T - 1e-6 ? 0.01 * s : 0, gb = Math.abs(z - h / 2) < T - 1e-6 ? 0.01 * s : 0;
-        var df = (inset(z + h / 2, s, ex) + gf) * miter, db = (inset(z - h / 2, s, ex) + gb) * miter;
-        capLoops[0][li].push(new THREE.Vector2(p.x - nb.x * df, p.y - nb.y * df));
-        capLoops[1][li].push(new THREE.Vector2(p.x - nb.x * db, p.y - nb.y * db));
+        capLoops[0][li].push(setIn(z + h / 2, inset(z + h / 2, s, ex) + gf));
+        capLoops[1][li].push(setIn(z - h / 2, inset(z - h / 2, s, ex) + gb));
       });
       for (var i = 0; i < m; i++) {
         var R0 = rings[i], R1 = rings[(i + 1) % m];

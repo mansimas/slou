@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-20 00:45] - Square pocket corner edge - Owner: next to the side, the pocket's top edge ran off at a slant instead of meeting the side square. The corner point now sits where the two straight edges meet, so the top edge runs horizontally straight into the side.
 [2026-10-20 00:30] - Straight glossy edge to corner - Owner: the glossy edge bent oddly at the very end. It widened over the last 2.5 mm before the pocket corner, easing into the side dome. It now stays one straight narrow band right to the corner, where the side edge begins.
 [2026-10-20 00:15] - Keep edge width under thread - Owner: the slope under the thread widened the glossy edge into the green. Removed it: the edge is the same narrow width everywhere, the green stays matte up to it, and the thread lies over the normal edge.
 [2026-10-19 23:50] - Ramp under thread, flush corner - Owner painted 2.png: the green edge right under the thread should slope down so the thread lies on leather, and the pocket corner stuck out. Edge sloped off only under the threads, the thread follows it; corner flap removed, corner kept square.
