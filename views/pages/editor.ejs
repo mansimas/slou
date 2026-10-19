@@ -188,8 +188,7 @@
   // back turn to the front one inside that gap.
   var RING = <%- JSON.stringify(ring) %>;
   var RING_GAP = 0.26;
-  var RING_NECK = 0.15;   // how much narrower the wire is where it crosses the gap
-  var RING_FULL = 0.12;   // and how much fuller (thicker along the axis), seen from the side
+  var RING_NECK = 0.15;   // how much thinner the wire is where it crosses the gap
   // Its cut ends: RING_CUT is how far the outer face of each end sits back
   // from the inner one (a slanted cut, not square across the wire — the back
   // of each end reaches past its front), RING_ROUND the radius the corners of
@@ -376,10 +375,9 @@
   // first of them set back by the slant, vertex by vertex. `wAt(u)` scales the
   // wire's radial width `w` along the sweep (1 = full), and `oAt(u)` blends
   // the section from its chamfered corners (0) to rounded ones (1), radius
-  // `ht * 0.95` — the oval the wire takes where it crosses the split — and
-  // thickens it along the axis by `full` there, so the oval reads full.
-  function bandGeo(R, w, t, a0, span, yAt, cut, round, wAt, oAt, full) {
-    var hw = w / 2, ht = t / 2, ch = ht * 0.35, ro = ht * 0.95, M = 3;
+  // `ht * 0.75` — the oval the wire takes where it crosses the split.
+  function bandGeo(R, w, t, a0, span, yAt, cut, round, wAt, oAt) {
+    var hw = w / 2, ht = t / 2, ch = ht * 0.35, ro = ht * 0.75, M = 3;
     // the section, CCW in (radial, axial): each corner M + 1 points, laid
     // along the chamfer in `sec` and along the quarter-circle in `oval`
     var sec = [], oval = [];
@@ -400,7 +398,7 @@
         var d = back(j) / R, a = end ? a0 + span - d : a0 + d, u = (a - a0) / span,
             sa = Math.sin(a), ca = Math.cos(a), y = yAt(u), o = oAt(u),
             x = (sec[j][0] + (oval[j][0] - sec[j][0]) * o) * wAt(u),
-            z = (sec[j][1] + (oval[j][1] - sec[j][1]) * o) * (1 + full * o);
+            z = sec[j][1] + (oval[j][1] - sec[j][1]) * o;
         x = Math.sign(x) * (Math.abs(x) - inset);
         z = Math.sign(z) * (Math.abs(z) - inset);
         v.push((R + x) * sa, y + z, (R + x) * ca);
@@ -839,7 +837,7 @@
       return s <= 0 || s >= 1 ? 0 : Math.pow(Math.sin(Math.PI * s), 1.5);
     }
     function wAt(u) { return 1 - RING_NECK * crossing(u); }
-    var r = new THREE.Mesh(bandGeo(ri + wire / 2, wire, th, 0, total, yAt, RING_CUT, RING_ROUND, wAt, crossing, RING_FULL), ringMat);
+    var r = new THREE.Mesh(bandGeo(ri + wire / 2, wire, th, 0, total, yAt, RING_CUT, RING_ROUND, wAt, crossing), ringMat);
     r.rotation.z = Math.PI / 2;   // stand the ring up in the fob's plane
     r.position.set(0, HOLE_Y + ri + wire / 2, 0);   // the band centred on the hole
     fob.add(r);

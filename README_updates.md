@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-19 14:38] - Revert fuller ring split - Owner did not like the fuller, rounder crossing seen from the side (near-full rounding, 12% thicker). Put back exactly as before it: corner radius 0.75 of half-thickness, normal thickness.
 [2026-10-19 14:37] - Fuller round ring split - Owner wanted the crossing between the ring ends rounder and fuller seen from the side. There its section now rounds off almost fully (corner radius 0.95 of half-thickness) and swells 12% thicker along the axis, on the same curve; rest unchanged.
 [2026-10-19 14:33] - Oval section in ring split - Owner wanted the short crossing between the ring ends a bit more oval and softer, not overdone, only there. Its section's chamfered corners now round off along the same curve as the narrowing; the rest of the band is unchanged.
 [2026-10-19 14:29] - Rounder ring split crossing - Owner found the crossing between the ring ends too angular; asked for slightly rounder, not overdone. The ramp bends in and out softer (smootherstep), the narrowing meets full width without a corner, and the band is sampled finer so it reads as a curve.
