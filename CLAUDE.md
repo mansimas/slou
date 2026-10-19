@@ -233,6 +233,17 @@ locked keyfob stitch, unchanged:
     instead of standing up steep (`pavyzdziai/korteline/1.png`). Mini
     corrections only here. A slanted pocket corner and a wide band worked
     down along the edge were both tried and reverted the same day.
+    From `pavyzdziai/korteline/2.png` (the owner's paint-over, side view):
+    - Right under the threads only (~1 mm wide, `pocketRamp`), the pocket's
+      top edge is sloped off `POCKET_RAMP` 0.9 mm on its outer side
+      (`leatherPiece(..., ramp)` → `inset(zz, s, ex)`), and the thread follows
+      that slope (`layPair`). So there is green leather under the thread all
+      the way over the edge, no gap.
+    - The pocket side keeps the stack's dome right up to its square top
+      corner, and only eases to the top's own edge along the first 2.5 mm of
+      the top (`pocketStack`). Easing it down the side made the corner stick out.
+    - `leatherPiece` adds no resample points within 2 mm of a sharp corner,
+      because points closer than the edge's inset cross over and fold a flap.
     On the owner's piece the brown slit at the last hole still shows beside
     the thread; that is right. Tried and rejected on 2026-10-19: threads placed
     inside the slit at different points along it, and the pair centred on

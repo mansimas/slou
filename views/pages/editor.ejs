@@ -255,6 +255,7 @@
   // where it wraps it (the owner: "vos vos", only just): 0.25 mm at most: a soft hollow in its
   // rounded edge under the threads (2026-10-19).
   var POCKET_DENT = 0.025;
+  var POCKET_RAMP = 0.09;   // the pocket edge sloped off 0.9 mm under the threads
   function pocketTop(x) {
     var f = Math.min(1, Math.max(0, (POCKET_X - x) / (2 * POCKET_X)));
     return POCKET_HI + (POCKET_LO - POCKET_HI) * f;
@@ -858,7 +859,9 @@
   // `mats` = [front face, edge, back face].
   // `squeeze(x, y, zz)`, if given, moves each point of the piece by that much
   // along z: where a thread pulled tight presses the leather in.
-  function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze) {
+  // `ramp(p)`, if given, is how far the outer face's edge is sloped off at
+  // outline point p (under a thread crossing it).
+  function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp) {
     var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T = CARD_THICK / 2, domeNormals = [];
     function vert(x, y, zz, c, edge) {
       pos.push(x, y, zz + (squeeze && edge ? squeeze(x, y, zz) : 0)); uv.push(x, y); col.push(c.r, c.g, c.b);
@@ -866,8 +869,10 @@
     }
     // How far in from the outline the edge is at height zz: an elliptical
     // dome, flat-crowned in the middle and meeting the faces with no corner.
-    function inset(zz, s) {
+    function inset(zz, s, ex) {
       var own = CARD_ROUND * (1 - Math.sqrt(Math.max(0, 1 - Math.pow((zz - z) / (h / 2), 2))));
+      // the ramp: more rounding on the outer half only, the same elliptical shape
+      if (ex && Math.abs(zz) > Math.abs(z)) { own += ex * (1 - Math.sqrt(Math.max(0, 1 - Math.pow((Math.abs(zz) - Math.abs(z)) / (h / 2), 2)))); }
       var all = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - Math.pow(zz / T, 2))));
       return own + (all - own) * s;
     }
@@ -875,9 +880,24 @@
     // run; the material on the left, so the outline runs CCW and holes CW
     loops = loops.map(function (pts, li) {
       var out = [];
+      // No extra points within 2 mm of a sharp corner (the pockets' square top
+      // corners): the edge there is set in by up to ~1 mm, and points closer to
+      // the corner than that cross over each other when set in, which stood up
+      // as a flap at the corner (the owner's 2.png).
+      var m = pts.length;
+      function sharp(i) {
+        var a = pts[(i + m - 1) % m], p = pts[i], b = pts[(i + 1) % m];
+        return p.clone().sub(a).normalize().dot(b.clone().sub(p).normalize()) < Math.cos(Math.PI / 6);
+      }
       pts.forEach(function (p, i) {
-        var q = pts[(i + 1) % pts.length], k = Math.max(1, Math.ceil(p.distanceTo(q) / 0.05));
-        for (var j = 0; j < k; j++) { out.push(p.clone().lerp(q, j / k)); }
+        var q = pts[(i + 1) % m], L = p.distanceTo(q), k = Math.max(1, Math.ceil(L / 0.05));
+        var c0 = sharp(i) ? 0.2 : 0, c1 = sharp((i + 1) % m) ? 0.2 : 0;
+        out.push(p.clone());
+        for (var j = 1; j < k; j++) {
+          var d = L * j / k;
+          if (d < c0 || L - d < c1) { continue; }
+          out.push(p.clone().lerp(q, j / k));
+        }
       });
       if (THREE.ShapeUtils.isClockWise(out) !== (li > 0)) { out.reverse(); }
       return out;
@@ -891,7 +911,7 @@
         // outward (away from the leather), mitred at corners
         var n1 = new THREE.Vector2(p.y - a.y, a.x - p.x).normalize(), n2 = new THREE.Vector2(b.y - p.y, p.x - b.x).normalize();
         var nb = n1.clone().add(n2).normalize(), miter = 1 / Math.max(0.5, nb.dot(n1));
-        var s = stack(p, li > 0), ring = [];
+        var s = stack(p, li > 0), ring = [], ex = ramp && !li ? ramp(p) : 0;
         // the profile across the edge, front face to back, spaced by angle so
         // it is fine where the dome turns into the faces
         // In the stack each layer's edge runs on 0.08 mm past its faces, tucked
@@ -901,7 +921,7 @@
         for (var j = 0; j <= S; j++) {
           var fz = j === 0 ? z + h / 2 : j === S ? z - h / 2 : null;   // a face, if this is its edge
           var e = fz !== null && Math.abs(fz) < T - 1e-6 ? 0.008 * s : 0;   // glued faces only, not the stack's outer ones
-          var zz = z + (h / 2 + e) * Math.sin(Math.PI / 2 - j / S * Math.PI), d = (inset(zz, s) + (e ? 0.003 : 0)) * miter;
+          var zz = z + (h / 2 + e) * Math.sin(Math.PI / 2 - j / S * Math.PI), d = (inset(zz, s, ex) + (e ? 0.003 : 0)) * miter;
           // its own colour, darkened a touch within ~0.15 mm of a glued face:
           // the glue line
           var gd = 1e9;
@@ -911,7 +931,7 @@
           var v = vert(p.x - nb.x * d, p.y - nb.y * d, zz, g ? ownCol.clone().multiplyScalar(1 - GLUE_LINE * g) : ownCol, true);
           // the normal straight off the dome, not averaged from this piece's
           // own faces: so the shading runs on across the joints between layers
-          var slope = (inset(zz + 1e-4, s) - inset(zz - 1e-4, s)) / 2e-4;
+          var slope = (inset(zz + 1e-4, s, ex) - inset(zz - 1e-4, s, ex)) / 2e-4;
           domeNormals.push([v, nb.x, nb.y, isFinite(slope) ? slope : 1e3]);
           ring.push(v);
         }
@@ -919,7 +939,7 @@
         // a glued face stops 0.1 mm short of the edge: run right out to it, its
         // rim showed through the joint as a light hairline
         var gf = Math.abs(z + h / 2) < T - 1e-6 ? 0.01 * s : 0, gb = Math.abs(z - h / 2) < T - 1e-6 ? 0.01 * s : 0;
-        var df = (inset(z + h / 2, s) + gf) * miter, db = (inset(z - h / 2, s) + gb) * miter;
+        var df = (inset(z + h / 2, s, ex) + gf) * miter, db = (inset(z - h / 2, s, ex) + gb) * miter;
         capLoops[0][li].push(new THREE.Vector2(p.x - nb.x * df, p.y - nb.y * df));
         capLoops[1][li].push(new THREE.Vector2(p.x - nb.x * db, p.y - nb.y * db));
       });
@@ -978,12 +998,13 @@
       function bodyStack(p) { return 1 - ease((p.y - pocketTop(p.x)) / 0.12); }
       // A pocket is in the stack along the stitched sides and bottom; its top
       // and the window are its own edges.
-      // (eased over the last 1.5 mm below the pocket top along the sides, so the
-      // edge does not change shape all at once at the corner)
+      // The side keeps the stack's dome right up to the square top corner, so
+      // nothing stands proud there (the owner's 2.png); the change to the top's
+      // own edge is eased along the top over its first 2.5 mm instead.
       function pocketStack(p, hole) {
         if (hole) { return 0; }
-        if (Math.abs(p.x) > CARD_W / 2 - 1e-3) { return ease((pocketTop(p.x) - p.y) / 0.15); }
-        return p.y < POCKET_LO - 0.3 ? 1 : 0;
+        if (Math.abs(p.x) > CARD_W / 2 - 1e-3 || p.y < POCKET_LO - 0.3) { return 1; }
+        return 1 - ease((CARD_W / 2 - Math.abs(p.x)) / 0.25);
       }
       // Burnished edge shades: each piece its own, a shade darker than its
       // grain. Seen from the side, the glued stack shows all four: green, brown,
@@ -1014,9 +1035,23 @@
           return -Math.sign(zz) * POCKET_DENT * Math.min(1, w) * Math.max(0, t);
         };
       }
+      // Right under the threads the pocket's top edge is sloped off on its
+      // outer side (the owner's 1.png and 2.png, 2026-10-19), POCKET_RAMP back
+      // from the edge, only as wide as the threads (~1 mm), so they lie on
+      // leather all the way over and down, with no gap and no steep shoulder.
+      function pocketRamp(sg) {
+        return function (p) {
+          var w = 0;
+          crossings.forEach(function (cr) {
+            if (cr.sg !== sg) { return; }
+            w = Math.max(w, Math.exp(-Math.pow(Math.hypot(p.x - cr.E.x, p.y - cr.E.y) / 0.07, 2)));
+          });
+          return POCKET_RAMP * w;
+        };
+      }
       addPockets = function () {
-        fob.add(leatherPiece([pocketLoop, windowLoop], CARD_POCKET, zp, pocketStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol, pocketDent(1)));
-        fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, pocketStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, pocketDent(-1)));
+        fob.add(leatherPiece([pocketLoop, windowLoop], CARD_POCKET, zp, pocketStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol, pocketDent(1), pocketRamp(1)));
+        fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, pocketStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, pocketDent(-1), pocketRamp(-1)));
       };
       fob.add(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol));
       fob.add(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol));
@@ -1156,7 +1191,16 @@
         // one long easy slope, not a steep drop (the owner, 2026-10-19): it
         // starts to lean down 1 mm before the edge, pressing the edge in, and
         // runs straight on to the hole without levelling out on the body.
-        var seq = [[e - dir * 0.14, zh + lift], [e - dir * 0.06, zh + side * (c * 0.5 - POCKET_DENT * 0.3)]];
+        // Lying on the edge as sloped under it: an ellipse R deep over the
+        // pocket's outer half, so the thread follows it, half sunk, from the
+        // face round to where it leaves for the body's hole.
+        var R = CARD_ROUND + POCKET_RAMP, hh = CARD_POCKET / 2, zc = zh - side * hh, reff = THREAD_R * 0.5;
+        var seq = [[e - dir * (R + 0.05), zh + side * reff]];
+        for (var k = 8; k >= 1; k--) {
+          var ph = k / 8 * Math.PI / 2, L = Math.hypot(hh * Math.cos(ph), R * Math.sin(ph));
+          seq.push([e - dir * R * (1 - Math.cos(ph)) + dir * reff * hh * Math.cos(ph) / L,
+                    zc + side * (hh * Math.sin(ph) + reff * R * Math.sin(ph) / L)]);
+        }
         if (!hiA) { seq.reverse(); }
         seq.forEach(function (q) { pts.push(at(fa, q[0], q[1], spreadAt(q[0] / len))); });
         crossings.push({ E: at(fa, e, 0, 0), u: u.clone().multiplyScalar(dir), sg: Math.sign(zh) });
