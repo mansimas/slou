@@ -193,16 +193,38 @@ locked keyfob stitch, unchanged:
     hugs the pocket edge. Its end hole is in the body, `POCKET_END` (~2 mm)
     *above* the pocket edge, and the hole before it is about as far below, so
     the stitch climbs over the edge. It is one of the doubled end stitches,
-    so it is sewn twice, which is the reinforcement. In 3D, `lay()` sets a
-    stitch between two levels in two halves: flat on the pocket to the edge,
-    then down over the 1.2 mm edge into the body hole. A single straight
-    strand would cut through the edge or hang in the air. On the PDF those
-    holes are on the body template only.
+    so it is sewn twice, which is the reinforcement. On the PDF those holes
+    are on the body template only.
+  - That stitch is pulled hard, and the owner was firm about it: no gap
+    anywhere between thread and leather seen from the side, and the leather
+    pressed in a little under it. So in 3D `lay()` builds it from four pieces
+    that follow the leather: flat on the pocket to where the edge starts to
+    round, over the rounding, straight down the edge face (the thread 60%
+    into it), then flat on the body into the hole. All four sit deeper than a
+    plain stitch (no lift). A single strand, or two halves (tried first),
+    left a wedge of air under the thread.
 - Edges (the owner, 2026-10-19): rounded with an edge beveler and burnished
-  with Tokonole for a natural sheen. Each piece is rounded over
-  `CARD_BEVEL 0.3 mm` in 6 steps, and the edges use `burnished()`: a satin
-  physical material with a light clearcoat, a shade darker than the grain
-  (×0.62). Card holder only: the keyfob keeps `edgeMat` and its 3-step bevel.
+  with Tokonole for a natural sheen, and not all alike. The pieces are built
+  by `leatherPiece()`, not ExtrudeGeometry, because ExtrudeGeometry rounds
+  every edge the same.
+  - Where the four pieces are glued (the stitched sides and bottom) the edge
+    is one polished dome across the whole 5.4 mm, "like a little hill, not a
+    cut-off corner". It is elliptical, `CARD_DOME` 1 mm deep, flat-crowned,
+    and meets the faces with no corner. It has one shade between the two
+    leathers, and no line between the layers.
+  - Where a piece ends on its own (the pocket tops, the window, the bodies
+    above the pockets) it has its own dome, `CARD_ROUND` 0.5 mm deep, in its
+    own shade. A body eases from the stack to its own edge over the first
+    1.2 mm above the pocket edge.
+  - To keep the joints invisible, the normals come straight off the dome,
+    not from each piece's own faces. Each layer's edge tucks 0.08 mm past
+    its glued faces, 0.03 mm under its neighbour, and its glued faces stop
+    0.1 mm short of the edge. Without those three, a light hairline showed
+    at every joint.
+  - The edge colour is in vertex colours (`burnished()`: a satin physical
+    material with a light clearcoat, ×0.62 of the grain), so a leather or
+    pocket colour change rebuilds the card holder. Card holder only: the
+    keyfob keeps `edgeMat` and its 3-step extruded bevel.
 - **Work on the card holder only** (the owner, 2026-10-19). Do not change
   the keyfob unless the owner names it, and keep shared code behaving as
   before for it.
