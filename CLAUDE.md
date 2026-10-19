@@ -220,6 +220,14 @@ locked keyfob stitch, unchanged:
     straight into the body hole, with no levelling out on the brown. The tube
     follows straight runs with quadratic-rounded corners, not Catmull-Rom,
     which swung the thread out into the air at the bend.
+    Where the threads cross the green edge, the rounded edge itself is
+    pressed in under them (`POCKET_DENT` 0.25 mm, ~0.6 mm wide): only the
+    edge ring moves (`vert(..., edge)`), nothing at the glued face, deepest high
+    on the dome, and none right at the outer face so it stays joined to the flat
+    face. Tried and dropped: a dark shadow decal on the face (its square showed
+    and it covered the thread), and 0.2 mm edge sampling (the inset outline
+    crossed itself at the pocket corners and threw up a flap). The pocket side
+    eases into the glued-stack dome over 1.5 mm below its top (`pocketStack`).
     On the owner's piece the brown slit at the last hole still shows beside
     the thread; that is right. Tried and rejected on 2026-10-19: threads placed
     inside the slit at different points along it, and the pair centred on

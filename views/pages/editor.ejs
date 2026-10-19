@@ -252,8 +252,9 @@
   // does not run far over the brown (the owner, 2026-10-19).
   var POCKET_END = 0.1;
   // ...and pulled so tight it squeezes the green pocket's edge a touch thinner
-  // where it wraps it (the owner: "vos vos", only just): 0.12 mm at most.
-  var POCKET_DENT = 0.012;
+  // where it wraps it (the owner: "vos vos", only just): 0.25 mm at most: a soft hollow in its
+  // rounded edge under the threads (2026-10-19).
+  var POCKET_DENT = 0.025;
   function pocketTop(x) {
     var f = Math.min(1, Math.max(0, (POCKET_X - x) / (2 * POCKET_X)));
     return POCKET_HI + (POCKET_LO - POCKET_HI) * f;
@@ -859,8 +860,8 @@
   // along z: where a thread pulled tight presses the leather in.
   function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze) {
     var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T = CARD_THICK / 2, domeNormals = [];
-    function vert(x, y, zz, c) {
-      pos.push(x, y, zz + (squeeze ? squeeze(x, y, zz) : 0)); uv.push(x, y); col.push(c.r, c.g, c.b);
+    function vert(x, y, zz, c, edge) {
+      pos.push(x, y, zz + (squeeze && edge ? squeeze(x, y, zz) : 0)); uv.push(x, y); col.push(c.r, c.g, c.b);
       return pos.length / 3 - 1;
     }
     // How far in from the outline the edge is at height zz: an elliptical
@@ -907,7 +908,7 @@
           if (Math.abs(z + h / 2) < T - 1e-6) { gd = Math.abs(zz - z - h / 2); }
           if (Math.abs(z - h / 2) < T - 1e-6) { gd = Math.min(gd, Math.abs(zz - z + h / 2)); }
           var g = s * Math.exp(-Math.pow(gd / 0.012, 2));
-          var v = vert(p.x - nb.x * d, p.y - nb.y * d, zz, g ? ownCol.clone().multiplyScalar(1 - GLUE_LINE * g) : ownCol);
+          var v = vert(p.x - nb.x * d, p.y - nb.y * d, zz, g ? ownCol.clone().multiplyScalar(1 - GLUE_LINE * g) : ownCol, true);
           // the normal straight off the dome, not averaged from this piece's
           // own faces: so the shading runs on across the joints between layers
           var slope = (inset(zz + 1e-4, s) - inset(zz - 1e-4, s)) / 2e-4;
@@ -977,7 +978,13 @@
       function bodyStack(p) { return 1 - ease((p.y - pocketTop(p.x)) / 0.12); }
       // A pocket is in the stack along the stitched sides and bottom; its top
       // and the window are its own edges.
-      function pocketStack(p, hole) { return !hole && (Math.abs(p.x) > CARD_W / 2 - 1e-3 || p.y < POCKET_LO - 0.3) ? 1 : 0; }
+      // (eased over the last 1.5 mm below the pocket top along the sides, so the
+      // edge does not change shape all at once at the corner)
+      function pocketStack(p, hole) {
+        if (hole) { return 0; }
+        if (Math.abs(p.x) > CARD_W / 2 - 1e-3) { return ease((pocketTop(p.x) - p.y) / 0.15); }
+        return p.y < POCKET_LO - 0.3 ? 1 : 0;
+      }
       // Burnished edge shades: each piece its own, a shade darker than its
       // grain. Seen from the side, the glued stack shows all four: green, brown,
       // brown, green, with a faint darker line at each glue joint (the owner,
@@ -995,10 +1002,14 @@
             if (cr.sg !== sg) { return; }
             var dx = x - cr.E.x, dy = y - cr.E.y, a = dx * cr.u.x + dy * cr.u.y, b = dx * cr.u.y - dy * cr.u.x;
             if (a > 0.02) { return; }
-            w += Math.exp(-Math.pow(b / 0.04, 2)) * Math.exp(-Math.pow(Math.max(0, -a - 0.03) / 0.04, 2));
+            w += Math.exp(-Math.pow(b / 0.06, 2)) * Math.exp(-Math.pow(Math.max(0, -a - 0.03) / 0.06, 2));
           });
-          var t = Math.min(1, Math.max(0, (Math.abs(zz) - CARD_BODY) / CARD_POCKET));
-          return -Math.sign(zz) * POCKET_DENT * Math.min(1, w) * t;
+          // over the pocket's rounded edge, under the thread: nothing at the
+          // glued face, deepest high on the dome, back to nothing right at the
+          // outer face so the edge stays joined to the flat face
+          var f = Math.min(1, Math.max(0, (Math.abs(zz) - CARD_BODY) / CARD_POCKET));
+          var t = Math.sin(Math.PI * Math.pow(f, 1.6));
+          return -Math.sign(zz) * POCKET_DENT * Math.min(1, w) * Math.max(0, t);
         };
       }
       addPockets = function () {
@@ -1143,7 +1154,7 @@
         // one long easy slope, not a steep drop (the owner, 2026-10-19): it
         // starts to lean down 1 mm before the edge, pressing the edge in, and
         // runs straight on to the hole without levelling out on the body.
-        var seq = [[e - dir * 0.14, zh + lift], [e - dir * 0.06, zh + side * (c * 0.5 - POCKET_DENT)]];
+        var seq = [[e - dir * 0.14, zh + lift], [e - dir * 0.06, zh + side * (c * 0.5 - POCKET_DENT * 0.3)]];
         if (!hiA) { seq.reverse(); }
         seq.forEach(function (q) { pts.push(at(fa, q[0], q[1], spreadAt(q[0] / len))); });
         crossings.push({ E: at(fa, e, 0, 0), u: u.clone().multiplyScalar(dir), sg: Math.sign(zh) });
