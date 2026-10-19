@@ -160,6 +160,34 @@ Open ideas, not done and not asked for yet:
 - turn thread ends only partly toward the slit, so the bend is softer
 - a "no ring" option
 
+### The card holder (kortelinė)
+Added 2026-10-19 at the owner's request: an "Item" toggle (`product`: keyfob /
+card) at the top of the panel; the card holder hides the shape and ring
+controls. Built under the same rules as the keyfob, and its stitching is the
+locked keyfob stitch, unchanged:
+- 100 × 70 mm (`CARD_W`, `CARD_H`), corners `CARD_R 0.6`. Four pieces of
+  veg-tan, each `CARD_LAYER 0.5 mm`, so 2 mm at the stitched edge. Front to
+  back: pocket, body, body, pocket (`outline('pocket')`, `outline('card')`).
+  The two bodies are full size, and the slot between them is the middle
+  pocket. The pockets are 48 mm tall (`POCKET_Y`). The bodies have a thumb cut
+  in the top edge (32 × 14 mm) so a card in the middle slot can be reached. The
+  pocket height and the thumb cut were Claude's choices, not the owner's.
+- The grain faces out on both sides (`grainBackMat` on the back pieces);
+  initials sit on the front pocket.
+- Stitching is an open U (`seamHoles`): down the sides and round the bottom,
+  the top left open, ending `CARD_R` below the top edge. `build()` handles the
+  open seam (no stitch after the last hole, `chordIn`), and the last
+  `OVERLAP` stitches at each end are doubled like the keyfob joint. The thread
+  sits on the pocket face below `POCKET_Y` and on the body face above it (`face(y)`).
+- Pattern PDF: two templates (body and pocket, each cut ×2). The dashed
+  pocket-edge line is on the body, and red brackets mark the doubled stitches
+  at both thread ends. Calibration is shared with the keyfob.
+
+### Example photos
+`pavyzdziai/` (one folder per item: `korteline/`, `pakabukas/`) is where the
+owner drops photos of real pieces. Look there before working on an item, and
+measure off the photos where they allow it.
+
 ### Testing without the server
 Render the view with `ejs` + `config/content.js` into a standalone HTML file, then use headless Chrome:
 ```
