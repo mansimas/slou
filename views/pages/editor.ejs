@@ -1127,7 +1127,8 @@
         return new THREE.Vector3(p.x + u.x * along + across.x * spread, p.y + u.y * along + across.y * spread, zz);
       }
       function spreadAt(s) { return t * JOINT_GAP * (0.3 + 0.7 * Math.sin(Math.PI * Math.min(1, Math.max(0, s)))); }
-      var pts = [at(fa, -0.035, za - side * 0.045, spreadAt(0)), at(fa, 0.03, za + lift, spreadAt(0.08))];
+      var pts = [Math.abs(za - zb) > 1e-6 && Math.abs(zb) > Math.abs(za) ? at(fa, -0.02, za - side * 0.02, spreadAt(0)) : at(fa, -0.035, za - side * 0.045, spreadAt(0))];
+      if (!(Math.abs(za - zb) > 1e-6 && Math.abs(zb) > Math.abs(za))) { pts.push(at(fa, 0.03, za + lift, spreadAt(0.08))); }
       if (Math.abs(za - zb) < 1e-6) {
         pts.push(at(fa, len / 2, za + lift, spreadAt(0.5)));
       } else {
@@ -1138,15 +1139,30 @@
           if (inPocket === hiA) { t0 = tm; } else { t1 = tm; }
         }
         var e = t0 * len, dir = hiA ? 1 : -1, zh = hiA ? za : zb, zl = hiA ? zb : za;
-        // on the pocket up to the edge, over it, then down onto the body
-        var seq = [[e - dir * 0.04, zh + lift], [e - dir * 0.01, zh + side * (c - POCKET_DENT)], [e + dir * 0.02, (zh + zl) / 2 + side * c * 0.5], [e + dir * 0.05, zl + lift]];
+        // On the pocket up to the edge, over it, then down to the body hole in
+        // one long easy slope, not a steep drop (the owner, 2026-10-19): it
+        // starts to lean down 1 mm before the edge, pressing the edge in, and
+        // runs straight on to the hole without levelling out on the body.
+        var seq = [[e - dir * 0.14, zh + lift], [e - dir * 0.06, zh + side * (c * 0.5 - POCKET_DENT)]];
         if (!hiA) { seq.reverse(); }
         seq.forEach(function (q) { pts.push(at(fa, q[0], q[1], spreadAt(q[0] / len))); });
         crossings.push({ E: at(fa, e, 0, 0), u: u.clone().multiplyScalar(dir), sg: Math.sign(zh) });
       }
-      pts.push(at(tb, -0.03, zb + lift, spreadAt(0.92)), at(tb, 0.035, zb - side * 0.045, spreadAt(1)));
-      var curve = new THREE.CatmullRomCurve3(pts, false, 'centripetal');
-      var tube = new THREE.TubeGeometry(curve, 120, THREAD_R, 12, false);
+      // where the thread comes down off the pocket it goes straight on into the
+      // hole; elsewhere it lies flat on the face up to the slit
+      var steep = Math.abs(za - zb) > 1e-6;
+      if (steep && Math.abs(za) > Math.abs(zb)) { pts.push(at(tb, 0.02, zb - side * 0.02, spreadAt(1))); }
+      else { pts.push(at(tb, -0.03, zb + lift, spreadAt(0.92)), at(tb, 0.035, zb - side * 0.045, spreadAt(1))); }
+      // Straight runs between the points, each corner rounded with a quadratic
+      // bend between the midpoints of its two runs. Unlike a Catmull-Rom curve
+      // this never swings out past its points, so where the thread comes down
+      // off the pocket it cannot bulge away from the leather.
+      var curve = new THREE.CurvePath();
+      function mid(i) { return pts[i].clone().add(pts[i + 1]).multiplyScalar(0.5); }
+      curve.add(new THREE.LineCurve3(pts[0], mid(0)));
+      for (var ci = 1; ci < pts.length - 1; ci++) { curve.add(new THREE.QuadraticBezierCurve3(mid(ci - 1), pts[ci], mid(ci))); }
+      curve.add(new THREE.LineCurve3(mid(pts.length - 2), pts[pts.length - 1]));
+      var tube = new THREE.TubeGeometry(curve, 160, THREAD_R, 12, false);
       // the ply twist at the density of a plain stitch
       var tuv = tube.attributes.uv, tl = curve.getLength();
       for (var q2 = 0; q2 < tuv.count; q2++) { tuv.setXY(q2, tuv.getY(q2), tuv.getX(q2) * tl / stitchLen); }

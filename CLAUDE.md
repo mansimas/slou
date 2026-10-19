@@ -215,6 +215,11 @@ locked keyfob stitch, unchanged:
     tips** and spread apart, just touching, only between the holes. Each end
     runs on into the cut and down 0.45 mm, so both threads are seen to go into
     the hole (the owner, 2026-10-19).
+    Over the pocket edge it is **not** a steep drop: it starts down 1.4 mm
+    before the edge, pressing the rounded edge in, and runs on one easy slope
+    straight into the body hole, with no levelling out on the brown. The tube
+    follows straight runs with quadratic-rounded corners, not Catmull-Rom,
+    which swung the thread out into the air at the bend.
     On the owner's piece the brown slit at the last hole still shows beside
     the thread; that is right. Tried and rejected on 2026-10-19: threads placed
     inside the slit at different points along it, and the pair centred on
