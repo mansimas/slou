@@ -165,23 +165,31 @@ Added 2026-10-19 at the owner's request: an "Item" toggle (`product`: keyfob /
 card) at the top of the panel; the card holder hides the shape and ring
 controls. Built under the same rules as the keyfob, and its stitching is the
 locked keyfob stitch, unchanged:
-- 100 × 70 mm (`CARD_W`, `CARD_H`), corners `CARD_R 0.6`. Four pieces of
-  veg-tan, each `CARD_LAYER 0.5 mm`, so 2 mm at the stitched edge. Front to
-  back: pocket, body, body, pocket (`outline('pocket')`, `outline('card')`).
-  The two bodies are full size, and the slot between them is the middle
-  pocket. The pockets are 48 mm tall (`POCKET_Y`). The bodies have a thumb cut
-  in the top edge (32 × 14 mm) so a card in the middle slot can be reached. The
-  pocket height and the thumb cut were Claude's choices, not the owner's.
+- Shapes come from the owner's own drawing, `pavyzdziai/korteline/korteline.pdf`
+  (measured off its vectors, 2026-10-19): 70 × 100 mm standing up (`CARD_W`,
+  `CARD_H`), every body corner rounded to `CARD_R 1.4`. Four pieces of veg-tan,
+  each `CARD_LAYER 0.5 mm` (the owner's figure; the drawing recommends
+  1.2–1.5 mm leather), so 2 mm at the stitched edge. Front to back: pocket,
+  body, body, pocket (`outline('pocket')`, `outline('card')`). The bodies are
+  full size, and the slot between them is the middle pocket. The pocket top
+  is slanted (`pocketTop(x)`): level at 81 mm for 11.3 mm, straight down to
+  52 mm, level for the last 11.3 mm, with square top corners. The drawing's
+  second pocket is the mirror image, which once turned over onto the back
+  lines up with the first, so the 3D uses one shape for both.
+- The drawing also recommends a 3.5 mm stitch line and a 3.75 mm pitch. The
+  locked keyfob values (2.8 / 3.85) are kept until the owner decides.
 - The grain faces out on both sides (`grainBackMat` on the back pieces);
   initials sit on the front pocket.
 - Stitching is an open U (`seamHoles`): down the sides and round the bottom,
   the top left open, ending `CARD_R` below the top edge. `build()` handles the
   open seam (no stitch after the last hole, `chordIn`), and the last
   `OVERLAP` stitches at each end are doubled like the keyfob joint. The thread
-  sits on the pocket face below `POCKET_Y` and on the body face above it (`face(y)`).
-- Pattern PDF: two templates (body and pocket, each cut ×2). The dashed
-  pocket-edge line is on the body, and red brackets mark the doubled stitches
-  at both thread ends. Calibration is shared with the keyfob.
+  sits on the pocket face below the pocket top and on the body face above it (`face(x, y)`).
+- Pattern PDF: body and pocket side by side, each cut ×2 (the second pocket
+  with the template turned over), with the legend and specs below them. The
+  body carries the slanted pocket edge as a dashed line, like the grey line on
+  the drawing, and red brackets mark the doubled stitches at both thread
+  ends. Calibration is shared with the keyfob.
 
 ### Example photos
 `pavyzdziai/` (one folder per item: `korteline/`, `pakabukas/`) is where the

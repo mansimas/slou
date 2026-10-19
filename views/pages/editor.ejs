@@ -210,15 +210,21 @@
   // back: pocket, body, body, pocket. The two bodies are full size and the slot
   // between them is the middle pocket; the shorter pieces make a pocket on each
   // face. The top is left open, so the stitching is a U round three sides.
-  var CARD_W = 10, CARD_H = 7;          // 100 × 70 mm
+  // The shapes are the owner's own drawing (pavyzdziai/korteline/korteline.pdf,
+  // "Slim card wallet – pattern no. 1"), measured off its vectors.
+  var CARD_W = 7, CARD_H = 10;          // 70 × 100 mm, standing up
   var CARD_LAYER = 0.05;                // each piece 0.5 mm
   var CARD_BEVEL = 0.01;
-  var CARD_R = 0.6;                     // corner radius
-  var POCKET_Y = -CARD_H / 2 + 4.8;     // the outer pockets are 48 mm tall
-  // thumb cut in the bodies' top edge, an arc 32 mm across and 14 mm deep:
-  // deep enough to reach a card in the middle slot
-  var NOTCH_D = 1.4, NOTCH_HW = 1.6;
-  var NOTCH_R = (NOTCH_HW * NOTCH_HW + NOTCH_D * NOTCH_D) / (2 * NOTCH_D), NOTCH_CY = CARD_H / 2 - NOTCH_D + NOTCH_R;
+  var CARD_R = 1.4;                     // corner radius (the drawing: ~14 mm)
+  // The pockets' top is cut on a slant: level at 81 mm for the first 11.3 mm
+  // across, down in a straight line to 52 mm, level again for the last 11.3 mm.
+  // Both pockets are this one shape — the drawing's second is its mirror, which
+  // turned over onto the back lines up with the first.
+  var POCKET_HI = -CARD_H / 2 + 8.1, POCKET_LO = -CARD_H / 2 + 5.18, POCKET_X = CARD_W / 2 - 1.13;
+  function pocketTop(x) {
+    var f = Math.min(1, Math.max(0, (x + POCKET_X) / (2 * POCKET_X)));
+    return POCKET_HI + (POCKET_LO - POCKET_HI) * f;
+  }
 
   var state = { product: 'keyfob', shape: 'arch', leather: '#9a5527', thread: '#eadcbf', ring: 'silver', text: '' };
 
@@ -305,8 +311,8 @@
     var txt = state.text.trim().toUpperCase();
     if (!txt) { return null; }
     if (state.product === 'card') {
-      // across the front pocket, centred on it
-      return { txt: txt, vertical: false, x: 0, y: (-CARD_H / 2 + POCKET_Y) / 2,
+      // across the front pocket, centred below its low edge
+      return { txt: txt, vertical: false, x: 0, y: (-CARD_H / 2 + POCKET_LO) / 2,
                size: Math.min(0.8, (CARD_W - 2) / (txt.length * 0.72)) };
     }
     var vertical = txt.length > 3;
@@ -501,17 +507,16 @@
   function outline(kind, i) {
     var s = new THREE.Shape(), x = W / 2 - i, PI = Math.PI;
     if (kind === 'card' || kind === 'pocket') {
-      // the card holder's pieces, corners rounded to CARD_R: a body has the
-      // thumb cut in its top edge, a pocket a straight top at POCKET_Y
+      // the card holder's pieces, bottom corners rounded to CARD_R: a body
+      // has its top corners rounded too, a pocket the slanted top, square-cornered
       var cx = CARD_W / 2 - i, cb = -CARD_H / 2 + i, cr = CARD_R - i;
       s.moveTo(-cx + cr, cb); s.lineTo(cx - cr, cb); s.absarc(cx - cr, cb + cr, cr, -PI / 2, 0);
       if (kind === 'pocket') {
-        s.lineTo(cx, POCKET_Y - i); s.lineTo(-cx, POCKET_Y - i);
+        s.lineTo(cx, POCKET_LO - i); s.lineTo(POCKET_X, POCKET_LO - i);
+        s.lineTo(-POCKET_X, POCKET_HI - i); s.lineTo(-cx, POCKET_HI - i);
       } else {
-        var ct = CARD_H / 2 - i, nr = NOTCH_R + i, na = Math.asin((ct - NOTCH_CY) / nr);
+        var ct = CARD_H / 2 - i;
         s.lineTo(cx, ct - cr); s.absarc(cx - cr, ct - cr, cr, 0, PI / 2);
-        s.lineTo(nr * Math.cos(na), ct);
-        s.absarc(0, NOTCH_CY, nr, na, -PI - na, true);   // dips down through the edge
         s.lineTo(-cx + cr, ct); s.absarc(-cx + cr, ct - cr, cr, PI / 2, PI);
       }
       s.lineTo(-cx, cb + cr); s.absarc(-cx + cr, cb + cr, cr, PI, PI * 1.5);
@@ -787,9 +792,9 @@
     var from = new THREE.Vector3(), to = new THREE.Vector3(), dir = new THREE.Vector3();
     var pos = new THREE.Vector3(), scl = new THREE.Vector3();
     var zTop = DEPTH / 2 + BEVEL;
-    // The face the thread lies on at height y. The keyfob is one piece; on the
-    // card holder the pockets stand one piece proud of the bodies below POCKET_Y.
-    function face(y) { return card ? (y < POCKET_Y ? 2 : 1) * CARD_LAYER : zTop; }
+    // The face the thread lies on at (x, y). The keyfob is one piece; on the
+    // card holder the pockets stand one piece proud of the bodies below their top.
+    function face(x, y) { return card ? (y < pocketTop(x) ? 2 : 1) * CARD_LAYER : zTop; }
     // stitch k runs from hole k to hole k + 1; both its slits lean off that
     // chord, so every stitch has the same length and lean
     var chords = holesAt.map(function (p, k) {
@@ -821,7 +826,7 @@
       // a slit sits between two stitches: lean it off their average direction
       var dh = chordIn(k).clone().add(d).normalize();
       [1, -1].forEach(function (side, i) {
-        var z = side * face((a.y + b.y) / 2);
+        var z = side * face((a.x + b.x) / 2, (a.y + b.y) / 2);
         var sl = slit(d, side), sh = slit(dh, side);
         // The strand runs between the slit *tips*, which puts each end ~0.4 mm
         // to the side of its hole — and that same offset is what tilts the
@@ -881,7 +886,7 @@
         // side and read as a hole beside the second thread. On the line it is
         // covered by the first thread, the second lies on the leather beside it,
         // and the cut disappears — measured at 84 exposed pixels before, 10 now.
-        z = side * face(a.y);
+        z = side * face(a.x, a.y);
         pos.set(a.x, a.y, z + side * 0.002);
         q.setFromUnitVectors(up, dir.set(sh.x, sh.y, 0));
         // Every hole is the same punch, the joint's included: two threads
@@ -1216,10 +1221,11 @@
     doc.text(doc.splitTextToSize(P.print, 180), 15, 27);
     doc.text(doc.splitTextToSize(card ? C.how : P.how, 180), 15, 36);
 
-    // The card holder: two templates, each cut twice — the body (with the
-    // thumb cut) and the pocket, one above the other on the left, the legend
-    // on the right. The pieces are glued and pricked as one stack, so the
-    // pocket's slits are the body's below the pocket edge, hole for hole.
+    // The card holder: two templates, each cut twice — the body and the pocket
+    // (the second pocket cut with the template turned over, as in the owner's
+    // drawing), side by side, the legend and specs below them, clear of the
+    // calibration square. The pieces are glued and pricked as one stack, so
+    // the pocket's slits are the body's below the pocket edge, hole for hole.
     function cardPattern() {
       var holes = current.holes, chords = current.chords, n = holes.length;
       function slitAt(k, h, width) {
@@ -1228,15 +1234,16 @@
         doc.setLineWidth(width * (cfx + cfy) / 2);
         doc.line(X(p.x) - hx, Y(p.y) + hy, X(p.x) + hx, Y(p.y) - hy);
       }
+      // `top(x)`: the piece's top edge, for which holes go through it
       function piece(kind, top, name) {
         doc.setDrawColor(0); doc.setLineWidth(0.3);
         poly(outline(kind, 0).getPoints(48).filter(function (p, k, all) {
           return p.distanceTo(all[(k + 1) % all.length]) > 1e-4;
         }));
         doc.setFontSize(9); doc.setTextColor(40, 36, 31);
-        doc.text(name, X(-CARD_W / 2), Y(top) - 3);
+        doc.text(name, X(-CARD_W / 2), Y(top(-CARD_W / 2)) - 3);
         // the stitch line, faint and open at the top, then the slits on it
-        var mine = holes.map(function (p, k) { return k; }).filter(function (k) { return holes[k].y < top - STITCH_INSET / 2; });
+        var mine = holes.map(function (p, k) { return k; }).filter(function (k) { return holes[k].y < top(holes[k].x) - STITCH_INSET / 2; });
         doc.setDrawColor(190); doc.setLineWidth(0.1);
         for (var j = 1; j < mine.length; j++) {
           var a = holes[mine[j - 1]], b = holes[mine[j]];
@@ -1246,14 +1253,19 @@
         mine.forEach(function (k) { slitAt(k, 0.8, 0.45); });   // drawn 1.6 mm, like the keyfob's
       }
 
-      OX = 68; OY = 90;
-      piece('card', CARD_H / 2, C.body);
-      // where the pockets' edge comes, for lining them up when gluing
+      // the body on the left, its top 50 mm down the page
+      OX = 20 + CARD_W / 2 * 10 * cfx; OY = 50 + CARD_H / 2 * 10 * cfy;
+      piece('card', function () { return CARD_H / 2; }, C.body);
+      // where the pockets' edge comes, for lining them up when gluing (the
+      // grey line on the owner's drawing)
       doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
-      doc.line(X(-CARD_W / 2), Y(POCKET_Y), X(CARD_W / 2), Y(POCKET_Y));
+      [[-CARD_W / 2, POCKET_HI], [-POCKET_X, POCKET_HI], [POCKET_X, POCKET_LO], [CARD_W / 2, POCKET_LO]].reduce(function (a, b) {
+        doc.line(X(a[0]), Y(a[1]), X(b[0]), Y(b[1]));
+        return b;
+      });
       doc.setLineDashPattern([], 0);
       doc.setFontSize(7); doc.setTextColor(120);
-      doc.text(C.pocketLine, X(-CARD_W / 2 + STITCH_INSET + 0.3), Y(POCKET_Y) - 1.2);
+      doc.text(C.pocketLine, X(-CARD_W / 2 + STITCH_INSET + 0.3), Y(POCKET_HI) - 1.2);
       // the thread's two ends, each with its doubled stitches: red brackets
       // outside the piece
       doc.setDrawColor(180, 40, 30); doc.setLineWidth(0.4);
@@ -1264,8 +1276,9 @@
         doc.line(br[2], y2, br[2] + br[3], y2);
       });
 
-      OY = 140 + POCKET_Y * 10 * cfy;   // the pocket's top edge 140 mm down the page
-      piece('pocket', POCKET_Y, C.pocket);
+      // the pocket to its right, the two bottoms level
+      OX = 100 + CARD_W / 2 * 10 * cfx;
+      piece('pocket', pocketTop, C.pocket);
       // initials as a stamping guide, on the front pocket
       var L = textLayout();
       if (L) {
@@ -1274,8 +1287,8 @@
         doc.text(L.txt, X(L.x), Y(L.y), { align: 'center', baseline: 'middle' });
       }
 
-      // legend + specs on the right
-      lx = 128; ly = 60;
+      // legend + specs below, left of the calibration square
+      lx = 20; rx = 135; ly = Y(-CARD_H / 2) + 12;
       doc.setFontSize(9); doc.setTextColor(40, 36, 31);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, P.holes);
@@ -1300,15 +1313,15 @@
     }
 
     // legend lines and the specs table, shared by both items
-    var lx = 118, ly = 70;
+    var lx = 118, rx = 195, ly = 70;
     function key(draw, label) {
-      var lines = doc.splitTextToSize(label, 195 - lx - 12);
+      var lines = doc.splitTextToSize(label, rx - lx - 12);
       draw(lx, ly - 1); doc.text(lines, lx + 12, ly); ly += 3 + 4 * lines.length;
     }
     function table(rows) {
       rows.forEach(function (r) {
         doc.setTextColor(110, 100, 90); doc.text(r[0], lx, ly);
-        doc.setTextColor(40, 36, 31); doc.text(r[1], 195, ly, { align: 'right' });
+        doc.setTextColor(40, 36, 31); doc.text(r[1], rx, ly, { align: 'right' });
         ly += 6;
       });
     }
