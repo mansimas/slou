@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-19 21:15] - Last hole nearer pocket edge - Owner: the reinforcing stitch ran too far over the brown leather. The last hole on each side now sits 1 mm above the green pocket edge (was 1.9 mm), so the stitch stays close to the green.
 [2026-10-19 18:30] - Plain doubled reinforcing stitch - Owner sent photos: the stitch over the pocket edge is plain, like the rest of the row, not a worm stuck on. Now two plain threads side by side, straight over the edge into the body hole; no grooves, no wide bends.
 [2026-10-19 18:05] - Glued edge shows every layer - Owner: seen from the side, the glued edge shows all four pieces: green, brown, brown, green, with a faint darker glue line between, so it reads as glued. Each layer now keeps its own edge colour within the one rounded dome.
 [2026-10-19 17:50] - Pull edge stitch tight - Owner: seen from the side there must be no gap between the reinforcing stitch and the leather, pulled hard into it. The stitch over the pocket edge now follows the leather in four pieces, over the rounding and down the edge face, pressed in.

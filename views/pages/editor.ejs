@@ -244,11 +244,13 @@
   // turned over onto the back lines up with the first.
   var POCKET_HI = -CARD_H / 2 + 8.1, POCKET_LO = -CARD_H / 2 + 5.18, POCKET_X = CARD_W / 2 - 1.13;
   var POCKET_EASE = 0.5;
-  // The last hole of each side is in the body, ~2 mm *above* the pocket edge
+  // The last hole of each side is in the body, just *above* the pocket edge
   // (the owner's close-ups, 2026-10-19): the last stitch climbs over the
   // pocket's edge and hugs it, which is what keeps the pocket mouth from
   // tearing open. It is one of the doubled end stitches, so it is sewn twice.
-  var POCKET_END = 0.19;
+  // 1 mm above the edge (it was 1.9 mm): close to the green, so the stitch
+  // does not run far over the brown (the owner, 2026-10-19).
+  var POCKET_END = 0.1;
   // ...and pulled so tight it squeezes the green pocket's edge a touch thinner
   // where it wraps it (the owner: "vos vos", only just): 0.12 mm at most.
   var POCKET_DENT = 0.012;

@@ -190,7 +190,7 @@ locked keyfob stitch, unchanged:
   - The stitching runs only as high as the pockets: up to the low edge on the
     left and the high one on the right. The body above is not sewn.
   - From the close-ups in `pavyzdziai/korteline/`: the last stitch of each side
-    hugs the pocket edge. Its end hole is in the body, `POCKET_END` (~2 mm)
+    hugs the pocket edge. Its end hole is in the body, `POCKET_END` (1 mm; it was 1.9 mm until the owner asked for it closer to the green)
     *above* the pocket edge, and the hole before it is about as far below, so
     the stitch climbs over the edge. It is one of the doubled end stitches,
     so it is sewn twice, which is the reinforcement. On the PDF those holes
