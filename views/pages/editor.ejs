@@ -1044,7 +1044,8 @@
     // the edge starts to round, over the rounding, straight down the edge face,
     // flat on the body into the hole. Every piece sits a little deeper than a
     // plain stitch, the leather pressed in under it.
-    function lay(fa, tb, za, zb, side, slot) {
+    // `inSlit`: the ends are already inside the cut, so run on only a hair.
+    function lay(fa, tb, za, zb, side, slot, inSlit) {
       var parts, lift = side * 0.005;
       if (Math.abs(za - zb) < 1e-6) {
         parts = [[fa, za, tb, za]];
@@ -1075,7 +1076,8 @@
         // Nothing more: grooves and wide bends round the edge read as a
         // crumpled worm stuck to the leather, never as thread.
         function at(p, along, zz) { return new THREE.Vector3(p.x + u.x * along, p.y + u.y * along, zz); }
-        var S0 = at(H, -0.035, zh - sg * 0.02), F0 = at(Lo, 0.035, zl - sg * 0.02);
+        var run = inSlit ? 0.008 : 0.035;
+        var S0 = at(H, -run, zh - sg * 0.02), F0 = at(Lo, run, zl - sg * 0.02);
         var C = at(E, -0.012, zh + sg * (THREAD_R * 0.6 - POCKET_DENT));
         var C1 = C.clone().add(S0.clone().sub(C).setLength(0.035)), C2 = C.clone().add(F0.clone().sub(C).setLength(0.035));
         var curve = new THREE.CurvePath();
@@ -1105,7 +1107,7 @@
         // that its end is inside the cut, no further, or two stitches overlap in
         // the same hole. Where two pieces of one stitch meet, they only just
         // overlap, so the joint stays tight to the leather.
-        var e0 = j === 0 ? 0.035 : 0.012, e1 = j === parts.length - 1 ? 0.035 : 0.012;
+        var e0 = j === 0 ? (inSlit ? 0.008 : 0.035) : 0.012, e1 = j === parts.length - 1 ? (inSlit ? 0.008 : 0.035) : 0.012;
         var c = p0.add(p1).multiplyScalar(0.5).addScaledVector(dv, (e1 - e0) / 2);
         stitches.setMatrixAt(j ? extra++ : slot, new THREE.Matrix4().compose(
           c, rq, new THREE.Vector3(1, (dl + e0 + e1) / stitchLen, 1)));
@@ -1171,11 +1173,23 @@
           // Kept almost flush in height, so perspective doesn't lift one end.
           // Drawn like every other stitch.
           var inward = new THREE.Vector3(-d.y, d.x, 0);   // outline runs CCW
-          // Two threads, as sewn (the owner's photos). Over the card holder's
-          // pocket edge each bends on its own, so there they lie just side by
-          // side, touching, rather than overlapping and cutting through each other.
-          var gap = Math.abs(za - zb) > 1e-6 ? 2 * THREAD_R + 0.002 : JOINT_GAP;
-          [[0, 0], [gap, side * 0.004]].forEach(function (t) {
+          if (open) {
+            // The card holder (the owner, 2026-10-19): both threads go *into*
+            // the slits, not beside them, so each sits at its own point along
+            // the cut (the slit is 1.2 mm, two 0.55 mm threads fit side by
+            // side in it), both ends inside the cut. The same offsets on every
+            // doubled stitch, so the pairs line up one after another.
+            [-1, 1].forEach(function (t, j) {
+              // shifted the same way at both ends, so the two run parallel
+              // instead of crossing: +δ into one slit is −δ out of the other
+              var c = SLIT_HALF * 0.6, dl = t * THREAD_R * 1.02;
+              var fa = new THREE.Vector3(a.x + sl.x * (c + dl), a.y + sl.y * (c + dl), 0);
+              var tb = new THREE.Vector3(b.x - sl.x * (c - dl), b.y - sl.y * (c - dl), 0);
+              lay(fa, tb, za + side * 0.002 * j, zb + side * 0.002 * j, side, extra++, true);
+            });
+          } else {
+          // the keyfob's joint, as approved
+          [[0, 0], [JOINT_GAP, side * 0.004]].forEach(function (t) {
             // the second also slides a little along the line, nearly touching
             // the next stitch: down the left side on the front; mirrored on
             // the back, where the stitches lean the other way
@@ -1184,6 +1198,7 @@
             var tb = to.clone().addScaledVector(inward, t[0]).add(along);
             lay(fa, tb, za + t[1], zb + t[1], side, extra++);
           });
+          }
         }
         // the slit itself, on the punch line like every other hole. It used to
         // be nudged half a thread inward (`JOINT_GAP / 2`) to sit centred under

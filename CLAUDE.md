@@ -206,9 +206,13 @@ locked keyfob stitch, unchanged:
     hole. Its ends sink into the holes like a plain stitch's.
   - **It is two threads**, as on every doubled end stitch (the owner's
     close-ups; taking one away was a mistake the owner caught). Each of the
-    two is that same plain stitch. Over the pocket edge they lie side by side,
-    touching (2R + 0.02 mm apart), because at `JOINT_GAP` they overlap and
-    their bends would cut through each other.
+    two is that same plain stitch. On the card holder (`open`) both threads
+    go **into** the slits, not beside them: each sits at its own point along
+    the cut (centre 0.6 × `SLIT_HALF`, ±1.02 thread radius). They are shifted
+    +δ into one slit and −δ out of the other, so they run parallel and touch
+    instead of crossing. The ends overrun only 0.08 mm (`lay(..., inSlit)`).
+    Every doubled pair uses the same offsets, so the pairs line up one after
+    another. The keyfob joint keeps its own approved `JOINT_GAP`/`JOINT_DROP` layout.
   - Rejected (the owner: "like a stuck-on worm crawling"): grooves pressed
     into the pocket, wide or hugging bends round the edge, and segmented
     pieces. Keep each thread plain.
