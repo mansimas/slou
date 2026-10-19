@@ -24,6 +24,30 @@ Never `pm2 start all` / `pm2 stop all` on this box — the neighbouring apps
 (chess 1337, chessarena 1339, gridess 1429, matchess 4005/4006) would go down
 with it.
 
+### Running it on a Windows PC
+
+One-time setup:
+
+1. Install **Node.js 22 LTS** from <https://nodejs.org> (the Windows
+   installer, all defaults).
+2. Install **Git for Windows** from <https://git-scm.com/download/win>
+   (all defaults).
+3. Open the **Start menu → "Git Bash"**, then fetch the project:
+   ```
+   cd ~/Documents
+   git clone https://github.com/mansimas/slou.git
+   ```
+   A GitHub login window opens the first time; sign in.
+
+After that, open `Documents\slou` in File Explorer and **double-click
+`start-windows.bat`**. The first run installs the packages (a few minutes),
+then the site opens in the browser at <http://localhost:1437>. Close the black
+window to stop it. To get the latest code later, run `git pull` in Git Bash
+inside the folder.
+
+From a terminal the same thing is `npm run dev` (development mode).
+`npm start` uses Linux syntax and does not work in Windows' own terminals.
+
 No `.env` and no environment variables are required. The port is 1437 in every
 environment (`config/port.js`; override with `PORT`), and there is no database
 to point at.
