@@ -211,6 +211,10 @@ locked keyfob stitch, unchanged:
     same slant (photo `pavyzdziai/korteline/20261019_162207.jpg`). The two
     threads are offset ±`JOINT_GAP`/2 across the line and overlap a little,
     so together they read as one slightly fuller, plied stitch in the row.
+    They are drawn by `layPair()` as one smooth tube each. They **meet at the slit
+    tips** and spread apart, just touching, only between the holes. Each end
+    runs on into the cut and down 0.45 mm, so both threads are seen to go into
+    the hole (the owner, 2026-10-19).
     On the owner's piece the brown slit at the last hole still shows beside
     the thread; that is right. Tried and rejected on 2026-10-19: threads placed
     inside the slit at different points along it, and the pair centred on
