@@ -240,9 +240,11 @@ locked keyfob stitch, unchanged:
       A slope made by widening the edge there (`pocketRamp`, 0.9 mm) turned
       that green into glossy edge and was rejected; so was the narrow dent.
       The thread simply lies over the edge as it is (`layPair`, R = `CARD_ROUND`).
-    - The pocket side keeps the stack's dome right up to its square top
-      corner, and only eases to the top's own edge along the first 2.5 mm of
-      the top (`pocketStack`). Easing it down the side made the corner stick out.
+    - At the pocket's square top corner the switch is clean (`pocketStack`):
+      the side keeps the stack's dome right up to the corner, and the top keeps
+      its own narrow edge right to it. Easing down the side made the corner
+      stick out. Easing along the top widened the glossy band into a bend
+      (the owner, 2026-10-20).
     - `leatherPiece` adds no resample points within 2 mm of a sharp corner,
       because points closer than the edge's inset cross over and fold a flap.
     On the owner's piece the brown slit at the last hole still shows beside

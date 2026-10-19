@@ -1009,14 +1009,11 @@
       function bodyStack(p) { return 1 - ease((p.y - pocketTop(p.x)) / 0.12); }
       // A pocket is in the stack along the stitched sides and bottom; its top
       // and the window are its own edges.
-      // The side keeps the stack's dome right up to the square top corner, so
-      // nothing stands proud there (the owner's 2.png); the change to the top's
-      // own edge is eased along the top over its first 2.5 mm instead.
-      function pocketStack(p, hole) {
-        if (hole) { return 0; }
-        if (Math.abs(p.x) > CARD_W / 2 - 1e-3 || p.y < POCKET_LO - 0.3) { return 1; }
-        return 1 - ease((CARD_W / 2 - Math.abs(p.x)) / 0.25);
-      }
+      // The side keeps the stack's dome right up to the square top corner, and
+      // the top keeps its own edge right to it: a clean switch at the corner.
+      // Easing between them along the top widened the glossy edge there into a
+      // bend (the owner, 2026-10-20).
+      function pocketStack(p, hole) { return !hole && (Math.abs(p.x) > CARD_W / 2 - 1e-3 || p.y < POCKET_LO - 0.3) ? 1 : 0; }
       // Burnished edge shades: each piece its own, a shade darker than its
       // grain. Seen from the side, the glued stack shows all four: green, brown,
       // brown, green, with a faint darker line at each glue joint (the owner,
