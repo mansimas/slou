@@ -229,11 +229,13 @@
   // owner, 2026-10-19), and not all alike. Where the four pieces are glued on
   // one another (the stitched sides and bottom) the edge is worked as one: a
   // single polished dome across the whole 5.4 mm, "like a little hill, not a
-  // cut-off corner", with no line between the layers. That dome is CARD_DOME
+  // cut-off corner", no step between the layers, though each keeps its own
+  // colour and the glue shows as a faint darker line. That dome is CARD_DOME
   // deep, from the faces to the crown. Where a piece ends on its own (the
   // pockets' tops and the window, the bodies above the pockets) it gets its
   // own dome across its own thickness, CARD_ROUND deep.
   var CARD_DOME = 0.1, CARD_ROUND = 0.05;
+  var GLUE_LINE = 0.35;   // how much darker the edge is right at a glue joint
   var CARD_R = 1.4;                     // corner radius (the drawing: ~14 mm)
   // The pockets' top is cut on a slant: level at 52 mm for the first 11.3 mm
   // across, up in a straight line to 81 mm, level again for the last 11.3 mm —
@@ -247,6 +249,9 @@
   // pocket's edge and hugs it, which is what keeps the pocket mouth from
   // tearing open. It is one of the doubled end stitches, so it is sewn twice.
   var POCKET_END = 0.19;
+  // ...and pulled so tight it squeezes the green pocket's edge a touch thinner
+  // where it wraps it (the owner: "vos vos", only just): 0.12 mm at most.
+  var POCKET_DENT = 0.012;
   function pocketTop(x) {
     var f = Math.min(1, Math.max(0, (POCKET_X - x) / (2 * POCKET_X)));
     return POCKET_HI + (POCKET_LO - POCKET_HI) * f;
@@ -845,11 +850,17 @@
   // same edge (see CARD_DOME). `loops` is the outline and its holes, `h` the
   // thickness round the middle at `z`. `stack(p, hole)` says how far outline
   // point p is part of the glued stack (1) or a free edge (0), and the edge
-  // there takes the stack's dome or the piece's own, and the stack's shade
-  // (`stackCol`) or the piece's (`ownCol`). `mats` = [front face, edge, back face].
-  function leatherPiece(loops, h, z, stack, mats, ownCol, stackCol) {
+  // there takes the stack's dome or the piece's own. The edge is the piece's
+  // own colour (`ownCol`), a touch darker along a glued joint (GLUE_LINE).
+  // `mats` = [front face, edge, back face].
+  // `squeeze(x, y, zz)`, if given, moves each point of the piece by that much
+  // along z: where a thread pulled tight presses the leather in.
+  function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze) {
     var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T = CARD_THICK / 2, domeNormals = [];
-    function vert(x, y, zz, c) { pos.push(x, y, zz); uv.push(x, y); col.push(c.r, c.g, c.b); return pos.length / 3 - 1; }
+    function vert(x, y, zz, c) {
+      pos.push(x, y, zz + (squeeze ? squeeze(x, y, zz) : 0)); uv.push(x, y); col.push(c.r, c.g, c.b);
+      return pos.length / 3 - 1;
+    }
     // How far in from the outline the edge is at height zz: an elliptical
     // dome, flat-crowned in the middle and meeting the faces with no corner.
     function inset(zz, s) {
@@ -877,7 +888,7 @@
         // outward (away from the leather), mitred at corners
         var n1 = new THREE.Vector2(p.y - a.y, a.x - p.x).normalize(), n2 = new THREE.Vector2(b.y - p.y, p.x - b.x).normalize();
         var nb = n1.clone().add(n2).normalize(), miter = 1 / Math.max(0.5, nb.dot(n1));
-        var s = stack(p, li > 0), ring = [], c = ownCol.clone().lerp(stackCol, s);
+        var s = stack(p, li > 0), ring = [];
         // the profile across the edge, front face to back, spaced by angle so
         // it is fine where the dome turns into the faces
         // In the stack each layer's edge runs on 0.08 mm past its faces, tucked
@@ -888,7 +899,13 @@
           var fz = j === 0 ? z + h / 2 : j === S ? z - h / 2 : null;   // a face, if this is its edge
           var e = fz !== null && Math.abs(fz) < T - 1e-6 ? 0.008 * s : 0;   // glued faces only, not the stack's outer ones
           var zz = z + (h / 2 + e) * Math.sin(Math.PI / 2 - j / S * Math.PI), d = (inset(zz, s) + (e ? 0.003 : 0)) * miter;
-          var v = vert(p.x - nb.x * d, p.y - nb.y * d, zz, c);
+          // its own colour, darkened a touch within ~0.15 mm of a glued face:
+          // the glue line
+          var gd = 1e9;
+          if (Math.abs(z + h / 2) < T - 1e-6) { gd = Math.abs(zz - z - h / 2); }
+          if (Math.abs(z - h / 2) < T - 1e-6) { gd = Math.min(gd, Math.abs(zz - z + h / 2)); }
+          var g = s * Math.exp(-Math.pow(gd / 0.012, 2));
+          var v = vert(p.x - nb.x * d, p.y - nb.y * d, zz, g ? ownCol.clone().multiplyScalar(1 - GLUE_LINE * g) : ownCol);
           // the normal straight off the dome, not averaged from this piece's
           // own faces: so the shading runs on across the joints between layers
           var slope = (inset(zz + 1e-4, s) - inset(zz - 1e-4, s)) / 2e-4;
@@ -942,7 +959,7 @@
   function build() {
     fob.children.slice().forEach(function (m) { fob.remove(m); if (m.geometry !== stitchGeo && m.geometry !== holeGeo) { m.geometry.dispose(); } });
 
-    var card = state.product === 'card', holesAt;
+    var card = state.product === 'card', holesAt, crossings = [], addPockets = null;
     if (card) {
       // Front to back: pocket, body, body, pocket, touching, the middle of the
       // stack at z = 0. The
@@ -959,16 +976,35 @@
       // A pocket is in the stack along the stitched sides and bottom; its top
       // and the window are its own edges.
       function pocketStack(p, hole) { return !hole && (Math.abs(p.x) > CARD_W / 2 - 1e-3 || p.y < POCKET_LO - 0.3) ? 1 : 0; }
-      // Burnished edge shades: each piece's own a shade darker than its grain.
-      // The glued stack, worked as one, takes the pockets' colour: they are the
-      // outside of the piece, and on the owner's piece the edge is green all
-      // the way through (2026-10-19), not a blend with the brown inside.
+      // Burnished edge shades: each piece its own, a shade darker than its
+      // grain. Seen from the side, the glued stack shows all four: green, brown,
+      // brown, green, with a faint darker line at each glue joint (the owner,
+      // 2026-10-19: it has to show that it is glued).
       var bodyCol = new THREE.Color(state.leather).multiplyScalar(0.62), pocketCol = new THREE.Color(state.pocket).multiplyScalar(0.62);
-      var stackCol = pocketCol.clone();
-      fob.add(leatherPiece([pocketLoop, windowLoop], CARD_POCKET, zp, pocketStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol, stackCol));
-      fob.add(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol, stackCol));
-      fob.add(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol, stackCol));
-      fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, pocketStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, stackCol));
+      // Where the reinforcing stitch wraps a pocket's edge it presses it in
+      // (POCKET_DENT): most at the pocket's outer face, nothing at its glued
+      // one, a thread's width across and fading out ~0.7 mm into the pocket.
+      // `crossings` (where the threads cross the edge) is filled in by `lay`
+      // as the stitches are laid, so the pockets are built after them.
+      function pocketDent(sg) {
+        return function (x, y, zz) {
+          var w = 0;
+          crossings.forEach(function (cr) {
+            if (cr.sg !== sg) { return; }
+            var dx = x - cr.E.x, dy = y - cr.E.y, a = dx * cr.u.x + dy * cr.u.y, b = dx * cr.u.y - dy * cr.u.x;
+            if (a > 0.02) { return; }
+            w += Math.exp(-Math.pow(b / 0.04, 2)) * Math.exp(-Math.pow(Math.max(0, -a - 0.03) / 0.04, 2));
+          });
+          var t = Math.min(1, Math.max(0, (Math.abs(zz) - CARD_BODY) / CARD_POCKET));
+          return -Math.sign(zz) * POCKET_DENT * Math.min(1, w) * t;
+        };
+      }
+      addPockets = function () {
+        fob.add(leatherPiece([pocketLoop, windowLoop], CARD_POCKET, zp, pocketStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol, pocketDent(1)));
+        fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, pocketStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, pocketDent(-1)));
+      };
+      fob.add(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol));
+      fob.add(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol));
       holesAt = seamHoles();
     } else {
       var shape = solidShape(state.shape, BEVEL);
@@ -1021,11 +1057,38 @@
           if (P.y < pocketTop(P.x)) { t0 = tm; } else { t1 = tm; }
         }
         var u = Lo.clone().sub(H).setZ(0).normalize(), E = H.clone().lerp(Lo, t0), sg = Math.sign(zh);
-        // A: where the edge starts to round; B: against the edge face, the
-        // thread a little into it (pressed), 40% of its thickness outside
-        var A = E.clone().addScaledVector(u, -CARD_ROUND), B = E.clone().addScaledVector(u, THREAD_R * 0.4);
-        parts = [[H, zh, A, zh], [A, zh, B, zh - sg * CARD_ROUND], [B, zh - sg * CARD_ROUND, B, zl], [B, zl, Lo, zl]];
-        if (!hiFirst) { parts = parts.reverse().map(function (p) { return [p[2], p[3], p[0], p[1]]; }); }
+        // A plain stitch, as it is sewn: the thread pulled straight and tight
+        // from hole to hole, wrapped over the pocket's edge (the owner,
+        // 2026-10-19: straight, covering the edge, sunk softly into the
+        // leather). So two straight runs: along the pocket face to the top of
+        // its edge, and straight down from there into the body's hole. They
+        // meet in a short round bend where the thread presses the edge in
+        // (POCKET_DENT, see pocketDent). The thread lies about half sunk.
+        // It looks like every other stitch in the row (the owner's photos,
+        // pavyzdziai/korteline/20261019_2057*.jpg): the same thread, the same
+        // slant, in line with the rest. It runs straight from the pocket's hole
+        // to the pocket's edge, turns over it in one short bend that presses
+        // the edge in only just (POCKET_DENT), and runs straight down into the
+        // body's hole. Its ends sink into the holes as a plain stitch's do.
+        // Nothing more: grooves and wide bends round the edge read as a
+        // crumpled worm stuck to the leather, never as thread.
+        function at(p, along, zz) { return new THREE.Vector3(p.x + u.x * along, p.y + u.y * along, zz); }
+        var S0 = at(H, -0.035, zh - sg * 0.02), F0 = at(Lo, 0.035, zl - sg * 0.02);
+        var C = at(E, -0.012, zh + sg * (THREAD_R * 0.6 - POCKET_DENT));
+        var C1 = C.clone().add(S0.clone().sub(C).setLength(0.035)), C2 = C.clone().add(F0.clone().sub(C).setLength(0.035));
+        var curve = new THREE.CurvePath();
+        curve.add(new THREE.LineCurve3(S0, C1));
+        curve.add(new THREE.QuadraticBezierCurve3(C1, C, C2));
+        curve.add(new THREE.LineCurve3(C2, F0));
+        crossings.push({ E: E, u: u, sg: sg });   // for the dent in the pocket
+        var tube = new THREE.TubeGeometry(curve, 240, THREAD_R, 16, false);
+        // the ply twist at the density of a plain stitch: around the thread on
+        // x, along it on y, as on stitchGeo
+        var tuv = tube.attributes.uv, tl = curve.getLength();
+        for (var q2 = 0; q2 < tuv.count; q2++) { tuv.setXY(q2, tuv.getY(q2), tuv.getX(q2) * tl / stitchLen); }
+        fob.add(new THREE.Mesh(tube, threadMat));
+        stitches.setMatrixAt(slot, zero);
+        return;
       }
       parts.forEach(function (p, j) {
         // The thread rides in the grain about 40% of its thickness, not 77%:
@@ -1106,7 +1169,11 @@
           // Kept almost flush in height, so perspective doesn't lift one end.
           // Drawn like every other stitch.
           var inward = new THREE.Vector3(-d.y, d.x, 0);   // outline runs CCW
-          [[0, 0], [JOINT_GAP, side * 0.004]].forEach(function (t) {
+          // Two threads, as sewn (the owner's photos). Over the card holder's
+          // pocket edge each bends on its own, so there they lie just side by
+          // side, touching, rather than overlapping and cutting through each other.
+          var gap = Math.abs(za - zb) > 1e-6 ? 2 * THREAD_R + 0.002 : JOINT_GAP;
+          [[0, 0], [gap, side * 0.004]].forEach(function (t) {
             // the second also slides a little along the line, nearly touching
             // the next stitch: down the left side on the front; mirrored on
             // the back, where the stitches lean the other way
@@ -1141,6 +1208,7 @@
       });
     }
     stitches.count = extra;   // only the instances laid
+    if (addPockets) { addPockets(); }   // now the dents the stitches press in are known
     fob.add(dimples, holes, stitches);
     if (card) { return; }   // no key ring on the card holder
 

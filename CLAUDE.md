@@ -195,14 +195,23 @@ locked keyfob stitch, unchanged:
     the stitch climbs over the edge. It is one of the doubled end stitches,
     so it is sewn twice, which is the reinforcement. On the PDF those holes
     are on the body template only.
-  - That stitch is pulled hard, and the owner was firm about it: no gap
-    anywhere between thread and leather seen from the side, and the leather
-    pressed in a little under it. So in 3D `lay()` builds it from four pieces
-    that follow the leather: flat on the pocket to where the edge starts to
-    round, over the rounding, straight down the edge face (the thread 60%
-    into it), then flat on the body into the hole. All four sit deeper than a
-    plain stitch (no lift). A single strand, or two halves (tried first),
-    left a wedge of air under the thread.
+  - **That stitch looks like every other stitch in the row** (the owner's
+    photos `pavyzdziai/korteline/20261019_2057*.jpg`): one thread, the same
+    slant and thickness, in line with the rest, and it flows on into the next
+    stitch. In `lay()` it is one `TubeGeometry` along a `CurvePath`: a
+    straight run from the pocket hole to the pocket edge, one short bend over
+    the edge that presses it in only just (`POCKET_DENT` 0.12 mm, through
+    `pocketDent()` → `leatherPiece(..., squeeze)`, so the pockets are built
+    after the stitches, `addPockets`), then a straight run down into the body
+    hole. Its ends sink into the holes like a plain stitch's.
+  - **It is two threads**, as on every doubled end stitch (the owner's
+    close-ups; taking one away was a mistake the owner caught). Each of the
+    two is that same plain stitch. Over the pocket edge they lie side by side,
+    touching (2R + 0.02 mm apart), because at `JOINT_GAP` they overlap and
+    their bends would cut through each other.
+  - Rejected (the owner: "like a stuck-on worm crawling"): grooves pressed
+    into the pocket, wide or hugging bends round the edge, and segmented
+    pieces. Keep each thread plain.
 - Edges (the owner, 2026-10-19): rounded with an edge beveler and burnished
   with Tokonole for a natural sheen, and not all alike. The pieces are built
   by `leatherPiece()`, not ExtrudeGeometry, because ExtrudeGeometry rounds
@@ -210,15 +219,16 @@ locked keyfob stitch, unchanged:
   - Where the four pieces are glued (the stitched sides and bottom) the edge
     is one polished dome across the whole 5.4 mm, "like a little hill, not a
     cut-off corner". It is elliptical, `CARD_DOME` 1 mm deep, flat-crowned,
-    and meets the faces with no corner, with no line between the layers. It
-    takes the **pockets' colour** (green on the owner's piece), because the
-    pockets are the outside. It is not a blend with the brown bodies inside:
-    the owner corrected that on 2026-10-19.
+    and meets the faces with no corner or step between the layers. Each layer
+    keeps **its own colour**: seen from the side it reads green, brown,
+    brown, green, with a faint darker glue line (`GLUE_LINE`) at each joint,
+    because it has to show that it is glued (the owner, 2026-10-19). A
+    single-colour edge, all green or blended, was tried and rejected.
   - Where a piece ends on its own (the pocket tops, the window, the bodies
     above the pockets) it has its own dome, `CARD_ROUND` 0.5 mm deep, in its
     own shade. A body eases from the stack to its own edge over the first
     1.2 mm above the pocket edge.
-  - To keep the joints invisible, the normals come straight off the dome,
+  - To keep the dome smooth across the joints, the normals come straight off the dome,
     not from each piece's own faces. Each layer's edge tucks 0.08 mm past
     its glued faces, 0.03 mm under its neighbour, and its glued faces stop
     0.1 mm short of the edge. Without those three, a light hairline showed
