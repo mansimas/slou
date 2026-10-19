@@ -862,7 +862,7 @@
   // `ramp(p)`, if given, is how far the outer face's edge is sloped off at
   // outline point p (under a thread crossing it).
   function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp) {
-    var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T = CARD_THICK / 2, domeNormals = [];
+    var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T = CARD_THICK / 2, domeNormals = [], matte = {}, sideFace = [];
     function vert(x, y, zz, c, edge) {
       pos.push(x, y, zz + (squeeze && edge ? squeeze(x, y, zz) : 0)); uv.push(x, y); col.push(c.r, c.g, c.b);
       return pos.length / 3 - 1;
@@ -871,8 +871,12 @@
     // dome, flat-crowned in the middle and meeting the faces with no corner.
     function inset(zz, s, ex) {
       var own = CARD_ROUND * (1 - Math.sqrt(Math.max(0, 1 - Math.pow((zz - z) / (h / 2), 2))));
-      // the ramp: more rounding on the outer half only, the same elliptical shape
-      if (ex && Math.abs(zz) > Math.abs(z)) { own += ex * (1 - Math.sqrt(Math.max(0, 1 - Math.pow((Math.abs(zz) - Math.abs(z)) / (h / 2), 2)))); }
+      // the ramp: on the outer half a straight slope, not a dome, so the leather
+      // under the thread lies flat rather than bulging (the owner, 2026-10-19)
+      if (ex && Math.abs(zz) > Math.abs(z)) {
+        var wr = ex / POCKET_RAMP, tr = (Math.abs(zz) - Math.abs(z)) / (h / 2);
+        own += ((CARD_ROUND + POCKET_RAMP) * tr - own) * wr;
+      }
       var all = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - Math.pow(zz / T, 2))));
       return own + (all - own) * s;
     }
@@ -933,6 +937,9 @@
           // own faces: so the shading runs on across the joints between layers
           var slope = (inset(zz + 1e-4, s, ex) - inset(zz - 1e-4, s, ex)) / 2e-4;
           domeNormals.push([v, nb.x, nb.y, isFinite(slope) ? slope : 1e3]);
+          // the slope under a thread is the face pressed down, not the burnished
+          // edge: it takes the face's matte grain (the owner, 2026-10-19)
+          if (ex > POCKET_RAMP * 0.25 && Math.abs(zz) > Math.abs(z)) { matte[v] = true; }
           ring.push(v);
         }
         rings.push(ring);
@@ -945,7 +952,10 @@
       });
       for (var i = 0; i < m; i++) {
         var R0 = rings[i], R1 = rings[(i + 1) % m];
-        for (var j = 0; j < R0.length - 1; j++) { side.push(R0[j], R0[j + 1], R1[j], R1[j], R0[j + 1], R1[j + 1]); }
+        for (var j = 0; j < R0.length - 1; j++) {
+          var quad = [R0[j], R0[j + 1], R1[j], R1[j], R0[j + 1], R1[j + 1]];
+          (quad.every(function (q) { return matte[q]; }) ? sideFace : side).push.apply(quad.every(function (q) { return matte[q]; }) ? sideFace : side, quad);
+        }
       }
     });
     // the two faces, each inside its own rounding, wound to face out
@@ -962,10 +972,11 @@
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
     g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-    g.setIndex(caps[0].concat(side, caps[1]));
+    g.setIndex(caps[0].concat(side, caps[1], sideFace));
     g.addGroup(0, caps[0].length, 0);
     g.addGroup(caps[0].length, side.length, 1);
     g.addGroup(caps[0].length + side.length, caps[1].length, 2);
+    g.addGroup(caps[0].length + side.length + caps[1].length, sideFace.length, Math.abs(z + h / 2) > Math.abs(z - h / 2) ? 0 : 2);
     g.computeVertexNormals();
     var nrm = g.attributes.normal, tmp = new THREE.Vector3();
     domeNormals.forEach(function (dn) {
@@ -1044,14 +1055,14 @@
           var w = 0;
           crossings.forEach(function (cr) {
             if (cr.sg !== sg) { return; }
-            w = Math.max(w, Math.exp(-Math.pow(Math.hypot(p.x - cr.E.x, p.y - cr.E.y) / 0.07, 2)));
+            w = Math.max(w, Math.exp(-Math.pow(Math.hypot(p.x - cr.E.x, p.y - cr.E.y) / 0.1, 2)));
           });
           return POCKET_RAMP * w;
         };
       }
       addPockets = function () {
-        fob.add(leatherPiece([pocketLoop, windowLoop], CARD_POCKET, zp, pocketStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol, pocketDent(1), pocketRamp(1)));
-        fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, pocketStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, pocketDent(-1), pocketRamp(-1)));
+        fob.add(leatherPiece([pocketLoop, windowLoop], CARD_POCKET, zp, pocketStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol));
+        fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, pocketStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol));
       };
       fob.add(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol));
       fob.add(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol));
@@ -1191,16 +1202,15 @@
         // one long easy slope, not a steep drop (the owner, 2026-10-19): it
         // starts to lean down 1 mm before the edge, pressing the edge in, and
         // runs straight on to the hole without levelling out on the body.
-        // Lying on the edge as sloped under it: an ellipse R deep over the
-        // pocket's outer half, so the thread follows it, half sunk, from the
-        // face round to where it leaves for the body's hole.
-        var R = CARD_ROUND + POCKET_RAMP, hh = CARD_POCKET / 2, zc = zh - side * hh, reff = THREAD_R * 0.5;
-        var seq = [[e - dir * (R + 0.05), zh + side * reff]];
-        for (var k = 8; k >= 1; k--) {
-          var ph = k / 8 * Math.PI / 2, L = Math.hypot(hh * Math.cos(ph), R * Math.sin(ph));
-          seq.push([e - dir * R * (1 - Math.cos(ph)) + dir * reff * hh * Math.cos(ph) / L,
-                    zc + side * (hh * Math.sin(ph) + reff * R * Math.sin(ph) / L)]);
-        }
+        // Over the pocket's edge as it is everywhere else (its own rounding, R):
+        // the edge is never widened or reshaped under the thread (the owner,
+        // 2026-10-20). Half sunk, from the face R back from the edge straight
+        // down to the edge at mid-thickness, then on to the body's hole.
+        var R = CARD_ROUND, hh = CARD_POCKET / 2, zc = zh - side * hh, reff = THREAD_R * 0.5;
+        var nl = Math.hypot(R, hh), nx = hh / nl, nz = R / nl;   // the slope's outward normal
+        var seq = [[e - dir * (R + 0.05), zh + side * reff],
+                   [e - dir * R + dir * reff * nx, zh + side * reff * nz],
+                   [e + dir * reff * nx, zc + side * reff * nz]];
         if (!hiA) { seq.reverse(); }
         seq.forEach(function (q) { pts.push(at(fa, q[0], q[1], spreadAt(q[0] / len))); });
         crossings.push({ E: at(fa, e, 0, 0), u: u.clone().multiplyScalar(dir), sg: Math.sign(zh) });

@@ -234,11 +234,12 @@ locked keyfob stitch, unchanged:
     corrections only here. A slanted pocket corner and a wide band worked
     down along the edge were both tried and reverted the same day.
     From `pavyzdziai/korteline/2.png` (the owner's paint-over, side view):
-    - Right under the threads only (~1 mm wide, `pocketRamp`), the pocket's
-      top edge is sloped off `POCKET_RAMP` 0.9 mm on its outer side
-      (`leatherPiece(..., ramp)` → `inset(zz, s, ex)`), and the thread follows
-      that slope (`layPair`). So there is green leather under the thread all
-      the way over the edge, no gap.
+    - **Never widen or reshape the edge under the thread** (the owner,
+      2026-10-20). The burnished edge is the same width everywhere
+      (`CARD_ROUND`), and the green face stays matte green right up to it.
+      A slope made by widening the edge there (`pocketRamp`, 0.9 mm) turned
+      that green into glossy edge and was rejected; so was the narrow dent.
+      The thread simply lies over the edge as it is (`layPair`, R = `CARD_ROUND`).
     - The pocket side keeps the stack's dome right up to its square top
       corner, and only eases to the top's own edge along the first 2.5 mm of
       the top (`pocketStack`). Easing it down the side made the corner stick out.

@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-20 00:15] - Keep edge width under thread - Owner: the slope under the thread widened the glossy edge into the green. Removed it: the edge is the same narrow width everywhere, the green stays matte up to it, and the thread lies over the normal edge.
 [2026-10-19 23:50] - Ramp under thread, flush corner - Owner painted 2.png: the green edge right under the thread should slope down so the thread lies on leather, and the pocket corner stuck out. Edge sloped off only under the threads, the thread follows it; corner flap removed, corner kept square.
 [2026-10-19 23:25] - Soften shoulder beside thread - Owner: revert the corner and band changes, only soften the small steep corner of leather right beside the thread. The dent under the thread is just a little wider, so its shoulder slopes off; nothing else changed.
 [2026-10-19 23:05] - Thread dents green edge - Owner: where the thread crosses the end of the green leather, the leather should dip slightly under it. The rounded pocket edge is now pressed in about 0.25 mm under the threads, and the pocket corner eases smoothly into the side edge.
