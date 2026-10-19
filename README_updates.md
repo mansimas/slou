@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-19 13:41] - Editor heading set to test - Owner wanted "test" on the editor rather than the homepage. Homepage tab title restored; the editor's keyfob heading (editor.title) now reads "test" in all 7 locales. Card holder heading unchanged.
 [2026-10-19 16:00] - Card holder matches real piece - Owner sent photos of the finished card holder to learn from. Matched them: pocket colour option (olive on brown), thumb window in front pocket with initials above, SLOU stamp on back, softer slant, stitching ends at pocket edge, pocket high on the right.
 [2026-10-19 15:40] - Card holder from owner's drawing - Owner uploaded their own card holder drawing as the reference. Reshaped to match it: 70 × 100 mm upright, 14 mm corners, slanted pockets (81→52 mm), no thumb cut; pattern PDF relaid with body and pocket side by side.
 [2026-10-19 15:20] - Desktop shortcut to photos - Owner wanted an easy place on the PC to drop example photos. Added a desktop shortcut "SLOU pavyzdziai" to the repo's pavyzdziai/ folder, so photos land where Claude reads them; nothing in the repo changed.
