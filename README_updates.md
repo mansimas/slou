@@ -1,6 +1,8 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-19 17:20] - Burnished rounded card edges - Owner rounds the card holder's edges and burnishes them with Tokonole for a natural shine. Each piece's edge now rounded 0.3 mm, with a satin, lightly glossy edge a shade darker than the grain. Card holder only; keyfob untouched at the owner's request.
+[2026-10-19 17:05] - Real card holder thicknesses - Owner gave the real leather: the two middle bodies 1.5 mm each, the two outer pockets 1.2 mm, so 5.4 mm at the edge. The stitch over the pocket edge is now laid over the taller edge, down onto the body.
 [2026-10-19 16:50] - Stitch hugs pocket edge - Owner's close-ups show the last stitch wrapping over the pocket edge to reinforce it. The end hole now sits in the body 2 mm above the pocket edge, so the doubled last stitch climbs over the edge into it, on both sides.
 [2026-10-19 16:00] - Card holder matches real piece - Owner sent photos of the finished card holder to learn from. Matched them: pocket colour option (olive on brown), thumb window in front pocket with initials above, SLOU stamp on back, softer slant, stitching ends at pocket edge, pocket high on the right.
 [2026-10-19 15:40] - Card holder from owner's drawing - Owner uploaded their own card holder drawing as the reference. Reshaped to match it: 70 × 100 mm upright, 14 mm corners, slanted pockets (81→52 mm), no thumb cut; pattern PDF relaid with body and pocket side by side.

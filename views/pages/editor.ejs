@@ -222,8 +222,12 @@
   // The shapes are the owner's own drawing (pavyzdziai/korteline/korteline.pdf,
   // "Slim card wallet – pattern no. 1"), measured off its vectors.
   var CARD_W = 7, CARD_H = 10;          // 70 × 100 mm, standing up
-  var CARD_LAYER = 0.05;                // each piece 0.5 mm
-  var CARD_BEVEL = 0.01;
+  // the leather, as the owner cuts it: the two bodies 1.5 mm each, the two
+  // pockets 1.2 mm, so 5.4 mm at the stitched edge
+  var CARD_BODY = 0.15, CARD_POCKET = 0.12, CARD_THICK = 2 * (CARD_BODY + CARD_POCKET);
+  // Edges rounded with an edge beveler and burnished with Tokonole (the
+  // owner, 2026-10-19): each piece's edge rounded over 0.3 mm
+  var CARD_BEVEL = 0.03;
   var CARD_R = 1.4;                     // corner radius (the drawing: ~14 mm)
   // The pockets' top is cut on a slant: level at 52 mm for the first 11.3 mm
   // across, up in a straight line to 81 mm, level again for the last 11.3 mm —
@@ -421,7 +425,11 @@
   var pocketFrontMat = new THREE.MeshStandardMaterial({ map: colorTex, bumpMap: bumpTex, bumpScale: 1.5, roughness: 0.72 });
   var pocketBackMat = new THREE.MeshStandardMaterial({ map: logoTex, bumpMap: logoBumpTex, bumpScale: 1.5, roughness: 0.72 });
   var pocketFleshMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1, roughness: 0.85 });
-  var pocketEdgeMat = new THREE.MeshStandardMaterial({ roughness: 0.45 });
+  // Burnished edges: Tokonole and a slicker leave the edge smooth, a shade
+  // darker than the grain and with a soft natural sheen — not lacquer, so a
+  // light clearcoat over a satin base. The keyfob keeps its own `edgeMat`.
+  function burnished() { return new THREE.MeshPhysicalMaterial({ roughness: 0.38, clearcoat: 0.45, clearcoatRoughness: 0.3 }); }
+  var pocketEdgeMat = burnished(), bodyEdgeMat = burnished();
   var bodyGrainMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1.5, roughness: 0.72 });
   // Twisted waxed thread: diagonal plies wound round each stitch.
   var plyTex = (function () {
@@ -552,7 +560,8 @@
     pocketFrontMat.color.copy(pc);
     pocketBackMat.color.copy(pc);
     pocketFleshMat.color.copy(pc).multiplyScalar(0.9);
-    pocketEdgeMat.color.copy(pc).multiplyScalar(0.55);
+    pocketEdgeMat.color.copy(pc).multiplyScalar(0.62);
+    bodyEdgeMat.color.copy(c).multiplyScalar(0.62);
     threadMat.color.set(state.thread);
     holeMat.color.copy(c).multiplyScalar(0.12);
     dimpleMat.color.copy(c).multiplyScalar(0.3);
@@ -809,10 +818,11 @@
   }
 
   // One piece of leather: `shape` extruded `depth` thick round its middle at
-  // `z`, with `mats` = [front face, edge, back face].
-  function slab(shape, bevel, depth, z, mats) {
+  // `z`, with `mats` = [front face, edge, back face]; `segs` steps round the
+  // edge (3 unless given: the keyfob's; the card holder's rounder edge takes 6).
+  function slab(shape, bevel, depth, z, mats, segs) {
     var geo = new THREE.ExtrudeGeometry(shape, {
-      depth: depth, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 3, curveSegments: 48,
+      depth: depth, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: segs || 3, curveSegments: 48,
     });
     // ExtrudeGeometry puts back and front caps in one group (back first, then
     // front, same size): split it so the initials only go on the front.
@@ -830,19 +840,20 @@
 
     var card = state.product === 'card', holesAt;
     if (card) {
-      // Front to back: pocket, body, body, pocket, each 0.5 mm, touching. The
+      // Front to back: pocket, body, body, pocket, touching, the middle of the
+      // stack at z = 0. The
       // grain faces out on both sides: the front two show their front face,
       // the back two their back face; the flesh sides face into the pockets.
       // The front pocket has the thumb window cut in it; the back one has not.
       var bodyShape = solidShape('card', CARD_BEVEL), pocketShape = solidShape('pocket', CARD_BEVEL);
       var frontShape = solidShape('pocket', CARD_BEVEL);
       frontShape.holes.push(windowPath(new THREE.Path()));
-      var dep = CARD_LAYER - 2 * CARD_BEVEL;
-      [[frontShape, 1.5, [pocketFrontMat, pocketEdgeMat, pocketFleshMat]],
-       [bodyShape, 0.5, [bodyGrainMat, edgeMat, backMat]],
-       [bodyShape, -0.5, [backMat, edgeMat, bodyGrainMat]],
-       [pocketShape, -1.5, [pocketFleshMat, pocketEdgeMat, pocketBackMat]]].forEach(function (L) {
-        fob.add(slab(L[0], CARD_BEVEL, dep, L[1] * CARD_LAYER, L[2]));
+      var zb = CARD_BODY / 2, zp = CARD_BODY + CARD_POCKET / 2;
+      [[frontShape, zp, CARD_POCKET, [pocketFrontMat, pocketEdgeMat, pocketFleshMat]],
+       [bodyShape, zb, CARD_BODY, [bodyGrainMat, bodyEdgeMat, backMat]],
+       [bodyShape, -zb, CARD_BODY, [backMat, bodyEdgeMat, bodyGrainMat]],
+       [pocketShape, -zp, CARD_POCKET, [pocketFleshMat, pocketEdgeMat, pocketBackMat]]].forEach(function (L) {
+        fob.add(slab(L[0], CARD_BEVEL, L[2] - 2 * CARD_BEVEL, L[1], L[3], 6));
       });
       holesAt = seamHoles();
     } else {
@@ -863,17 +874,44 @@
     // always lands on each corner and joint. The back is the mirror image.
     var n = holesAt.length;
     // the open seam has two thread ends, each with its doubled stitches
-    var stitches = new THREE.InstancedMesh(stitchGeo, threadMat, n * 2 + OVERLAP * 8);
+    var stitches = new THREE.InstancedMesh(stitchGeo, threadMat, n * 2 + OVERLAP * 8 + 16);   // + split stitches over a pocket edge
     var extra = n * 2;   // next free instance: 2 threads x 2 faces per joint stitch
     var holes = new THREE.InstancedMesh(holeGeo, holeMat, n * 2);
     var dimples = new THREE.InstancedMesh(dimpleGeo, dimpleMat, n * 2);
     var m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), zAxis = new THREE.Vector3(0, 0, 1);
     var from = new THREE.Vector3(), to = new THREE.Vector3(), dir = new THREE.Vector3();
     var pos = new THREE.Vector3(), scl = new THREE.Vector3();
+    var zero = new THREE.Matrix4().makeScale(0, 0, 0);
+    // One strand of thread from slit tip fa to slit tip tb, lying at level za at
+    // fa and zb at tb, into instance `slot`. On one level (every keyfob stitch)
+    // it is a single straight strand. Where the levels differ (the card
+    // holder's stitch over the pocket edge, 1.2 mm high) it is laid in two
+    // halves, as the thread goes: flat on the pocket as far as the edge, then
+    // down over the edge onto the body and into the hole there. One straight
+    // strand would cut through the edge, or hang in the air at the body end.
+    function lay(fa, tb, za, zb, side, slot) {
+      var mid = fa.clone().add(tb).multiplyScalar(0.5);
+      var parts = Math.abs(za - zb) < 1e-6 ? [[fa, tb, za, za]]
+        : Math.abs(za) > Math.abs(zb) ? [[fa, mid, za, za], [mid, tb, za, zb]] : [[fa, mid, za, zb], [mid, tb, zb, zb]];
+      parts.forEach(function (p, j) {
+        // The thread rides in the grain about 40% of its thickness, not 77%:
+        // it was sunk to suit the old 0.8 mm cord, and at 0.55 mm that left a
+        // flat sliver showing instead of a rounded cord.
+        var p0 = new THREE.Vector3(p[0].x, p[0].y, p[2] + side * 0.005), p1 = new THREE.Vector3(p[1].x, p[1].y, p[3] + side * 0.005);
+        var dv = p1.clone().sub(p0), dl = dv.length();
+        var rq = new THREE.Quaternion().setFromUnitVectors(up, dv.normalize());
+        if (side < 0) { rq.multiply(flipBack); }
+        // the strand reaches 0.035 past each slit's inner end: just far enough
+        // that its end is inside the cut, no further, or two stitches overlap in
+        // the same hole
+        stitches.setMatrixAt(j ? extra++ : slot, new THREE.Matrix4().compose(
+          p0.add(p1).multiplyScalar(0.5), rq, new THREE.Vector3(1, (dl + 0.07) / stitchLen, 1)));
+      });
+    }
     var zTop = DEPTH / 2 + BEVEL;
     // The face the thread lies on at (x, y). The keyfob is one piece; on the
     // card holder the pockets stand one piece proud of the bodies below their top.
-    function face(x, y) { return card ? (y < pocketTop(x) ? 2 : 1) * CARD_LAYER : zTop; }
+    function face(x, y) { return card ? (y < pocketTop(x) ? CARD_BODY + CARD_POCKET : CARD_BODY) : zTop; }
     // stitch k runs from hole k to hole k + 1; both its slits lean off that
     // chord, so every stitch has the same length and lean
     var chords = holesAt.map(function (p, k) {
@@ -905,10 +943,10 @@
       // a slit sits between two stitches: lean it off their average direction
       var dh = chordIn(k).clone().add(d).normalize();
       [1, -1].forEach(function (side, i) {
-        // A stitch over the pocket edge lies at the pocket's level the whole
-        // way: it runs over the edge and its end drops onto the body into the
-        // hole there, rather than cutting through the edge.
-        var z = side * Math.max(face(a.x, a.y), face(b.x, b.y));
+        // The levels the thread lies at, at each end. On the card holder the
+        // stitch over the pocket edge goes from the pocket's face to the body's;
+        // `lay` sets it over the edge rather than through it.
+        var za = side * face(a.x, a.y), zb = side * face(b.x, b.y), z;
         var sl = slit(d, side), sh = slit(dh, side);
         // The strand runs between the slit *tips*, which puts each end ~0.4 mm
         // to the side of its hole — and that same offset is what tilts the
@@ -919,31 +957,16 @@
         from.set(a.x + sl.x * SLIT_HALF, a.y + sl.y * SLIT_HALF, 0);
         to.set(b.x - sl.x * SLIT_HALF, b.y - sl.y * SLIT_HALF, 0);
         dir.subVectors(to, from);
-        var len = dir.length(); dir.normalize();
-        // The thread rides in the grain about 40% of its thickness, not 77%:
-        // it was sunk to suit the old 0.8 mm cord, and at 0.55 mm that left a
-        // flat sliver showing instead of a rounded cord.
-        pos.addVectors(from, to).multiplyScalar(0.5).setZ(z + side * 0.005);
-        q.setFromUnitVectors(up, dir);
-        if (side < 0) { q.multiply(flipBack); }
-        // the strand reaches 0.02 past each slit's inner end: just far enough
-        // that its end is inside the cut, no further, or two stitches overlap in
-        // the same hole. Round in section (1.05 x 0.9), not the flat ribbon it
-        // was, and a touch sunk, so it sits on the leather rather than on top of
-        // it — a waxed thread pulled tight spreads into the grain.
-        scl.set(1, (len + 0.07) / stitchLen, 1);
-        if (!sewn) {
-          m.makeScale(0, 0, 0);
-        } else if (!doubled) {
-          m.compose(pos, q, scl);
-        } else {
+        stitches.setMatrixAt(k * 2 + i, zero);   // laid below, or not sewn
+        if (sewn && !doubled) {
+          lay(from, to, za, zb, side, k * 2 + i);
+        } else if (sewn) {
           // Two threads through the same pair of slits: the first exactly
           // where a single stitch would be, the second right beside it on the
           // inner side (towards the centre), same start and end, so the pair
           // lines up with the neighbouring stitches and both ends sit level.
           // Kept almost flush in height, so perspective doesn't lift one end.
           // Drawn like every other stitch.
-          m.makeScale(0, 0, 0);   // replaced by the two threads below
           var inward = new THREE.Vector3(-d.y, d.x, 0);   // outline runs CCW
           [[0, 0], [JOINT_GAP, side * 0.004]].forEach(function (t) {
             // the second also slides a little along the line, nearly touching
@@ -952,15 +975,9 @@
             var along = new THREE.Vector3(d.x, d.y, 0).multiplyScalar(t[0] ? JOINT_DROP * side : 0);
             var fa = from.clone().addScaledVector(inward, t[0]).add(along);
             var tb = to.clone().addScaledVector(inward, t[0]).add(along);
-            var td = tb.clone().sub(fa), tl = td.length();
-            var tm = new THREE.Matrix4().compose(
-              fa.clone().add(tb).multiplyScalar(0.5).setZ(z + side * 0.005 + t[1]),
-              new THREE.Quaternion().setFromUnitVectors(up, td.normalize()).multiply(side < 0 ? flipBack : new THREE.Quaternion()),
-              new THREE.Vector3(1, (tl + 0.07) / stitchLen, 1));
-            stitches.setMatrixAt(extra++, tm);
+            lay(fa, tb, za + t[1], zb + t[1], side, extra++);
           });
         }
-        stitches.setMatrixAt(k * 2 + i, m);
         // the slit itself, on the punch line like every other hole. It used to
         // be nudged half a thread inward (`JOINT_GAP / 2`) to sit centred under
         // the pair — but both joint threads *end* where an ordinary stitch's
@@ -985,6 +1002,7 @@
         dimples.setMatrixAt(k * 2 + i, m);
       });
     }
+    stitches.count = extra;   // only the instances laid
     fob.add(dimples, holes, stitches);
     if (card) { return; }   // no key ring on the card holder
 
@@ -1095,7 +1113,7 @@
     }
 
     var SPECS = { width: mm(W), height: mm(H), spacing: mm(STITCH_PITCH), inset: mm(STITCH_INSET),
-                  thickness: card ? mm(4 * CARD_LAYER) + ' (4 \u00d7 ' + mm(CARD_LAYER) + ')' : mm(THICK),
+                  thickness: card ? mm(CARD_THICK) + ' (2 \u00d7 ' + mm(CARD_POCKET) + ' + 2 \u00d7 ' + mm(CARD_BODY) + ')' : mm(THICK),
                   hole: card ? '\u2014' : '\u00d8 ' + mm(HOLE_R * 2) };
     document.querySelectorAll('[data-spec]').forEach(function (dd) { dd.textContent = SPECS[dd.dataset.spec]; });
   }
@@ -1389,8 +1407,8 @@
       ly += 4;
       var rows = [
         [M.width + ' × ' + M.height, mm(CARD_W) + ' × ' + mm(CARD_H)],
-        [C.pieces, '4 × ' + mm(CARD_LAYER)],
-        [M.thickness, mm(4 * CARD_LAYER)],
+        [C.pieces, '2 × ' + mm(CARD_POCKET) + ' + 2 × ' + mm(CARD_BODY)],
+        [M.thickness, mm(CARD_THICK)],
         [M.spacing, mm(STITCH_PITCH)],
         [M.inset, mm(STITCH_INSET)],
         [P.stitches, String(n - 1)],

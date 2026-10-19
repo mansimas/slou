@@ -168,8 +168,9 @@ locked keyfob stitch, unchanged:
 - Shapes come from the owner's own drawing, `pavyzdziai/korteline/korteline.pdf`
   (measured off its vectors, 2026-10-19): 70 × 100 mm standing up (`CARD_W`,
   `CARD_H`), every body corner rounded to `CARD_R 1.4`. Four pieces of veg-tan,
-  each `CARD_LAYER 0.5 mm` (the owner's figure; the drawing recommends
-  1.2–1.5 mm leather), so 2 mm at the stitched edge. Front to back: pocket,
+  as the owner cuts them: the two middle bodies `CARD_BODY 1.5 mm` each and
+  the two outer pockets `CARD_POCKET 1.2 mm` each, so 5.4 mm at the stitched
+  edge (`CARD_THICK`). Front to back: pocket,
   body, body, pocket (`outline('pocket')`, `outline('card')`). The bodies are
   full size, and the slot between them is the middle pocket. The pocket top
   is slanted (`pocketTop(x)`): level at 52 mm for 11.3 mm, straight up to
@@ -192,10 +193,19 @@ locked keyfob stitch, unchanged:
     hugs the pocket edge. Its end hole is in the body, `POCKET_END` (~2 mm)
     *above* the pocket edge, and the hole before it is about as far below, so
     the stitch climbs over the edge. It is one of the doubled end stitches,
-    so it is sewn twice, which is the reinforcement. In 3D a stitch between
-    two levels lies at the higher one (`Math.max` of `face()`), and its end
-    drops onto the body. On the PDF those holes are on the body template only.
-  - The edges look thicker than 4 × 0.5 mm, so the thickness is still open.
+    so it is sewn twice, which is the reinforcement. In 3D, `lay()` sets a
+    stitch between two levels in two halves: flat on the pocket to the edge,
+    then down over the 1.2 mm edge into the body hole. A single straight
+    strand would cut through the edge or hang in the air. On the PDF those
+    holes are on the body template only.
+- Edges (the owner, 2026-10-19): rounded with an edge beveler and burnished
+  with Tokonole for a natural sheen. Each piece is rounded over
+  `CARD_BEVEL 0.3 mm` in 6 steps, and the edges use `burnished()`: a satin
+  physical material with a light clearcoat, a shade darker than the grain
+  (×0.62). Card holder only: the keyfob keeps `edgeMat` and its 3-step bevel.
+- **Work on the card holder only** (the owner, 2026-10-19). Do not change
+  the keyfob unless the owner names it, and keep shared code behaving as
+  before for it.
 - The drawing also recommends a 3.5 mm stitch line and a 3.75 mm pitch. The
   locked keyfob values (2.8 / 3.85) are kept until the owner decides.
 - The grain faces out on both sides (`grainBackMat` on the back pieces);
