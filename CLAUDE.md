@@ -168,8 +168,9 @@ locked keyfob stitch, unchanged:
 - Shapes come from the owner's own drawing, `pavyzdziai/korteline/korteline.pdf`
   (measured off its vectors, 2026-10-19): 70 × 100 mm standing up (`CARD_W`,
   `CARD_H`), every body corner rounded to `CARD_R 1.4`. Four pieces of veg-tan,
-  each `CARD_LAYER 0.5 mm` (the owner's figure; the drawing recommends
-  1.2–1.5 mm leather), so 2 mm at the stitched edge. Front to back: pocket,
+  as the owner cuts them: the two middle bodies `CARD_BODY 1.5 mm` each and
+  the two outer pockets `CARD_POCKET 1.2 mm` each, so 5.4 mm at the stitched
+  edge (`CARD_THICK`). Front to back: pocket,
   body, body, pocket (`outline('pocket')`, `outline('card')`). The bodies are
   full size, and the slot between them is the middle pocket. The pocket top
   is slanted (`pocketTop(x)`): level at 52 mm for 11.3 mm, straight up to
@@ -187,9 +188,60 @@ locked keyfob stitch, unchanged:
   - The back pocket carries a SLOU stamp at the foot (`logoTex`, drawn
     mirrored because the back face is seen from behind).
   - The stitching runs only as high as the pockets: up to the low edge on the
-    left and the high one on the right, the end holes `POCKET_END` 2 mm under
-    the edge. The body above is not sewn.
-  - The edges look thicker than 4 × 0.5 mm, so the thickness is still open.
+    left and the high one on the right. The body above is not sewn.
+  - From the close-ups in `pavyzdziai/korteline/`: the last stitch of each side
+    hugs the pocket edge. Its end hole is in the body, `POCKET_END` (~2 mm)
+    *above* the pocket edge, and the hole before it is about as far below, so
+    the stitch climbs over the edge. It is one of the doubled end stitches,
+    so it is sewn twice, which is the reinforcement. On the PDF those holes
+    are on the body template only.
+  - That stitch is pulled hard, and the owner was firm about it: no gap
+    anywhere between thread and leather, and leather is soft, so the tight
+    thread presses a **groove** into the pocket face and lies in it, smooth
+    and level, front and back alike. It is one unbroken thread (saddle stitch),
+    built as one `TubeGeometry` along a `CurvePath` in `lay()`:
+    - it comes up out of the pocket hole on a gentle slope ("nuožulnus kalnelis");
+    - it runs straight in its groove (`grooveGeo`/`grooveMat`: a soft dark strip,
+      0.9 mm wide, from the hole to the edge);
+    - it rolls over the edge on a wide bend, pressing it in by `POCKET_DENT`
+      (0.12 mm, through `pocketDent()` → `leatherPiece(..., squeeze)`, so the
+      pockets are built after the stitches, `addPockets`);
+    - it goes down into the body hole the same gentle way, `DIVE` 1 mm deep.
+  - No tight kinks anywhere: they read as a crumpled, twisted thread. The
+    doubled pair lie side by side, touching (2R + 0.02 mm apart), because
+    overlapping (`JOINT_GAP`) bends cut through each other.
+  - Rejected on the way: two halves bent mid-stitch (air under the thread,
+    looked loose), four straight pieces (looked broken), a curve hugging
+    the whole dome ("no thread can lie like that"), tight bends at the
+    holes (looked crumpled).
+- Edges (the owner, 2026-10-19): rounded with an edge beveler and burnished
+  with Tokonole for a natural sheen, and not all alike. The pieces are built
+  by `leatherPiece()`, not ExtrudeGeometry, because ExtrudeGeometry rounds
+  every edge the same.
+  - Where the four pieces are glued (the stitched sides and bottom) the edge
+    is one polished dome across the whole 5.4 mm, "like a little hill, not a
+    cut-off corner". It is elliptical, `CARD_DOME` 1 mm deep, flat-crowned,
+    and meets the faces with no corner or step between the layers. Each layer
+    keeps **its own colour**: seen from the side it reads green, brown,
+    brown, green, with a faint darker glue line (`GLUE_LINE`) at each joint,
+    because it has to show that it is glued (the owner, 2026-10-19). A
+    single-colour edge, all green or blended, was tried and rejected.
+  - Where a piece ends on its own (the pocket tops, the window, the bodies
+    above the pockets) it has its own dome, `CARD_ROUND` 0.5 mm deep, in its
+    own shade. A body eases from the stack to its own edge over the first
+    1.2 mm above the pocket edge.
+  - To keep the dome smooth across the joints, the normals come straight off the dome,
+    not from each piece's own faces. Each layer's edge tucks 0.08 mm past
+    its glued faces, 0.03 mm under its neighbour, and its glued faces stop
+    0.1 mm short of the edge. Without those three, a light hairline showed
+    at every joint.
+  - The edge colour is in vertex colours (`burnished()`: a satin physical
+    material with a light clearcoat, ×0.62 of the grain), so a leather or
+    pocket colour change rebuilds the card holder. Card holder only: the
+    keyfob keeps `edgeMat` and its 3-step extruded bevel.
+- **Work on the card holder only** (the owner, 2026-10-19). Do not change
+  the keyfob unless the owner names it, and keep shared code behaving as
+  before for it.
 - The drawing also recommends a 3.5 mm stitch line and a 3.75 mm pitch. The
   locked keyfob values (2.8 / 3.85) are kept until the owner decides.
 - The grain faces out on both sides (`grainBackMat` on the back pieces);
