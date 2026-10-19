@@ -41,7 +41,10 @@ end sits higher and of the right one lower, and their corners are rounded to
 `RING_NECK 0.15` narrower in its radial width (seen face on, along the ring's
 axis): one round curve (`sin`) between the two ends. The ends are slanted, so
 it runs past each tip to the far corner of its cut (`RING_CUT` back) and is
-full width only once the cut is passed entirely. Its thickness along
+full width only once the cut is passed entirely. Kept round on purpose (the
+owner: less angular, "nepersistenk"): the ramp is a smootherstep, the neck
+`sin^1.5` so it meets full width without a corner, and the band is sampled at
+128 rings per radian so the short crossing is a curve, not facets. Its thickness along
 the axis stays as it is — thinning that was tried first and reversed. Building each turn as its own
 arc (what the code did until 2026-10-13) left four ends showing and read as two
 rings stacked; the owner's photos — and the object — have one wire with two cut

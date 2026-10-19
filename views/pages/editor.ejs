@@ -397,7 +397,7 @@
       ring(end, function (j) { return slant(j) + round * (1 - Math.sin(th)); }, round * (1 - Math.cos(th)));
     }
     var body = (cut + round) / R, main = span - 2 * body,
-        steps = Math.max(8, Math.round(main * 64)), rings = 0;
+        steps = Math.max(8, Math.round(main * 128)), rings = 0;   // fine enough that the crossing reads as a curve, not facets
     for (i = K; i >= 0; i--) { tip(0, i); rings++; }
     for (i = 0; i <= steps; i++) {
       var at = (body + main * i / steps) * R;
@@ -806,8 +806,8 @@
       var a = u * total;
       if (a <= TURN - RING_GAP) { return -th / 2; }             // the back turn, flat
       if (a >= TURN) { return th / 2; }                         // the front turn, flat
-      var s = (a - TURN + RING_GAP) / RING_GAP;                 // the ramp: eased, so the
-      return th * (s * s * (3 - 2 * s) - 0.5);                  // wire does not kink over
+      var s = (a - TURN + RING_GAP) / RING_GAP;                 // the ramp: smootherstep, so
+      return th * (s * s * s * (s * (6 * s - 15) + 10) - 0.5);  // it bends in and out softly
     }
     // Where it crosses between the ends the wire is a touch narrower seen face
     // on, along the ring's axis — its radial width, not its thickness (which
@@ -815,10 +815,11 @@
     // deepest, running between the two cut ends. The ends are cut on the
     // slant, so it reaches past each end's tip to the far corner of its cut
     // (`RING_CUT` back): full width only where the cut is passed entirely.
+    // `sin^1.5`, not `sin`: it meets the full width without a corner.
     var neck = RING_CUT / (ri + wire / 2);   // the slant, as an angle on the band
     function wAt(u) {
       var s = (u * total - TURN + RING_GAP + neck) / (RING_GAP + 2 * neck);
-      return s <= 0 || s >= 1 ? 1 : 1 - RING_NECK * Math.sin(Math.PI * s);
+      return s <= 0 || s >= 1 ? 1 : 1 - RING_NECK * Math.pow(Math.sin(Math.PI * s), 1.5);
     }
     var r = new THREE.Mesh(bandGeo(ri + wire / 2, wire, th, 0, total, yAt, RING_CUT, RING_ROUND, wAt), ringMat);
     r.rotation.z = Math.PI / 2;   // stand the ring up in the fob's plane
