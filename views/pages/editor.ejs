@@ -184,11 +184,10 @@
 
   // Key ring: the size above, as the scene wants it. It is one strip of flat
   // wire wound two turns — a single spiral, not two rings. RING_GAP is the
-  // angle between its two cut ends (the split), RING_RAMP the arc over which
-  // the wire crosses from the back turn to the front one.
+  // angle between its two cut ends (the split), and the wire crosses from the
+  // back turn to the front one inside that gap.
   var RING = <%- JSON.stringify(ring) %>;
   var RING_GAP = 0.22;
-  var RING_RAMP = 0.35;
 
   var state = { shape: 'arch', leather: '#9a5527', thread: '#eadcbf', ring: 'silver', text: '' };
 
@@ -747,10 +746,17 @@
 
     // Key ring threaded through the hole: one length of flat strip wound two
     // turns, and one mesh — the two turns are the same sweep of `bandGeo`, the
-    // wire ramping from the back turn to the front one over `RING_RAMP` where
-    // its two cut ends sit. It is a spiral, not two rings: build the turns as
-    // separate arcs and the ends of the two read as four, which is what the
-    // owner objected to (2026-10-13).
+    // wire ramping from the back turn to the front one across the split, the
+    // `RING_GAP` between its two cut ends. It is a spiral, not two rings: build
+    // the turns as separate arcs and the ends of the two read as four, which is
+    // what the owner objected to (2026-10-13).
+    //
+    // The ramp lies between the ends, not after them: the start end sits on
+    // the back layer at angle 0, so a ramp that began at 2π (as it did until
+    // 2026-10-19) ran the wire through that end and swallowed it — one end
+    // read as a clean cut, the other just faded out. Across the gap, the end
+    // of the front turn sits above the ramp's foot and the start of the back
+    // turn below its top, and both ends show alike.
     //
     // Both turns are at the same radius — a close-wound coil, so the band is
     // two wires wide with a groove between them, as in the photos — and the
@@ -761,9 +767,9 @@
     var TURN = Math.PI * 2, total = TURN * 2 - RING_GAP;
     function yAt(u) {
       var a = u * total;
-      if (a <= TURN) { return -th / 2; }                        // the back turn, flat
-      if (a >= TURN + RING_RAMP) { return th / 2; }             // the front turn, flat
-      var s = (a - TURN) / RING_RAMP;                           // the ramp: eased, so the
+      if (a <= TURN - RING_GAP) { return -th / 2; }             // the back turn, flat
+      if (a >= TURN) { return th / 2; }                         // the front turn, flat
+      var s = (a - TURN + RING_GAP) / RING_GAP;                 // the ramp: eased, so the
       return th * (s * s * (3 - 2 * s) - 0.5);                  // wire does not kink over
     }
     var r = new THREE.Mesh(bandGeo(ri + wire / 2, wire, th, 0, total, yAt), ringMat);

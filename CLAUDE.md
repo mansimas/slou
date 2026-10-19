@@ -29,7 +29,10 @@ wires wide with a groove between them and the pair is one wire's thickness apart
 It is **one continuous spiral, not two rings**: `bandGeo()` is called once, over
 two turns, and `yAt(u)` (u running 0→1 over the sweep) is where the wire sits
 along the axis as it winds — flat on the back turn, then eased across to the
-front turn over `RING_RAMP 0.35` rad, flat again. Building each turn as its own
+front turn across the split itself (the `RING_GAP` between the two ends), flat
+again. The crossing must lie *between* the ends: until 2026-10-19 it ran over
+`RING_RAMP 0.35` rad starting at 2π, right where the start end sits, so the wire
+ran through that end and it faded out instead of ending like the other one. Building each turn as its own
 arc (what the code did until 2026-10-13) left four ends showing and read as two
 rings stacked; the owner's photos — and the object — have one wire with two cut
 ends, which sit `RING_GAP 0.22` rad apart at the split, one layer apart, exactly
