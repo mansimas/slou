@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-19 21:55] - Reinforcing pair as photographed - Owner: the reinforcement looked distorted. Rechecked all photos: a doubled stitch sits exactly where a single one would, same line and slit tips, its two threads close and slightly overlapping, reading as one fuller stitch. Slit-offset placement dropped.
 [2026-10-19 21:40] - Doubled threads into slits - Owner: the doubled end threads ran beside the holes and the pairs did not line up. Now both threads go into the slit, side by side and parallel, with the same offsets on every doubled stitch so the pairs sit in one line. Card holder only.
 [2026-10-19 21:15] - Last hole nearer pocket edge - Owner: the reinforcing stitch ran too far over the brown leather. The last hole on each side now sits 1 mm above the green pocket edge (was 1.9 mm), so the stitch stays close to the green.
 [2026-10-19 18:30] - Plain doubled reinforcing stitch - Owner sent photos: the stitch over the pocket edge is plain, like the rest of the row, not a worm stuck on. Now two plain threads side by side, straight over the edge into the body hole; no grooves, no wide bends.

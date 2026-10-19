@@ -206,13 +206,16 @@ locked keyfob stitch, unchanged:
     hole. Its ends sink into the holes like a plain stitch's.
   - **It is two threads**, as on every doubled end stitch (the owner's
     close-ups; taking one away was a mistake the owner caught). Each of the
-    two is that same plain stitch. On the card holder (`open`) both threads
-    go **into** the slits, not beside them: each sits at its own point along
-    the cut (centre 0.6 × `SLIT_HALF`, ±1.02 thread radius). They are shifted
-    +δ into one slit and −δ out of the other, so they run parallel and touch
-    instead of crossing. The ends overrun only 0.08 mm (`lay(..., inSlit)`).
-    Every doubled pair uses the same offsets, so the pairs line up one after
-    another. The keyfob joint keeps its own approved `JOINT_GAP`/`JOINT_DROP` layout.
+    two is that same plain stitch. On the card holder (`open`) a doubled stitch
+    sits **exactly where a single stitch would**: same line, same slit tips,
+    same slant (photo `pavyzdziai/korteline/20261019_162207.jpg`). The two
+    threads are offset ±`JOINT_GAP`/2 across the line and overlap a little,
+    so together they read as one slightly fuller, plied stitch in the row.
+    On the owner's piece the brown slit at the last hole still shows beside
+    the thread; that is right. Tried and rejected on 2026-10-19: threads placed
+    inside the slit at different points along it, and the pair centred on
+    the end hole. Both bent the pair out of line and made the holes look
+    distorted. The keyfob joint keeps its own approved `JOINT_GAP`/`JOINT_DROP` layout.
   - Rejected (the owner: "like a stuck-on worm crawling"): grooves pressed
     into the pocket, wide or hugging bends round the edge, and segmented
     pieces. Keep each thread plain.
