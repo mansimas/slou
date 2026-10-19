@@ -210,8 +210,10 @@ locked keyfob stitch, unchanged:
   - Where the four pieces are glued (the stitched sides and bottom) the edge
     is one polished dome across the whole 5.4 mm, "like a little hill, not a
     cut-off corner". It is elliptical, `CARD_DOME` 1 mm deep, flat-crowned,
-    and meets the faces with no corner. It has one shade between the two
-    leathers, and no line between the layers.
+    and meets the faces with no corner, with no line between the layers. It
+    takes the **pockets' colour** (green on the owner's piece), because the
+    pockets are the outside. It is not a blend with the brown bodies inside:
+    the owner corrected that on 2026-10-19.
   - Where a piece ends on its own (the pocket tops, the window, the bodies
     above the pockets) it has its own dome, `CARD_ROUND` 0.5 mm deep, in its
     own shade. A body eases from the stack to its own edge over the first

@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-19 18:05] - Glued edge stays green - Owner liked the rounding but the outer pieces are green, so the edge must stay green. The glued four-layer edge now takes the pocket colour instead of a brown-green blend; the bodies' free edges above the pockets stay brown.
 [2026-10-19 17:50] - Pull edge stitch tight - Owner: seen from the side there must be no gap between the reinforcing stitch and the leather, pulled hard into it. The stitch over the pocket edge now follows the leather in four pieces, over the rounding and down the edge face, pressed in.
 [2026-10-19 17:20] - Burnished rounded card edges - Owner rounds and burnishes edges with Tokonole. Where the four layers are glued, the edge is now one polished dome over 5.4 mm, like a hill, one shade, no layer lines; a piece's free edge (pocket top, window, body above) gets its own dome. Card holder only.
 [2026-10-19 17:05] - Real card holder thicknesses - Owner gave the real leather: the two middle bodies 1.5 mm each, the two outer pockets 1.2 mm, so 5.4 mm at the edge. The stitch over the pocket edge is now laid over the taller edge, down onto the body.

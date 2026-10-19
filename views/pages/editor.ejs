@@ -959,10 +959,12 @@
       // A pocket is in the stack along the stitched sides and bottom; its top
       // and the window are its own edges.
       function pocketStack(p, hole) { return !hole && (Math.abs(p.x) > CARD_W / 2 - 1e-3 || p.y < POCKET_LO - 0.3) ? 1 : 0; }
-      // Burnished edge shades: each piece's own a shade darker than its grain,
-      // and the glued stack, worked as one, one shade between the two.
+      // Burnished edge shades: each piece's own a shade darker than its grain.
+      // The glued stack, worked as one, takes the pockets' colour: they are the
+      // outside of the piece, and on the owner's piece the edge is green all
+      // the way through (2026-10-19), not a blend with the brown inside.
       var bodyCol = new THREE.Color(state.leather).multiplyScalar(0.62), pocketCol = new THREE.Color(state.pocket).multiplyScalar(0.62);
-      var stackCol = bodyCol.clone().lerp(pocketCol, 0.5).multiplyScalar(0.85);
+      var stackCol = pocketCol.clone();
       fob.add(leatherPiece([pocketLoop, windowLoop], CARD_POCKET, zp, pocketStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol, stackCol));
       fob.add(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol, stackCol));
       fob.add(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol, stackCol));
