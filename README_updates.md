@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-19 23:25] - Soften shoulder beside thread - Owner: revert the corner and band changes, only soften the small steep corner of leather right beside the thread. The dent under the thread is just a little wider, so its shoulder slopes off; nothing else changed.
 [2026-10-19 23:05] - Thread dents green edge - Owner: where the thread crosses the end of the green leather, the leather should dip slightly under it. The rounded pocket edge is now pressed in about 0.25 mm under the threads, and the pocket corner eases smoothly into the side edge.
 [2026-10-19 22:35] - Gentler bend over pocket - Owner: the top thread bent too steeply where the green leather ends. It now starts down before the edge and runs one easy slope straight into the hole, and the curve no longer swings out into the air at the bend.
 [2026-10-19 22:15] - Doubled threads meet in hole - Owner: direction is fine, but the threads did not look like they went into the hole. Both threads of each doubled stitch now meet at the slit and sink into it together, spreading apart only between holes. Card holder only.

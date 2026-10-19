@@ -1002,7 +1002,9 @@
             if (cr.sg !== sg) { return; }
             var dx = x - cr.E.x, dy = y - cr.E.y, a = dx * cr.u.x + dy * cr.u.y, b = dx * cr.u.y - dy * cr.u.x;
             if (a > 0.02) { return; }
-            w += Math.exp(-Math.pow(b / 0.06, 2)) * Math.exp(-Math.pow(Math.max(0, -a - 0.03) / 0.06, 2));
+            // a touch wider than the thread, so the little shoulder of leather beside
+            // it slopes off instead of standing up steep (the owner, 1.png)
+            w += Math.exp(-Math.pow(b / 0.1, 2)) * Math.exp(-Math.pow(Math.max(0, -a - 0.03) / 0.08, 2));
           });
           // over the pocket's rounded edge, under the thread: nothing at the
           // glued face, deepest high on the dome, back to nothing right at the

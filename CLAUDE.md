@@ -228,6 +228,11 @@ locked keyfob stitch, unchanged:
     and it covered the thread), and 0.2 mm edge sampling (the inset outline
     crossed itself at the pocket corners and threw up a flap). The pocket side
     eases into the glued-stack dome over 1.5 mm below its top (`pocketStack`).
+    The dent is a little wider than the thread (1 mm across, ~0.8 mm into the
+    pocket), so the small shoulder of leather beside the thread slopes off
+    instead of standing up steep (`pavyzdziai/korteline/1.png`). Mini
+    corrections only here. A slanted pocket corner and a wide band worked
+    down along the edge were both tried and reverted the same day.
     On the owner's piece the brown slit at the last hole still shows beside
     the thread; that is right. Tried and rejected on 2026-10-19: threads placed
     inside the slit at different points along it, and the pair centred on
