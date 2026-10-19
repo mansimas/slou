@@ -187,8 +187,14 @@ locked keyfob stitch, unchanged:
   - The back pocket carries a SLOU stamp at the foot (`logoTex`, drawn
     mirrored because the back face is seen from behind).
   - The stitching runs only as high as the pockets: up to the low edge on the
-    left and the high one on the right, the end holes `POCKET_END` 2 mm under
-    the edge. The body above is not sewn.
+    left and the high one on the right. The body above is not sewn.
+  - From the close-ups in `pavyzdziai/korteline/`: the last stitch of each side
+    hugs the pocket edge. Its end hole is in the body, `POCKET_END` (~2 mm)
+    *above* the pocket edge, and the hole before it is about as far below, so
+    the stitch climbs over the edge. It is one of the doubled end stitches,
+    so it is sewn twice, which is the reinforcement. In 3D a stitch between
+    two levels lies at the higher one (`Math.max` of `face()`), and its end
+    drops onto the body. On the PDF those holes are on the body template only.
   - The edges look thicker than 4 × 0.5 mm, so the thickness is still open.
 - The drawing also recommends a 3.5 mm stitch line and a 3.75 mm pitch. The
   locked keyfob values (2.8 / 3.85) are kept until the owner decides.

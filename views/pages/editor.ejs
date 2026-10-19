@@ -232,7 +232,11 @@
   // turned over onto the back lines up with the first.
   var POCKET_HI = -CARD_H / 2 + 8.1, POCKET_LO = -CARD_H / 2 + 5.18, POCKET_X = CARD_W / 2 - 1.13;
   var POCKET_EASE = 0.5;
-  var POCKET_END = 0.2;   // the last hole, 2 mm under the pocket edge
+  // The last hole of each side is in the body, ~2 mm *above* the pocket edge
+  // (the owner's close-ups, 2026-10-19): the last stitch climbs over the
+  // pocket's edge and hugs it, which is what keeps the pocket mouth from
+  // tearing open. It is one of the doubled end stitches, so it is sewn twice.
+  var POCKET_END = 0.19;
   function pocketTop(x) {
     var f = Math.min(1, Math.max(0, (POCKET_X - x) / (2 * POCKET_X)));
     return POCKET_HI + (POCKET_LO - POCKET_HI) * f;
@@ -768,12 +772,14 @@
   // The card holder's stitch line: an open U, down the left side, round the
   // bottom and up the right, CCW like the outlines. It runs only as high as
   // the pockets on each side (the owner's piece: the body above them is left
-  // unsewn), its end holes POCKET_END below the pocket edge: up to the low
-  // edge on the left, the high one on the right.
+  // unsewn), its end holes POCKET_END above the pocket edge, in the body: by
+  // the low edge on the left, the high one on the right. With the pitch close
+  // to 3.85 mm the hole before sits about as far below the edge, so the last
+  // stitch straddles it.
   // No sharp corners, so it is one run of equal chords from end to end.
   function seamHoles() {
     var i = STITCH_INSET, x = CARD_W / 2 - i, y0 = -CARD_H / 2 + i, r = CARD_R - i, PI = Math.PI;
-    var yL = pocketTop(-x) - POCKET_END, yR = pocketTop(x) - POCKET_END;
+    var yL = pocketTop(-x) + POCKET_END, yR = pocketTop(x) + POCKET_END;
     var p = new THREE.Path(), poly = [];
     p.moveTo(-x, yL); p.lineTo(-x, y0 + r); p.absarc(-x + r, y0 + r, r, PI, PI * 1.5);
     p.lineTo(x - r, y0); p.absarc(x - r, y0 + r, r, -PI / 2, 0); p.lineTo(x, yR);
@@ -899,7 +905,10 @@
       // a slit sits between two stitches: lean it off their average direction
       var dh = chordIn(k).clone().add(d).normalize();
       [1, -1].forEach(function (side, i) {
-        var z = side * face((a.x + b.x) / 2, (a.y + b.y) / 2);
+        // A stitch over the pocket edge lies at the pocket's level the whole
+        // way: it runs over the edge and its end drops onto the body into the
+        // hole there, rather than cutting through the edge.
+        var z = side * Math.max(face(a.x, a.y), face(b.x, b.y));
         var sl = slit(d, side), sh = slit(dh, side);
         // The strand runs between the slit *tips*, which puts each end ~0.4 mm
         // to the side of its hole — and that same offset is what tilts the
