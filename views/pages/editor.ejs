@@ -188,6 +188,12 @@
   // back turn to the front one inside that gap.
   var RING = <%- JSON.stringify(ring) %>;
   var RING_GAP = 0.22;
+  // Its cut ends: RING_CUT is how far the outer face of each end sits back
+  // from the inner one (a slanted cut, not square across the wire — the back
+  // of each end reaches past its front), RING_ROUND the radius the corners of
+  // the cut are rounded to, just enough to take the sharp edge off.
+  var RING_CUT = 0.15;
+  var RING_ROUND = 0.02;
 
   var state = { shape: 'arch', leather: '#9a5527', thread: '#eadcbf', ring: 'silver', text: '' };
 
@@ -361,15 +367,43 @@
   // `yAt(u)`, u running 0→1 over the sweep, is where the wire sits along the
   // ring's axis as it winds: that one function is what makes the two turns a
   // single spiral — both turns of the ring go through here, as one sweep.
-  function bandGeo(R, w, t, a0, span, yAt) {
+  //
+  // Each end is cut on the slant (`cut`: the outer face stops that much short
+  // of the inner one) and its corners rounded to `round`: the last few rings
+  // of the sweep close in on the section a quarter-circle at a time, the
+  // first of them set back by the slant, vertex by vertex.
+  function bandGeo(R, w, t, a0, span, yAt, cut, round) {
     var hw = w / 2, ht = t / 2, ch = ht * 0.35;
     var sec = [[-hw + ch, -ht], [hw - ch, -ht], [hw, -ht + ch], [hw, ht - ch],
                [hw - ch, ht], [-hw + ch, ht], [-hw, ht - ch], [-hw, -ht + ch]];
-    var n = sec.length, steps = Math.max(8, Math.round(span * 32)), v = [], idx = [], i, j;
-    for (i = 0; i <= steps; i++) {
-      var u = i / steps, a = a0 + span * u, sa = Math.sin(a), ca = Math.cos(a), y = yAt(u);
-      for (j = 0; j < n; j++) { v.push((R + sec[j][0]) * sa, y + sec[j][1], (R + sec[j][0]) * ca); }
+    var n = sec.length, v = [], idx = [], i, j, K = 4;
+    // one ring of the section: `back(j)` is how far vertex j sits in from the
+    // end of the sweep at `end` (0 or 1), `inset` how far it closes in
+    function ring(end, back, inset) {
+      for (var j = 0; j < n; j++) {
+        var d = back(j) / R, a = end ? a0 + span - d : a0 + d,
+            sa = Math.sin(a), ca = Math.cos(a), y = yAt((a - a0) / span),
+            x = sec[j][0], z = sec[j][1];
+        x = Math.sign(x) * (Math.abs(x) - inset);
+        z = Math.sign(z) * (Math.abs(z) - inset);
+        v.push((R + x) * sa, y + z, (R + x) * ca);
+      }
     }
+    function slant(j) { return cut * (sec[j][0] + hw) / w; }   // 0 inside, `cut` outside
+    function tip(end, k) {                                      // the k-th ring of the rounding
+      var th = k / K * Math.PI / 2;
+      ring(end, function (j) { return slant(j) + round * (1 - Math.sin(th)); }, round * (1 - Math.cos(th)));
+    }
+    var body = (cut + round) / R, main = span - 2 * body,
+        steps = Math.max(8, Math.round(main * 32)), rings = 0;
+    for (i = K; i >= 0; i--) { tip(0, i); rings++; }
+    for (i = 0; i <= steps; i++) {
+      var at = (body + main * i / steps) * R;
+      ring(0, function () { return at; }, 0);
+      rings++;
+    }
+    for (i = 0; i <= K; i++) { tip(1, i); rings++; }
+    steps = rings - 1;
     for (i = 0; i < steps; i++) {
       for (j = 0; j < n; j++) {
         var k = (j + 1) % n, p = i * n + j, q = i * n + k,
@@ -380,8 +414,9 @@
       }
     }
     [0, steps].forEach(function (e, end) {
-      var u = e / steps, a = a0 + span * u, sa = Math.sin(a), ca = Math.cos(a), mid = v.length / 3;
-      v.push(R * sa, yAt(u), R * ca);
+      var mid = v.length / 3, c = [0, 0, 0];   // the fan's centre: the middle of the end ring
+      for (j = 0; j < n * 3; j++) { c[j % 3] += v[e * n * 3 + j] / n; }
+      v.push(c[0], c[1], c[2]);
       for (j = 0; j < n; j++) {
         var p = e * n + j, q = e * n + (j + 1) % n;
         idx.push(mid, end === 0 ? p : q, end === 0 ? q : p);
@@ -772,7 +807,7 @@
       var s = (a - TURN + RING_GAP) / RING_GAP;                 // the ramp: eased, so the
       return th * (s * s * (3 - 2 * s) - 0.5);                  // wire does not kink over
     }
-    var r = new THREE.Mesh(bandGeo(ri + wire / 2, wire, th, 0, total, yAt), ringMat);
+    var r = new THREE.Mesh(bandGeo(ri + wire / 2, wire, th, 0, total, yAt, RING_CUT, RING_ROUND), ringMat);
     r.rotation.z = Math.PI / 2;   // stand the ring up in the fob's plane
     r.position.set(0, HOLE_Y + ri + wire / 2, 0);   // the band centred on the hole
     fob.add(r);

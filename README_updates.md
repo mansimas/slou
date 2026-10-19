@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-19 14:09] - Slanted rounded ring ends - Owner wanted the ring's cut ends to look real: corners very slightly rounded (0.2 mm) and the cut slanted, not square — the back of each end reaches past its front (left end's back higher, right end's lower).
 [2026-10-19 14:03] - Fix key ring spiral end - Owner: one ring end was clear, the other just faded out. The crossing to the front turn began right on the start end and swallowed it; it now runs across the split, so both cut ends show alike, like a real split ring.
 [2026-10-19 14:05] - Flags in language switcher - Owner wanted the language switcher (top right) shown with a flag. The globe icon became the current language's flag and each menu row got its flag; inline SVG, since Windows renders flag emoji as plain letters.
 [2026-10-19 13:53] - Hide grunt console window - After each auto-restart a grunt console window popped up, which the owner does not want to see. The server now starts in a hidden console that grunt shares, so restarts happen with nothing on screen.

@@ -32,7 +32,11 @@ along the axis as it winds — flat on the back turn, then eased across to the
 front turn across the split itself (the `RING_GAP` between the two ends), flat
 again. The crossing must lie *between* the ends: until 2026-10-19 it ran over
 `RING_RAMP 0.35` rad starting at 2π, right where the start end sits, so the wire
-ran through that end and it faded out instead of ending like the other one. Building each turn as its own
+ran through that end and it faded out instead of ending like the other one.
+The ends are cut on the slant, not square (2026-10-19, the owner's call): the
+outer face of each end stops `RING_CUT 0.15` short of the inner one, so the back
+of the left (upward-facing) end sits higher and of the right one lower, and
+their corners are rounded to `RING_ROUND 0.02` (0.2 mm, "vos vos"). Building each turn as its own
 arc (what the code did until 2026-10-13) left four ends showing and read as two
 rings stacked; the owner's photos — and the object — have one wire with two cut
 ends, which sit `RING_GAP 0.22` rad apart at the split, one layer apart, exactly
