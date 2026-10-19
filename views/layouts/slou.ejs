@@ -81,7 +81,7 @@
     .langsw > summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 2px; color: var(--ink); background: rgba(247,241,230,.6); user-select: none; letter-spacing: 1px; }
     .langsw > summary::-webkit-details-marker { display: none; }
     .langsw > summary:hover { border-color: var(--leather); }
-    .langsw > summary svg { width: 15px; height: 15px; stroke: var(--leather-dark); fill: none; stroke-width: 1.4; }
+    .flag { width: 21px; height: 14px; flex: none; display: block; border-radius: 2px; box-shadow: 0 0 0 1px rgba(43,29,15,.18); }
     .langsw .caret { font-size: 9px; color: var(--muted); transition: transform .2s; }
     .langsw[open] .caret { transform: rotate(180deg); }
     .langmenu { position: absolute; right: 0; top: calc(100% + 8px); min-width: 184px; background: var(--card); border: 1px solid var(--line); border-radius: 3px; box-shadow: 0 16px 40px -16px rgba(70,48,25,.5); padding: 6px; list-style: none; z-index: 40; }
@@ -534,6 +534,22 @@
   <div class="topbar"><%= t.topbar %></div>
 
   <% var langNames = { lt: 'Lietuvių', en: 'English', pt: 'Português', fr: 'Français', de: 'Deutsch', es: 'Español', it: 'Italiano' }; %>
+  <%
+    /* Flags as inline SVG, not emoji: Windows has no flag emoji and shows
+       the two letters instead. Simplified (no coats of arms) at this size. */
+    var flagBody = {
+      lt: '<path fill="#FDB913" d="M0 0h30v7H0z"/><path fill="#006A44" d="M0 7h30v6H0z"/><path fill="#C1272D" d="M0 13h30v7H0z"/>',
+      en: '<path fill="#012169" d="M0 0h30v20H0z"/><path stroke="#fff" stroke-width="4" d="M0 0l30 20M30 0L0 20"/><path stroke="#C8102E" stroke-width="1.4" d="M0 0l30 20M30 0L0 20"/><path stroke="#fff" stroke-width="6" d="M15 0v20M0 10h30"/><path stroke="#C8102E" stroke-width="3.4" d="M15 0v20M0 10h30"/>',
+      pt: '<path fill="#FF0000" d="M0 0h30v20H0z"/><path fill="#006600" d="M0 0h12v20H0z"/><circle cx="12" cy="10" r="4" fill="#FFE000"/>',
+      fr: '<path fill="#fff" d="M0 0h30v20H0z"/><path fill="#002654" d="M0 0h10v20H0z"/><path fill="#CE1126" d="M20 0h10v20H20z"/>',
+      de: '<path fill="#000" d="M0 0h30v7H0z"/><path fill="#DD0000" d="M0 7h30v6H0z"/><path fill="#FFCE00" d="M0 13h30v7H0z"/>',
+      es: '<path fill="#AA151B" d="M0 0h30v20H0z"/><path fill="#F1BF00" d="M0 5h30v10H0z"/>',
+      it: '<path fill="#fff" d="M0 0h30v20H0z"/><path fill="#009246" d="M0 0h10v20H0z"/><path fill="#CE2B37" d="M20 0h10v20H20z"/>'
+    };
+    function flag(code) {
+      return flagBody[code] ? '<svg class="flag" viewBox="0 0 30 20" preserveAspectRatio="none" aria-hidden="true">' + flagBody[code] + '</svg>' : '';
+    }
+  %>
   <% var isHome = typeof active !== 'undefined' && active === 'home'; %>
   <div class="headband<%= isHome ? ' headband--home' : '' %>">
     <div class="headbar<%= isHome ? ' headbar--home' : '' %>">
@@ -548,7 +564,7 @@
 
       <details class="langsw" id="langsw">
         <summary>
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15.5 0 18M12 3c-2.5 2.5-2.5 15.5 0 18"/></svg>
+          <%- flag(locale) %>
           <span><%= t.langLabel %></span>
           <span class="caret">▾</span>
         </summary>
@@ -562,7 +578,7 @@
                  not having them crawled: they redirect straight back to the
                  page you came from, they are not separate pages. */
             %>
-            <li><a href="/language/<%= l.code %>" rel="nofollow" class="<%= locale === l.code ? 'active' : '' %>"><span class="code"><%= l.label %></span><%= langNames[l.code] || l.label %></a></li>
+            <li><a href="/language/<%= l.code %>" rel="nofollow" class="<%= locale === l.code ? 'active' : '' %>"><%- flag(l.code) %><span class="code"><%= l.label %></span><%= langNames[l.code] || l.label %></a></li>
           <% }); %>
         </ul>
       </details>

@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-19 14:05] - Flags in language switcher - Owner wanted the language switcher (top right) shown with a flag. The globe icon became the current language's flag and each menu row got its flag; inline SVG, since Windows renders flag emoji as plain letters.
 [2026-10-19 13:53] - Hide grunt console window - After each auto-restart a grunt console window popped up, which the owner does not want to see. The server now starts in a hidden console that grunt shares, so restarts happen with nothing on screen.
 [2026-10-19 13:42] - Remove editor eyebrow label - Owner asked to drop the small "Kūrimo įrankis" label above the editor title; it added nothing. Removed from the view, its 7 translations and its CSS rule.
 [2026-10-19 13:41] - Open editor on launch - Owner wants the desktop icon (and any new tab the auto-reload opens) to land straight on localhost:1337/editor, since the editor is what he works on.
