@@ -44,7 +44,11 @@ it runs past each tip to the far corner of its cut (`RING_CUT` back) and is
 full width only once the cut is passed entirely. Kept round on purpose (the
 owner: less angular, "nepersistenk"): the ramp is a smootherstep, the neck
 `sin^1.5` so it meets full width without a corner, and the band is sampled at
-128 rings per radian so the short crossing is a curve, not facets. Its thickness along
+128 rings per radian so the short crossing is a curve, not facets. Over the
+same stretch, on the same curve (`crossing(u)`), the section goes oval: its
+chamfered corners blend into quarter-circles of radius `ht * 0.75` (the owner:
+"ovalesnis", softer, only the gap). The section is 16 points for this — four
+per corner, collinear along the chamfer everywhere else, so the band is unchanged. Its thickness along
 the axis stays as it is — thinning that was tried first and reversed. Building each turn as its own
 arc (what the code did until 2026-10-13) left four ends showing and read as two
 rings stacked; the owner's photos — and the object — have one wire with two cut

@@ -373,19 +373,32 @@
   // of the inner one) and its corners rounded to `round`: the last few rings
   // of the sweep close in on the section a quarter-circle at a time, the
   // first of them set back by the slant, vertex by vertex. `wAt(u)` scales the
-  // wire's radial width `w` along the sweep (1 = full).
-  function bandGeo(R, w, t, a0, span, yAt, cut, round, wAt) {
-    var hw = w / 2, ht = t / 2, ch = ht * 0.35;
-    var sec = [[-hw + ch, -ht], [hw - ch, -ht], [hw, -ht + ch], [hw, ht - ch],
-               [hw - ch, ht], [-hw + ch, ht], [-hw, ht - ch], [-hw, -ht + ch]];
+  // wire's radial width `w` along the sweep (1 = full), and `oAt(u)` blends
+  // the section from its chamfered corners (0) to rounded ones (1), radius
+  // `ht * 0.75` — the oval the wire takes where it crosses the split.
+  function bandGeo(R, w, t, a0, span, yAt, cut, round, wAt, oAt) {
+    var hw = w / 2, ht = t / 2, ch = ht * 0.35, ro = ht * 0.75, M = 3;
+    // the section, CCW in (radial, axial): each corner M + 1 points, laid
+    // along the chamfer in `sec` and along the quarter-circle in `oval`
+    var sec = [], oval = [];
+    [[1, -1], [1, 1], [-1, 1], [-1, -1]].forEach(function (c, ci) {
+      for (var k = 0; k <= M; k++) {
+        var f = k / M, a = (ci - 1 + f) * Math.PI / 2, a1 = ci * Math.PI / 2, a2 = (ci - 1) * Math.PI / 2,
+            cx = c[0] * (hw - ch), cy = c[1] * (ht - ch);
+        sec.push([cx + ch * ((1 - f) * Math.cos(a2) + f * Math.cos(a1)),
+                  cy + ch * ((1 - f) * Math.sin(a2) + f * Math.sin(a1))]);
+        oval.push([c[0] * (hw - ro) + ro * Math.cos(a), c[1] * (ht - ro) + ro * Math.sin(a)]);
+      }
+    });
     var n = sec.length, v = [], idx = [], i, j, K = 4;
     // one ring of the section: `back(j)` is how far vertex j sits in from the
     // end of the sweep at `end` (0 or 1), `inset` how far it closes in
     function ring(end, back, inset) {
       for (var j = 0; j < n; j++) {
         var d = back(j) / R, a = end ? a0 + span - d : a0 + d, u = (a - a0) / span,
-            sa = Math.sin(a), ca = Math.cos(a), y = yAt(u),
-            x = sec[j][0] * wAt(u), z = sec[j][1];
+            sa = Math.sin(a), ca = Math.cos(a), y = yAt(u), o = oAt(u),
+            x = (sec[j][0] + (oval[j][0] - sec[j][0]) * o) * wAt(u),
+            z = sec[j][1] + (oval[j][1] - sec[j][1]) * o;
         x = Math.sign(x) * (Math.abs(x) - inset);
         z = Math.sign(z) * (Math.abs(z) - inset);
         v.push((R + x) * sa, y + z, (R + x) * ca);
@@ -816,12 +829,15 @@
     // slant, so it reaches past each end's tip to the far corner of its cut
     // (`RING_CUT` back): full width only where the cut is passed entirely.
     // `sin^1.5`, not `sin`: it meets the full width without a corner.
+    // Over the same stretch, on the same curve, its section goes oval — the
+    // corners rounded — so the crossing reads softer than the rest of the band.
     var neck = RING_CUT / (ri + wire / 2);   // the slant, as an angle on the band
-    function wAt(u) {
+    function crossing(u) {                   // 0 outside the crossing, 1 at its middle
       var s = (u * total - TURN + RING_GAP + neck) / (RING_GAP + 2 * neck);
-      return s <= 0 || s >= 1 ? 1 : 1 - RING_NECK * Math.pow(Math.sin(Math.PI * s), 1.5);
+      return s <= 0 || s >= 1 ? 0 : Math.pow(Math.sin(Math.PI * s), 1.5);
     }
-    var r = new THREE.Mesh(bandGeo(ri + wire / 2, wire, th, 0, total, yAt, RING_CUT, RING_ROUND, wAt), ringMat);
+    function wAt(u) { return 1 - RING_NECK * crossing(u); }
+    var r = new THREE.Mesh(bandGeo(ri + wire / 2, wire, th, 0, total, yAt, RING_CUT, RING_ROUND, wAt, crossing), ringMat);
     r.rotation.z = Math.PI / 2;   // stand the ring up in the fob's plane
     r.position.set(0, HOLE_Y + ri + wire / 2, 0);   // the band centred on the hole
     fob.add(r);
