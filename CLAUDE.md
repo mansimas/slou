@@ -172,21 +172,37 @@ locked keyfob stitch, unchanged:
   1.2–1.5 mm leather), so 2 mm at the stitched edge. Front to back: pocket,
   body, body, pocket (`outline('pocket')`, `outline('card')`). The bodies are
   full size, and the slot between them is the middle pocket. The pocket top
-  is slanted (`pocketTop(x)`): level at 81 mm for 11.3 mm, straight down to
-  52 mm, level for the last 11.3 mm, with square top corners. The drawing's
-  second pocket is the mirror image, which once turned over onto the back
-  lines up with the first, so the 3D uses one shape for both.
+  is slanted (`pocketTop(x)`): level at 52 mm for 11.3 mm, straight up to
+  81 mm, level for the last 11.3 mm, with square top corners. The bends are
+  eased over `POCKET_EASE 0.5`, because the real cut is soft, not a kink. The
+  drawing's second pocket is the mirror image, which once turned over onto
+  the back lines up with the first, so the 3D uses one shape for both.
+- From the owner's photos of the real piece (`pavyzdziai/2026091*.jpg`,
+  2026-10-19):
+  - Two colours: brown bodies (`state.leather`) and olive pockets
+    (`state.pocket`, the "Pocket colour" control, card only).
+  - Seen from the window side, the pocket is high on the **right**.
+  - The front pocket has an arch-shaped thumb window (`windowPath`, 34 × 38 mm,
+    its foot 7 mm off the bottom), and the initials sit just above it.
+  - The back pocket carries a SLOU stamp at the foot (`logoTex`, drawn
+    mirrored because the back face is seen from behind).
+  - The stitching runs only as high as the pockets: up to the low edge on the
+    left and the high one on the right, the end holes `POCKET_END` 2 mm under
+    the edge. The body above is not sewn.
+  - The edges look thicker than 4 × 0.5 mm, so the thickness is still open.
 - The drawing also recommends a 3.5 mm stitch line and a 3.75 mm pitch. The
   locked keyfob values (2.8 / 3.85) are kept until the owner decides.
 - The grain faces out on both sides (`grainBackMat` on the back pieces);
   initials sit on the front pocket.
 - Stitching is an open U (`seamHoles`): down the sides and round the bottom,
-  the top left open, ending `CARD_R` below the top edge. `build()` handles the
+  the top left open, ending just under the pocket edge on each side. `build()` handles the
   open seam (no stitch after the last hole, `chordIn`), and the last
   `OVERLAP` stitches at each end are doubled like the keyfob joint. The thread
   sits on the pocket face below the pocket top and on the body face above it (`face(x, y)`).
 - Pattern PDF: body and pocket side by side, each cut ×2 (the second pocket
   with the template turned over), with the legend and specs below them. The
+  window is drawn dashed on the pocket, with a note to cut it in the front
+  pocket only. The
   body carries the slanted pocket edge as a dashed line, like the grey line on
   the drawing, and red brackets mark the doubled stitches at both thread
   ends. Calibration is shared with the keyfob.

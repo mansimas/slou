@@ -103,6 +103,15 @@
           </div>
         </div>
 
+        <div id="kfPocketBox" hidden>
+          <span class="kf__label"><%= e.card.pocketColor %></span>
+          <div class="kf__opts" data-group="pocket">
+            <% [['tan', '#c08a55'], ['cognac', '#9a5527'], ['brown', '#5a3820'], ['black', '#222020'], ['burgundy', '#5e1f24'], ['olive', '#5b5a35']].forEach(function (c, i) { %>
+              <button type="button" class="kf__sw" data-value="<%= c[1] %>" style="background:<%= c[1] %>" title="<%= e.colors[c[0]] %>" aria-label="<%= e.colors[c[0]] %>" aria-pressed="<%= i === 5 %>"></button>
+            <% }); %>
+          </div>
+        </div>
+
         <div>
           <span class="kf__label"><%= e.thread %></span>
           <div class="kf__opts" data-group="thread">
@@ -216,17 +225,37 @@
   var CARD_LAYER = 0.05;                // each piece 0.5 mm
   var CARD_BEVEL = 0.01;
   var CARD_R = 1.4;                     // corner radius (the drawing: ~14 mm)
-  // The pockets' top is cut on a slant: level at 81 mm for the first 11.3 mm
-  // across, down in a straight line to 52 mm, level again for the last 11.3 mm.
+  // The pockets' top is cut on a slant: level at 52 mm for the first 11.3 mm
+  // across, up in a straight line to 81 mm, level again for the last 11.3 mm —
+  // high on the right seen from the window side, as on the owner's piece.
   // Both pockets are this one shape — the drawing's second is its mirror, which
   // turned over onto the back lines up with the first.
   var POCKET_HI = -CARD_H / 2 + 8.1, POCKET_LO = -CARD_H / 2 + 5.18, POCKET_X = CARD_W / 2 - 1.13;
+  var POCKET_EASE = 0.5;
+  var POCKET_END = 0.2;   // the last hole, 2 mm under the pocket edge
   function pocketTop(x) {
-    var f = Math.min(1, Math.max(0, (x + POCKET_X) / (2 * POCKET_X)));
+    var f = Math.min(1, Math.max(0, (POCKET_X - x) / (2 * POCKET_X)));
     return POCKET_HI + (POCKET_LO - POCKET_HI) * f;
   }
 
-  var state = { product: 'keyfob', shape: 'arch', leather: '#9a5527', thread: '#eadcbf', ring: 'silver', text: '' };
+  // The thumb window, cut in the front pocket only (the owner's photos): an arch
+  // with a flat foot, 34 mm across, 38 mm tall, its foot 7 mm off the bottom
+  // edge — just clear of the stitching.
+  var WIN_HW = 1.7, WIN_H = 3.8, WIN_Y = -CARD_H / 2 + 0.7, WIN_R = 0.5;
+  function windowPath(path) {
+    var top = WIN_Y + WIN_H;
+    path.moveTo(-WIN_HW + WIN_R, WIN_Y);
+    path.quadraticCurveTo(-WIN_HW, WIN_Y, -WIN_HW, WIN_Y + WIN_R);
+    path.bezierCurveTo(-WIN_HW, top - 0.9, -WIN_HW * 0.75, top, 0, top);
+    path.bezierCurveTo(WIN_HW * 0.75, top, WIN_HW, top - 0.9, WIN_HW, WIN_Y + WIN_R);
+    path.quadraticCurveTo(WIN_HW, WIN_Y, WIN_HW - WIN_R, WIN_Y);
+    path.lineTo(-WIN_HW + WIN_R, WIN_Y);
+    return path;
+  }
+
+  // `pocket` is the card holder's second colour: as made, olive pockets on a
+  // brown body
+  var state = { product: 'keyfob', shape: 'arch', leather: '#9a5527', pocket: '#5b5a35', thread: '#eadcbf', ring: 'silver', text: '' };
 
   // ---------- scene ----------
   var stage = document.getElementById('kfStage');
@@ -311,9 +340,9 @@
     var txt = state.text.trim().toUpperCase();
     if (!txt) { return null; }
     if (state.product === 'card') {
-      // across the front pocket, centred below its low edge
-      return { txt: txt, vertical: false, x: 0, y: (-CARD_H / 2 + POCKET_LO) / 2,
-               size: Math.min(0.8, (CARD_W - 2) / (txt.length * 0.72)) };
+      // across the front pocket, just above the window (as on the owner's piece)
+      return { txt: txt, vertical: false, x: 0, y: WIN_Y + WIN_H + 0.75,
+               size: Math.min(0.75, (CARD_W - 2.2) / (txt.length * 0.72)) };
     }
     var vertical = txt.length > 3;
     var room = vertical ? H - 4.4 : W - 1;   // stays inside the stitching
@@ -359,13 +388,37 @@
   var plainBumpTex = canvasTex(false);
   plainBumpTex.image.getContext('2d').drawImage(grain, 0, 0);
   plainBumpTex.needsUpdate = true;
+  // the back pocket: grain and the SLOU stamp at the foot, centred, as on the
+  // owner's piece. Mirrored on the canvas, because the back face carries the
+  // same texture coordinates as the front and is seen from behind.
+  var logoTex = canvasTex(true), logoBumpTex = canvasTex(false);
+  [[logoTex, 'rgba(28,13,2,.55)', true], [logoBumpTex, '#000', false]].forEach(function (l) {
+    var g = l[0].image.getContext('2d'), px = TEX_N / TEX_SPAN;
+    g.drawImage(grain, 0, 0);
+    if (l[2]) { g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(0, 0, TEX_N, TEX_N); }
+    g.save();
+    g.translate(TEX_N / 2, TEX_N / 2 + (CARD_H / 2 - 0.85) * px);
+    g.scale(-1, 1);
+    g.font = '800 ' + (0.62 * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = l[1]; g.filter = 'blur(1px)';
+    g.fillText('SLOU', 0, 0);
+    g.restore();
+    l[0].needsUpdate = true;
+  });
 
   // ---------- materials ----------
   var leatherMat = new THREE.MeshStandardMaterial({ map: colorTex, bumpMap: bumpTex, bumpScale: 1.5, roughness: 0.72 });
-  // the card holder's back pieces face outwards with their grain side, like the front
-  var grainBackMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1.5, roughness: 0.72 });
   var backMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: bumpTex, bumpScale: 1, roughness: 0.85 });
   var edgeMat = new THREE.MeshStandardMaterial({ roughness: 0.45 });  // burnished edge
+  // The card holder in two colours: the bodies in `state.leather`, the
+  // pockets in `state.pocket`. The front pocket carries the initials, the
+  // back one the SLOU stamp; the bodies' grain is plain.
+  var pocketFrontMat = new THREE.MeshStandardMaterial({ map: colorTex, bumpMap: bumpTex, bumpScale: 1.5, roughness: 0.72 });
+  var pocketBackMat = new THREE.MeshStandardMaterial({ map: logoTex, bumpMap: logoBumpTex, bumpScale: 1.5, roughness: 0.72 });
+  var pocketFleshMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1, roughness: 0.85 });
+  var pocketEdgeMat = new THREE.MeshStandardMaterial({ roughness: 0.45 });
+  var bodyGrainMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1.5, roughness: 0.72 });
   // Twisted waxed thread: diagonal plies wound round each stitch.
   var plyTex = (function () {
     // three plies round the thread; repeat set so they run at ~45 deg
@@ -488,9 +541,14 @@
   function applyColors() {
     var c = new THREE.Color(state.leather);
     leatherMat.color.copy(c);
-    grainBackMat.color.copy(c);
     backMat.color.copy(c).multiplyScalar(0.9);
     edgeMat.color.copy(c).multiplyScalar(0.55);
+    bodyGrainMat.color.copy(c);
+    var pc = new THREE.Color(state.pocket);
+    pocketFrontMat.color.copy(pc);
+    pocketBackMat.color.copy(pc);
+    pocketFleshMat.color.copy(pc).multiplyScalar(0.9);
+    pocketEdgeMat.color.copy(pc).multiplyScalar(0.55);
     threadMat.color.set(state.thread);
     holeMat.color.copy(c).multiplyScalar(0.12);
     dimpleMat.color.copy(c).multiplyScalar(0.3);
@@ -512,8 +570,15 @@
       var cx = CARD_W / 2 - i, cb = -CARD_H / 2 + i, cr = CARD_R - i;
       s.moveTo(-cx + cr, cb); s.lineTo(cx - cr, cb); s.absarc(cx - cr, cb + cr, cr, -PI / 2, 0);
       if (kind === 'pocket') {
-        s.lineTo(cx, POCKET_LO - i); s.lineTo(POCKET_X, POCKET_LO - i);
-        s.lineTo(-POCKET_X, POCKET_HI - i); s.lineTo(-cx, POCKET_HI - i);
+        // the slant meets the level runs in a soft curve, not a corner, as cut
+        // on the owner's piece: each bend eased over POCKET_EASE either side
+        var lo = POCKET_LO - i, hi = POCKET_HI - i, e = POCKET_EASE;
+        var dx = 2 * POCKET_X, dy = hi - lo, dl = Math.hypot(dx, dy), ux = dx / dl * e, uy = dy / dl * e;
+        s.lineTo(cx, hi); s.lineTo(POCKET_X + e, hi);
+        s.quadraticCurveTo(POCKET_X, hi, POCKET_X - ux, hi - uy);
+        s.lineTo(-POCKET_X + ux, lo + uy);
+        s.quadraticCurveTo(-POCKET_X, lo, -POCKET_X - e, lo);
+        s.lineTo(-cx, lo);
       } else {
         var ct = CARD_H / 2 - i;
         s.lineTo(cx, ct - cr); s.absarc(cx - cr, ct - cr, cr, 0, PI / 2);
@@ -701,19 +766,22 @@
   }
 
   // The card holder's stitch line: an open U, down the left side, round the
-  // bottom and up the right, CCW like the outlines. The top is the opening, so
-  // the line stops where the top corners begin to turn, CARD_R below the edge.
+  // bottom and up the right, CCW like the outlines. It runs only as high as
+  // the pockets on each side (the owner's piece: the body above them is left
+  // unsewn), its end holes POCKET_END below the pocket edge: up to the low
+  // edge on the left, the high one on the right.
   // No sharp corners, so it is one run of equal chords from end to end.
   function seamHoles() {
-    var i = STITCH_INSET, x = CARD_W / 2 - i, y0 = -CARD_H / 2 + i, r = CARD_R - i, yT = CARD_H / 2 - CARD_R, PI = Math.PI;
+    var i = STITCH_INSET, x = CARD_W / 2 - i, y0 = -CARD_H / 2 + i, r = CARD_R - i, PI = Math.PI;
+    var yL = pocketTop(-x) - POCKET_END, yR = pocketTop(x) - POCKET_END;
     var p = new THREE.Path(), poly = [];
-    p.moveTo(-x, yT); p.lineTo(-x, y0 + r); p.absarc(-x + r, y0 + r, r, PI, PI * 1.5);
-    p.lineTo(x - r, y0); p.absarc(x - r, y0 + r, r, -PI / 2, 0); p.lineTo(x, yT);
+    p.moveTo(-x, yL); p.lineTo(-x, y0 + r); p.absarc(-x + r, y0 + r, r, PI, PI * 1.5);
+    p.lineTo(x - r, y0); p.absarc(x - r, y0 + r, r, -PI / 2, 0); p.lineTo(x, yR);
     p.curves.filter(function (c) { return c.getLength() > 1e-4; }).forEach(function (c) {
       var k = Math.max(8, Math.ceil(c.getLength() / 0.005));
       for (var j = 0; j < k; j++) { poly.push(c.getPointAt(j / k)); }
     });
-    poly.push(new THREE.Vector2(x, yT));
+    poly.push(new THREE.Vector2(x, yR));
     return divide(poly).concat([poly[poly.length - 1]]);
   }
 
@@ -759,10 +827,15 @@
       // Front to back: pocket, body, body, pocket, each 0.5 mm, touching. The
       // grain faces out on both sides: the front two show their front face,
       // the back two their back face; the flesh sides face into the pockets.
+      // The front pocket has the thumb window cut in it; the back one has not.
       var bodyShape = solidShape('card', CARD_BEVEL), pocketShape = solidShape('pocket', CARD_BEVEL);
+      var frontShape = solidShape('pocket', CARD_BEVEL);
+      frontShape.holes.push(windowPath(new THREE.Path()));
       var dep = CARD_LAYER - 2 * CARD_BEVEL;
-      var faceOut = [leatherMat, edgeMat, backMat], faceBack = [backMat, edgeMat, grainBackMat];
-      [[pocketShape, 1.5, faceOut], [bodyShape, 0.5, faceOut], [bodyShape, -0.5, faceBack], [pocketShape, -1.5, faceBack]].forEach(function (L) {
+      [[frontShape, 1.5, [pocketFrontMat, pocketEdgeMat, pocketFleshMat]],
+       [bodyShape, 0.5, [bodyGrainMat, edgeMat, backMat]],
+       [bodyShape, -0.5, [backMat, edgeMat, bodyGrainMat]],
+       [pocketShape, -1.5, [pocketFleshMat, pocketEdgeMat, pocketBackMat]]].forEach(function (L) {
         fob.add(slab(L[0], CARD_BEVEL, dep, L[1] * CARD_LAYER, L[2]));
       });
       holesAt = seamHoles();
@@ -1108,6 +1181,7 @@
     var card = state.product === 'card';
     document.getElementById('kfShapeBox').hidden = card;
     document.getElementById('kfRingBox').hidden = card;
+    document.getElementById('kfPocketBox').hidden = !card;
     ['kfTitle', 'kfLead'].forEach(function (id) {
       var el = document.getElementById(id);
       el.textContent = el.dataset[card ? 'card' : 'keyfob'];
@@ -1241,7 +1315,7 @@
           return p.distanceTo(all[(k + 1) % all.length]) > 1e-4;
         }));
         doc.setFontSize(9); doc.setTextColor(40, 36, 31);
-        doc.text(name, X(-CARD_W / 2), Y(top(-CARD_W / 2)) - 3);
+        doc.text(name, X(-CARD_W / 2), Y(Math.max(top(-CARD_W / 2), top(CARD_W / 2))) - 3);
         // the stitch line, faint and open at the top, then the slits on it
         var mine = holes.map(function (p, k) { return k; }).filter(function (k) { return holes[k].y < top(holes[k].x) - STITCH_INSET / 2; });
         doc.setDrawColor(190); doc.setLineWidth(0.1);
@@ -1259,13 +1333,13 @@
       // where the pockets' edge comes, for lining them up when gluing (the
       // grey line on the owner's drawing)
       doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
-      [[-CARD_W / 2, POCKET_HI], [-POCKET_X, POCKET_HI], [POCKET_X, POCKET_LO], [CARD_W / 2, POCKET_LO]].reduce(function (a, b) {
+      [[-CARD_W / 2, POCKET_LO], [-POCKET_X, POCKET_LO], [POCKET_X, POCKET_HI], [CARD_W / 2, POCKET_HI]].reduce(function (a, b) {
         doc.line(X(a[0]), Y(a[1]), X(b[0]), Y(b[1]));
         return b;
       });
       doc.setLineDashPattern([], 0);
       doc.setFontSize(7); doc.setTextColor(120);
-      doc.text(C.pocketLine, X(-CARD_W / 2 + STITCH_INSET + 0.3), Y(POCKET_HI) - 1.2);
+      doc.text(C.pocketLine, X(CARD_W / 2 - STITCH_INSET - 0.3), Y(POCKET_HI) - 1.2, { align: 'right' });
       // the thread's two ends, each with its doubled stitches: red brackets
       // outside the piece
       doc.setDrawColor(180, 40, 30); doc.setLineWidth(0.4);
@@ -1279,6 +1353,12 @@
       // the pocket to its right, the two bottoms level
       OX = 100 + CARD_W / 2 * 10 * cfx;
       piece('pocket', pocketTop, C.pocket);
+      // the thumb window: cut in the front pocket only, so drawn dashed
+      doc.setDrawColor(0); doc.setLineWidth(0.25); doc.setLineDashPattern([2, 1.5], 0);
+      poly(windowPath(new THREE.Path()).getPoints(24));
+      doc.setLineDashPattern([], 0);
+      doc.setFontSize(7); doc.setTextColor(120);
+      doc.text(doc.splitTextToSize(C.window, 30), X(0), Y(WIN_Y + WIN_H / 2), { align: 'center' });
       // initials as a stamping guide, on the front pocket
       var L = textLayout();
       if (L) {
@@ -1288,7 +1368,7 @@
       }
 
       // legend + specs below, left of the calibration square
-      lx = 20; rx = 135; ly = Y(-CARD_H / 2) + 12;
+      lx = 20; rx = 135; ly = Y(-CARD_H / 2) + 9;
       doc.setFontSize(9); doc.setTextColor(40, 36, 31);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, P.holes);
@@ -1306,6 +1386,7 @@
         [M.inset, mm(STITCH_INSET)],
         [P.stitches, String(n - 1)],
         [P.leather, pressedLabel('leather') + ', ' + C.vegtan],
+        [C.pocketColor, pressedLabel('pocket')],
         [P.thread, pressedLabel('thread')],
       ];
       if (L) { rows.push([P.initials, L.txt]); }
