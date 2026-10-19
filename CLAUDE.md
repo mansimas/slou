@@ -34,12 +34,18 @@ again. The crossing must lie *between* the ends: until 2026-10-19 it ran over
 `RING_RAMP 0.35` rad starting at 2π, right where the start end sits, so the wire
 ran through that end and it faded out instead of ending like the other one.
 The ends are cut on the slant, not square (2026-10-19, the owner's call): the
-outer face of each end stops `RING_CUT 0.15` short of the inner one, so the back
-of the left (upward-facing) end sits higher and of the right one lower, and
-their corners are rounded to `RING_ROUND 0.02` (0.2 mm, "vos vos"). Building each turn as its own
+outer face of each end stops `RING_CUT 0.124` short of the inner one — 20° off
+square (0.15, i.e. 24°, was too much) — so the back of the left (upward-facing)
+end sits higher and of the right one lower, and their corners are rounded to
+`RING_ROUND 0.02` (0.2 mm, "vos vos"). Where the wire crosses the gap it is
+`RING_NECK 0.15` narrower in its radial width (seen face on, along the ring's
+axis): one round curve (`sin`) between the two ends. The ends are slanted, so
+it runs past each tip to the far corner of its cut (`RING_CUT` back) and is
+full width only once the cut is passed entirely. Its thickness along
+the axis stays as it is — thinning that was tried first and reversed. Building each turn as its own
 arc (what the code did until 2026-10-13) left four ends showing and read as two
 rings stacked; the owner's photos — and the object — have one wire with two cut
-ends, which sit `RING_GAP 0.22` rad apart at the split, one layer apart, exactly
+ends, which sit `RING_GAP 0.26` rad apart at the split (0.22 until 2026-10-19), one layer apart, exactly
 as the hand photos show. Both turns are at the **same** radius: a coil is wound
 on one mandrel, and the turns have to be free to slide along each other or the
 ring cannot open. (An earlier version nested the back turn `wire * 0.28` further

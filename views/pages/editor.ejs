@@ -187,12 +187,13 @@
   // angle between its two cut ends (the split), and the wire crosses from the
   // back turn to the front one inside that gap.
   var RING = <%- JSON.stringify(ring) %>;
-  var RING_GAP = 0.22;
+  var RING_GAP = 0.26;
+  var RING_NECK = 0.15;   // how much thinner the wire is where it crosses the gap
   // Its cut ends: RING_CUT is how far the outer face of each end sits back
   // from the inner one (a slanted cut, not square across the wire — the back
   // of each end reaches past its front), RING_ROUND the radius the corners of
   // the cut are rounded to, just enough to take the sharp edge off.
-  var RING_CUT = 0.15;
+  var RING_CUT = 0.124;   // 20° off square across the 3.4 mm wire (24° was too much)
   var RING_ROUND = 0.02;
 
   var state = { shape: 'arch', leather: '#9a5527', thread: '#eadcbf', ring: 'silver', text: '' };
@@ -371,8 +372,9 @@
   // Each end is cut on the slant (`cut`: the outer face stops that much short
   // of the inner one) and its corners rounded to `round`: the last few rings
   // of the sweep close in on the section a quarter-circle at a time, the
-  // first of them set back by the slant, vertex by vertex.
-  function bandGeo(R, w, t, a0, span, yAt, cut, round) {
+  // first of them set back by the slant, vertex by vertex. `wAt(u)` scales the
+  // wire's radial width `w` along the sweep (1 = full).
+  function bandGeo(R, w, t, a0, span, yAt, cut, round, wAt) {
     var hw = w / 2, ht = t / 2, ch = ht * 0.35;
     var sec = [[-hw + ch, -ht], [hw - ch, -ht], [hw, -ht + ch], [hw, ht - ch],
                [hw - ch, ht], [-hw + ch, ht], [-hw, ht - ch], [-hw, -ht + ch]];
@@ -381,9 +383,9 @@
     // end of the sweep at `end` (0 or 1), `inset` how far it closes in
     function ring(end, back, inset) {
       for (var j = 0; j < n; j++) {
-        var d = back(j) / R, a = end ? a0 + span - d : a0 + d,
-            sa = Math.sin(a), ca = Math.cos(a), y = yAt((a - a0) / span),
-            x = sec[j][0], z = sec[j][1];
+        var d = back(j) / R, a = end ? a0 + span - d : a0 + d, u = (a - a0) / span,
+            sa = Math.sin(a), ca = Math.cos(a), y = yAt(u),
+            x = sec[j][0] * wAt(u), z = sec[j][1];
         x = Math.sign(x) * (Math.abs(x) - inset);
         z = Math.sign(z) * (Math.abs(z) - inset);
         v.push((R + x) * sa, y + z, (R + x) * ca);
@@ -395,7 +397,7 @@
       ring(end, function (j) { return slant(j) + round * (1 - Math.sin(th)); }, round * (1 - Math.cos(th)));
     }
     var body = (cut + round) / R, main = span - 2 * body,
-        steps = Math.max(8, Math.round(main * 32)), rings = 0;
+        steps = Math.max(8, Math.round(main * 64)), rings = 0;
     for (i = K; i >= 0; i--) { tip(0, i); rings++; }
     for (i = 0; i <= steps; i++) {
       var at = (body + main * i / steps) * R;
@@ -807,7 +809,18 @@
       var s = (a - TURN + RING_GAP) / RING_GAP;                 // the ramp: eased, so the
       return th * (s * s * (3 - 2 * s) - 0.5);                  // wire does not kink over
     }
-    var r = new THREE.Mesh(bandGeo(ri + wire / 2, wire, th, 0, total, yAt, RING_CUT, RING_ROUND), ringMat);
+    // Where it crosses between the ends the wire is a touch narrower seen face
+    // on, along the ring's axis — its radial width, not its thickness (which
+    // was tried first and was not it): one round curve, `RING_NECK` off at its
+    // deepest, running between the two cut ends. The ends are cut on the
+    // slant, so it reaches past each end's tip to the far corner of its cut
+    // (`RING_CUT` back): full width only where the cut is passed entirely.
+    var neck = RING_CUT / (ri + wire / 2);   // the slant, as an angle on the band
+    function wAt(u) {
+      var s = (u * total - TURN + RING_GAP + neck) / (RING_GAP + 2 * neck);
+      return s <= 0 || s >= 1 ? 1 : 1 - RING_NECK * Math.sin(Math.PI * s);
+    }
+    var r = new THREE.Mesh(bandGeo(ri + wire / 2, wire, th, 0, total, yAt, RING_CUT, RING_ROUND, wAt), ringMat);
     r.rotation.z = Math.PI / 2;   // stand the ring up in the fob's plane
     r.position.set(0, HOLE_Y + ri + wire / 2, 0);   // the band centred on the hole
     fob.add(r);

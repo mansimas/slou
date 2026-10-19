@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-19 14:16] - Wider ring split, narrower crossing - Owner wanted the ring ends minimally further apart, and the wire between them slightly narrower seen face on (not thinner edge-on): one round curve between the ends, full width only past the far corner of each slanted cut, like a real split ring. End cut eased from 24° to 20°.
 [2026-10-19 14:09] - Slanted rounded ring ends - Owner wanted the ring's cut ends to look real: corners very slightly rounded (0.2 mm) and the cut slanted, not square — the back of each end reaches past its front (left end's back higher, right end's lower).
 [2026-10-19 14:03] - Fix key ring spiral end - Owner: one ring end was clear, the other just faded out. The crossing to the front turn began right on the start end and swallowed it; it now runs across the split, so both cut ends show alike, like a real split ring.
 [2026-10-19 14:05] - Flags in language switcher - Owner wanted the language switcher (top right) shown with a flag. The globe icon became the current language's flag and each menu row got its flag; inline SVG, since Windows renders flag emoji as plain letters.
