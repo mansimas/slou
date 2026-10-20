@@ -300,7 +300,7 @@ locked keyfob stitch, unchanged:
   pockets as a mirrored pair, each as seen from its own face: the front
   piece (`C.pocketFront`, drawn with `m = -1`; never mention the SLOU stamp on the pattern, buyers may use their own) and the back
   piece (window as a solid cut line, initials, `C.pocketBack`). Below, the
-  inner piece × 2 (`C.body`; never call it a "main" piece), with the legend
+  inner piece × 2 (`C.body`; never call it a "main" piece), with the legend; each template carries its name only inside (`inside()`, "× 2" only where cut twice), so it survives cutting out,
   beside it. The specs table is on page 2: the calibration square leaves no
   room. The
   body carries the slanted pocket edge as a dashed line, like the grey line on

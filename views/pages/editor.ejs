@@ -1770,14 +1770,19 @@
         doc.line(X(m * p.x) - hx, Y(p.y) + hy, X(m * p.x) + hx, Y(p.y) - hy);
       }
       // `top(x)`: the piece's top edge, for which holes go through it
-      function piece(kind, top, name, m) {
+      // The piece's name, with "× 2" if it is cut twice, written inside it at
+      // (x, y) and nowhere else, so it is still there once the template is cut
+      // out (the owner, 2026-10-20). All centred on the piece's middle line.
+      function inside(name, x, y) {
+        doc.setFontSize(11); doc.setTextColor(150);
+        doc.text(name, X(x), Y(y), { align: 'center', baseline: 'middle' });
+      }
+      function piece(kind, top, m) {
         m = m || 1;
         doc.setDrawColor(0); doc.setLineWidth(0.3);
         poly(outline(kind, 0).getPoints(48).filter(function (p, k, all) {
           return p.distanceTo(all[(k + 1) % all.length]) > 1e-4;
         }).map(function (p) { return new THREE.Vector2(m * p.x, p.y); }));
-        doc.setFontSize(9); doc.setTextColor(40, 36, 31);
-        doc.text(name, X(-CARD_W / 2), Y(Math.max(top(-CARD_W / 2), top(CARD_W / 2))) - 3);
         // the stitch line, faint and open at the top, then the slits on it
         var mine = holes.map(function (p, k) { return k; }).filter(function (k) { return holes[k].y < top(holes[k].x) - STITCH_INSET / 2; });
         doc.setDrawColor(190); doc.setLineWidth(0.1);
@@ -1794,10 +1799,14 @@
       OY = 52 + POCKET_HI * 10 * cfy;
       // the front pocket on the left: the back pocket's mirror image, no window
       OX = 20 + CARD_W / 2 * 10 * cfx;
-      piece('pocket', pocketTop, C.pocketFront, -1);
+      // both pocket names at the same height: between the initials and the
+      // slanted top on the back piece
+      piece('pocket', pocketTop, -1);
+      inside(C.pocketFront, 0, -0.2);
       // the back pocket on the right, with the window and the initials
       OX = 100 + CARD_W / 2 * 10 * cfx;
-      piece('pocket', pocketTop, C.pocketBack);
+      piece('pocket', pocketTop);
+      inside(C.pocketBack, 0, -0.2);
       // the thumb window, open at the bottom: a cut line on this pocket
       doc.setDrawColor(0); doc.setLineWidth(0.3);
       windowPath(new THREE.Path()).getPoints(24).reduce(function (a, b) { doc.line(X(a.x), Y(a.y), X(b.x), Y(b.y)); return b; });
@@ -1811,7 +1820,8 @@
 
       // the inner piece below, on the left
       OX = 20 + CARD_W / 2 * 10 * cfx; OY = Y(-CARD_H / 2) + 8 + CARD_H / 2 * 10 * cfy;
-      piece('card', function () { return CARD_H / 2; }, C.body);
+      piece('card', function () { return CARD_H / 2; });
+      inside(C.body, 0, -2.5);   // below the pocket edge line
       // where the pockets' edge comes, for lining them up when gluing (the
       // grey line on the owner's drawing)
       doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
