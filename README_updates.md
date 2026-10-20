@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-20 17:46] - Window note says back pocket - Owner: the SLOU-stamped piece is the front, so the window is cut in the back pocket. The PDF note now says to cut the window in the back pocket only, in all 7 languages.
 [2026-10-20 17:28] - Lower thumb window - Owner: the arch was too tall and looked wrong. It is now 32 mm tall (was 38), same 40 mm width, oval top and straight 6 mm sides; the initials above it move down with it.
 [2026-10-20 17:25] - Card holder higher in view - Owner: the hint text at the foot of the 3D view showed over the card holder. The view now centres 11 mm lower for the card holder, so the piece sits a touch higher in the frame. Keyfob view unchanged.
 [2026-10-20 17:02] - Even oval window top - Owner: the window looked like an egg, pointed at the top. Its top is now a superellipse (WIN_FULL 2.3), fuller in the shoulders and evenly round. Size, sides and the stitches crossing them are unchanged.
