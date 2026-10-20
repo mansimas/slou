@@ -261,18 +261,20 @@
     return POCKET_HI + (POCKET_LO - POCKET_HI) * f;
   }
 
-  // The thumb window, cut in the front pocket only: an arch 42 mm across and
+  // The thumb window, cut in the front pocket only: an arch 40 mm across and
   // 38 mm tall, open at the bottom — it runs right down through the bottom
   // edge (the owner, 2026-10-20; it was a closed arch 7 mm off the bottom).
-  // 42 mm wide so the bottom seam straddles each side of it, one hole in the
-  // green and the next in the brown (it was 34 mm), each side halfway between
-  // its two holes, ~1.9 mm from both: the stitch hugs the green edge evenly
-  // (the owner, 2026-10-20). The seam's holes are not symmetric (the pocket is
-  // higher on the right), so that puts the window WIN_CX 1 mm left of centre. The top is a half ellipse,
+  // The bottom seam straddles each side of it: the hole inside the window,
+  // in the body, is 1 mm past the green edge, as the end hole is at the pocket
+  // top on the owner's piece (POCKET_END), so the thread drops over the edge
+  // straight into it (the owner, 2026-10-20). Halfway between two holes (42
+  // mm) left a long slope from the edge to the hole. The seam's holes are not
+  // symmetric (the pocket is higher on the right), so that puts the window
+  // WIN_CX 1 mm left of centre. The top is a half ellipse,
   // WIN_TOP tall, on straight sides: round and oval rather than a flat-topped
   // arch (the owner, 2026-10-20).
   // The path is the arch alone, from the bottom edge up, over and back down.
-  var WIN_HW = 2.1, WIN_CX = -0.1, WIN_H = 3.8, WIN_Y = -CARD_H / 2, WIN_TOP = 3.2;   // 1.9 until the owner asked for the bend to start lower
+  var WIN_HW = 2.01, WIN_CX = -0.0985, WIN_H = 3.8, WIN_Y = -CARD_H / 2, WIN_TOP = 3.2;   // 1.9 until the owner asked for the bend to start lower
   function windowPath(path, cont) {
     var top = WIN_Y + WIN_H, b = WIN_TOP, k = 0.5523;   // k: a quarter ellipse in one bezier
     var l = WIN_CX - WIN_HW, r = WIN_CX + WIN_HW;
@@ -1174,17 +1176,21 @@
         function at(p, along, zz) { return new THREE.Vector3(p.x + u.x * along, p.y + u.y * along, zz); }
         // The strand itself is the plain stitch (stitchGeo: the same thickness,
         // ends, dip into the holes and ply twist), only bent to follow the
-        // thread's line: along the pocket face to its edge, one short round
-        // bend there, and straight down to the body's hole. A tube of its own
-        // came out faceted, blunt-ended and lumpier than the stitches beside it
-        // (the owner, 2026-10-20: the threads must look perfect).
-        var S0 = at(H, -0.035, zh + lift0), F0 = at(Lo, 0.035, zl + lift0), C = at(E, -0.012, zh + lift0);
-        var C1 = C.clone().add(S0.clone().sub(C).setLength(Math.min(0.035, S0.distanceTo(C) / 2)));
-        var C2 = C.clone().add(F0.clone().sub(C).setLength(Math.min(0.035, F0.distanceTo(C) / 2)));
+        // thread's line. A tube of its own came out faceted, blunt-ended and
+        // lumpier than the stitches beside it (the owner, 2026-10-20: the
+        // threads must look perfect).
+        // Pulled tight, as sewn: flat on the pocket face, sunk like a plain
+        // stitch, up to where the edge starts to round, over the edge, and
+        // straight from there into the body's hole 1 mm away. Laid flat on
+        // the body after the edge it crept along the leather before going in,
+        // which thread never does (the owner, 2026-10-20).
+        var S0 = at(H, -0.035, zh + lift0), F0 = at(Lo, 0.035, zl + lift0);
+        var pts = [S0, at(E, -CARD_ROUND, zh + lift0), at(E, 0, zh - side * 0.02), F0];
+        function mid(i) { return pts[i].clone().add(pts[i + 1]).multiplyScalar(0.5); }
         var curve = new THREE.CurvePath();
-        curve.add(new THREE.LineCurve3(S0, C1));
-        curve.add(new THREE.QuadraticBezierCurve3(C1, C, C2));
-        curve.add(new THREE.LineCurve3(C2, F0));
+        curve.add(new THREE.LineCurve3(pts[0], mid(0)));
+        for (var ci = 1; ci < pts.length - 1; ci++) { curve.add(new THREE.QuadraticBezierCurve3(mid(ci - 1), pts[ci], mid(ci))); }
+        curve.add(new THREE.LineCurve3(mid(pts.length - 2), pts[pts.length - 1]));
         crossings.push({ E: E, u: u, sg: sg });
         // the plain stitch runs fa -> tb; its local frame: y along, x across, z
         // up off the leather (turned over on the back, as flipBack does)
