@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-20 23:10] - LT term skylučių kaltukai - Owner chose the Lithuanian name for the pricking iron: "skylučių kaltukai" instead of "durtuvas", in the pattern legend (holes and the keyfob's corner-hole note). Other languages already say pricking iron.
 [2026-10-20 22:48] - Piece names inside templates - Owner: names above templates are lost once cut out, and were said twice. Each name is now only inside its template, aligned on the middle line, both pocket names level; "× 2" only on the inner piece, cut twice.
 [2026-10-20 22:44] - Front and back piece names - Owner: customers may use their own stamp, so the pattern no longer mentions the SLOU stamp. The pockets are now called front piece and back piece (with window), in all 7 languages, labels and instructions.
 [2026-10-20 17:57] - Card pattern: three clear pieces - Owner: "main piece" was misleading, and one flipped pocket template unclear. Now: inner piece × 2, plus front pocket (SLOU) and back pocket (window) drawn as a mirrored pair. Instructions in 7 languages; specs moved to page 2 for space.
