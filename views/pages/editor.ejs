@@ -1747,7 +1747,8 @@
 
     // heading
     doc.setTextColor(40, 36, 31);
-    doc.setFontSize(18); doc.text('SLOU — ' + (card ? C.patternTitle : P.title), 15, 20);
+    // the card holder's title centred on the sheet (the owner, 2026-10-20)
+    doc.setFontSize(18); doc.text('SLOU — ' + (card ? C.patternTitle : P.title), card ? 105 : 15, 20, { align: card ? 'center' : 'left' });
     doc.setFontSize(9); doc.setTextColor(110, 100, 90);
     doc.text(doc.splitTextToSize(P.print, 180), 15, 27);
     doc.text(doc.splitTextToSize(card ? C.how : P.how, 180), 15, 36);
@@ -2022,7 +2023,7 @@
     if (cardSpecs) {
       doc.addPage();
       doc.setTextColor(40, 36, 31); doc.setFontSize(18);
-      doc.text('SLOU — ' + C.patternTitle, 15, 20);
+      doc.text('SLOU — ' + C.patternTitle, 105, 20, { align: 'center' });
       doc.setFontSize(12); doc.text(C.specs, 15, 34);
       doc.setFontSize(9); lx = 15; rx = 120; ly = 44;
       table(cardSpecs);
