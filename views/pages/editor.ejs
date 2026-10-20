@@ -274,15 +274,20 @@
   // WIN_TOP tall, on straight sides: round and oval rather than a flat-topped
   // arch (the owner, 2026-10-20).
   // The path is the arch alone, from the bottom edge up, over and back down.
-  var WIN_HW = 2.01, WIN_CX = -0.0985, WIN_H = 3.8, WIN_Y = -CARD_H / 2, WIN_TOP = 3.2;   // 1.9 until the owner asked for the bend to start lower
+  var WIN_HW = 2.01, WIN_CX = -0.0985, WIN_H = 3.8, WIN_Y = -CARD_H / 2, WIN_TOP = 3.2, WIN_FULL = 2.3;   // 1.9 until the owner asked for the bend to start lower
   function windowPath(path, cont) {
-    var top = WIN_Y + WIN_H, b = WIN_TOP, k = 0.5523;   // k: a quarter ellipse in one bezier
-    var l = WIN_CX - WIN_HW, r = WIN_CX + WIN_HW;
+    // The top is a superellipse (WIN_FULL): fuller in the shoulders than a
+    // plain ellipse, which on these proportions came to a point like an egg
+    // (the owner, 2026-10-20: a nice oval, not an egg).
+    var top = WIN_Y + WIN_H, b = WIN_TOP, n = WIN_FULL, N = 48;
+    var l = WIN_CX - WIN_HW;
     if (!cont) { path.moveTo(l, WIN_Y); }   // continued: the outline is already there
     path.lineTo(l, top - b);
-    path.bezierCurveTo(l, top - b + k * b, WIN_CX - k * WIN_HW, top, WIN_CX, top);
-    path.bezierCurveTo(WIN_CX + k * WIN_HW, top, r, top - b + k * b, r, top - b);
-    path.lineTo(r, WIN_Y);
+    for (var i = 1; i <= N; i++) {
+      var a = Math.PI * (1 - i / N), c = Math.cos(a), sn = Math.sin(a);
+      path.lineTo(WIN_CX + WIN_HW * Math.sign(c) * Math.pow(Math.abs(c), 2 / n), top - b + b * Math.pow(sn, 2 / n));
+    }
+    path.lineTo(WIN_CX + WIN_HW, WIN_Y);
     return path;
   }
   // inside the window (and below the bottom edge, so the arch is open there)
