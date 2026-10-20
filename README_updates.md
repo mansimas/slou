@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-20 13:09] - Open arch thumb window - Owner's idea: bring the thumb window back, but run the arch down through the bottom edge so it is open, not a closed hole. The front pocket is cut up from the bottom; stitches in the opening lie on the brown body. PDF draws the open arch.
 [2026-10-20 12:59] - Pocket slant 48 to 88mm - Owner set the pocket top heights: level at 48 mm on the left (was 51.8) and 88 mm on the right (was 81), measured from the bottom, so the slant is steeper. 3D and PDF share the shape.
 [2026-10-20 12:54] - Pocket slant starts 10mm - Owner asked for the pocket top's level runs to be 10 mm from each side edge (was 11.3 mm), so the slant starts and ends exactly 10 mm in. Affects the 3D and the PDF template, which share the shape.
 [2026-10-20 12:52] - Sharper pocket top bends - Owner: the green pockets' top should turn more firmly where it rises and levels off. Each bend is now eased over 2 mm instead of 5 mm, so it reads as a cut angle, not a long soft curve. Applies to the 3D and the PDF.
