@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-20 14:26] - Plain thread over window edge - Owner: threads must look perfect. The stitch crossing the window's green edge was its own tube: faceted, blunt, lumpier. It is now the plain stitch model bent over the edge, so its thickness, ends, dip and twist match every other stitch.
 [2026-10-20 14:03] - Wider oval thumb window - Owner: rounder oval top (half ellipse from 6 mm up) and a 42 mm opening (was 34), each side halfway between two seam holes so the stitch straddles the green evenly. Holes are not symmetric, so the arch sits 1 mm left of centre.
 [2026-10-20 13:09] - Open arch thumb window - Owner's idea: bring the thumb window back, but run the arch down through the bottom edge so it is open, not a closed hole. The front pocket is cut up from the bottom; stitches in the opening lie on the brown body. PDF draws the open arch.
 [2026-10-20 12:59] - Pocket slant 48 to 88mm - Owner set the pocket top heights: level at 48 mm on the left (was 51.8) and 88 mm on the right (was 81), measured from the bottom, so the slant is steeper. 3D and PDF share the shape.

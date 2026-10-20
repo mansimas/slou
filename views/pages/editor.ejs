@@ -1142,7 +1142,7 @@
     // flat on the body into the hole. Every piece sits a little deeper than a
     // plain stitch, the leather pressed in under it.
     function lay(fa, tb, za, zb, side, slot) {
-      var parts, lift = side * 0.005;
+      var parts, lift = side * 0.005, lift0 = lift, dl0 = fa.distanceTo(tb);
       if (Math.abs(za - zb) < 1e-6) {
         parts = [[fa, za, tb, za]];
       } else {
@@ -1172,20 +1172,36 @@
         // Nothing more: grooves and wide bends round the edge read as a
         // crumpled worm stuck to the leather, never as thread.
         function at(p, along, zz) { return new THREE.Vector3(p.x + u.x * along, p.y + u.y * along, zz); }
-        var S0 = at(H, -0.035, zh - sg * 0.02), F0 = at(Lo, 0.035, zl - sg * 0.02);
-        var C = at(E, -0.012, zh + sg * (THREAD_R * 0.6 - POCKET_DENT));
-        var C1 = C.clone().add(S0.clone().sub(C).setLength(0.035)), C2 = C.clone().add(F0.clone().sub(C).setLength(0.035));
+        // The strand itself is the plain stitch (stitchGeo: the same thickness,
+        // ends, dip into the holes and ply twist), only bent to follow the
+        // thread's line: along the pocket face to its edge, one short round
+        // bend there, and straight down to the body's hole. A tube of its own
+        // came out faceted, blunt-ended and lumpier than the stitches beside it
+        // (the owner, 2026-10-20: the threads must look perfect).
+        var S0 = at(H, -0.035, zh + lift0), F0 = at(Lo, 0.035, zl + lift0), C = at(E, -0.012, zh + lift0);
+        var C1 = C.clone().add(S0.clone().sub(C).setLength(Math.min(0.035, S0.distanceTo(C) / 2)));
+        var C2 = C.clone().add(F0.clone().sub(C).setLength(Math.min(0.035, F0.distanceTo(C) / 2)));
         var curve = new THREE.CurvePath();
         curve.add(new THREE.LineCurve3(S0, C1));
         curve.add(new THREE.QuadraticBezierCurve3(C1, C, C2));
         curve.add(new THREE.LineCurve3(C2, F0));
-        crossings.push({ E: E, u: u, sg: sg });   // for the dent in the pocket
-        var tube = new THREE.TubeGeometry(curve, 240, THREAD_R, 16, false);
-        // the ply twist at the density of a plain stitch: around the thread on
-        // x, along it on y, as on stitchGeo
-        var tuv = tube.attributes.uv, tl = curve.getLength();
-        for (var q2 = 0; q2 < tuv.count; q2++) { tuv.setXY(q2, tuv.getY(q2), tuv.getX(q2) * tl / stitchLen); }
-        fob.add(new THREE.Mesh(tube, threadMat));
+        crossings.push({ E: E, u: u, sg: sg });
+        // the plain stitch runs fa -> tb; its local frame: y along, x across, z
+        // up off the leather (turned over on the back, as flipBack does)
+        var fwd = hiFirst ? 1 : -1, ax = new THREE.Vector3(u.y, -u.x, 0).multiplyScalar(side * fwd), zw = new THREE.Vector3(0, 0, side);
+        var g = stitchGeo.clone(), gp = g.attributes.position, T = new THREE.Vector3(), N = new THREE.Vector3(), P = new THREE.Vector3();
+        for (var k = 0; k < gp.count; k++) {
+          var w = Math.min(1, Math.max(0, gp.getY(k) / stitchLen + 0.5)), ws = hiFirst ? w : 1 - w;   // 0 at the pocket end
+          curve.getPointAt(ws, P); curve.getTangentAt(ws, T);
+          N.copy(zw).addScaledVector(T, -T.dot(zw)).normalize();
+          P.addScaledVector(ax, gp.getX(k)).addScaledVector(N, gp.getZ(k));
+          gp.setXYZ(k, P.x, P.y, P.z);
+        }
+        g.computeVertexNormals();
+        // the ply twist at the density of a plain stitch
+        var guv = g.attributes.uv, gl = curve.getLength() / (dl0 + 0.07);
+        for (var q2 = 0; q2 < guv.count; q2++) { guv.setY(q2, guv.getY(q2) * gl); }
+        fob.add(new THREE.Mesh(g, threadMat));
         stitches.setMatrixAt(slot, zero);
         return;
       }
