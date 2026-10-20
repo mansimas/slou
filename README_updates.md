@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-20 23:25] - Remove square from card pattern - Owner no longer needs the 50 × 50 mm calibration square on the card holder pattern; it is gone there. The two rulers stay. The keyfob pattern keeps its square.
 [2026-10-20 23:24] - Centre notes under title - Owner, for a tidier look: the card holder pattern's printing note and instructions are now centred under the centred title. Keyfob pattern unchanged.
 [2026-10-20 23:16] - Drop thread-end marks, slit angle - Owner: the card holder pattern no longer shows the red doubled-stitch brackets or their legend line, and the holes legend omits the 45° slit angle (all 7 languages). Keyfob pattern unchanged.
 [2026-10-20 23:12] - Centred title, pattern No. 1 - Owner: the card holder pattern title is now centred on both pages and reads "Kortelinės lekalas Nr. 1" (No. 1 in all 7 languages). Keyfob pattern title unchanged.

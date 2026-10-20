@@ -2006,13 +2006,16 @@
     // horizontal ruler (2026-10-14): a short measurement in both directions at
     // once, for anyone who would rather trust a square than a line. Drawn
     // `cfx` by `cfy` so it comes out a true 50 × 50 mm, and its right edge kept
-    // 15 mm clear of the page edge.
-    var sqNom = 50, sqR = 195, sqB = calHy - 10;
-    var sqW = sqNom * cfx, sqH = sqNom * cfy;
-    doc.setDrawColor(0); doc.setLineWidth(0.2);
-    doc.rect(sqR - sqW, sqB - sqH, sqW, sqH);
-    doc.setTextColor(40, 36, 31); doc.setFontSize(7);
-    doc.text(sqNom + ' mm', sqR - sqW / 2, sqB + 4, { align: 'center' });
+    // 15 mm clear of the page edge. Not on the card holder's pattern: the owner
+    // took it off there (2026-10-20).
+    if (!card) {
+      var sqNom = 50, sqR = 195, sqB = calHy - 10;
+      var sqW = sqNom * cfx, sqH = sqNom * cfy;
+      doc.setDrawColor(0); doc.setLineWidth(0.2);
+      doc.rect(sqR - sqW, sqB - sqH, sqW, sqH);
+      doc.setTextColor(40, 36, 31); doc.setFontSize(7);
+      doc.text(sqNom + ' mm', sqR - sqW / 2, sqB + 4, { align: 'center' });
+    }
 
     // the card holder's specs, on a page of their own
     if (cardSpecs) {
