@@ -301,8 +301,8 @@ locked keyfob stitch, unchanged:
   piece (`C.pocketFront`, drawn with `m = -1`; never mention the SLOU stamp on the pattern, buyers may use their own) and the back
   piece (window as a solid cut line, initials, `C.pocketBack`). Below, the
   inner piece × 2 (`C.body`; never call it a "main" piece), with the legend; each template carries its name only inside (`inside()`, "× 2" only where cut twice), so it survives cutting out,
-  beside it. No 50 mm square on this pattern (the owner, 2026-10-20). The specs table is on page 2: the calibration square left no
-  room. No doubled-stitch brackets and no slit angle in the legend (`C.holes`; the owner, 2026-10-20). The
+  beside it. No 50 mm square on this pattern (the owner, 2026-10-20), so the specs table fits under the legend: one A4 sheet. No
+  doubled-stitch brackets and no slit angle in the legend (`C.holes`; the owner, 2026-10-20). The
   body carries the slanted pocket edge as a dashed line, like the grey line on
   the drawing. Thread
   ends are not marked. Calibration is shared with the keyfob.

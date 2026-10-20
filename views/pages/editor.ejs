@@ -1759,8 +1759,8 @@
     // pockets side by side on top, drawn as the mirror pair they are — the
     // front one (SLOU stamp) and the back one (window) each as seen from its
     // own face, so nobody has to turn a template over — and below them the
-    // inner piece, cut twice, with the legend beside it. The specs table is on
-    // a second page: the calibration square leaves no room for it. The pieces
+    // inner piece, cut twice, with the legend and the specs beside it, all on
+    // one sheet (the owner took the 50 mm square off to make room). The pieces
     // are glued and pricked as one stack, so the pockets' slits are the inner
     // piece's below the pocket edge, hole for hole.
     function cardPattern() {
@@ -1848,7 +1848,8 @@
         doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
         doc.line(x, y, x + 8, y); doc.setLineDashPattern([], 0);
       }, C.pocketLine);
-      cardSpecs = [
+      ly += 4;
+      var rows = [
         [M.width + ' × ' + M.height, mm(CARD_W) + ' × ' + mm(CARD_H)],
         [C.pieces, '2 × ' + mm(CARD_POCKET) + ' + 2 × ' + mm(CARD_BODY)],
         [M.thickness, mm(CARD_THICK)],
@@ -1859,7 +1860,8 @@
         [C.pocketColor, pressedLabel('pocket')],
         [P.thread, pressedLabel('thread')],
       ];
-      if (L) { cardSpecs.push([P.initials, L.txt]); }
+      if (L) { rows.push([P.initials, L.txt]); }
+      table(rows);
     }
 
     // legend lines and the specs table, shared by both items
@@ -1876,7 +1878,6 @@
       });
     }
 
-    var cardSpecs = null;
     if (card) {
       cardPattern();
     } else {
@@ -2015,16 +2016,6 @@
       doc.rect(sqR - sqW, sqB - sqH, sqW, sqH);
       doc.setTextColor(40, 36, 31); doc.setFontSize(7);
       doc.text(sqNom + ' mm', sqR - sqW / 2, sqB + 4, { align: 'center' });
-    }
-
-    // the card holder's specs, on a page of their own
-    if (cardSpecs) {
-      doc.addPage();
-      doc.setTextColor(40, 36, 31); doc.setFontSize(18);
-      doc.text('SLOU — ' + C.patternTitle, 105, 20, { align: 'center' });
-      doc.setFontSize(12); doc.text(C.specs, 15, 34);
-      doc.setFontSize(9); lx = 15; rx = 120; ly = 44;
-      table(cardSpecs);
     }
 
     doc.save(card ? 'slou-card-holder-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
