@@ -1747,11 +1747,13 @@
 
     // heading
     doc.setTextColor(40, 36, 31);
-    // the card holder's title centred on the sheet (the owner, 2026-10-20)
+    // the card holder's title, and the two lines of notes under it, centred on the
+    // sheet (the owner, 2026-10-20)
     doc.setFontSize(18); doc.text('SLOU — ' + (card ? C.patternTitle : P.title), card ? 105 : 15, 20, { align: card ? 'center' : 'left' });
     doc.setFontSize(9); doc.setTextColor(110, 100, 90);
-    doc.text(doc.splitTextToSize(P.print, 180), 15, 27);
-    doc.text(doc.splitTextToSize(card ? C.how : P.how, 180), 15, 36);
+    var tx = card ? 105 : 15, ta = { align: card ? 'center' : 'left' };
+    doc.text(doc.splitTextToSize(P.print, 180), tx, 27, ta);
+    doc.text(doc.splitTextToSize(card ? C.how : P.how, 180), tx, 36, ta);
 
     // The card holder: three templates (the owner, 2026-10-20). The two
     // pockets side by side on top, drawn as the mirror pair they are — the
