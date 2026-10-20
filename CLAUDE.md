@@ -183,7 +183,7 @@ locked keyfob stitch, unchanged:
   - Two colours: brown bodies (`state.leather`) and olive pockets
     (`state.pocket`, the "Pocket colour" control, card only).
   - Seen from the window side, the pocket is high on the **right**.
-  - The front pocket (the initials side) has an arch-shaped thumb window (`windowPath`, 34 × 38 mm),
+  - The front pocket (the initials side) has an arch-shaped thumb window (`windowPath`, 42 × 38 mm; 34 mm wide until the owner widened it so the seam straddles each side, each side halfway between two holes, so the arch sits `WIN_CX` 1 mm left of centre and its left foot falls just into the corner rounding, and a half-ellipse top `WIN_TOP 3.2` (1.9 at first) for a rounder, oval top that bends from 6 mm up, with no long straight sides),
     open at the bottom: cut up through the bottom edge (2026-10-20; it was a closed arch 7 mm up). Inside it the stitches lie on the body (`inPocket`, `face(x, y, side)`), and its sides are the pocket's own edge (`frontStack`).
   - The back pocket carries a SLOU stamp at the foot (`logoTex`, drawn
     mirrored because the back face is seen from behind).

@@ -261,23 +261,31 @@
     return POCKET_HI + (POCKET_LO - POCKET_HI) * f;
   }
 
-  // The thumb window, cut in the front pocket only: an arch 34 mm across and
+  // The thumb window, cut in the front pocket only: an arch 42 mm across and
   // 38 mm tall, open at the bottom — it runs right down through the bottom
   // edge (the owner, 2026-10-20; it was a closed arch 7 mm off the bottom).
+  // 42 mm wide so the bottom seam straddles each side of it, one hole in the
+  // green and the next in the brown (it was 34 mm), each side halfway between
+  // its two holes, ~1.9 mm from both: the stitch hugs the green edge evenly
+  // (the owner, 2026-10-20). The seam's holes are not symmetric (the pocket is
+  // higher on the right), so that puts the window WIN_CX 1 mm left of centre. The top is a half ellipse,
+  // WIN_TOP tall, on straight sides: round and oval rather than a flat-topped
+  // arch (the owner, 2026-10-20).
   // The path is the arch alone, from the bottom edge up, over and back down.
-  var WIN_HW = 1.7, WIN_H = 3.8, WIN_Y = -CARD_H / 2;
+  var WIN_HW = 2.1, WIN_CX = -0.1, WIN_H = 3.8, WIN_Y = -CARD_H / 2, WIN_TOP = 3.2;   // 1.9 until the owner asked for the bend to start lower
   function windowPath(path, cont) {
-    var top = WIN_Y + WIN_H;
-    if (!cont) { path.moveTo(-WIN_HW, WIN_Y); } else { path.lineTo(-WIN_HW, WIN_Y); }
-    path.lineTo(-WIN_HW, top - 1.4);
-    path.bezierCurveTo(-WIN_HW, top - 0.4, -WIN_HW * 0.75, top, 0, top);
-    path.bezierCurveTo(WIN_HW * 0.75, top, WIN_HW, top - 0.4, WIN_HW, top - 1.4);
-    path.lineTo(WIN_HW, WIN_Y);
+    var top = WIN_Y + WIN_H, b = WIN_TOP, k = 0.5523;   // k: a quarter ellipse in one bezier
+    var l = WIN_CX - WIN_HW, r = WIN_CX + WIN_HW;
+    if (!cont) { path.moveTo(l, WIN_Y); }   // continued: the outline is already there
+    path.lineTo(l, top - b);
+    path.bezierCurveTo(l, top - b + k * b, WIN_CX - k * WIN_HW, top, WIN_CX, top);
+    path.bezierCurveTo(WIN_CX + k * WIN_HW, top, r, top - b + k * b, r, top - b);
+    path.lineTo(r, WIN_Y);
     return path;
   }
   // inside the window (and below the bottom edge, so the arch is open there)
   var winPoly = windowPath(new THREE.Path()).getPoints(24);
-  winPoly.push(new THREE.Vector2(WIN_HW, WIN_Y - 1), new THREE.Vector2(-WIN_HW, WIN_Y - 1));
+  winPoly.push(new THREE.Vector2(WIN_CX + WIN_HW, WIN_Y - 1), new THREE.Vector2(WIN_CX - WIN_HW, WIN_Y - 1));
   function inWindow(x, y) {
     var c = false;
     for (var i = 0, j = winPoly.length - 1; i < winPoly.length; j = i++) {
@@ -610,8 +618,10 @@
       // the card holder's pieces, bottom corners rounded to CARD_R: a body
       // has its top corners rounded too, a pocket the slanted top, square-cornered
       var cx = CARD_W / 2 - i, cb = -CARD_H / 2 + i, cr = CARD_R - i;
-      s.moveTo(-cx + cr, cb);
-      if (kind === 'pocketWin') { windowPath(s, true); }   // the front pocket, the window cut up from the bottom
+      // the front pocket, the window cut up from the bottom: it starts at the
+      // window's right foot and ends at its left one
+      var win = kind === 'pocketWin', wl = WIN_CX - WIN_HW, cl = -cx + cr;
+      s.moveTo(win ? WIN_CX + WIN_HW : cl, cb);
       s.lineTo(cx - cr, cb); s.absarc(cx - cr, cb + cr, cr, -PI / 2, 0);
       if (kind !== 'card') {
         // the slant meets the level runs in a soft curve, not a corner, as cut
@@ -628,7 +638,10 @@
         s.lineTo(cx, ct - cr); s.absarc(cx - cr, ct - cr, cr, 0, PI / 2);
         s.lineTo(-cx + cr, ct); s.absarc(-cx + cr, ct - cr, cr, PI / 2, PI);
       }
-      s.lineTo(-cx, cb + cr); s.absarc(-cx + cr, cb + cr, cr, PI, PI * 1.5);
+      // the window's left foot can fall a little into the bottom-left
+      // rounding (the window sits 1 mm left of centre): the arc stops there
+      s.lineTo(-cx, cb + cr); s.absarc(cl, cb + cr, cr, PI, win && wl < cl ? 2 * PI - Math.acos((wl - cl) / cr) : PI * 1.5);
+      if (win) { if (wl > cl) { s.lineTo(wl, cb); } windowPath(s, true); }
       return s;
     }
     var ra = ARC_R - i, cyT = H / 2 - ARC_R;
@@ -1041,7 +1054,7 @@
       // bend (the owner, 2026-10-20).
       function pocketStack(p, hole) { return !hole && (Math.abs(p.x) > CARD_W / 2 - 1e-3 || p.y < POCKET_LO - 0.3) ? 1 : 0; }
       // the window's sides are the front pocket's own edge, not the stack
-      function frontStack(p, hole) { return Math.abs(p.x) < WIN_HW + 1e-3 && p.y > WIN_Y + 1e-3 ? 0 : pocketStack(p, hole); }
+      function frontStack(p, hole) { return Math.abs(p.x - WIN_CX) < WIN_HW + 1e-3 && p.y > WIN_Y + 0.01 ? 0 : pocketStack(p, hole); }
       // Burnished edge shades: each piece its own, a shade darker than its
       // grain. Seen from the side, the glued stack shows all four: green, brown,
       // brown, green, with a faint darker line at each glue joint (the owner,
@@ -1757,7 +1770,7 @@
       windowPath(new THREE.Path()).getPoints(24).reduce(function (a, b) { doc.line(X(a.x), Y(a.y), X(b.x), Y(b.y)); return b; });
       doc.setLineDashPattern([], 0);
       doc.setFontSize(7); doc.setTextColor(120);
-      doc.text(doc.splitTextToSize(C.window, 30), X(0), Y(WIN_Y + WIN_H / 2), { align: 'center' });
+      doc.text(doc.splitTextToSize(C.window, 30), X(WIN_CX), Y(WIN_Y + WIN_H / 2), { align: 'center' });
       // initials as a stamping guide, on the front pocket
       var L = textLayout();
       if (L) {
