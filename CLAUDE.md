@@ -302,10 +302,10 @@ locked keyfob stitch, unchanged:
   piece (window as a solid cut line, initials, `C.pocketBack`). Below, the
   inner piece × 2 (`C.body`; never call it a "main" piece), with the legend; each template carries its name only inside (`inside()`, "× 2" only where cut twice), so it survives cutting out,
   beside it. The specs table is on page 2: the calibration square leaves no
-  room. The
+  room. No doubled-stitch brackets and no slit angle in the legend (`C.holes`; the owner, 2026-10-20). The
   body carries the slanted pocket edge as a dashed line, like the grey line on
-  the drawing, and red brackets mark the doubled stitches at both thread
-  ends. Calibration is shared with the keyfob.
+  the drawing. Thread
+  ends are not marked. Calibration is shared with the keyfob.
 
 ### Example photos
 `pavyzdziai/` (one folder per item: `korteline/`, `pakabukas/`) is where the
