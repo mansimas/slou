@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-20 17:25] - Card holder higher in view - Owner: the hint text at the foot of the 3D view showed over the card holder. The view now centres 11 mm lower for the card holder, so the piece sits a touch higher in the frame. Keyfob view unchanged.
 [2026-10-20 17:02] - Even oval window top - Owner: the window looked like an egg, pointed at the top. Its top is now a superellipse (WIN_FULL 2.3), fuller in the shoulders and evenly round. Size, sides and the stitches crossing them are unchanged.
 [2026-10-20 16:59] - Window stitches visible when zoomed - Owner: the two window-edge stitches vanished on zoom. The bent copy kept the plain stitch's bounds at the scene centre, so the renderer culled it as off-screen; its bounds are now recomputed.
 [2026-10-20 16:53] - Round brown edge in window - Owner: in the thumb window the brown bottom edge was a dark square cut. There the stack is three layers (no front pocket), so its dome now runs up to the brown face and rounds over into it like every glued edge.

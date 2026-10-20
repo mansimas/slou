@@ -334,7 +334,11 @@
   // the target in to whatever is under the cursor, so you can close in on the
   // initials or the ring without having to rotate the fob back to centre first.
   controls.zoomToCursor = true;
-  controls.target.set(0, 0.8, 0);
+  controls.target.set(0, centreY(), 0);
+  // Where the view is centred: the card holder sits a touch higher in the
+  // frame, clear of the hint text at the foot of the stage (the owner,
+  // 2026-10-20); the keyfob keeps its own.
+  function centreY() { return state.product === 'card' ? -0.3 : 0.8; }
   controls.autoRotate = true;
   controls.autoRotateSpeed = 1.2;
   controls.addEventListener('start', function () { controls.autoRotate = false; });
@@ -1576,7 +1580,7 @@
     controls.mouseButtons.LEFT = on ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
     controls.touches.ONE = on ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE;
     controls.minDistance = on ? 2 : 7;
-    if (!on) { controls.target.set(0, 0.8, 0); }     // re-centre, panning is over
+    if (!on) { controls.target.set(0, centreY(), 0); }     // re-centre, panning is over
     hint.textContent = on ? hint.dataset.pan : hint.dataset.rotate;
     if (on) { faceFront(); }
   }
@@ -1639,6 +1643,7 @@
       el.textContent = el.dataset[card ? 'card' : 'keyfob'];
     });
     paintTextures();   // the initials move
+    controls.target.y = centreY();
     build();
     drawMeasures();
   }
