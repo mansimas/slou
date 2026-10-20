@@ -1215,6 +1215,9 @@
           gp.setXYZ(k, P.x, P.y, P.z);
         }
         g.computeVertexNormals();
+        // the clone kept the plain stitch's bounds, round the origin: zoomed in,
+        // that was off screen and the bent stitch was culled (it vanished)
+        g.computeBoundingBox(); g.computeBoundingSphere();
         // the ply twist at the density of a plain stitch
         var guv = g.attributes.uv, gl = curve.getLength() / (dl0 + 0.07);
         for (var q2 = 0; q2 < guv.count; q2++) { guv.setY(q2, guv.getY(q2) * gl); }
