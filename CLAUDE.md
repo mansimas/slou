@@ -296,10 +296,13 @@ locked keyfob stitch, unchanged:
   open seam (no stitch after the last hole, `chordIn`), and the last
   `OVERLAP` stitches at each end are doubled like the keyfob joint. The thread
   sits on the pocket face below the pocket top and on the body face above it (`face(x, y)`).
-- Pattern PDF: body and pocket side by side, each cut ×2 (the second pocket
-  with the template turned over), with the legend and specs below them. The
-  window is drawn dashed on the pocket, with a note to cut it in the front
-  pocket only. The
+- Pattern PDF (the owner, 2026-10-20): three templates. On top the two
+  pockets as a mirrored pair, each as seen from its own face: the front
+  pocket (SLOU stamp, `C.pocketFront`, drawn with `m = -1`) and the back
+  pocket (window as a solid cut line, initials, `C.pocketBack`). Below, the
+  inner piece × 2 (`C.body`; never call it a "main" piece), with the legend
+  beside it. The specs table is on page 2: the calibration square leaves no
+  room. The
   body carries the slanted pocket edge as a dashed line, like the grey line on
   the drawing, and red brackets mark the doubled stitches at both thread
   ends. Calibration is shared with the keyfob.
