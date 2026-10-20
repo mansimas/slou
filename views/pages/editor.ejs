@@ -892,8 +892,11 @@
   // along z: where a thread pulled tight presses the leather in.
   // `ramp(p)`, if given, is how far the outer face's edge is sloped off at
   // outline point p (under a thread crossing it).
-  function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp) {
-    var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T = CARD_THICK / 2, domeNormals = [], matte = {}, sideFace = [];
+  // `top(p)`, if given, is where the glued stack ends on the front at outline
+  // point p (CARD_THICK / 2 by default): in the thumb window the front pocket
+  // is cut away, so there the stack is the two bodies and the back pocket.
+  function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp, top) {
+    var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T = CARD_THICK / 2, tp = T, domeNormals = [], matte = {}, sideFace = [];
     function vert(x, y, zz, c, edge) {
       pos.push(x, y, zz + (squeeze && edge ? squeeze(x, y, zz) : 0)); uv.push(x, y); col.push(c.r, c.g, c.b);
       return pos.length / 3 - 1;
@@ -908,7 +911,8 @@
         var wr = ex / POCKET_RAMP, tr = (Math.abs(zz) - Math.abs(z)) / (h / 2);
         own += ((CARD_ROUND + POCKET_RAMP) * tr - own) * wr;
       }
-      var all = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - Math.pow(zz / T, 2))));
+      // the stack's dome, from its back face (-T) to its front one (tp)
+      var all = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - Math.pow((zz - (tp - T) / 2) / ((tp + T) / 2), 2))));
       return own + (all - own) * s;
     }
     // resampled every 0.5 mm, so the rounding can change along a straight
@@ -946,6 +950,8 @@
         // outward (away from the leather), mitred at corners
         var n1 = new THREE.Vector2(p.y - a.y, a.x - p.x).normalize(), n2 = new THREE.Vector2(b.y - p.y, p.x - b.x).normalize();
         var nb = n1.clone().add(n2).normalize(), miter = 1 / Math.max(0.5, nb.dot(n1));
+        tp = top ? top(p) : T;
+        function glued(fz) { return fz > -T + 1e-6 && fz < tp - 1e-6; }
         var s = stack(p, li > 0), ring = [], ex = ramp && !li ? ramp(p) : 0;
         // At a sharp corner each side keeps its own rounding right up to it, and
         // the corner point sits where the two set-in edges meet. A single mitre
@@ -966,13 +972,13 @@
         // a hairline of their own).
         for (var j = 0; j <= S; j++) {
           var fz = j === 0 ? z + h / 2 : j === S ? z - h / 2 : null;   // a face, if this is its edge
-          var e = fz !== null && Math.abs(fz) < T - 1e-6 ? 0.008 * s : 0;   // glued faces only, not the stack's outer ones
+          var e = fz !== null && glued(fz) ? 0.008 * s : 0;   // glued faces only, not the stack's outer ones
           var zz = z + (h / 2 + e) * Math.sin(Math.PI / 2 - j / S * Math.PI), d = inset(zz, s, ex) + (e ? 0.003 : 0), P = setIn(zz, d);
           // its own colour, darkened a touch within ~0.15 mm of a glued face:
           // the glue line
           var gd = 1e9;
-          if (Math.abs(z + h / 2) < T - 1e-6) { gd = Math.abs(zz - z - h / 2); }
-          if (Math.abs(z - h / 2) < T - 1e-6) { gd = Math.min(gd, Math.abs(zz - z + h / 2)); }
+          if (glued(z + h / 2)) { gd = Math.abs(zz - z - h / 2); }
+          if (glued(z - h / 2)) { gd = Math.min(gd, Math.abs(zz - z + h / 2)); }
           var g = s * Math.exp(-Math.pow(gd / 0.012, 2));
           var v = vert(P.x, P.y, zz, g ? ownCol.clone().multiplyScalar(1 - GLUE_LINE * g) : ownCol, true);
           // the normal straight off the dome, not averaged from this piece's
@@ -987,7 +993,7 @@
         rings.push(ring);
         // a glued face stops 0.1 mm short of the edge: run right out to it, its
         // rim showed through the joint as a light hairline
-        var gf = Math.abs(z + h / 2) < T - 1e-6 ? 0.01 * s : 0, gb = Math.abs(z - h / 2) < T - 1e-6 ? 0.01 * s : 0;
+        var gf = glued(z + h / 2) ? 0.01 * s : 0, gb = glued(z - h / 2) ? 0.01 * s : 0;
         capLoops[0][li].push(setIn(z + h / 2, inset(z + h / 2, s, ex) + gf));
         capLoops[1][li].push(setIn(z - h / 2, inset(z - h / 2, s, ex) + gb));
       });
@@ -1056,6 +1062,11 @@
       // bend (the owner, 2026-10-20).
       function pocketStack(p, hole) { return !hole && (Math.abs(p.x) > CARD_W / 2 - 1e-3 || p.y < POCKET_LO - 0.3) ? 1 : 0; }
       // the window's sides are the front pocket's own edge, not the stack
+      // In the window the bottom edge is three layers, not four: its dome runs
+      // from the back pocket up to the front body's face, and the brown body's
+      // edge there is rounded over into its face like every glued edge (the
+      // owner, 2026-10-20: it showed as a dark cut-off band).
+      function stackTop(p) { return Math.abs(p.x - WIN_CX) < WIN_HW && p.y < WIN_Y + 0.01 ? CARD_BODY : CARD_THICK / 2; }
       function frontStack(p, hole) { return Math.abs(p.x - WIN_CX) < WIN_HW + 1e-3 && p.y > WIN_Y + 0.01 ? 0 : pocketStack(p, hole); }
       // Burnished edge shades: each piece its own, a shade darker than its
       // grain. Seen from the side, the glued stack shows all four: green, brown,
@@ -1102,10 +1113,10 @@
       }
       addPockets = function () {
         fob.add(leatherPiece([frontLoop], CARD_POCKET, zp, frontStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol));
-        fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, pocketStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol));
+        fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, pocketStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, null, null, stackTop));
       };
-      fob.add(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol));
-      fob.add(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol));
+      fob.add(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol, null, null, stackTop));
+      fob.add(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol, null, null, stackTop));
       holesAt = seamHoles();
     } else {
       var shape = solidShape(state.shape, BEVEL);
