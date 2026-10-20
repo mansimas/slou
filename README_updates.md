@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-20 16:49] - Reload editor - Owner did not see the window-edge stitches in the browser, though they render in the current code. No code change; this entry makes the hook restart the server and reload the page with the latest editor.
 [2026-10-20 16:25] - Window stitch drops into hole - Owner: tilted, the window-edge stitch crept along the brown before entering the hole, unlike real thread. Window now 40 mm (was 42) so the brown hole is 1 mm past the green edge, as at the pocket top; the thread goes over the edge straight into it.
 [2026-10-20 16:11] - Tried straight thread at window - Owner asked what a straight (unbent) stitch over the window edge would look like. Rendered: it runs into the green edge and out again, reading as a cut thread. Not applied; the bent plain stitch stays.
 [2026-10-20 14:26] - Plain thread over window edge - Owner: threads must look perfect. The stitch crossing the window's green edge was its own tube: faceted, blunt, lumpier. It is now the plain stitch model bent over the edge, so its thickness, ends, dip and twist match every other stitch.
