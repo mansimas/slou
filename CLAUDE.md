@@ -175,7 +175,7 @@ locked keyfob stitch, unchanged:
   full size, and the slot between them is the middle pocket. The pocket top
   is slanted (`pocketTop(x)`): level at 52 mm for 11.3 mm, straight up to
   81 mm, level for the last 11.3 mm, with square top corners. The bends are
-  eased over `POCKET_EASE 0.5`, because the real cut is soft, not a kink. The
+  eased over `POCKET_EASE 0.2` (2 mm; 0.5 until the owner asked for a firmer angle, 2026-10-20), soft but not a long curve. The
   drawing's second pocket is the mirror image, which once turned over onto
   the back lines up with the first, so the 3D uses one shape for both.
 - From the owner's photos of the real piece (`pavyzdziai/2026091*.jpg`,
