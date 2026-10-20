@@ -1857,8 +1857,7 @@
         [M.inset, mm(STITCH_INSET)],
         [P.stitches, String(n - 1)],
         [P.leather, pressedLabel('leather') + ', ' + C.vegtan],
-        [C.pocketColor, pressedLabel('pocket')],
-        [P.thread, pressedLabel('thread')],
+        [P.thread, pressedLabel('thread') + ', ' + C.threadSize],   // the size the owner sews with
       ];
       if (L) { rows.push([P.initials, L.txt]); }
       table(rows);

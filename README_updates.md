@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-20 23:30] - Thread size, no pocket colour - Owner: the card holder pattern's thread row now adds "rekomenduojama 0,55 mm" (7 languages), the size the owner sews with; the pocket-colour row is removed from the specs, it is not needed there.
 [2026-10-20 23:28] - Card pattern on one page - Owner: with the square gone there is room, so the specs table moved from page 2 to page 1, under the legend beside the inner piece. The card holder pattern is now a single A4 sheet.
 [2026-10-20 23:25] - Remove square from card pattern - Owner no longer needs the 50 × 50 mm calibration square on the card holder pattern; it is gone there. The two rulers stay. The keyfob pattern keeps its square.
 [2026-10-20 23:24] - Centre notes under title - Owner, for a tidier look: the card holder pattern's printing note and instructions are now centred under the centred title. Keyfob pattern unchanged.
