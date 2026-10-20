@@ -298,8 +298,8 @@ locked keyfob stitch, unchanged:
   sits on the pocket face below the pocket top and on the body face above it (`face(x, y)`).
 - Pattern PDF (the owner, 2026-10-20): three templates. On top the two
   pockets as a mirrored pair, each as seen from its own face: the front
-  pocket (SLOU stamp, `C.pocketFront`, drawn with `m = -1`) and the back
-  pocket (window as a solid cut line, initials, `C.pocketBack`). Below, the
+  piece (`C.pocketFront`, drawn with `m = -1`; never mention the SLOU stamp on the pattern, buyers may use their own) and the back
+  piece (window as a solid cut line, initials, `C.pocketBack`). Below, the
   inner piece × 2 (`C.body`; never call it a "main" piece), with the legend
   beside it. The specs table is on page 2: the calibration square leaves no
   room. The

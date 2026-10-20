@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-20 22:44] - Front and back piece names - Owner: customers may use their own stamp, so the pattern no longer mentions the SLOU stamp. The pockets are now called front piece and back piece (with window), in all 7 languages, labels and instructions.
 [2026-10-20 17:57] - Card pattern: three clear pieces - Owner: "main piece" was misleading, and one flipped pocket template unclear. Now: inner piece × 2, plus front pocket (SLOU) and back pocket (window) drawn as a mirrored pair. Instructions in 7 languages; specs moved to page 2 for space.
 [2026-10-20 17:46] - Window note says back pocket - Owner: the SLOU-stamped piece is the front, so the window is cut in the back pocket. The PDF note now says to cut the window in the back pocket only, in all 7 languages.
 [2026-10-20 17:28] - Lower thumb window - Owner: the arch was too tall and looked wrong. It is now 32 mm tall (was 38), same 40 mm width, oval top and straight 6 mm sides; the initials above it move down with it.
