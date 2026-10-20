@@ -1009,9 +1009,8 @@
       // stack at z = 0. The
       // grain faces out on both sides: the front two show their front face,
       // the back two their back face; the flesh sides face into the pockets.
-      // The front pocket has the thumb window cut in it; the back one has not.
+      // Both pockets are whole leather: no thumb window (the owner, 2026-10-20).
       var bodyLoop = loopOf(outline('card', 0)), pocketLoop = loopOf(outline('pocket', 0));
-      var windowLoop = loopOf(windowPath(new THREE.Path()));
       var zb = CARD_BODY / 2, zp = CARD_BODY + CARD_POCKET / 2;
       function ease(t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); }
       // A body is in the glued stack below the pocket edge; above it, it ends
@@ -1068,7 +1067,7 @@
         };
       }
       addPockets = function () {
-        fob.add(leatherPiece([pocketLoop, windowLoop], CARD_POCKET, zp, pocketStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol));
+        fob.add(leatherPiece([pocketLoop], CARD_POCKET, zp, pocketStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol));
         fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, pocketStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol));
       };
       fob.add(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol));

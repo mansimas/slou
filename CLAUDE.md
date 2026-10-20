@@ -183,8 +183,8 @@ locked keyfob stitch, unchanged:
   - Two colours: brown bodies (`state.leather`) and olive pockets
     (`state.pocket`, the "Pocket colour" control, card only).
   - Seen from the window side, the pocket is high on the **right**.
-  - The front pocket has an arch-shaped thumb window (`windowPath`, 34 × 38 mm,
-    its foot 7 mm off the bottom), and the initials sit just above it.
+  - The pocket with the initials had an arch-shaped thumb window (`windowPath`, 34 × 38 mm,
+    its foot 7 mm off the bottom). Not cut in 3D since 2026-10-20 (the owner: both pockets whole leather); the PDF still marks it.
   - The back pocket carries a SLOU stamp at the foot (`logoTex`, drawn
     mirrored because the back face is seen from behind).
   - The stitching runs only as high as the pockets: up to the low edge on the
