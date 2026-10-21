@@ -1955,6 +1955,9 @@
       dimH(xR0, R, pBot + 4, mm(CARD_W), 1);
       dimV(R + 5, pHi, pBot, mm(POCKET_HI + CARD_H / 2), 1);
       dimV(left + colW + colGap / 2 - 1, pLo, pBot, mm(POCKET_LO + CARD_H / 2), 1);
+      // the level stretch of the back piece's low top, from its edge to where
+      // the slope starts (the owner, 2026-10-21)
+      dimH(xR0, xR0 + (CARD_W / 2 - POCKET_X) * 10 * cfx, pLo - 4, mm(CARD_W / 2 - POCKET_X), -1);
       // the window, inside it (it is cut away): its width low down, its
       // height up the middle
       OX = xR0 + colW / 2; OY = pBot - CARD_H / 2 * 10 * cfy;

@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-21 21:55] - Level top stretch dimension - Owner: the back piece now shows the 10 mm level stretch of its low top, from the edge to where the slope starts, as a dimension above it.
 [2026-10-21 21:45] - Inner size on left piece - Owner: the inner piece's 70 mm width and 100 mm height dimensions move from the right inner template to the left one (over the front piece); the back piece keeps its own.
 [2026-10-21 21:30] - Dimensions on right pieces - Owner: dimensions only on the right-hand templates (width and height of the inner piece and the back piece with the arch, its 48 mm low side and the window); none on the left-hand ones.
 [2026-10-21 21:20] - Dimensions on card templates - Owner: the card wallet templates now carry grey dimension lines: width and height of every piece, the pockets' high and low sides, and the window's width and height, so the maker can check and transfer sizes.
