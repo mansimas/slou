@@ -1838,13 +1838,16 @@
       // the front pocket on the left: the back pocket's mirror image, no window
       OX = left + colW / 2;
       // both pocket names at the same height: between the initials and the
-      // slanted top on the back piece
+      // slanted top on the back piece, 3 mm lower than they were (the owner,
+      // 2026-10-21); only 1.5 mm lower when there are initials, or the back
+      // piece's name sits right on top of them
+      var nameY = textLayout() ? -0.35 : -0.5;
       piece('pocket', pocketTop, -1);
-      inside(C.pocketFront, 0, -0.2);
+      inside(C.pocketFront, 0, nameY);
       // the back pocket on the right, with the window and the initials
       OX = left + colW + colGap + colW / 2;
       piece('pocket', pocketTop);
-      inside(C.pocketBack, 0, -0.2);
+      inside(C.pocketBack, 0, nameY);
       // the thumb window, open at the bottom: a cut line on this pocket
       doc.setDrawColor(0); doc.setLineWidth(0.3);
       windowPath(new THREE.Path()).getPoints(24).reduce(function (a, b) { doc.line(X(a.x), Y(a.y), X(b.x), Y(b.y)); return b; });
