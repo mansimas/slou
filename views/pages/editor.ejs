@@ -1944,16 +1944,15 @@
       }
       var R = left + 2 * colW + colGap, xR0 = left + colW + colGap;
       var pBot = top + hB + rowGap + hP, pHi = pBot - hP, pLo = pBot - (POCKET_LO + CARD_H / 2) * 10 * cfy;
-      // the inner pieces: width over each, height down the outer sides
-      dimH(left, left + colW, top - 4, mm(CARD_W), -1);
+      // All on the right-hand pieces, nothing on the left-hand ones (the
+      // owner, 2026-10-21): the right inner piece and the back piece with the
+      // arch, plus the pockets' low side in the gap and the window.
+      // the inner piece: width over it, height down its right side
       dimH(xR0, R, top - 4, mm(CARD_W), -1);
-      dimV(left - 5, top, top + hB, mm(CARD_H), -1);
       dimV(R + 5, top, top + hB, mm(CARD_H), 1);
-      // the pockets: width under each, the high side outside, the low side
-      // in the gap
-      dimH(left, left + colW, pBot + 4, mm(CARD_W), 1);
+      // the back pocket: width under it, its high side outside, the low
+      // side in the gap
       dimH(xR0, R, pBot + 4, mm(CARD_W), 1);
-      dimV(left - 5, pHi, pBot, mm(POCKET_HI + CARD_H / 2), -1);
       dimV(R + 5, pHi, pBot, mm(POCKET_HI + CARD_H / 2), 1);
       dimV(left + colW + colGap / 2 - 1, pLo, pBot, mm(POCKET_LO + CARD_H / 2), 1);
       // the window, inside it (it is cut away): its width low down, its
