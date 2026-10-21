@@ -2033,11 +2033,22 @@
         // the window, the inner piece showing through it (its foot is the
         // inner piece's own bottom edge, so the closed outline is right)
         if (m > 0) { fillPoly(windowPath(new THREE.Path()).getPoints(24), 240); }
-        // the seam, sewn: one short thread from hole to hole
-        doc.setDrawColor(70); doc.setLineWidth(0.55);
-        for (var k = 0; k < holes.length - 1; k++) {
-          var a = holes[k], b = holes[k + 1], ax = m * a.x, bx = m * b.x;
-          doc.line(X(ax + (bx - ax) * 0.12), Y(a.y + (b.y - a.y) * 0.12), X(bx - (bx - ax) * 0.12), Y(b.y - (b.y - a.y) * 0.12));
+        // The seam as it is sewn, saddle stitch, laid out as in the 3D editor
+        // (the owner, 2026-10-21): each stitch runs from the inner end of one
+        // iron slit (leaning at SLIT_ANGLE) to the next, which slants it off
+        // the row, and the next one starts the slit's length across, so the
+        // row reads as a chain of slanted stitches. The slits themselves are
+        // under the thread, as on a sewn piece (drawn, they joined the
+        // stitches into a zigzag). Worked out on the side seen (side = m: -1
+        // the front, +1 the back), then drawn mirrored with it. The doubled
+        // stitches at the thread's ends are drawn a little fuller.
+        var nH = holes.length, side = m;
+        doc.setDrawColor(70);
+        for (var k = 0; k < nH - 1; k++) {
+          var a = holes[k], b = holes[k + 1], sl = slit(chords[k], side);
+          var doubled = k < OVERLAP || k >= nH - 1 - OVERLAP;
+          doc.setLineWidth(doubled ? 0.8 : 0.6);
+          doc.line(X(m * (a.x + sl.x * SLIT_HALF)), Y(a.y + sl.y * SLIT_HALF), X(m * (b.x - sl.x * SLIT_HALF)), Y(b.y - sl.y * SLIT_HALF));
         }
         if (m > 0 && L) {
           doc.setTextColor(150);
