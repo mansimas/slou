@@ -1862,10 +1862,9 @@
 
       // Laid out on a centred grid (the owner, 2026-10-21): two columns one
       // piece wide with 10 mm between them, centred left to right on the
-      // sheet, the inner piece with the legend beside it on top and the
-      // pockets below (swapped round by the owner, 2026-10-21), the whole
-      // block centred top to bottom between the notes and the horizontal
-      // ruler's label.
+      // sheet, the two inner pieces on top and the pockets below (the owner,
+      // 2026-10-21), the whole block centred top to bottom between the notes
+      // and the horizontal ruler's label. The legend and specs are on page 2.
       var colW = CARD_W * 10 * cfx, colGap = 10, left = (210 - 2 * colW - colGap) / 2;
       var hP = (POCKET_HI + CARD_H / 2) * 10 * cfy, hB = CARD_H * 10 * cfy, rowGap = 8;
       var below = 297 - 40 - 9, top = headEnd + Math.max(0, (below - headEnd - hP - rowGap - hB) / 2);
@@ -1902,31 +1901,35 @@
         doc.text(L.txt, X(L.x), Y(L.y), { align: 'center', baseline: 'middle' });
       }
 
-      // the inner piece on top, on the left, drawn as seen from the front, the
-      // same way round as the front piece below it: laid on it, that piece
-      // covers it hole for hole, slit for slit (the owner, 2026-10-21; it was
-      // drawn as seen from the back, so nothing lined up)
-      OX = left + colW / 2; OY = top + CARD_H / 2 * 10 * cfy;
-      piece('card', function () { return CARD_H / 2; }, -1);
-      inside('× 2', 0, -2.5);   // below the pocket edge line
-      inside('(' + mm(CARD_BODY) + ')', 0, -2.5 - (20 + 12) * CAP - 0.2 / cfy, 12);
-      // where the pockets' edge comes, for lining them up when gluing (the
-      // grey line on the owner's drawing)
-      doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
-      [[-CARD_W / 2, POCKET_LO], [-POCKET_X, POCKET_LO], [POCKET_X, POCKET_HI], [CARD_W / 2, POCKET_HI]].reduce(function (a, b) {
-        doc.line(X(-a[0]), Y(a[1]), X(-b[0]), Y(b[1]));   // mirrored, as the piece
-        return b;
+      // The inner piece twice on top, one over each pocket (the owner,
+      // 2026-10-21: all four pieces on the sheet, so each is cut once). Each
+      // is drawn the same way round as the pocket below it, so laid on it the
+      // pocket covers it hole for hole, slit for slit: on the left as seen
+      // from the front, over the front piece; on the right as seen from the
+      // back, over the back piece. (The single inner piece used to be drawn
+      // as seen from the back, so the front piece lined up with nothing.)
+      [[left + colW / 2, -1], [left + colW + colGap + colW / 2, 1]].forEach(function (c) {
+        OX = c[0]; OY = top + CARD_H / 2 * 10 * cfy;
+        var m = c[1];
+        piece('card', function () { return CARD_H / 2; }, m);
+        inside('× 1', 0, -2.5);   // below the pocket edge line
+        inside('(' + mm(CARD_BODY) + ')', 0, -2.5 - (20 + 12) * CAP - 0.2 / cfy, 12);
+        // where the pockets' edge comes, for lining them up when gluing (the
+        // grey line on the owner's drawing)
+        doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
+        [[-CARD_W / 2, POCKET_LO], [-POCKET_X, POCKET_LO], [POCKET_X, POCKET_HI], [CARD_W / 2, POCKET_HI]].reduce(function (a, b) {
+          doc.line(X(m * a[0]), Y(a[1]), X(m * b[0]), Y(b[1]));   // the same way round as the piece
+          return b;
+        });
+        doc.setLineDashPattern([], 0);
       });
-      doc.setLineDashPattern([], 0);
       // not named on the piece itself, only in the legend (the owner, 2026-10-21)
       // No marks for the doubled stitches at the thread's ends, and no slit
       // angle in the legend: the owner does not want either on the card
       // holder's pattern (2026-10-20).
 
-      // The legend and the specs in the right-hand column, in a thin frame as
-      // tall as the inner piece beside it and level with it, the text centred
-      // top to bottom inside (the owner, 2026-10-21). The frame stands 4 mm out from the column on both sides,
-      // so the text keeps the column's full width.
+      // The legend and the specs go on page 2 (the owner, 2026-10-21), drawn
+      // once the first page is finished: see `legendPage`.
       var rows = [
         [M.width + ' × ' + M.height, mm(CARD_W) + ' × ' + mm(CARD_H)],
         [C.pieces, '2 × ' + mm(CARD_POCKET) + ' + 2 × ' + mm(CARD_BODY)],
@@ -1941,16 +1944,21 @@
       ];
       function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
       if (L) { rows.push([P.initials, L.txt]); }
-      lx = left + colW + colGap; rx = left + 2 * colW + colGap;
+      legendPage = function () {
+      // the title again, then the legend and specs in a thin frame, centred
+      // across the page under it; the frame stands 4 mm out from the text
+      doc.setFontSize(18); doc.setTextColor(40, 36, 31);
+      doc.text('SLOU — ' + C.patternTitle, 105, 20, { align: 'center' });
+      lx = (210 - colW) / 2; rx = lx + colW;
       doc.setFontSize(9); doc.setTextColor(40, 36, 31);
       // how far key() and table() will run, to centre the block before drawing
       var run = [P.cut, C.holes, C.pocketLine].reduce(function (h, label) {
         return h + 3 + 4 * doc.splitTextToSize(label, rx - lx - 12).length;
       }, 4) + rows.length * 6;
       var blockH = run - 6 + 4.5, pad = 4;   // first cap line (3 mm up) to last descender
-      ly = Y(0) - blockH / 2 + 3;
+      ly = 36 + pad + 3;
       doc.setDrawColor(170); doc.setLineWidth(0.2);
-      doc.roundedRect(lx - pad, Y(CARD_H / 2), rx - lx + 2 * pad, CARD_H * 10 * cfy, 2, 2);
+      doc.roundedRect(lx - pad, 36, rx - lx + 2 * pad, blockH + 2 * pad, 2, 2);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, C.holes);
       key(function (x, y) {
@@ -1959,7 +1967,9 @@
       }, C.pocketLine);
       ly += 4;
       table(rows);
+      };
     }
+    var legendPage = null;
 
     // legend lines and the specs table, shared by both items
     var lx = 118, rx = 195, ly = 70;
@@ -2114,6 +2124,9 @@
       doc.setTextColor(40, 36, 31); doc.setFontSize(7);
       doc.text(sqNom + ' mm', sqR - sqW / 2, sqB + 4, { align: 'center' });
     }
+
+    // the card wallet's legend and specs, on a page of their own
+    if (legendPage) { doc.addPage(); legendPage(); }
 
     doc.save(card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
   }
