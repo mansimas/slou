@@ -1835,9 +1835,14 @@
           });
         }
         // the stitch line, faint and open at the top, then the slits on it
-        var mine = holes.map(function (p, k) { return k; }).filter(function (k) { return holes[k].y < top(holes[k].x) - STITCH_INSET / 2; });
+        // (none inside the back piece's window, which is cut away: the owner,
+        // 2026-10-21; the stitch line breaks there too)
+        var mine = holes.map(function (p, k) { return k; }).filter(function (k) {
+          return holes[k].y < top(holes[k].x) - STITCH_INSET / 2 && !(gap && inWindow(holes[k].x, holes[k].y));
+        });
         doc.setDrawColor(190); doc.setLineWidth(0.1);
         for (var j = 1; j < mine.length; j++) {
+          if (mine[j] !== mine[j - 1] + 1) { continue; }
           var a = holes[mine[j - 1]], b = holes[mine[j]];
           doc.line(X(m * a.x), Y(a.y), X(m * b.x), Y(b.y));
         }
