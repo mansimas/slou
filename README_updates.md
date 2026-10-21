@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-21 13:00] - Same finish on all ends - Owner: the front right edge tuning (deeper bend into holes, pair shifted, one thread 0.2 mm higher) now on all four seam ends, following the slit direction, not a left-right mirror: same slits, same shift; the back mirrors the front through the leather.
 [2026-10-21 12:20] - Shift front threads out, up - Owner: on the front (SLOU side) right edge, both doubled stitches shift 0.2 mm out towards the side edge and 0.2 mm down it, and their inner thread slides 0.2 mm back up along the edge, tuned by eye for a better fit.
 [2026-10-21 12:00] - Front edge stitches bend in - Owner: on the front (SLOU side) right edge, both doubled stitches now dip deeper into their holes, and the upper one turns into its body hole at the mouth instead of running in straight, so the thread is seen to bend into the hole.
 [2026-10-20 23:30] - Thread size, no pocket colour - Owner: the card holder pattern's thread row now adds "rekomenduojama 0,55 mm" (7 languages), the size the owner sews with; the pocket-colour row is removed from the specs, it is not needed there.

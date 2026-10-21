@@ -1262,21 +1262,26 @@
     // hole. Over the pocket edge the thread runs flat on the pocket to the
     // edge, bends over it, pressing it in only just (POCKET_DENT), and goes
     // down onto the body. One smooth curve, as thread lies.
-    // `bend`: the front's right edge (the owner, 2026-10-21): both doubled
-    // stitches there dip a little deeper at each end and the upper one, coming
+    // `bend`: every end of the seam (the owner, 2026-10-21; first tuned on the
+    // front's right edge, then carried to the other three ends): both doubled
+    // stitches dip a little deeper at each end and the upper one, coming
     // down off the pocket, turns into its body hole at the mouth instead of
     // running in straight, so they are seen to bend into the hole.
     function layPair(fa, tb, za, zb, side, across, t, j, bend) {
       var sink = bend ? 0.07 : 0.045;
       var u = tb.clone().sub(fa).setZ(0), len = u.length(); u.normalize();
       var lift = side * (0.005 + 0.003 * j), c = THREAD_R * 0.6;
-      // and there both threads of the pair sit a hair (0.2 mm) out towards
-      // the piece's side edge and 0.2 mm further down it, along the seam's
-      // run (the owner, 2026-10-21)
-      if (bend) { fa = fa.clone().addScaledVector(across, -0.02).addScaledVector(u, 0.02); tb = tb.clone().addScaledVector(across, -0.02).addScaledVector(u, 0.02); }
-      // and the inner thread of the pair slides 0.2 mm back up along the edge,
-      // against the seam's run (the owner, 2026-10-21; 0.4 mm was too high)
-      if (bend && t > 0) { fa.addScaledVector(u, -0.02); tb.addScaledVector(u, -0.02); }
+      // and there the pair sits 0.2 mm further to -x and 0.2 mm lower, and its
+      // thread on the +x side slides 0.2 mm back up: tuned on the front's
+      // right edge (the owner, 2026-10-21). The same shift in the piece's own
+      // x, y at every end, not mirrored left to right, because it follows the
+      // slits (the owner): on each face the slits lean the same way on both
+      // edges, so both ends get the same, and the back's slits are the
+      // front's mirrored through the leather, which in x, y is again the same.
+      if (bend) {
+        var sh = new THREE.Vector3(-0.02, across.x * t > 0 ? 0 : -0.02, 0);
+        fa = fa.clone().add(sh); tb = tb.clone().add(sh);
+      }
       function at(p, along, zz, spread) {
         return new THREE.Vector3(p.x + u.x * along + across.x * spread, p.y + u.y * along + across.y * spread, zz);
       }
@@ -1402,9 +1407,7 @@
             // together they read as one slightly fuller, plied stitch in the
             // row, not as two separate cords. The holes are untouched.
             [-0.5, 0.5].forEach(function (t, j) {
-              // the front (SLOU, side -1) seen from behind: its right edge is
-              // the seam's start, x < 0
-              layPair(from, to, za, zb, side, inward, t, j, side < 0 && k < OVERLAP);
+              layPair(from, to, za, zb, side, inward, t, j, true);
             });
           } else {
           // the keyfob's joint, as approved
