@@ -1854,7 +1854,11 @@
         // punched through the glued stack, and only the ones above the pocket
         // edge are the inner piece's own (the owner, 2026-10-21)
         mine.forEach(function (k) {
-          doc.setDrawColor(kind === 'card' && holes[k].y < pocketTop(holes[k].x) ? 160 : 0);
+          // the inner piece drawn over the back piece (m = 1) shows through
+          // its window, so the holes there are not covered: black, the seam
+          // running on unbroken (the owner, 2026-10-21)
+          var covered = holes[k].y < pocketTop(holes[k].x) && !(m === 1 && inWindow(holes[k].x, holes[k].y));
+          doc.setDrawColor(kind === 'card' && covered ? 160 : 0);
           slitAt(k, 0.8, 0.45, m);   // drawn 1.6 mm, like the keyfob's
         });
         doc.setDrawColor(0);
