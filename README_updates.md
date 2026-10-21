@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-21 19:40] - Drop card pattern how-to - Owner: the card holder pattern no longer prints the cutting, gluing and punching instructions under the title; only the print-at-100% note remains, and the pieces centre in the space it frees.
 [2026-10-21 19:30] - Inner piece matches front - Owner: the inner piece template was drawn as seen from the back, so laying the front piece on it matched no holes; it is now drawn the same way round as the front piece, which covers it slit for slit.
 [2026-10-21 19:15] - No holes inside window - Owner: on the back piece template the pricking-iron slits and stitch line inside the thumb window are gone; that leather is cut away, so those holes exist only in the inner pieces.
 [2026-10-21 19:05] - No line under window arch - Owner: on the back piece template the bottom cut line no longer runs across the foot of the thumb window; the window is open at the bottom, so nothing is cut there.

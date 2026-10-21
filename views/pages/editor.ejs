@@ -1777,10 +1777,12 @@
     doc.setFontSize(18); doc.text('SLOU — ' + (card ? C.patternTitle : P.title), card ? 105 : 15, 20, { align: card ? 'center' : 'left' });
     doc.setFontSize(9); doc.setTextColor(110, 100, 90);
     var tx = card ? 105 : 15, ta = { align: card ? 'center' : 'left' };
-    doc.text(doc.splitTextToSize(P.print, 180), tx, 27, ta);
-    var howLines = doc.splitTextToSize(card ? C.how : P.how, 180);
-    doc.text(howLines, tx, 36, ta);
-    var headEnd = 36 + howLines.length * 3.7;   // where the notes end
+    var printLines = doc.splitTextToSize(P.print, 180);
+    doc.text(printLines, tx, 27, ta);
+    // the card holder's pattern has no "how to" note (the owner, 2026-10-21)
+    var howLines = card ? [] : doc.splitTextToSize(P.how, 180);
+    if (!card) { doc.text(howLines, tx, 36, ta); }
+    var headEnd = card ? 27 + printLines.length * 3.7 : 36 + howLines.length * 3.7;   // where the notes end
 
     // The card holder: three templates (the owner, 2026-10-20). The two
     // pockets side by side on top, drawn as the mirror pair they are — the
