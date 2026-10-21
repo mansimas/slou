@@ -1778,7 +1778,9 @@
     doc.setFontSize(9); doc.setTextColor(110, 100, 90);
     var tx = card ? 105 : 15, ta = { align: card ? 'center' : 'left' };
     doc.text(doc.splitTextToSize(P.print, 180), tx, 27, ta);
-    doc.text(doc.splitTextToSize(card ? C.how : P.how, 180), tx, 36, ta);
+    var howLines = doc.splitTextToSize(card ? C.how : P.how, 180);
+    doc.text(howLines, tx, 36, ta);
+    var headEnd = 36 + howLines.length * 3.7;   // where the notes end
 
     // The card holder: three templates (the owner, 2026-10-20). The two
     // pockets side by side on top, drawn as the mirror pair they are — the
@@ -1822,17 +1824,24 @@
         mine.forEach(function (k) { slitAt(k, 0.8, 0.45, m); });   // drawn 1.6 mm, like the keyfob's
       }
 
-      // the pockets on top, their bottoms level, the high corner 52 mm down
-      // the page
-      OY = 52 + POCKET_HI * 10 * cfy;
+      // Laid out on a centred grid (the owner, 2026-10-21): two columns one
+      // piece wide with 10 mm between them, centred left to right on the
+      // sheet, the pockets on top and the inner piece with the legend beside
+      // it below, the whole block centred top to bottom between the notes and
+      // the horizontal ruler's label.
+      var colW = CARD_W * 10 * cfx, colGap = 10, left = (210 - 2 * colW - colGap) / 2;
+      var hP = (POCKET_HI + CARD_H / 2) * 10 * cfy, hB = CARD_H * 10 * cfy, rowGap = 8;
+      var below = 297 - 40 - 9, top = headEnd + Math.max(0, (below - headEnd - hP - rowGap - hB) / 2);
+      // the pockets on top, their bottoms level
+      OY = top + POCKET_HI * 10 * cfy;
       // the front pocket on the left: the back pocket's mirror image, no window
-      OX = 20 + CARD_W / 2 * 10 * cfx;
+      OX = left + colW / 2;
       // both pocket names at the same height: between the initials and the
       // slanted top on the back piece
       piece('pocket', pocketTop, -1);
       inside(C.pocketFront, 0, -0.2);
       // the back pocket on the right, with the window and the initials
-      OX = 100 + CARD_W / 2 * 10 * cfx;
+      OX = left + colW + colGap + colW / 2;
       piece('pocket', pocketTop);
       inside(C.pocketBack, 0, -0.2);
       // the thumb window, open at the bottom: a cut line on this pocket
@@ -1847,7 +1856,7 @@
       }
 
       // the inner piece below, on the left
-      OX = 20 + CARD_W / 2 * 10 * cfx; OY = Y(-CARD_H / 2) + 8 + CARD_H / 2 * 10 * cfy;
+      OX = left + colW / 2; OY = top + hP + rowGap + CARD_H / 2 * 10 * cfy;
       piece('card', function () { return CARD_H / 2; });
       inside(C.body, 0, -2.5);   // below the pocket edge line
       // where the pockets' edge comes, for lining them up when gluing (the
@@ -1864,8 +1873,8 @@
       // angle in the legend: the owner does not want either on the card
       // holder's pattern (2026-10-20).
 
-      // the legend to the right of the inner piece, above the calibration square
-      lx = 100; rx = 195; ly = Y(CARD_H / 2) + 2;
+      // the legend in the right-hand column, beside the inner piece
+      lx = left + colW + colGap; rx = left + 2 * colW + colGap; ly = Y(CARD_H / 2) + 2;
       doc.setFontSize(9); doc.setTextColor(40, 36, 31);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, C.holes);

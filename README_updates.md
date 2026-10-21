@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-21 17:20] - Centre card pattern layout - Owner: the card holder pattern was off to the left; the pieces now sit on a centred two-column grid (pockets on top, inner piece with legend below) and the block is centred between the notes and the bottom ruler.
 [2026-10-21 13:45] - Back end stitches mirrored - Owner: on the back (window side) the end-stitch tuning came out backwards; there the pair now shifts the other way across the edge and the other thread is the raised one, mirroring the front as seen.
 [2026-10-21 13:30] - Top-left stitch end outward - Owner: on the front (SLOU side), top left, only the upper doubled stitch: its upper end in the body hole moves 0.15 mm toward the outer edge, so it sits level with the hole.
 [2026-10-21 13:00] - Same finish on all ends - Owner: the front right edge tuning (deeper bend into holes, pair shifted, one thread 0.2 mm higher) now on all four seam ends, following the slit direction, not a left-right mirror: same slits, same shift; the back mirrors the front through the leather.
