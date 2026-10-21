@@ -1744,6 +1744,9 @@
     pair[1].addEventListener('change', keep);
   });
 
+  // One still of the scene for the pattern: 900 × 1200 px from `pos`,
+  // looking at the piece's middle, without the measurements; the view on
+  // screen is put back as it was.
   function makePattern(fontB64) {
     var P = I18N.pattern, M = I18N.measure;
     var doc = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
@@ -1999,6 +2002,49 @@
       doc.setDrawColor(170); doc.setLineWidth(0.2);
       doc.roundedRect(lx - pad, 36, rx - lx + 2 * pad, blockH + 2 * pad, 2, 2);
       table(rows);
+
+      // The finished card wallet in clean 2D, true size, under the specs (the
+      // owner, 2026-10-21; a 3D render and a pencil sketch were tried first):
+      // the front (the front piece over the inner pieces) and the back (the
+      // back piece with its window, the inner piece showing through), each
+      // straight on from its own side, sewn. Light greys, so it prints
+      // cheaply and never reads as a template to cut.
+      function fillPoly(pts, fill) {
+        doc.setFillColor(fill);
+        doc.lines(pts.slice(1).map(function (p, i) { return [X(p.x) - X(pts[i].x), Y(p.y) - Y(pts[i].y)]; }),
+          X(pts[0].x), Y(pts[0].y), [1, 1], 'FD', true);
+      }
+      function outlinePts(kind, m) {
+        return outline(kind, 0).getPoints(48).filter(function (p, k, all) {
+          return p.distanceTo(all[(k + 1) % all.length]) > 1e-4;
+        }).map(function (p) { return new THREE.Vector2(m * p.x, p.y); });
+      }
+      var vTop = 36 + blockH + 2 * pad + 22, vGap = 20, vLeft = (210 - 2 * colW - vGap) / 2;
+      doc.setFontSize(12); doc.setTextColor(40, 36, 31);
+      doc.text(C.finished, 105, vTop - 12, { align: 'center' });
+      [[-1, C.viewFront], [1, C.viewBack]].forEach(function (v, i) {
+        var m = v[0];
+        OX = vLeft + i * (colW + vGap) + colW / 2; OY = vTop + CARD_H / 2 * 10 * cfy;
+        doc.setFontSize(9); doc.setTextColor(110, 100, 90);
+        doc.text(v[1], OX, vTop - 3, { align: 'center' });
+        doc.setDrawColor(0); doc.setLineWidth(0.3);
+        fillPoly(outlinePts('card', m), 240);
+        fillPoly(outlinePts('pocket', m), 215);
+        // the window, the inner piece showing through it (its foot is the
+        // inner piece's own bottom edge, so the closed outline is right)
+        if (m > 0) { fillPoly(windowPath(new THREE.Path()).getPoints(24), 240); }
+        // the seam, sewn: one short thread from hole to hole
+        doc.setDrawColor(70); doc.setLineWidth(0.55);
+        for (var k = 0; k < holes.length - 1; k++) {
+          var a = holes[k], b = holes[k + 1], ax = m * a.x, bx = m * b.x;
+          doc.line(X(ax + (bx - ax) * 0.12), Y(a.y + (b.y - a.y) * 0.12), X(bx - (bx - ax) * 0.12), Y(b.y - (b.y - a.y) * 0.12));
+        }
+        if (m > 0 && L) {
+          doc.setTextColor(150);
+          doc.setFontSize(L.size * 10 * cfy * 72 / 25.4);
+          doc.text(L.txt, X(L.x), Y(L.y), { align: 'center', baseline: 'middle' });
+        }
+      });
       };
     }
     var legendPage = null;
