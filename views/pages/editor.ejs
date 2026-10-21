@@ -2007,8 +2007,7 @@
       // owner, 2026-10-21; a 3D render and a pencil sketch were tried first):
       // the front (the front piece over the inner pieces) and the back (the
       // back piece with its window, the inner piece showing through), each
-      // straight on from its own side, sewn. Light greys, so it prints
-      // cheaply and never reads as a template to cut.
+      // straight on from its own side, sewn. Black lines on white.
       function fillPoly(pts, fill) {
         doc.setFillColor(fill);
         doc.lines(pts.slice(1).map(function (p, i) { return [X(p.x) - X(pts[i].x), Y(p.y) - Y(pts[i].y)]; }),
@@ -2028,11 +2027,13 @@
         doc.setFontSize(9); doc.setTextColor(110, 100, 90);
         doc.text(v[1], OX, vTop - 3, { align: 'center' });
         doc.setDrawColor(0); doc.setLineWidth(0.3);
-        fillPoly(outlinePts('card', m), 240);
-        fillPoly(outlinePts('pocket', m), 215);
+        // white, no greys (the owner, 2026-10-21): outlines only, each piece
+        // filled white so it covers what lies under it
+        fillPoly(outlinePts('card', m), 255);
+        fillPoly(outlinePts('pocket', m), 255);
         // the window, the inner piece showing through it (its foot is the
         // inner piece's own bottom edge, so the closed outline is right)
-        if (m > 0) { fillPoly(windowPath(new THREE.Path()).getPoints(24), 240); }
+        if (m > 0) { fillPoly(windowPath(new THREE.Path()).getPoints(24), 255); }
         // The seam as it is sewn, saddle stitch, laid out as in the 3D editor
         // (the owner, 2026-10-21): each stitch runs from the inner end of one
         // iron slit (leaning at SLIT_ANGLE) to the next, which slants it off
