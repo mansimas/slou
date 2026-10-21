@@ -1826,14 +1826,15 @@
 
       // Laid out on a centred grid (the owner, 2026-10-21): two columns one
       // piece wide with 10 mm between them, centred left to right on the
-      // sheet, the pockets on top and the inner piece with the legend beside
-      // it below, the whole block centred top to bottom between the notes and
-      // the horizontal ruler's label.
+      // sheet, the inner piece with the legend beside it on top and the
+      // pockets below (swapped round by the owner, 2026-10-21), the whole
+      // block centred top to bottom between the notes and the horizontal
+      // ruler's label.
       var colW = CARD_W * 10 * cfx, colGap = 10, left = (210 - 2 * colW - colGap) / 2;
       var hP = (POCKET_HI + CARD_H / 2) * 10 * cfy, hB = CARD_H * 10 * cfy, rowGap = 8;
       var below = 297 - 40 - 9, top = headEnd + Math.max(0, (below - headEnd - hP - rowGap - hB) / 2);
-      // the pockets on top, their bottoms level
-      OY = top + POCKET_HI * 10 * cfy;
+      // the pockets below the inner piece, their bottoms level
+      OY = top + hB + rowGap + POCKET_HI * 10 * cfy;
       // the front pocket on the left: the back pocket's mirror image, no window
       OX = left + colW / 2;
       // both pocket names at the same height: between the initials and the
@@ -1855,8 +1856,8 @@
         doc.text(L.txt, X(L.x), Y(L.y), { align: 'center', baseline: 'middle' });
       }
 
-      // the inner piece below, on the left
-      OX = left + colW / 2; OY = top + hP + rowGap + CARD_H / 2 * 10 * cfy;
+      // the inner piece on top, on the left
+      OX = left + colW / 2; OY = top + CARD_H / 2 * 10 * cfy;
       piece('card', function () { return CARD_H / 2; });
       inside(C.body, 0, -2.5);   // below the pocket edge line
       // where the pockets' edge comes, for lining them up when gluing (the
