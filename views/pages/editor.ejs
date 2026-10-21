@@ -1873,16 +1873,10 @@
       // angle in the legend: the owner does not want either on the card
       // holder's pattern (2026-10-20).
 
-      // the legend in the right-hand column, beside the inner piece
-      lx = left + colW + colGap; rx = left + 2 * colW + colGap; ly = Y(CARD_H / 2) + 2;
-      doc.setFontSize(9); doc.setTextColor(40, 36, 31);
-      key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
-      key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, C.holes);
-      key(function (x, y) {
-        doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
-        doc.line(x, y, x + 8, y); doc.setLineDashPattern([], 0);
-      }, C.pocketLine);
-      ly += 4;
+      // The legend and the specs in the right-hand column, in a thin frame as
+      // tall as the inner piece beside it and level with it, the text centred
+      // top to bottom inside (the owner, 2026-10-21). The frame stands 4 mm out from the column on both sides,
+      // so the text keeps the column's full width.
       var rows = [
         [M.width + ' × ' + M.height, mm(CARD_W) + ' × ' + mm(CARD_H)],
         [C.pieces, '2 × ' + mm(CARD_POCKET) + ' + 2 × ' + mm(CARD_BODY)],
@@ -1894,6 +1888,23 @@
         [P.thread, pressedLabel('thread') + ', ' + C.threadSize],   // the size the owner sews with
       ];
       if (L) { rows.push([P.initials, L.txt]); }
+      lx = left + colW + colGap; rx = left + 2 * colW + colGap;
+      doc.setFontSize(9); doc.setTextColor(40, 36, 31);
+      // how far key() and table() will run, to centre the block before drawing
+      var run = [P.cut, C.holes, C.pocketLine].reduce(function (h, label) {
+        return h + 3 + 4 * doc.splitTextToSize(label, rx - lx - 12).length;
+      }, 4) + rows.length * 6;
+      var blockH = run - 6 + 4.5, pad = 4;   // first cap line (3 mm up) to last descender
+      ly = Y(0) - blockH / 2 + 3;
+      doc.setDrawColor(170); doc.setLineWidth(0.2);
+      doc.roundedRect(lx - pad, Y(CARD_H / 2), rx - lx + 2 * pad, CARD_H * 10 * cfy, 2, 2);
+      key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
+      key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, C.holes);
+      key(function (x, y) {
+        doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
+        doc.line(x, y, x + 8, y); doc.setLineDashPattern([], 0);
+      }, C.pocketLine);
+      ly += 4;
       table(rows);
     }
 
