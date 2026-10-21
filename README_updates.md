@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-21 21:20] - Dimensions on card templates - Owner: the card wallet templates now carry grey dimension lines: width and height of every piece, the pockets' high and low sides, and the window's width and height, so the maker can check and transfer sizes.
 [2026-10-21 21:05] - Drop card pattern legend - Owner: page 2 of the card wallet pattern no longer explains the cut line, holes and pocket edge; the frame now holds only the specs table.
 [2026-10-21 20:55] - Drop stitch count row - Owner: the card wallet pattern specs no longer list the number of stitches; it does not matter to the maker.
 [2026-10-21 20:45] - Window holes black on inner - Owner: on the right inner piece (the one matching the back piece) the holes inside the thumb window are black, not grey: the back piece does not cover them and the seam runs on unbroken there.

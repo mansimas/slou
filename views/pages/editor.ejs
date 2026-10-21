@@ -1927,6 +1927,40 @@
         });
         doc.setLineDashPattern([], 0);
       });
+      // Dimensions (the owner, 2026-10-21): the outer sizes of every piece, the
+      // pockets' low side (once, in the gap between them, where both low
+      // sides face each other) and the window. Thin grey lines with end ticks,
+      // outside the pieces, so they never read as cut lines. Drawn true size
+      // like everything else; the labels give the nominal size.
+      doc.setFontSize(7); doc.setTextColor(90); doc.setDrawColor(120); doc.setLineWidth(0.15);
+      function dimV(x, y0, y1, label, side) {   // side -1: label left of the line
+        doc.line(x, y0, x, y1); doc.line(x - 1.2, y0, x + 1.2, y0); doc.line(x - 1.2, y1, x + 1.2, y1);
+        var w = doc.getTextWidth(label);
+        doc.text(label, side < 0 ? x - 1 : x + 2.8, (y0 + y1) / 2 + w / 2, { angle: 90 });
+      }
+      function dimH(x0, x1, y, label, side) {   // side -1: label above the line
+        doc.line(x0, y, x1, y); doc.line(x0, y - 1.2, x0, y + 1.2); doc.line(x1, y - 1.2, x1, y + 1.2);
+        doc.text(label, (x0 + x1) / 2, side < 0 ? y - 1 : y + 3, { align: 'center' });
+      }
+      var R = left + 2 * colW + colGap, xR0 = left + colW + colGap;
+      var pBot = top + hB + rowGap + hP, pHi = pBot - hP, pLo = pBot - (POCKET_LO + CARD_H / 2) * 10 * cfy;
+      // the inner pieces: width over each, height down the outer sides
+      dimH(left, left + colW, top - 4, mm(CARD_W), -1);
+      dimH(xR0, R, top - 4, mm(CARD_W), -1);
+      dimV(left - 5, top, top + hB, mm(CARD_H), -1);
+      dimV(R + 5, top, top + hB, mm(CARD_H), 1);
+      // the pockets: width under each, the high side outside, the low side
+      // in the gap
+      dimH(left, left + colW, pBot + 4, mm(CARD_W), 1);
+      dimH(xR0, R, pBot + 4, mm(CARD_W), 1);
+      dimV(left - 5, pHi, pBot, mm(POCKET_HI + CARD_H / 2), -1);
+      dimV(R + 5, pHi, pBot, mm(POCKET_HI + CARD_H / 2), 1);
+      dimV(left + colW + colGap / 2 - 1, pLo, pBot, mm(POCKET_LO + CARD_H / 2), 1);
+      // the window, inside it (it is cut away): its width low down, its
+      // height up the middle
+      OX = xR0 + colW / 2; OY = pBot - CARD_H / 2 * 10 * cfy;
+      dimH(X(WIN_CX - WIN_HW), X(WIN_CX + WIN_HW), Y(WIN_Y + 0.5), mm(2 * WIN_HW), -1);
+      dimV(X(WIN_CX), Y(WIN_Y), Y(WIN_Y + WIN_H), mm(WIN_H), 1);
       // not named on the piece itself, only in the legend (the owner, 2026-10-21)
       // No marks for the doubled stitches at the thread's ends, and no slit
       // angle in the legend: the owner does not want either on the card
