@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-21 20:00] - Rename to card wallet - Owner: the product is now "Card wallet" everywhere the user sees it (LT "Kortelių piniginė"): the Item toggle, the page title, and the downloaded image and pattern file names, in all 7 languages, matching the pattern's new name.
 [2026-10-21 19:50] - Card wallet No. 1 - Owner: the card holder pattern is now titled "Card wallet No. 1" (LT "Kortelių piniginė Nr. 1"), translated into all 7 languages; the template's name, not a description of it.
 [2026-10-21 19:40] - Drop card pattern how-to - Owner: the card holder pattern no longer prints the cutting, gluing and punching instructions under the title; only the print-at-100% note remains, and the pieces centre in the space it frees.
 [2026-10-21 19:30] - Inner piece matches front - Owner: the inner piece template was drawn as seen from the back, so laying the front piece on it matched no holes; it is now drawn the same way round as the front piece, which covers it slit for slit.

@@ -2107,7 +2107,7 @@
       doc.text(sqNom + ' mm', sqR - sqW / 2, sqB + 4, { align: 'center' });
     }
 
-    doc.save(card ? 'slou-card-holder-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
+    doc.save(card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
   }
 
   document.getElementById('kfPattern').addEventListener('click', function (ev) {
@@ -2121,7 +2121,7 @@
   document.getElementById('kfShot').addEventListener('click', function () {
     renderer.render(scene, camera);
     var a = document.createElement('a');
-    a.download = state.product === 'card' ? 'slou-card-holder.png' : 'slou-keyfob.png';
+    a.download = state.product === 'card' ? 'slou-card-wallet.png' : 'slou-keyfob.png';
     a.href = renderer.domElement.toDataURL('image/png');
     a.click();
   });
