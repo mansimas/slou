@@ -2019,8 +2019,7 @@
         }).map(function (p) { return new THREE.Vector2(m * p.x, p.y); });
       }
       var vTop = 36 + blockH + 2 * pad + 22, vGap = 20, vLeft = (210 - 2 * colW - vGap) / 2;
-      doc.setFontSize(12); doc.setTextColor(40, 36, 31);
-      doc.text(C.finished, 105, vTop - 12, { align: 'center' });
+      // no heading over the views (the owner, 2026-10-21)
       [[-1, C.viewFront], [1, C.viewBack]].forEach(function (v, i) {
         var m = v[0];
         OX = vLeft + i * (colW + vGap) + colW / 2; OY = vTop + CARD_H / 2 * 10 * cfy;

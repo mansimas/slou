@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-21 22:45] - No heading over 2D view - Owner: page 2 no longer prints "Pasiūta kortelių piniginė" above the finished card wallet drawing; the front and back labels stay.
 [2026-10-21 22:40] - No grey in 2D view - Owner: the finished card wallet drawing on page 2 drops its grey fills; it is now black outlines and stitches on white.
 [2026-10-21 22:30] - Saddle stitch in 2D view - Owner: the finished card wallet drawing on page 2 now shows the seam as in the 3D editor: slanted saddle stitches running slit tip to slit tip, the doubled end stitches a little fuller.
 [2026-10-21 22:10] - Finished wallet on page 2 - Owner: page 2 of the card wallet pattern shows the finished card wallet in clean 2D, front and back true size, sewn, in light greys; a 3D render and a pencil sketch were tried and dropped. Labels in all 7 languages.
