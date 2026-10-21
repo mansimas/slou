@@ -1820,8 +1820,14 @@
           var a = holes[mine[j - 1]], b = holes[mine[j]];
           doc.line(X(m * a.x), Y(a.y), X(m * b.x), Y(b.y));
         }
+        // on the inner piece, the holes the pockets cover are grey: those are
+        // punched through the glued stack, and only the ones above the pocket
+        // edge are the inner piece's own (the owner, 2026-10-21)
+        mine.forEach(function (k) {
+          doc.setDrawColor(kind === 'card' && holes[k].y < pocketTop(holes[k].x) ? 160 : 0);
+          slitAt(k, 0.8, 0.45, m);   // drawn 1.6 mm, like the keyfob's
+        });
         doc.setDrawColor(0);
-        mine.forEach(function (k) { slitAt(k, 0.8, 0.45, m); });   // drawn 1.6 mm, like the keyfob's
       }
 
       // Laid out on a centred grid (the owner, 2026-10-21): two columns one
