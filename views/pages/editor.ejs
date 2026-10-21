@@ -1955,21 +1955,13 @@
       doc.text('SLOU — ' + C.patternTitle, 105, 20, { align: 'center' });
       lx = (210 - colW) / 2; rx = lx + colW;
       doc.setFontSize(9); doc.setTextColor(40, 36, 31);
-      // how far key() and table() will run, to centre the block before drawing
-      var run = [P.cut, C.holes, C.pocketLine].reduce(function (h, label) {
-        return h + 3 + 4 * doc.splitTextToSize(label, rx - lx - 12).length;
-      }, 4) + rows.length * 6;
+      // no legend keys (cut line, holes, pocket edge) on the card wallet's
+      // pattern, only the specs (the owner, 2026-10-21)
+      var run = rows.length * 6;
       var blockH = run - 6 + 4.5, pad = 4;   // first cap line (3 mm up) to last descender
       ly = 36 + pad + 3;
       doc.setDrawColor(170); doc.setLineWidth(0.2);
       doc.roundedRect(lx - pad, 36, rx - lx + 2 * pad, blockH + 2 * pad, 2, 2);
-      key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
-      key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, C.holes);
-      key(function (x, y) {
-        doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
-        doc.line(x, y, x + 8, y); doc.setLineDashPattern([], 0);
-      }, C.pocketLine);
-      ly += 4;
       table(rows);
       };
     }

@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-21 21:05] - Drop card pattern legend - Owner: page 2 of the card wallet pattern no longer explains the cut line, holes and pocket edge; the frame now holds only the specs table.
 [2026-10-21 20:55] - Drop stitch count row - Owner: the card wallet pattern specs no longer list the number of stitches; it does not matter to the maker.
 [2026-10-21 20:45] - Window holes black on inner - Owner: on the right inner piece (the one matching the back piece) the holes inside the thumb window are black, not grey: the back piece does not cover them and the seam runs on unbroken there.
 [2026-10-21 20:30] - All four pieces, specs page 2 - Owner: page 1 of the card wallet pattern now has both inner pieces (each over the pocket it matches, × 1) above the two pockets; the framed legend and specs move to page 2 under the title.
