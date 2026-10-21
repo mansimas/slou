@@ -1893,15 +1893,18 @@
         doc.text(L.txt, X(L.x), Y(L.y), { align: 'center', baseline: 'middle' });
       }
 
-      // the inner piece on top, on the left
+      // the inner piece on top, on the left, drawn as seen from the front, the
+      // same way round as the front piece below it: laid on it, that piece
+      // covers it hole for hole, slit for slit (the owner, 2026-10-21; it was
+      // drawn as seen from the back, so nothing lined up)
       OX = left + colW / 2; OY = top + CARD_H / 2 * 10 * cfy;
-      piece('card', function () { return CARD_H / 2; });
+      piece('card', function () { return CARD_H / 2; }, -1);
       inside('× 2', 0, -2.5);   // below the pocket edge line
       // where the pockets' edge comes, for lining them up when gluing (the
       // grey line on the owner's drawing)
       doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
       [[-CARD_W / 2, POCKET_LO], [-POCKET_X, POCKET_LO], [POCKET_X, POCKET_HI], [CARD_W / 2, POCKET_HI]].reduce(function (a, b) {
-        doc.line(X(a[0]), Y(a[1]), X(b[0]), Y(b[1]));
+        doc.line(X(-a[0]), Y(a[1]), X(-b[0]), Y(b[1]));   // mirrored, as the piece
         return b;
       });
       doc.setLineDashPattern([], 0);
