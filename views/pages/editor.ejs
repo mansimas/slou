@@ -1814,12 +1814,26 @@
         doc.setTextColor(0);
         doc.text(name, X(x), Y(y), { align: 'center', baseline: 'middle' });
       }
-      function piece(kind, top, m) {
+      // `gap` [x0, x1]: a stretch of the bottom edge left undrawn, where the
+      // back piece's window opens through it (the owner, 2026-10-21: no line
+      // across the foot of the arch, it is not cut there)
+      function piece(kind, top, m, gap) {
         m = m || 1;
         doc.setDrawColor(0); doc.setLineWidth(0.3);
-        poly(outline(kind, 0).getPoints(48).filter(function (p, k, all) {
+        var pts = outline(kind, 0).getPoints(48).filter(function (p, k, all) {
           return p.distanceTo(all[(k + 1) % all.length]) > 1e-4;
-        }).map(function (p) { return new THREE.Vector2(m * p.x, p.y); }));
+        }).map(function (p) { return new THREE.Vector2(m * p.x, p.y); });
+        if (!gap) { poly(pts); }
+        else {
+          pts.forEach(function (a, k) {
+            var b = pts[(k + 1) % pts.length];
+            var bottom = Math.abs(a.y + CARD_H / 2) < 1e-4 && Math.abs(b.y + CARD_H / 2) < 1e-4;
+            if (!bottom) { doc.line(X(a.x), Y(a.y), X(b.x), Y(b.y)); return; }
+            var lo = Math.min(a.x, b.x), hi = Math.max(a.x, b.x);
+            if (lo < gap[0]) { doc.line(X(lo), Y(a.y), X(Math.min(hi, gap[0])), Y(a.y)); }
+            if (hi > gap[1]) { doc.line(X(Math.max(lo, gap[1])), Y(a.y), X(hi), Y(a.y)); }
+          });
+        }
         // the stitch line, faint and open at the top, then the slits on it
         var mine = holes.map(function (p, k) { return k; }).filter(function (k) { return holes[k].y < top(holes[k].x) - STITCH_INSET / 2; });
         doc.setDrawColor(190); doc.setLineWidth(0.1);
@@ -1861,7 +1875,7 @@
       inside('× 1', 0, nameY, nameSize);
       // the back pocket on the right, with the window and the initials
       OX = left + colW + colGap + colW / 2;
-      piece('pocket', pocketTop);
+      piece('pocket', pocketTop, 1, [WIN_CX - WIN_HW, WIN_CX + WIN_HW]);
       inside('× 1', 0, nameY, nameSize);
       // the thumb window, open at the bottom: a cut line on this pocket
       doc.setDrawColor(0); doc.setLineWidth(0.3);

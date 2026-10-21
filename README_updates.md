@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-21 19:05] - No line under window arch - Owner: on the back piece template the bottom cut line no longer runs across the foot of the thumb window; the window is open at the bottom, so nothing is cut there.
 [2026-10-21 18:50] - Pieces show only x1, x2 - Owner: card holder templates carry no piece names, only how many to cut: "× 2" on the inner piece, "× 1" on the front and back, black, 20 pt (14 pt on the pockets with initials), clear of the pocket cut line.
 [2026-10-21 18:40] - Grey covered holes on body - Owner: on the inner piece template the holes that the front and back pockets cover are drawn grey; only the holes above the pocket edge, the inner piece's own, stay black.
 [2026-10-21 18:25] - Lower pocket names - Owner: on the card holder pattern the words "Priekinė detalė" and "Galinė detalė" sit 3 mm lower inside their pieces (1.5 mm when initials are entered, to keep clear of them), a little further from the slanted top.
