@@ -1270,6 +1270,13 @@
       var sink = bend ? 0.07 : 0.045;
       var u = tb.clone().sub(fa).setZ(0), len = u.length(); u.normalize();
       var lift = side * (0.005 + 0.003 * j), c = THREAD_R * 0.6;
+      // and there both threads of the pair sit a hair (0.2 mm) out towards
+      // the piece's side edge and 0.2 mm further down it, along the seam's
+      // run (the owner, 2026-10-21)
+      if (bend) { fa = fa.clone().addScaledVector(across, -0.02).addScaledVector(u, 0.02); tb = tb.clone().addScaledVector(across, -0.02).addScaledVector(u, 0.02); }
+      // and the inner thread of the pair slides 0.2 mm back up along the edge,
+      // against the seam's run (the owner, 2026-10-21; 0.4 mm was too high)
+      if (bend && t > 0) { fa.addScaledVector(u, -0.02); tb.addScaledVector(u, -0.02); }
       function at(p, along, zz, spread) {
         return new THREE.Vector3(p.x + u.x * along + across.x * spread, p.y + u.y * along + across.y * spread, zz);
       }
