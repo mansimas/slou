@@ -1276,10 +1276,11 @@
       // right edge (the owner, 2026-10-21). The same shift in the piece's own
       // x, y at every end, not mirrored left to right, because it follows the
       // slits (the owner): on each face the slits lean the same way on both
-      // edges, so both ends get the same, and the back's slits are the
-      // front's mirrored through the leather, which in x, y is again the same.
+      // edges, so both ends get the same. The back is the front mirrored left
+      // to right as seen (the owner: the same x, y there came out backwards),
+      // so there x is turned round: +x, and the -x thread slides up.
       if (bend) {
-        var sh = new THREE.Vector3(-0.02, across.x * t > 0 ? 0 : -0.02, 0);
+        var sh = new THREE.Vector3(-0.02 * -side, across.x * t * -side > 0 ? 0 : -0.02, 0);
         fa = fa.clone().add(sh); tb = tb.clone().add(sh);
       }
       // the front's top-left stitch (over the high pocket edge): its upper
