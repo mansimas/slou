@@ -1262,15 +1262,22 @@
     // hole. Over the pocket edge the thread runs flat on the pocket to the
     // edge, bends over it, pressing it in only just (POCKET_DENT), and goes
     // down onto the body. One smooth curve, as thread lies.
-    function layPair(fa, tb, za, zb, side, across, t, j) {
+    // `bend`: the front's right edge (the owner, 2026-10-21): both doubled
+    // stitches there dip a little deeper at each end and the upper one, coming
+    // down off the pocket, turns into its body hole at the mouth instead of
+    // running in straight, so they are seen to bend into the hole.
+    function layPair(fa, tb, za, zb, side, across, t, j, bend) {
+      var sink = bend ? 0.07 : 0.045;
       var u = tb.clone().sub(fa).setZ(0), len = u.length(); u.normalize();
       var lift = side * (0.005 + 0.003 * j), c = THREAD_R * 0.6;
       function at(p, along, zz, spread) {
         return new THREE.Vector3(p.x + u.x * along + across.x * spread, p.y + u.y * along + across.y * spread, zz);
       }
       function spreadAt(s) { return t * JOINT_GAP * (0.3 + 0.7 * Math.sin(Math.PI * Math.min(1, Math.max(0, s)))); }
-      var pts = [Math.abs(za - zb) > 1e-6 && Math.abs(zb) > Math.abs(za) ? at(fa, -0.02, za - side * 0.02, spreadAt(0)) : at(fa, -0.035, za - side * 0.045, spreadAt(0))];
-      if (!(Math.abs(za - zb) > 1e-6 && Math.abs(zb) > Math.abs(za))) { pts.push(at(fa, 0.03, za + lift, spreadAt(0.08))); }
+      var upA = Math.abs(za - zb) > 1e-6 && Math.abs(zb) > Math.abs(za);
+      var pts = [upA && !bend ? at(fa, -0.02, za - side * 0.02, spreadAt(0)) : at(fa, -0.035, za - side * sink, spreadAt(0))];
+      if (!upA) { pts.push(at(fa, 0.03, za + lift, spreadAt(0.08))); }
+      else if (bend) { pts.push(at(fa, 0.02, za + lift, spreadAt(0.02))); }
       if (Math.abs(za - zb) < 1e-6) {
         pts.push(at(fa, len / 2, za + lift, spreadAt(0.5)));
       } else {
@@ -1301,8 +1308,9 @@
       // where the thread comes down off the pocket it goes straight on into the
       // hole; elsewhere it lies flat on the face up to the slit
       var steep = Math.abs(za - zb) > 1e-6;
-      if (steep && Math.abs(za) > Math.abs(zb)) { pts.push(at(tb, 0.02, zb - side * 0.02, spreadAt(1))); }
-      else { pts.push(at(tb, -0.03, zb + lift, spreadAt(0.92)), at(tb, 0.035, zb - side * 0.045, spreadAt(1))); }
+      if (steep && Math.abs(za) > Math.abs(zb) && !bend) { pts.push(at(tb, 0.02, zb - side * 0.02, spreadAt(1))); }
+      else if (steep && Math.abs(za) > Math.abs(zb)) { pts.push(at(tb, -0.02, zb + lift, spreadAt(0.98)), at(tb, 0.035, zb - side * sink, spreadAt(1))); }
+      else { pts.push(at(tb, -0.03, zb + lift, spreadAt(0.92)), at(tb, 0.035, zb - side * sink, spreadAt(1))); }
       // Straight runs between the points, each corner rounded with a quadratic
       // bend between the midpoints of its two runs. Unlike a Catmull-Rom curve
       // this never swings out past its points, so where the thread comes down
@@ -1387,7 +1395,9 @@
             // together they read as one slightly fuller, plied stitch in the
             // row, not as two separate cords. The holes are untouched.
             [-0.5, 0.5].forEach(function (t, j) {
-              layPair(from, to, za, zb, side, inward, t, j);
+              // the front (SLOU, side -1) seen from behind: its right edge is
+              // the seam's start, x < 0
+              layPair(from, to, za, zb, side, inward, t, j, side < 0 && k < OVERLAP);
             });
           } else {
           // the keyfob's joint, as approved
