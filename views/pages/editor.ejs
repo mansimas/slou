@@ -1267,7 +1267,7 @@
     // stitches dip a little deeper at each end and the upper one, coming
     // down off the pocket, turns into its body hole at the mouth instead of
     // running in straight, so they are seen to bend into the hole.
-    function layPair(fa, tb, za, zb, side, across, t, j, bend) {
+    function layPair(fa, tb, za, zb, side, across, t, j, bend, topOut) {
       var sink = bend ? 0.07 : 0.045;
       var u = tb.clone().sub(fa).setZ(0), len = u.length(); u.normalize();
       var lift = side * (0.005 + 0.003 * j), c = THREAD_R * 0.6;
@@ -1282,6 +1282,10 @@
         var sh = new THREE.Vector3(-0.02, across.x * t > 0 ? 0 : -0.02, 0);
         fa = fa.clone().add(sh); tb = tb.clone().add(sh);
       }
+      // the front's top-left stitch (over the high pocket edge): its upper
+      // end, in the body hole, sits a hair further out, level with the hole
+      // (the owner, 2026-10-21)
+      if (topOut) { tb = tb.clone().addScaledVector(across, -topOut); }
       function at(p, along, zz, spread) {
         return new THREE.Vector3(p.x + u.x * along + across.x * spread, p.y + u.y * along + across.y * spread, zz);
       }
@@ -1407,7 +1411,7 @@
             // together they read as one slightly fuller, plied stitch in the
             // row, not as two separate cords. The holes are untouched.
             [-0.5, 0.5].forEach(function (t, j) {
-              layPair(from, to, za, zb, side, inward, t, j, true);
+              layPair(from, to, za, zb, side, inward, t, j, true, side < 0 && k === n - 2 ? 0.015 : 0);
             });
           } else {
           // the keyfob's joint, as approved
