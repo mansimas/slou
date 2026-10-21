@@ -1884,9 +1884,12 @@
         [M.spacing, mm(STITCH_PITCH)],
         [M.inset, mm(STITCH_INSET)],
         [P.stitches, String(n - 1)],
-        [P.leather, pressedLabel('leather') + ', ' + C.vegtan],
-        [P.thread, pressedLabel('thread') + ', ' + C.threadSize],   // the size the owner sews with
+        // no colours: the maker picks their own leather and thread (the
+        // owner, 2026-10-21), so only the kind of leather and the thread size
+        [P.leather, cap(C.vegtan)],
+        [P.thread, cap(C.threadSize)],   // the size the owner sews with
       ];
+      function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
       if (L) { rows.push([P.initials, L.txt]); }
       lx = left + colW + colGap; rx = left + 2 * colW + colGap;
       doc.setFontSize(9); doc.setTextColor(40, 36, 31);

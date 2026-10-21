@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-21 18:15] - No colours on card pattern - Owner: the card holder pattern specs no longer name the leather and thread colours (e.g. Konjakas, Kreminė); makers choose their own, so only "augalinio rauginimo" and "rekomenduojama 0,55 mm" remain.
 [2026-10-21 18:05] - No pocket edge label - Owner: the words "Kišenės kraštas" are no longer written on the inner piece template; the dashed line stays and is still explained in the legend.
 [2026-10-21 17:55] - Inner piece on top - Owner: on the card holder pattern the rows are swapped: the inner piece with the framed legend and specs now on top, the front and back pockets below it; the grid stays centred.
 [2026-10-21 17:40] - Frame card pattern legend - Owner: on the card holder pattern the legend and specs table now sit in a thin rounded frame, 100 mm tall and level with the inner piece beside it, text centred inside, so the block reads as one tidy unit.
