@@ -1944,12 +1944,12 @@
       }
       var R = left + 2 * colW + colGap, xR0 = left + colW + colGap;
       var pBot = top + hB + rowGap + hP, pHi = pBot - hP, pLo = pBot - (POCKET_LO + CARD_H / 2) * 10 * cfy;
-      // All on the right-hand pieces, nothing on the left-hand ones (the
-      // owner, 2026-10-21): the right inner piece and the back piece with the
-      // arch, plus the pockets' low side in the gap and the window.
-      // the inner piece: width over it, height down its right side
-      dimH(xR0, R, top - 4, mm(CARD_W), -1);
-      dimV(R + 5, top, top + hB, mm(CARD_H), 1);
+      // Where the owner wants them (2026-10-21): the inner piece's size on
+      // the left one (over the front piece), the pocket's on the back piece
+      // with the arch, plus the pockets' low side in the gap and the window.
+      // the left inner piece: width over it, height down its left side
+      dimH(left, left + colW, top - 4, mm(CARD_W), -1);
+      dimV(left - 5, top, top + hB, mm(CARD_H), -1);
       // the back pocket: width under it, its high side outside, the low
       // side in the gap
       dimH(xR0, R, pBot + 4, mm(CARD_W), 1);
