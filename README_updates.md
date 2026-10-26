@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-26 15:25] - Page 2 as 3D render - Owner found the line drawing ugly and wants it realistic: page 2 is now a still of the 3D model (leather colours, stitches, bevelled edges) with a navy bank card in the front pocket; no SLOU stamp; total thickness row dropped.
 [2026-10-26 15:05] - Pockets named outer pieces - Owner: on page 2 the front and back pockets are one row, "Išorinė detalė × 2" (1.2 mm), matching "Vidinė detalė × 2", with a leader to each pocket layer; "Vidinė detalė × 2" likewise gets one to each inner layer. Translated in all 7 locales.
 [2026-10-26 14:55] - Page 2 shows finished wallet - Owner wants page 2 to show the result: the wallet in a turned 3D line view, four layers on the edge, a bank card out of the front pocket, the thickness and stitch specs beside it with leader lines.
 [2026-10-26 14:23] - Arrows from note to rulers - Owner: the pattern note says "išmatuokite abi šias linijas", so two arrows now lead from it to the vertical and horizontal rulers; the note moved 6 mm right to make room for the left arrow.
