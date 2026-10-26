@@ -1993,7 +1993,7 @@
       // towards the viewer (the scene's x and z turned round).
       var zF = CARD_THICK / 2, zB = zF - CARD_POCKET;
       var BANK_W = 5.398, BANK_H = 8.56, BANK_T = 0.076, BANK_R = 0.318;   // ISO ID-1, the bank card size, at the wallet's own scale
-      var bankFoot = -CARD_H / 2 + STITCH_INSET + 0.3, bankTop = bankFoot + BANK_H;   // 3 mm clear of the seam
+      var bankFoot = -CARD_H / 2 + STITCH_INSET + 0.4, bankTop = bankFoot + BANK_H;   // 4 mm clear of the seam
       var bankShape = new THREE.Shape(), bl = -BANK_W / 2, br = BANK_W / 2, bb = bankFoot, rr = BANK_R;
       bankShape.moveTo(bl + rr, bb); bankShape.lineTo(br - rr, bb); bankShape.quadraticCurveTo(br, bb, br, bb + rr);
       bankShape.lineTo(br, bankTop - rr); bankShape.quadraticCurveTo(br, bankTop, br - rr, bankTop);
@@ -2055,9 +2055,11 @@
       // polygon with points only round its outline, so for the still it is
       // remade from a fine grid cut to that outline, which can then bend; the
       // editor's own model is not touched.
-      // It eases in over the first 3 mm in from the seam line itself (the
-      // stitch holes), round its curved corners too, so no stitch is buried.
-      var LIFT = 0.09, RAMP = 0.3, seamU = holes.slice();
+      // It stays flat for 1 mm beside the seam line itself (the stitch holes)
+      // and rises over the next 3 mm, round the curved corners and up both
+      // sides to the pocket's top the same (the owner, 2026-10-26), so no
+      // stitch is buried.
+      var LIFT = 0.09, FLAT = 0.1, RAMP = 0.3, seamU = holes.slice();
       var seamPoly = seamU.concat([new THREE.Vector2(seamU[seamU.length - 1].x, 10), new THREE.Vector2(seamU[0].x, 10)]);
       function ease(t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); }
       function lift(x, y) {
@@ -2073,7 +2075,7 @@
           var t = Math.max(0, Math.min(1, ((x - A.x) * ex + (y - A.y) * ey) / (ex * ex + ey * ey)));
           d = Math.min(d, Math.hypot(x - A.x - t * ex, y - A.y - t * ey));
         }
-        return LIFT * ease(d / RAMP);
+        return LIFT * ease((d - FLAT) / RAMP);
       }
       function bulged(src) {
         var gi = src.index.array, gp = src.attributes.position, gr = src.groups, face = gr[2];
