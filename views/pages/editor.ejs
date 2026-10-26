@@ -1777,7 +1777,7 @@
     doc.setTextColor(40, 36, 31);
     // the card holder's title, and the two lines of notes under it, centred on the
     // sheet (the owner, 2026-10-20)
-    doc.setFontSize(18); doc.text('SLOU — ' + (card ? C.patternTitle : P.title), card ? 105 : 15, 20, { align: card ? 'center' : 'left' });
+    doc.setFontSize(18); doc.text('SLOU - ' + (card ? C.patternTitle : P.title), card ? 105 : 15, 20, { align: card ? 'center' : 'left' });
     doc.setFontSize(9); doc.setTextColor(110, 100, 90);
     var tx = card ? 105 : 15, ta = { align: card ? 'center' : 'left' };
     var printLines = doc.splitTextToSize(P.print, 180);
@@ -1979,7 +1979,7 @@
       function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
       legendPage = function () {
       doc.setFontSize(18); doc.setTextColor(40, 36, 31);
-      doc.text('SLOU — ' + C.patternTitle, 105, 20, { align: 'center' });
+      doc.text('SLOU - ' + C.patternTitle, 105, 20, { align: 'center' });
       // and under it "Recommendations" (the owner, 2026-10-26)
       doc.setFontSize(12); doc.setTextColor(110, 100, 90);
       doc.text(C.recommend, 105, 28, { align: 'center' });
