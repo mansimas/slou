@@ -255,6 +255,7 @@
   // where it wraps it (the owner: "vos vos", only just): 0.25 mm at most: a soft hollow in its
   // rounded edge under the threads (2026-10-19).
   var POCKET_DENT = 0.025;
+  var POCKET_CORNER = 0.15;   // the pockets' outer top corners, rounded 1.5 mm in the 3D (sanded flush)
   var POCKET_RAMP = 0.09;   // the pocket edge sloped off 0.9 mm under the threads
   function pocketTop(x) {
     var f = Math.min(1, Math.max(0, (POCKET_X - x) / (2 * POCKET_X)));
@@ -1057,16 +1058,34 @@
       // the back two their back face; the flesh sides face into the pockets.
       // The front pocket has the thumb window cut up from its bottom edge; the
       // back one is whole.
-      var bodyLoop = loopOf(outline('card', 0)), pocketLoop = loopOf(outline('pocket', 0)), frontLoop = loopOf(outline('pocketWin', 0));
+      // The pockets' two outer top corners, where the top meets the stitched
+      // side, rounded off in the 3D by POCKET_CORNER: the glued stack is sanded
+      // flush, which takes the square corner off, as on the owner's piece
+      // (pavyzdziai/korteline/20261019_162147.jpg). Left square, it stood out
+      // past the inner piece's edge (the owner, 2026-10-26, 11.png). The
+      // pattern keeps the square corner: that is how it is cut.
+      function sanded(pts) {
+        var out = [], m = pts.length, R = POCKET_CORNER;
+        var corners = pts.map(function (p) { return Math.abs(Math.abs(p.x) - CARD_W / 2) < 1e-4 && p.y > POCKET_LO - 1e-3 && Math.abs(p.y - pocketTop(p.x)) < 1e-3; });
+        pts.forEach(function (p, i) {
+          var near = corners.some(function (c, k) { return c && k !== i && pts[k].distanceTo(p) < R + 1e-4; });
+          if (near) { return; }
+          if (!corners[i]) { out.push(p); return; }
+          var a = pts[(i + m - 1) % m], b = pts[(i + 1) % m];
+          var A = p.clone().add(a.clone().sub(p).setLength(R)), B = p.clone().add(b.clone().sub(p).setLength(R));
+          for (var j = 0; j <= 6; j++) {
+            var t = j / 6, u = 1 - t;
+            out.push(new THREE.Vector2(u * u * A.x + 2 * u * t * p.x + t * t * B.x, u * u * A.y + 2 * u * t * p.y + t * t * B.y));
+          }
+        });
+        return out;
+      }
+      var bodyLoop = loopOf(outline('card', 0)), pocketLoop = sanded(loopOf(outline('pocket', 0))), frontLoop = sanded(loopOf(outline('pocketWin', 0)));
       var zb = CARD_BODY / 2, zp = CARD_BODY + CARD_POCKET / 2;
       function ease(t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); }
       // A body is in the glued stack below the pocket edge; above it, it ends
-      // on its own, rounded right from the pocket's top, as the beveler leaves
-      // it: the switch is over 0.5 mm. Eased over 1.2 mm (until 2026-10-26),
-      // the square stack edge tapering into the rounding stood out as a dark
-      // pointed corner where the pocket ends (the owner); a longer ease only
-      // made the point longer.
-      function bodyStack(p) { return 1 - ease((p.y - pocketTop(p.x)) / 0.05); }
+      // on its own. Eased from one to the other over the first 1.2 mm.
+      function bodyStack(p) { return 1 - ease((p.y - pocketTop(p.x)) / 0.12); }
       // A pocket is in the stack along the stitched sides and bottom; its top
       // and the window are its own edges.
       // The side keeps the stack's dome right up to the square top corner, and
