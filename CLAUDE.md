@@ -273,8 +273,10 @@ locked keyfob stitch, unchanged:
     single-colour edge, all green or blended, was tried and rejected.
   - Where a piece ends on its own (the pocket tops, the window, the bodies
     above the pockets) it has its own dome, `CARD_ROUND` 0.5 mm deep, in its
-    own shade. A body eases from the stack to its own edge over the first
-    1.2 mm above the pocket edge.
+    own shade. A body switches from the stack to its own edge within 0.5 mm
+    above the pocket edge, as the beveler leaves it (2026-10-26: eased over
+    1.2 mm, the taper showed as a dark pointed corner where the pocket ends;
+    a longer ease only made the point longer).
   - To keep the dome smooth across the joints, the normals come straight off the dome,
     not from each piece's own faces. Each layer's edge tucks 0.08 mm past
     its glued faces, 0.03 mm under its neighbour, and its glued faces stop

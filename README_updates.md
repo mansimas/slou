@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-26 17:05] - No pointed corner at pocket - Owner saw a strange corner sticking out where the pocket ends: the inner piece edge tapered from square to rounded over 1.2 mm; it now switches within 0.5 mm, as a beveler leaves it (3D editor and PDF).
 [2026-10-26 16:45] - Short dashes in editor text - Owner: long dashes look AI-written, so the pattern PDF titles ("SLOU - ...") and all editor UI text in 7 locales now use a short hyphen instead of — or –.
 [2026-10-26 16:30] - Recommendations under page title - Owner: page 2 keeps "SLOU — Kortelių piniginė Nr. 1" at the top and now has "Rekomendacijos" under it, so the page reads as the recommendations; translated in all 7 locales.
 [2026-10-26 16:10] - Card inside, pocket bulges - Owner: on page 2 the bank card (true ISO size, printed face, chip) sits 4 mm above the seam; the front pocket bulges over it, flat 1 mm beside the seam then rising round the corners up both sides; long lens keeps true proportions; card no longer hides the inner piece corner.
