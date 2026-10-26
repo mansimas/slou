@@ -1,7 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
-[2026-10-26 16:30] - Title under the specs - Owner: on page 2 the "SLOU — Kortelių piniginė Nr. 1" title moved from the top of the page to under the specs column, sized to fit its width.
+[2026-10-26 16:30] - Recommendations under page title - Owner: page 2 keeps "SLOU — Kortelių piniginė Nr. 1" at the top and now has "Rekomendacijos" under it, so the page reads as the recommendations; translated in all 7 locales.
 [2026-10-26 16:10] - Card inside, pocket bulges - Owner: on page 2 the bank card (true ISO size, printed face, chip) sits 4 mm above the seam; the front pocket bulges over it, flat 1 mm beside the seam then rising round the corners up both sides; long lens keeps true proportions; card no longer hides the inner piece corner.
 [2026-10-26 15:25] - Page 2 as 3D render - Owner found the line drawing ugly and wants it realistic: page 2 is now a still of the 3D model (leather colours, stitches, bevelled edges) with a navy bank card in the front pocket; no SLOU stamp; total thickness row dropped.
 [2026-10-26 15:05] - Pockets named outer pieces - Owner: on page 2 the front and back pockets are one row, "Išorinė detalė × 2" (1.2 mm), matching "Vidinė detalė × 2", with a leader to each pocket layer; "Vidinė detalė × 2" likewise gets one to each inner layer. Translated in all 7 locales.
