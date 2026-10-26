@@ -2197,7 +2197,19 @@
     doc.setTextColor(40, 36, 31); doc.setFontSize(7);
     doc.text(calNomV + ' mm', calVx + 5, calVy + calLenV - 3);
     doc.text(calNomH + ' mm', calHx, calHy - 5);
-    doc.text(doc.splitTextToSize(card ? C.calibNote : P.calibNote, 175), calVx + 6, calHy + 9);   // clear of the vertical ruler
+    // The note says "measure both these lines", so two arrows lead from it to
+    // them (the owner, 2026-10-26): one left to the vertical ruler, one up to
+    // the horizontal. The note sits 12 mm in so the left arrow has room.
+    var noteX = calVx + 12, noteY = calHy + 9;
+    doc.text(doc.splitTextToSize(card ? C.calibNote : P.calibNote, 169), noteX, noteY);
+    function arrow(x1, y1, x2, y2) {
+      var a = Math.atan2(y2 - y1, x2 - x1), c = Math.cos(a), s = Math.sin(a), h = 1.6, w = 0.6;
+      doc.line(x1, y1, x2 - c * h, y2 - s * h);
+      doc.triangle(x2, y2, x2 - c * h - s * w, y2 - s * h + c * w, x2 - c * h + s * w, y2 - s * h - c * w, 'F');
+    }
+    doc.setDrawColor(40, 36, 31); doc.setFillColor(40, 36, 31); doc.setLineWidth(0.2);
+    arrow(noteX - 1.5, noteY - 1.1, calVx + 0.6, noteY - 1.1);
+    arrow(noteX + 25, noteY - 3.3, noteX + 25, calHy + 0.6);
 
     // And a 5 × 5 cm square in the bottom right corner, 1 cm above the
     // horizontal ruler (2026-10-14): a short measurement in both directions at
