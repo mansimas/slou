@@ -2047,7 +2047,7 @@
       var faceMat = new THREE.MeshPhysicalMaterial({ map: faceTex, alphaTest: 0.5, roughness: 0.32, clearcoat: 0.8, clearcoatRoughness: 0.15 });
       var print = new THREE.Mesh(new THREE.PlaneGeometry(BANK_W, BANK_H), faceMat);
       print.rotation.y = Math.PI;   // facing the front
-      print.position.set(0, bankFoot + BANK_H / 2, bank.position.z - 0.0005);
+      print.position.set(0, bankFoot + BANK_H / 2, bank.position.z - 0.003);   // clear of the card, or the long lens flickers between them
       // The front pocket stands out over the card (the owner, 2026-10-26): its
       // leather is lifted by the card's thickness and a little more over the
       // whole card, easing back to nothing at the seam, so the stitching stays
@@ -2055,10 +2055,25 @@
       // polygon with points only round its outline, so for the still it is
       // remade from a fine grid cut to that outline, which can then bend; the
       // editor's own model is not touched.
-      var LIFT = 0.09, liftX = CARD_W / 2 - STITCH_INSET - 0.03, liftY = -CARD_H / 2 + STITCH_INSET + 0.03;
+      // It eases in over the first 3 mm in from the seam line itself (the
+      // stitch holes), round its curved corners too, so no stitch is buried.
+      var LIFT = 0.09, RAMP = 0.3, seamU = holes.slice();
+      var seamPoly = seamU.concat([new THREE.Vector2(seamU[seamU.length - 1].x, 10), new THREE.Vector2(seamU[0].x, 10)]);
       function ease(t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); }
       function lift(x, y) {
-        return LIFT * ease((liftX - Math.abs(x)) / (liftX - BANK_W / 2 - 0.04)) * ease((y - liftY) / (bankFoot - 0.04 - liftY));
+        var c = false;
+        for (var i = 0, j = seamPoly.length - 1; i < seamPoly.length; j = i++) {
+          var a = seamPoly[i], b = seamPoly[j];
+          if ((a.y > y) !== (b.y > y) && x < (b.x - a.x) * (y - a.y) / (b.y - a.y) + a.x) { c = !c; }
+        }
+        if (!c) { return 0; }
+        var d = Infinity;
+        for (var k = 0; k < seamU.length - 1; k++) {
+          var A = seamU[k], B = seamU[k + 1], ex = B.x - A.x, ey = B.y - A.y;
+          var t = Math.max(0, Math.min(1, ((x - A.x) * ex + (y - A.y) * ey) / (ex * ex + ey * ey)));
+          d = Math.min(d, Math.hypot(x - A.x - t * ex, y - A.y - t * ey));
+        }
+        return LIFT * ease(d / RAMP);
       }
       function bulged(src) {
         var gi = src.index.array, gp = src.attributes.position, gr = src.groups, face = gr[2];
@@ -2159,7 +2174,7 @@
       pocketBackMat.map = backColorTex; pocketBackMat.bumpMap = plainBumpTex;
 
       var IW = 1000, IH = 1600, PX = 8, PY = 30, PW = 118, PH = PW * IH / IW;
-      var was = { pos: camera.position.clone(), aspect: camera.aspect, fov: camera.fov, ratio: renderer.getPixelRatio(),
+      var was = { pos: camera.position.clone(), aspect: camera.aspect, fov: camera.fov, near: camera.near, ratio: renderer.getPixelRatio(),
         size: renderer.getSize(new THREE.Vector2()), clear: renderer.getClearColor(new THREE.Color()),
         alpha: renderer.getClearAlpha(), measures: measures.visible };
       // a long lens, so near and far parts keep their true proportions:
@@ -2167,7 +2182,7 @@
       var TURN = 42 * Math.PI / 180, RISE = 14 * Math.PI / 180, DIST = 57, LENS = 12, aim = new THREE.Vector3(0, 0.2, 0);
       fob.add(bank, print); scene.add(key); measures.visible = false;
       renderer.setPixelRatio(1); renderer.setSize(IW, IH, false); renderer.setClearColor(0xffffff, 1);
-      camera.aspect = IW / IH; camera.fov = LENS; camera.updateProjectionMatrix();
+      camera.aspect = IW / IH; camera.fov = LENS; camera.near = DIST - 15; camera.updateProjectionMatrix();
       camera.position.set(-Math.sin(TURN) * Math.cos(RISE) * DIST, aim.y + Math.sin(RISE) * DIST, -Math.cos(TURN) * Math.cos(RISE) * DIST);
       camera.lookAt(aim); camera.updateMatrixWorld();
       renderer.render(scene, camera);
@@ -2178,7 +2193,7 @@
       if (pocketMesh) { pocketMesh.geometry.dispose(); pocketMesh.geometry = flatGeo; }
       pocketBackMat.map = stamp[0]; pocketBackMat.bumpMap = stamp[1];
       renderer.setPixelRatio(was.ratio); renderer.setSize(was.size.x, was.size.y, false); renderer.setClearColor(was.clear, was.alpha);
-      camera.position.copy(was.pos); camera.aspect = was.aspect; camera.fov = was.fov; camera.updateProjectionMatrix(); camera.lookAt(controls.target);
+      camera.position.copy(was.pos); camera.aspect = was.aspect; camera.fov = was.fov; camera.near = was.near; camera.updateProjectionMatrix(); camera.lookAt(controls.target);
       renderer.render(scene, camera);
       doc.addImage(shot, 'JPEG', PX, PY, PW, PH);
       // a point of the front frame, where it lands on the page
