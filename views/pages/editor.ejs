@@ -255,7 +255,7 @@
   // where it wraps it (the owner: "vos vos", only just): 0.25 mm at most: a soft hollow in its
   // rounded edge under the threads (2026-10-19).
   var POCKET_DENT = 0.025;
-  var POCKET_CORNER = 0.15;   // the pockets' outer top corners, rounded 1.5 mm in the 3D (sanded flush)
+  var POCKET_CORNER = 0.15;   // the front pocket's high top corner, rounded 1.5 mm in the 3D (sanded flush)
   var POCKET_RAMP = 0.09;   // the pocket edge sloped off 0.9 mm under the threads
   function pocketTop(x) {
     var f = Math.min(1, Math.max(0, (POCKET_X - x) / (2 * POCKET_X)));
@@ -1058,15 +1058,16 @@
       // the back two their back face; the flesh sides face into the pockets.
       // The front pocket has the thumb window cut up from its bottom edge; the
       // back one is whole.
-      // The pockets' two outer top corners, where the top meets the stitched
-      // side, rounded off in the 3D by POCKET_CORNER: the glued stack is sanded
-      // flush, which takes the square corner off, as on the owner's piece
-      // (pavyzdziai/korteline/20261019_162147.jpg). Left square, it stood out
-      // past the inner piece's edge (the owner, 2026-10-26, 11.png). The
-      // pattern keeps the square corner: that is how it is cut.
+      // One corner only (the owner, 2026-10-26: just the one in 11.png): the
+      // front (SLOU-side) pocket's high top corner, where the top meets the
+      // stitched side, rounded off in the 3D by POCKET_CORNER, as the sanded
+      // stack is on the owner's piece (pavyzdziai/korteline/20261019_162147.jpg).
+      // Square, it stood out past the inner piece's edge. Every other pocket
+      // corner stays square, and so does the pattern: that is how it is cut.
+      function sandedCorner(p) { return Math.abs(p.x - CARD_W / 2) < 1e-4 && Math.abs(p.y - POCKET_HI) < 1e-3; }
       function sanded(pts) {
         var out = [], m = pts.length, R = POCKET_CORNER;
-        var corners = pts.map(function (p) { return Math.abs(Math.abs(p.x) - CARD_W / 2) < 1e-4 && p.y > POCKET_LO - 1e-3 && Math.abs(p.y - pocketTop(p.x)) < 1e-3; });
+        var corners = pts.map(sandedCorner);
         pts.forEach(function (p, i) {
           var near = corners.some(function (c, k) { return c && k !== i && pts[k].distanceTo(p) < R + 1e-4; });
           if (near) { return; }
@@ -1080,7 +1081,7 @@
         });
         return out;
       }
-      var bodyLoop = loopOf(outline('card', 0)), pocketLoop = sanded(loopOf(outline('pocket', 0))), frontLoop = sanded(loopOf(outline('pocketWin', 0)));
+      var bodyLoop = loopOf(outline('card', 0)), pocketLoop = sanded(loopOf(outline('pocket', 0))), frontLoop = loopOf(outline('pocketWin', 0));
       var zb = CARD_BODY / 2, zp = CARD_BODY + CARD_POCKET / 2;
       function ease(t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); }
       // A body is in the glued stack below the pocket edge; above it, it ends
@@ -1092,11 +1093,13 @@
       // the top keeps its own edge right to it: a clean switch at the corner.
       // Easing between them along the top widened the glossy edge there into a
       // bend (the owner, 2026-10-20).
-      // Round the sanded corner (POCKET_CORNER) the one eases into the other.
-      function pocketStack(p, hole) {
-        if (hole) { return 0; }
-        if (p.y < POCKET_LO - 0.3) { return 1; }
-        return ease((Math.abs(p.x) - (CARD_W / 2 - POCKET_CORNER)) / POCKET_CORNER);
+      function pocketStack(p, hole) { return !hole && (Math.abs(p.x) > CARD_W / 2 - 1e-3 || p.y < POCKET_LO - 0.3) ? 1 : 0; }
+      // the front pocket: round its one sanded corner the one eases into the other
+      function sandedStack(p, hole) {
+        if (!hole && p.x > CARD_W / 2 - POCKET_CORNER && p.y > POCKET_HI - POCKET_CORNER - 1e-3) {
+          return ease((p.x - (CARD_W / 2 - POCKET_CORNER)) / POCKET_CORNER);
+        }
+        return pocketStack(p, hole);
       }
       // the window's sides are the front pocket's own edge, not the stack
       // In the window the bottom edge is three layers, not four: its dome runs
@@ -1150,7 +1153,7 @@
       }
       addPockets = function () {
         fob.add(leatherPiece([frontLoop], CARD_POCKET, zp, frontStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol));
-        fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, pocketStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, null, null, stackTop));
+        fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, sandedStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, null, null, stackTop));
       };
       fob.add(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol, null, null, stackTop));
       fob.add(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol, null, null, stackTop));

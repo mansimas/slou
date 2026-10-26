@@ -275,11 +275,12 @@ locked keyfob stitch, unchanged:
     above the pockets) it has its own dome, `CARD_ROUND` 0.5 mm deep, in its
     own shade. A body eases from the stack to its own edge over the first
     1.2 mm above the pocket edge.
-  - The pockets' outer top corners (top meets stitched side) are rounded
-    `POCKET_CORNER` 1.5 mm in the 3D only (`sanded()`): the stack is sanded
-    flush, as on the owner's piece; square, the corner stood out past the
-    inner piece's edge (the owner, 2026-10-26, `korteline/11.png`). The
-    pattern keeps them square.
+  - One corner only, the front (SLOU-side) pocket's high top corner, is
+    rounded `POCKET_CORNER` 1.5 mm in the 3D (`sanded()`, `sandedStack`): the
+    stack is sanded flush, as on the owner's piece; square, it stood out past
+    the inner piece's edge (`korteline/11.png`). The owner asked for that one
+    corner alone (2026-10-26): every other pocket corner stays square, and
+    the pattern keeps them all square.
   - To keep the dome smooth across the joints, the normals come straight off the dome,
     not from each piece's own faces. Each layer's edge tucks 0.08 mm past
     its glued faces, 0.03 mm under its neighbour, and its glued faces stop
