@@ -1092,7 +1092,12 @@
       // the top keeps its own edge right to it: a clean switch at the corner.
       // Easing between them along the top widened the glossy edge there into a
       // bend (the owner, 2026-10-20).
-      function pocketStack(p, hole) { return !hole && (Math.abs(p.x) > CARD_W / 2 - 1e-3 || p.y < POCKET_LO - 0.3) ? 1 : 0; }
+      // Round the sanded corner (POCKET_CORNER) the one eases into the other.
+      function pocketStack(p, hole) {
+        if (hole) { return 0; }
+        if (p.y < POCKET_LO - 0.3) { return 1; }
+        return ease((Math.abs(p.x) - (CARD_W / 2 - POCKET_CORNER)) / POCKET_CORNER);
+      }
       // the window's sides are the front pocket's own edge, not the stack
       // In the window the bottom edge is three layers, not four: its dome runs
       // from the back pocket up to the front body's face, and the brown body's
