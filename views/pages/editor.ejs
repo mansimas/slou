@@ -1978,8 +1978,7 @@
       // 2026-10-21).
       function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
       legendPage = function () {
-      doc.setFontSize(18); doc.setTextColor(40, 36, 31);
-      doc.text('SLOU — ' + C.patternTitle, 105, 20, { align: 'center' });
+      // the title is under the specs, not over the page (the owner, 2026-10-26)
 
       // The finished card wallet as it will come out (the owner, 2026-10-26):
       // a still of the 3D model itself, so it has the leather's colours, the
@@ -2237,6 +2236,12 @@
         doc.setTextColor(110, 100, 90); doc.text(r[0], cx, y);
         doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
       });
+      // the title, under the specs, across their column (smaller if it would
+      // not fit)
+      var title = 'SLOU — ' + C.patternTitle;
+      doc.setFontSize(14);
+      if (doc.getTextWidth(title) > cr - cx) { doc.setFontSize(14 * (cr - cx) / doc.getTextWidth(title)); }
+      doc.setTextColor(40, 36, 31); doc.text(title, cx, y + 14);
       };
     }
     var legendPage = null;
