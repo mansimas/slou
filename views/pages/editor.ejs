@@ -2083,12 +2083,13 @@
       // the seam's above the edge's, so no two leaders cross; the rest follow under a rule.
       var E = CARD_W / 2, seamX = E - STITCH_INSET;
       var notes = [
-        [C.body, mm(CARD_BODY), proj(E, 2.0, 0)],
+        [C.body, mm(CARD_BODY), proj(E, 2.0, zB / 2), proj(E, 1.8, -zB / 2)],   // a leader to each of the two
         [M.spacing, mm(STITCH_PITCH), proj(seamX, -0.7, zF)],
         [P.thread, cap(C.threadSize), proj(seamX, -1.2, zF)],
         [M.inset, mm(STITCH_INSET), proj(E - STITCH_INSET / 2, -1.7, zF)],
-        [C.pocketFront, mm(CARD_POCKET), proj(E, -2.3, (zB + zF) / 2)],
-        [C.pocketBack, mm(CARD_POCKET), proj(E, -2.8, -(zB + zF) / 2)],
+        // the two pockets are one row, "outer piece × 2" (the owner,
+        // 2026-10-26), with a leader to each
+        [C.outer, mm(CARD_POCKET), proj(E, -2.3, (zB + zF) / 2), proj(E, -2.5, -(zB + zF) / 2)],
         [M.thickness, mm(CARD_THICK), proj(E, -3.3, 0)],
       ].sort(function (u, v) { return u[2][1] - v[2][1]; });
       var cx = 142, cr = 200, y = 0;
@@ -2097,9 +2098,11 @@
         y = Math.max(y + 9, r[2][1] - 18);
         doc.setTextColor(110, 100, 90); doc.text(r[0], cx, y);
         doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
-        doc.setDrawColor(120); doc.setLineWidth(0.15);
-        doc.line(cx - 2, y - 1, r[2][0], r[2][1]);
-        doc.setFillColor(40, 36, 31); doc.circle(r[2][0], r[2][1], 0.4, 'F');
+        r.slice(2).forEach(function (a) {
+          doc.setDrawColor(120); doc.setLineWidth(0.15);
+          doc.line(cx - 2, y - 1, a[0], a[1]);
+          doc.setFillColor(40, 36, 31); doc.circle(a[0], a[1], 0.4, 'F');
+        });
       });
       var rest = [[M.width + ' × ' + M.height, mm(CARD_W) + ' × ' + mm(CARD_H)], [P.leather, cap(C.vegtan)]];
       if (L) { rest.push([P.initials, L.txt]); }

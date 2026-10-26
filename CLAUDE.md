@@ -298,8 +298,8 @@ locked keyfob stitch, unchanged:
   sits on the pocket face below the pocket top and on the body face above it (`face(x, y)`).
 - Pattern PDF (the owner, 2026-10-20): three templates. On top the two
   pockets as a mirrored pair, each as seen from its own face: the front
-  piece (`C.pocketFront`, drawn with `m = -1`; never mention the SLOU stamp on the pattern, buyers may use their own) and the back
-  piece (window as a solid cut line, initials, `C.pocketBack`). Below, the
+  piece (drawn with `m = -1`; never mention the SLOU stamp on the pattern, buyers may use their own) and the back
+  piece (window as a solid cut line, initials). On page 2 both are one row, "Išorinė detalė × 2" (`C.outer`, the owner, 2026-10-26). Below, the
   inner piece × 2 (`C.body`; never call it a "main" piece), with the legend; each template carries its name only inside (`inside()`, "× 2" only where cut twice), so it survives cutting out,
   beside it. No 50 mm square on this pattern (the owner, 2026-10-20), so the specs table fits under the legend: one A4 sheet. No
   doubled-stitch brackets and no slit angle in the legend (`C.holes`; the owner, 2026-10-20). The
