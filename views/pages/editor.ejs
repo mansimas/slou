@@ -1971,90 +1971,144 @@
       // angle in the legend: the owner does not want either on the card
       // holder's pattern (2026-10-20).
 
-      // The legend and the specs go on page 2 (the owner, 2026-10-21), drawn
-      // once the first page is finished: see `legendPage`.
-      var rows = [
-        [M.width + ' × ' + M.height, mm(CARD_W) + ' × ' + mm(CARD_H)],
-        [C.pieces, '2 × ' + mm(CARD_POCKET) + ' + 2 × ' + mm(CARD_BODY)],
-        [M.thickness, mm(CARD_THICK)],
-        [M.spacing, mm(STITCH_PITCH)],
-        [M.inset, mm(STITCH_INSET)],
-        // no stitch count: it does not matter to the maker (the owner, 2026-10-21)
-        // no colours: the maker picks their own leather and thread (the
-        // owner, 2026-10-21), so only the kind of leather and the thread size
-        [P.leather, cap(C.vegtan)],
-        [P.thread, cap(C.threadSize)],   // the size the owner sews with
-      ];
+      // The specs go on page 2 (the owner, 2026-10-21), drawn once the first
+      // page is finished: see `legendPage`. No stitch count (it does not
+      // matter to the maker) and no colours (the maker picks their own leather
+      // and thread): only the kind of leather and the thread size (the owner,
+      // 2026-10-21).
       function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
-      if (L) { rows.push([P.initials, L.txt]); }
       legendPage = function () {
-      // the title again, then the legend and specs in a thin frame, centred
-      // across the page under it; the frame stands 4 mm out from the text
       doc.setFontSize(18); doc.setTextColor(40, 36, 31);
       doc.text('SLOU — ' + C.patternTitle, 105, 20, { align: 'center' });
-      lx = (210 - colW) / 2; rx = lx + colW;
-      doc.setFontSize(9); doc.setTextColor(40, 36, 31);
-      // no legend keys (cut line, holes, pocket edge) on the card wallet's
-      // pattern, only the specs (the owner, 2026-10-21)
-      var run = rows.length * 6;
-      var blockH = run - 6 + 4.5, pad = 4;   // first cap line (3 mm up) to last descender
-      ly = 36 + pad + 3;
-      doc.setDrawColor(170); doc.setLineWidth(0.2);
-      doc.roundedRect(lx - pad, 36, rx - lx + 2 * pad, blockH + 2 * pad, 2, 2);
-      table(rows);
 
-      // The finished card wallet in clean 2D, true size, under the specs (the
-      // owner, 2026-10-21; a 3D render and a pencil sketch were tried first):
-      // the front (the front piece over the inner pieces) and the back (the
-      // back piece with its window, the inner piece showing through), each
-      // straight on from its own side, sewn. Black lines on white.
-      function fillPoly(pts, fill) {
-        doc.setFillColor(fill);
-        doc.lines(pts.slice(1).map(function (p, i) { return [X(p.x) - X(pts[i].x), Y(p.y) - Y(pts[i].y)]; }),
-          X(pts[0].x), Y(pts[0].y), [1, 1], 'FD', true);
+      // The finished card wallet as it will come out (the owner, 2026-10-26;
+      // it was a flat front and back view): seen from the front, turned a
+      // little to the side and from just above, so the stitched edge shows
+      // its four layers, with a bank card (85.6 × 54 mm) pulled a little up
+      // out of the front pocket. Line art, black on white like the flat views
+      // were, only the edges lightly tinted: hidden lines are removed by
+      // painting filled faces back to front. The specs stand beside it, each with a thin leader line to the
+      // part it is about. An illustration, not true size.
+      // Front frame: x to the right as seen from the front, z towards the
+      // viewer (the scene's x and z turned round, so the window side is -z).
+      var TH = 38 * Math.PI / 180, PH = 16 * Math.PI / 180, S = 18;   // turn, tilt, paper mm per cm
+      var ct = Math.cos(TH), st = Math.sin(TH), cp = Math.cos(PH), sp = Math.sin(PH);
+      var VX = 74, VY = 152;
+      function proj(x, y, z) {
+        var x1 = x * ct - z * st, z1 = x * st + z * ct;
+        return [VX + S * x1, VY - S * (y * cp - z1 * sp), y * sp + z1 * cp];
       }
-      function outlinePts(kind, m) {
-        return outline(kind, 0).getPoints(48).filter(function (p, k, all) {
-          return p.distanceTo(all[(k + 1) % all.length]) > 1e-4;
-        }).map(function (p) { return new THREE.Vector2(m * p.x, p.y); });
+      function fill(q, style) {
+        doc.lines(q.slice(1).map(function (p, i) { return [p[0] - q[i][0], p[1] - q[i][1]]; }), q[0][0], q[0][1], [1, 1], style, true);
       }
-      var vTop = 36 + blockH + 2 * pad + 22, vGap = 20, vLeft = (210 - 2 * colW - vGap) / 2;
-      // no heading over the views (the owner, 2026-10-21)
-      [[-1, C.viewFront], [1, C.viewBack]].forEach(function (v, i) {
-        var m = v[0];
-        OX = vLeft + i * (colW + vGap) + colW / 2; OY = vTop + CARD_H / 2 * 10 * cfy;
-        doc.setFontSize(9); doc.setTextColor(110, 100, 90);
-        doc.text(v[1], OX, vTop - 3, { align: 'center' });
-        doc.setDrawColor(0); doc.setLineWidth(0.3);
-        // white, no greys (the owner, 2026-10-21): outlines only, each piece
-        // filled white so it covers what lies under it
-        fillPoly(outlinePts('card', m), 255);
-        fillPoly(outlinePts('pocket', m), 255);
-        // the window, the inner piece showing through it (its foot is the
-        // inner piece's own bottom edge, so the closed outline is right)
-        if (m > 0) { fillPoly(windowPath(new THREE.Path()).getPoints(24), 255); }
-        // The seam as it is sewn, saddle stitch, laid out as in the 3D editor
-        // (the owner, 2026-10-21): each stitch runs from the inner end of one
-        // iron slit (leaning at SLIT_ANGLE) to the next, which slants it off
-        // the row, and the next one starts the slit's length across, so the
-        // row reads as a chain of slanted stitches. The slits themselves are
-        // under the thread, as on a sewn piece (drawn, they joined the
-        // stitches into a zigzag). Worked out on the side seen (side = m: -1
-        // the front, +1 the back), then drawn mirrored with it. The doubled
-        // stitches at the thread's ends are drawn a little fuller.
-        var nH = holes.length, side = m;
-        doc.setDrawColor(70);
-        for (var k = 0; k < nH - 1; k++) {
-          var a = holes[k], b = holes[k + 1], sl = slit(chords[k], side);
-          var doubled = k < OVERLAP || k >= nH - 1 - OVERLAP;
-          doc.setLineWidth(doubled ? 0.8 : 0.6);
-          doc.line(X(m * (a.x + sl.x * SLIT_HALF)), Y(a.y + sl.y * SLIT_HALF), X(m * (b.x - sl.x * SLIT_HALF)), Y(b.y - sl.y * SLIT_HALF));
-        }
-        if (m > 0 && L) {
-          doc.setTextColor(150);
-          doc.setFontSize(L.size * 10 * cfy * 72 / 25.4);
-          doc.text(L.txt, X(L.x), Y(L.y), { align: 'center', baseline: 'middle' });
-        }
+      // a scene outline in the front frame, anticlockwise
+      function frontPts(pts) {
+        pts = pts.filter(function (p, k, all) { return p.distanceTo(all[(k + 1) % all.length]) > 1e-4; })
+          .map(function (p) { return new THREE.Vector2(-p.x, p.y); });
+        var area = 0;
+        pts.forEach(function (p, k) { var q = pts[(k + 1) % pts.length]; area += p.x * q.y - q.x * p.y; });
+        return area < 0 ? pts.reverse() : pts;
+      }
+      // One flat piece from z0 to z1: the side walls that face the viewer,
+      // far ones first, each with its far edge drawn (between two layers that
+      // is the glue line), the silhouette where the walls turn away, then the
+      // face itself.
+      function slab(pts, z0, z1) {
+        var n = pts.length, vis = pts.map(function (a, k) {
+          var b = pts[(k + 1) % n];
+          return (b.y - a.y) * st * cp - (b.x - a.x) * sp > 0;   // outward normal towards the viewer
+        });
+        var walls = [];
+        pts.forEach(function (a, k) {
+          if (!vis[k]) { return; }
+          var b = pts[(k + 1) % n];
+          walls.push({ q: [proj(a.x, a.y, z0), proj(b.x, b.y, z0), proj(b.x, b.y, z1), proj(a.x, a.y, z1)] });
+        });
+        walls.forEach(function (w) { w.d = w.q[0][2] + w.q[1][2]; });
+        walls.sort(function (u, v) { return u.d - v.d; });
+        // the edges lightly tinted, so the thickness reads as depth
+        doc.setFillColor(222);
+        walls.forEach(function (w) {
+          doc.setDrawColor(222); doc.setLineWidth(0.1); fill(w.q, 'FD');
+          doc.setDrawColor(0); doc.setLineWidth(0.25);
+          doc.line(w.q[0][0], w.q[0][1], w.q[1][0], w.q[1][1]);
+        });
+        pts.forEach(function (a, k) {
+          if (vis[k] === vis[(k + n - 1) % n]) { return; }
+          var p0 = proj(a.x, a.y, z0), p1 = proj(a.x, a.y, z1);
+          doc.line(p0[0], p0[1], p1[0], p1[1]);
+        });
+        doc.setLineWidth(0.3); doc.setFillColor(255);
+        fill(pts.map(function (a) { return proj(a.x, a.y, z1); }), 'FD');
+      }
+      function rounded(w, h, r, cx, y0) {   // a rounded rectangle, w × h, its foot centred on (cx, y0)
+        var path = new THREE.Shape(), l = cx - w / 2, rr = cx + w / 2, t = y0 + h;
+        path.moveTo(l + r, y0); path.lineTo(rr - r, y0); path.quadraticCurveTo(rr, y0, rr, y0 + r);
+        path.lineTo(rr, t - r); path.quadraticCurveTo(rr, t, rr - r, t); path.lineTo(l + r, t);
+        path.quadraticCurveTo(l, t, l, t - r); path.lineTo(l, y0 + r); path.quadraticCurveTo(l, y0, l + r, y0);
+        return path.getPoints(8).filter(function (p, k, all) { return p.distanceTo(all[(k + 1) % all.length]) > 1e-4; });
+      }
+      // back to front: the back pocket (window side), the two inner pieces,
+      // the bank card, the front pocket
+      var zF = CARD_THICK / 2, zB = zF - CARD_POCKET, BANK_W = 5.4, BANK_H = 8.56, BANK_T = 0.076;
+      var bankTop = CARD_H / 2 + 0.9;   // pulled up, 9 mm out over the top
+      slab(frontPts(outline('pocketWin', 0).getPoints(48)), -zF, -zB);
+      slab(frontPts(outline('card', 0).getPoints(48)), -zB, 0);
+      slab(frontPts(outline('card', 0).getPoints(48)), 0, zB);
+      slab(rounded(BANK_W, BANK_H, 0.32, 0, bankTop - BANK_H), zB, zB + BANK_T);
+      // the card's chip, near its top, on the side where the pocket is low
+      var zc = zB + BANK_T, chipX = 0.9, chipY = bankTop - 2.0;
+      doc.setDrawColor(0); doc.setLineWidth(0.2);
+      fill(rounded(0.85, 1.1, 0.12, chipX, chipY).map(function (a) { return proj(a.x, a.y, zc); }), 'S');
+      [[0, 0, 0, 1.1], [-0.425, 0.4, 0.425, 0.4], [-0.425, 0.7, 0.425, 0.7]].forEach(function (l) {
+        var a = proj(chipX + l[0], chipY + l[1], zc), b = proj(chipX + l[2], chipY + l[3], zc);
+        doc.line(a[0], a[1], b[0], b[1]);
+      });
+      slab(frontPts(outline('pocket', 0).getPoints(48)), zB, zF);
+      // The seam on the front, as the flat view drew it: each stitch from the
+      // inner end of one slit to the next (side -1, the front), on the pocket
+      // face, or on the inner piece's face for the end holes above the pocket.
+      var nH = holes.length;
+      doc.setDrawColor(70);
+      for (var k = 0; k < nH - 1; k++) {
+        var a = holes[k], b = holes[k + 1], sl = slit(chords[k], -1);
+        var doubled = k < OVERLAP || k >= nH - 1 - OVERLAP;
+        var za = a.y < pocketTop(a.x) ? zF : zB, zb = b.y < pocketTop(b.x) ? zF : zB;
+        var p = proj(-(a.x + sl.x * SLIT_HALF), a.y + sl.y * SLIT_HALF, za), q = proj(-(b.x - sl.x * SLIT_HALF), b.y - sl.y * SLIT_HALF, zb);
+        doc.setLineWidth(doubled ? 0.9 : 0.7);
+        doc.line(p[0], p[1], q[0], q[1]);
+      }
+
+      // The specs beside it. Those that belong to a part get a leader to it,
+      // the seam's above the edge's, so no two leaders cross; the rest follow under a rule.
+      var E = CARD_W / 2, seamX = E - STITCH_INSET;
+      var notes = [
+        [C.body, mm(CARD_BODY), proj(E, 2.0, 0)],
+        [M.spacing, mm(STITCH_PITCH), proj(seamX, -0.7, zF)],
+        [P.thread, cap(C.threadSize), proj(seamX, -1.2, zF)],
+        [M.inset, mm(STITCH_INSET), proj(E - STITCH_INSET / 2, -1.7, zF)],
+        [C.pocketFront, mm(CARD_POCKET), proj(E, -2.3, (zB + zF) / 2)],
+        [C.pocketBack, mm(CARD_POCKET), proj(E, -2.8, -(zB + zF) / 2)],
+        [M.thickness, mm(CARD_THICK), proj(E, -3.3, 0)],
+      ].sort(function (u, v) { return u[2][1] - v[2][1]; });
+      var cx = 142, cr = 200, y = 0;
+      doc.setFontSize(9);
+      notes.forEach(function (r) {
+        y = Math.max(y + 9, r[2][1] - 18);
+        doc.setTextColor(110, 100, 90); doc.text(r[0], cx, y);
+        doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
+        doc.setDrawColor(120); doc.setLineWidth(0.15);
+        doc.line(cx - 2, y - 1, r[2][0], r[2][1]);
+        doc.setFillColor(40, 36, 31); doc.circle(r[2][0], r[2][1], 0.4, 'F');
+      });
+      var rest = [[M.width + ' × ' + M.height, mm(CARD_W) + ' × ' + mm(CARD_H)], [P.leather, cap(C.vegtan)]];
+      if (L) { rest.push([P.initials, L.txt]); }
+      y += 5;
+      doc.setDrawColor(170); doc.setLineWidth(0.2); doc.line(cx, y, cr, y);
+      rest.forEach(function (r) {
+        y += 6;
+        doc.setTextColor(110, 100, 90); doc.text(r[0], cx, y);
+        doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
       });
       };
     }
