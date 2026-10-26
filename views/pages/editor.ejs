@@ -1986,24 +1986,85 @@
       // stitching and the bevelled edges just as the editor shows them. (A
       // line drawing of it was tried first the same day and read badly.)
       // Seen from the front, turned so the stitched edge with its four layers
-      // shows, from a little above, with a bank card (85.6 × 54 mm) pulled a
-      // little up out of the front pocket. An illustration, not true size.
+      // shows, from a little above, with a bank card (85.6 × 54 mm) pushed into
+      // the front pocket almost down to the seam, and the pocket's leather
+      // standing out over it, shaped by the card. An illustration, not true size.
       // The front frame used below: x to the right as seen from the front, z
       // towards the viewer (the scene's x and z turned round).
       var zF = CARD_THICK / 2, zB = zF - CARD_POCKET;
-      var BANK_W = 5.4, BANK_H = 8.56, BANK_T = 0.076, bankTop = CARD_H / 2 + 0.9;   // 9 mm out over the top
-      var bankShape = new THREE.Shape(), bl = -BANK_W / 2, br = BANK_W / 2, bb = bankTop - BANK_H, br0 = 0.32;
-      bankShape.moveTo(bl + br0, bb); bankShape.lineTo(br - br0, bb); bankShape.quadraticCurveTo(br, bb, br, bb + br0);
-      bankShape.lineTo(br, bankTop - br0); bankShape.quadraticCurveTo(br, bankTop, br - br0, bankTop);
-      bankShape.lineTo(bl + br0, bankTop); bankShape.quadraticCurveTo(bl, bankTop, bl, bankTop - br0);
-      bankShape.lineTo(bl, bb + br0); bankShape.quadraticCurveTo(bl, bb, bl + br0, bb);
-      var bankMat = new THREE.MeshStandardMaterial({ color: 0x1d3557, roughness: 0.35, metalness: 0.1 });
-      var chipMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, roughness: 0.3, metalness: 0.8 });
+      var BANK_W = 5.4, BANK_H = 8.56, BANK_T = 0.076, BANK_R = 0.318;
+      var bankFoot = -CARD_H / 2 + STITCH_INSET + 0.3, bankTop = bankFoot + BANK_H;   // 3 mm clear of the seam
+      var bankShape = new THREE.Shape(), bl = -BANK_W / 2, br = BANK_W / 2, bb = bankFoot, rr = BANK_R;
+      bankShape.moveTo(bl + rr, bb); bankShape.lineTo(br - rr, bb); bankShape.quadraticCurveTo(br, bb, br, bb + rr);
+      bankShape.lineTo(br, bankTop - rr); bankShape.quadraticCurveTo(br, bankTop, br - rr, bankTop);
+      bankShape.lineTo(bl + rr, bankTop); bankShape.quadraticCurveTo(bl, bankTop, bl, bankTop - rr);
+      bankShape.lineTo(bl, bb + rr); bankShape.quadraticCurveTo(bl, bb, bl + rr, bb);
+      var bankMat = new THREE.MeshStandardMaterial({ color: 0x0d1f3c, roughness: 0.4 });
       var bank = new THREE.Mesh(new THREE.ExtrudeGeometry(bankShape, { depth: BANK_T, bevelEnabled: false, curveSegments: 8 }), bankMat);
       bank.position.z = -zB - BANK_T - 0.002;   // between the front pocket and the inner piece
-      // its chip, near the top, on the side where the pocket is low
-      var chip = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.1, 0.01), chipMat);
-      chip.position.set(-0.9, bankTop - 1.45, bank.position.z - 0.004);
+      // Its printed face, drawn as a landscape card and turned so its left
+      // end, with the chip, is at the top: a glossy navy card, the chip, the
+      // contactless mark, a number and an expiry. No bank's or network's mark.
+      var PXC = 20, CW = Math.round(BANK_H * 10 * PXC), CH = Math.round(BANK_W * 10 * PXC);   // px per mm, landscape size
+      var face = document.createElement('canvas'); face.width = CH; face.height = CW;
+      var g = face.getContext('2d');
+      g.translate(CH, 0); g.rotate(Math.PI / 2);
+      function rrect(x, y, w, h, r) {
+        g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+        g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+      }
+      var mmp = PXC;
+      rrect(0, 0, CW, CH, BANK_R * 10 * mmp); g.save(); g.clip();
+      var bg = g.createLinearGradient(0, 0, CW, CH);
+      bg.addColorStop(0, '#24467d'); bg.addColorStop(0.55, '#132b52'); bg.addColorStop(1, '#0a1830');
+      g.fillStyle = bg; g.fillRect(0, 0, CW, CH);
+      g.strokeStyle = 'rgba(255,255,255,.06)'; g.lineWidth = 0.6 * mmp;
+      for (var w = 0; w < 7; w++) { g.beginPath(); g.arc(CW * 0.95, CH * 1.25, (40 + w * 5) * mmp, Math.PI, Math.PI * 1.6); g.stroke(); }
+      g.restore();
+      // the chip: gold, with its contact pads
+      var cx0 = 11 * mmp, cy0 = 19 * mmp, cw = 11.5 * mmp, chh = 9 * mmp;
+      var gold = g.createLinearGradient(cx0, cy0, cx0 + cw, cy0 + chh);
+      gold.addColorStop(0, '#f3dc94'); gold.addColorStop(0.5, '#c9a447'); gold.addColorStop(1, '#e7c975');
+      rrect(cx0, cy0, cw, chh, 1.3 * mmp); g.fillStyle = gold; g.fill();
+      g.strokeStyle = 'rgba(110,80,20,.75)'; g.lineWidth = 0.25 * mmp; g.stroke();
+      g.beginPath();
+      g.moveTo(cx0, cy0 + chh / 3); g.lineTo(cx0 + cw * 0.36, cy0 + chh / 3); g.moveTo(cx0 + cw * 0.64, cy0 + chh / 3); g.lineTo(cx0 + cw, cy0 + chh / 3);
+      g.moveTo(cx0, cy0 + chh * 2 / 3); g.lineTo(cx0 + cw * 0.36, cy0 + chh * 2 / 3); g.moveTo(cx0 + cw * 0.64, cy0 + chh * 2 / 3); g.lineTo(cx0 + cw, cy0 + chh * 2 / 3);
+      g.moveTo(cx0 + cw * 0.36, cy0); g.lineTo(cx0 + cw * 0.36, cy0 + chh); g.moveTo(cx0 + cw * 0.64, cy0); g.lineTo(cx0 + cw * 0.64, cy0 + chh);
+      g.stroke();
+      // the contactless mark beside it
+      g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 0.55 * mmp; g.lineCap = 'round';
+      for (var a = 0; a < 4; a++) {
+        g.beginPath(); g.arc(25 * mmp, cy0 + chh / 2, (1.4 + a * 1.25) * mmp, -0.6, 0.6); g.stroke();
+      }
+      g.fillStyle = 'rgba(236,240,248,.92)'; g.textBaseline = 'alphabetic';
+      g.font = (4.3 * mmp) + 'px "OCR A Std", "Courier New", monospace';
+      g.fillText('4000 1234 5678 9010', 10 * mmp, 39 * mmp);
+      g.font = (2.8 * mmp) + 'px "Courier New", monospace';
+      g.fillText('12/29', 44 * mmp, 45.5 * mmp);
+      var faceTex = new THREE.CanvasTexture(face);
+      faceTex.colorSpace = THREE.SRGBColorSpace; faceTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      var faceMat = new THREE.MeshPhysicalMaterial({ map: faceTex, alphaTest: 0.5, roughness: 0.32, clearcoat: 0.8, clearcoatRoughness: 0.15 });
+      var print = new THREE.Mesh(new THREE.PlaneGeometry(BANK_W, BANK_H), faceMat);
+      print.rotation.y = Math.PI;   // facing the front
+      print.position.set(0, bankFoot + BANK_H / 2, bank.position.z - 0.0005);
+      // The front pocket stands out over the card (the owner, 2026-10-26): its
+      // leather is lifted by the card's thickness and a little more over the
+      // whole card, easing back to nothing at the seam, so the stitching stays
+      // where it is. The pocket's mouth opens with it.
+      var LIFT = 0.09, liftX = CARD_W / 2 - STITCH_INSET - 0.03, liftY = -CARD_H / 2 + STITCH_INSET + 0.03;
+      function ease(t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); }
+      function lift(x, y) {
+        return LIFT * ease((liftX - Math.abs(x)) / (liftX - BANK_W / 2 - 0.04)) * ease((y - liftY) / (bankFoot - 0.04 - liftY));
+      }
+      var pocketMesh = fob.children.filter(function (m) { return Array.isArray(m.material) && m.material[2] === pocketBackMat; })[0];
+      var flat = null;
+      if (pocketMesh) {
+        var pg = pocketMesh.geometry, pp = pg.attributes.position;
+        flat = [pp.array.slice(), pg.attributes.normal.array.slice()];
+        for (var v = 0; v < pp.count; v++) { pp.setZ(v, pp.getZ(v) - lift(pp.getX(v), pp.getY(v))); }
+        pp.needsUpdate = true; pg.computeVertexNormals();
+      }
       // a light from the upper left in front, where the scene's own lights
       // are on the window side
       var key = new THREE.DirectionalLight(0xfff3e0, 2.4);
@@ -2016,8 +2077,8 @@
       var was = { pos: camera.position.clone(), aspect: camera.aspect, ratio: renderer.getPixelRatio(),
         size: renderer.getSize(new THREE.Vector2()), clear: renderer.getClearColor(new THREE.Color()),
         alpha: renderer.getClearAlpha(), measures: measures.visible };
-      var TURN = 42 * Math.PI / 180, RISE = 14 * Math.PI / 180, DIST = 19, aim = new THREE.Vector3(0, 0.75, 0);
-      fob.add(bank, chip); scene.add(key); measures.visible = false;
+      var TURN = 42 * Math.PI / 180, RISE = 14 * Math.PI / 180, DIST = 19, aim = new THREE.Vector3(0, 0.2, 0);
+      fob.add(bank, print); scene.add(key); measures.visible = false;
       renderer.setPixelRatio(1); renderer.setSize(IW, IH, false); renderer.setClearColor(0xffffff, 1);
       camera.aspect = IW / IH; camera.updateProjectionMatrix();
       camera.position.set(-Math.sin(TURN) * Math.cos(RISE) * DIST, aim.y + Math.sin(RISE) * DIST, -Math.cos(TURN) * Math.cos(RISE) * DIST);
@@ -2025,8 +2086,12 @@
       renderer.render(scene, camera);
       var shot = renderer.domElement.toDataURL('image/jpeg', 0.92), view = camera.clone();
       // and the editor put back as it was
-      fob.remove(bank, chip); scene.remove(key); measures.visible = was.measures;
-      bank.geometry.dispose(); chip.geometry.dispose(); bankMat.dispose(); chipMat.dispose();
+      fob.remove(bank, print); scene.remove(key); measures.visible = was.measures;
+      bank.geometry.dispose(); print.geometry.dispose(); bankMat.dispose(); faceMat.dispose(); faceTex.dispose();
+      if (flat) {
+        pocketMesh.geometry.attributes.position.array.set(flat[0]); pocketMesh.geometry.attributes.position.needsUpdate = true;
+        pocketMesh.geometry.attributes.normal.array.set(flat[1]); pocketMesh.geometry.attributes.normal.needsUpdate = true;
+      }
       pocketBackMat.map = stamp[0]; pocketBackMat.bumpMap = stamp[1];
       renderer.setPixelRatio(was.ratio); renderer.setSize(was.size.x, was.size.y, false); renderer.setClearColor(was.clear, was.alpha);
       camera.position.copy(was.pos); camera.aspect = was.aspect; camera.updateProjectionMatrix(); camera.lookAt(controls.target);
