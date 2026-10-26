@@ -1061,10 +1061,12 @@
       var zb = CARD_BODY / 2, zp = CARD_BODY + CARD_POCKET / 2;
       function ease(t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); }
       // A body is in the glued stack below the pocket edge; above it, it ends
-      // on its own. Eased from one to the other over the first 4 mm: over 1.2 mm
-      // (until 2026-10-26) the square stack edge rounding off so fast stood
-      // out as a dark pointed corner where the pocket ends (the owner).
-      function bodyStack(p) { return 1 - ease((p.y - pocketTop(p.x)) / 0.4); }
+      // on its own, rounded right from the pocket's top, as the beveler leaves
+      // it: the switch is over 0.5 mm. Eased over 1.2 mm (until 2026-10-26),
+      // the square stack edge tapering into the rounding stood out as a dark
+      // pointed corner where the pocket ends (the owner); a longer ease only
+      // made the point longer.
+      function bodyStack(p) { return 1 - ease((p.y - pocketTop(p.x)) / 0.05); }
       // A pocket is in the stack along the stitched sides and bottom; its top
       // and the window are its own edges.
       // The side keeps the stack's dome right up to the square top corner, and
