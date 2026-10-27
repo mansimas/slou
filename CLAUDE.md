@@ -125,8 +125,14 @@ How it works:
     the middle, LEATHERCRAFT and SLOU.LT round the ring, Helvetica capitals as in
     the logo - scattered unevenly over every page of every PDF, 11 of them, big
     and small (0.55-1.5 × a 48 mm stamp), each at its own tilt (`SCATTER`, placed
-    by hand so no two touch and every download is alike), at 6% opacity (fill
-    and stroke). Call it on any new PDF, then `flatten(doc)` and save what that
+    by hand so no two touch and every download is alike). It is drawn solid
+    black on its own jsPDF (`wm`, a page per page)
+    and coloured in `flatten(doc, wm)` with a diagonal gradient (`WM_STOPS`, leather
+    browns and olive) plus a radial one, varying in darkness (~3-9% darker than
+    the paper) and not only colour, since most people print black and white (the
+    owner), and a random ink grain on every pixel; multiplied into the
+    page at 200 dpi, so there is no single tone to select (the owner, 2026-10-27).
+    Call it on any new PDF, then `flatten(doc, wm)` and save what that
     returns: every page is rendered by pdf.js 3.11.174 (cdnjs, loaded with jsPDF)
     at 400 dpi into one JPEG filling the A4 page, so the watermark is in the same
     pixels as the lines and a PDF editor finds no object or text to delete (the

@@ -1797,36 +1797,83 @@
   // keeps the lines to 0.06 mm and a page under the 16.7 M pixel canvas limit
   // of phones, and the picture fills the A4 page exactly, so the calibration
   // is untouched.
-  function flatten(doc) {
-    var DPI = 400;
-    return window.pdfjsLib.getDocument({ data: doc.output('arraybuffer') }).promise.then(function (src) {
+  //
+  // The watermark comes in as its own PDF (`wm`, a page per page, drawn solid)
+  // and is coloured here rather than in jsPDF (the owner, 2026-10-27): a smooth
+  // gradient across the page, with a second, round one over it in another
+  // direction, and an ink grain through it. A watermark of one even tone can be
+  // picked out in one click; this one has no single tone to pick. Most people
+  // print black and white (the owner), so what changes is how dark it is, not
+  // just its colour: the stops go from about 3% to 9% darker than the paper,
+  // and the grain survives a grey print too. It is rendered at 200 dpi and laid
+  // on the lines with `multiply`, so it darkens the paper the way ink would and
+  // the lines stay black through it.
+  var WM_STOPS = [   // along the page's diagonal: colour, strength (darkening ≈ strength × (1 - lightness))
+    [0, '60,40,28', 0.11], [0.22, '176,122,58', 0.07], [0.41, '91,90,53', 0.13],
+    [0.6, '176,122,58', 0.06], [0.8, '60,40,28', 0.10], [1, '91,90,53', 0.07]
+  ];
+  function flatten(doc, wm) {
+    var DPI = 400, WM_DPI = 200;
+    var open = function (d) { return window.pdfjsLib.getDocument({ data: d.output('arraybuffer') }).promise; };
+    function draw(src, p, dpi, fill) {
+      return src.getPage(p).then(function (pg) {
+        var vp = pg.getViewport({ scale: dpi / 72 });
+        var c = document.createElement('canvas');
+        c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+        var g = c.getContext('2d');
+        if (fill) { g.fillStyle = fill; g.fillRect(0, 0, c.width, c.height); }
+        return pg.render({ canvasContext: g, viewport: vp, background: 'rgba(0,0,0,0)' }).promise
+          .then(function () { return c; });
+      });
+    }
+    // the watermark layer's shapes, filled with the two gradients in place of black
+    function tint(c, p) {
+      var g = c.getContext('2d'), w = c.width, h = c.height;
+      var flip = p % 2 === 0;   // the next page runs the other way
+      var lin = g.createLinearGradient(flip ? w : 0, 0, flip ? 0 : w, h);
+      WM_STOPS.forEach(function (s) { lin.addColorStop(s[0], 'rgba(' + s[1] + ',' + s[2] + ')'); });
+      g.globalCompositeOperation = 'source-in';
+      g.fillStyle = lin; g.fillRect(0, 0, w, h);
+      var rad = g.createRadialGradient(w * (flip ? 0.3 : 0.7), h * 0.62, 0, w * 0.5, h * 0.5, h * 0.75);
+      rad.addColorStop(0, 'rgba(60,40,28,0.05)'); rad.addColorStop(0.5, 'rgba(91,90,53,0)');
+      rad.addColorStop(1, 'rgba(176,122,58,0.04)');
+      g.globalCompositeOperation = 'source-atop';
+      g.fillStyle = rad; g.fillRect(0, 0, w, h);
+      // the grain: every pixel of the stamps a little lighter or darker, at
+      // random, like ink from a real stamp
+      var img = g.getImageData(0, 0, w, h), px = img.data;
+      for (var k = 3; k < px.length; k += 4) {
+        if (px[k]) { px[k] = Math.min(255, px[k] * (0.45 + Math.random() * 0.9)); }
+      }
+      g.putImageData(img, 0, 0);
+      return c;
+    }
+    return Promise.all([open(doc), open(wm)]).then(function (srcs) {
+      var src = srcs[0], mark = srcs[1];
       var out = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
       out.setProperties({ title: 'SLOU', author: 'SLOU', creator: 'slou.lt' });
       function page(p) {
-        return src.getPage(p).then(function (pg) {
-          var vp = pg.getViewport({ scale: DPI / 72 });
-          var c = document.createElement('canvas');
-          c.width = Math.round(vp.width); c.height = Math.round(vp.height);
-          var g = c.getContext('2d');
-          g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
-          return pg.render({ canvasContext: g, viewport: vp }).promise.then(function () {
-            if (p > 1) { out.addPage(); }
-            out.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
-            c.width = c.height = 0;   // let the memory go before the next page
-          });
+        return Promise.all([draw(src, p, DPI, '#fff'), draw(mark, p, WM_DPI)]).then(function (cs) {
+          var c = cs[0], g = c.getContext('2d');
+          g.globalCompositeOperation = 'multiply';
+          g.drawImage(tint(cs[1], p), 0, 0, c.width, c.height);
+          if (p > 1) { out.addPage(); }
+          out.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+          c.width = c.height = cs[1].width = cs[1].height = 0;   // let the memory go before the next page
         });
       }
       var chain = Promise.resolve();
       for (var p = 1; p <= src.numPages; p++) { chain = chain.then(page.bind(null, p)); }
-      return chain.then(function () { src.destroy(); return out; });
+      return chain.then(function () { src.destroy(); mark.destroy(); return out; });
     });
   }
 
   // The watermark on every PDF the editor makes (the owner, 2026-10-27): a
   // round stamp - SLOU in the middle, LEATHERCRAFT round the top, SLOU.LT round
   // the bottom, all Helvetica capitals like the logo - scattered over each page
-  // unevenly, big and small, each at its own tilt, and faint so the cut and
-  // stitch lines read through.
+  // unevenly, big and small, each at its own tilt. Drawn solid black on a
+  // document of its own; `flatten` colours it and makes it faint, so the cut
+  // and stitch lines read through.
   function watermark(doc) {
     var PT = 2.835;                                     // pt per mm
     var R, RI, RM, TILT, K;                             // the stamp being drawn
@@ -1880,12 +1927,9 @@
     ];
     for (var pg = 1; pg <= doc.internal.getNumberOfPages(); pg++) {
       doc.setPage(pg);
-      doc.setGState(new doc.GState({ opacity: 0.06, 'stroke-opacity': 0.06 }));
-      doc.setDrawColor(40, 36, 31); doc.setFillColor(40, 36, 31); doc.setTextColor(40, 36, 31);
+      doc.setDrawColor(0); doc.setFillColor(0); doc.setTextColor(0);
       SCATTER.forEach(function (s) { stamp(s[0], s[1], s[2], s[3]); });
-      doc.setGState(new doc.GState({ opacity: 1, 'stroke-opacity': 1 }));
     }
-    doc.setFont('DejaVu', 'normal');
   }
 
   // One still of the scene for the pattern: 900 × 1200 px from `pos`,
@@ -2571,8 +2615,10 @@
     // the card wallet's legend and specs, on a page of their own
     if (legendPage) { doc.addPage(); legendPage(); }
 
-    watermark(doc);
-    return flatten(doc).then(function (out) {
+    var wm = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+    for (var pg = 1; pg < doc.internal.getNumberOfPages(); pg++) { wm.addPage(); }
+    watermark(wm);
+    return flatten(doc, wm).then(function (out) {
       out.save(card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
     });
   }
