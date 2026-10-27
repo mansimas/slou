@@ -313,6 +313,7 @@ locked keyfob stitch, unchanged:
   piece (drawn with `m = -1`; never mention the SLOU stamp on the pattern, buyers may use their own) and the back
   piece (window as a solid cut line, initials). On page 2 both are one row, "Išorinė detalė × 2" (`C.outer`, the owner, 2026-10-26). Below, the
   inner piece × 2 (`C.body`; never call it a "main" piece), with the legend; each template carries its name only inside (`inside()`, "× 2" only where cut twice), so it survives cutting out,
+  numbered 1-4 in a circle (0.5 mm line) left of its count (`number()`, the owner, 2026-10-27), down each column: left inner 1, front pocket 2, right inner 3, back pocket 4;
   beside it. No 50 mm square on this pattern (the owner, 2026-10-20), so the specs table fits under the legend: one A4 sheet. No
   doubled-stitch brackets and no slit angle in the legend (`C.holes`; the owner, 2026-10-20). The
   body carries the slanted pocket edge as a dashed line, like the grey line on

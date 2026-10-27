@@ -1918,6 +1918,16 @@
         doc.setTextColor(0);
         doc.text(name, X(x), Y(y), { align: 'center', baseline: 'middle' });
       }
+      // The piece's number in a circle, left of its count (the owner,
+      // 2026-10-27): 1 to 4 down each column, left then right - the inner
+      // piece and the front pocket below it, then the other inner piece and
+      // the back pocket. The circle is drawn a little heavier than the cut line.
+      function number(n, y) {
+        doc.setDrawColor(0); doc.setLineWidth(0.5);
+        doc.circle(X(-2.3), Y(y), 3.3);
+        doc.setFontSize(14); doc.setTextColor(0);
+        doc.text(String(n), X(-2.3), Y(y), { align: 'center', baseline: 'middle' });
+      }
       // `gap` [x0, x1]: a stretch of the bottom edge left undrawn, where the
       // back piece's window opens through it (the owner, 2026-10-21: no line
       // across the foot of the arch, it is not cut there)
@@ -1988,12 +1998,15 @@
       var thickSize = hasL ? 10 : 12;
       var thickY = hasL ? (textLayout().y - textLayout().size * 0.365 + WIN_Y + WIN_H) / 2
                         : nameY - (nameSize + 12) * CAP - 0.2 / cfy;
+      var numY = hasL ? nameY - 0.3 : (nameY + thickY) / 2;   // clear of the pocket's top edge
       piece('pocket', pocketTop, -1);
       inside('× 1', 0, nameY, nameSize); inside('(' + mm(CARD_POCKET) + ')', 0, thickY, thickSize);
+      number(2, numY);
       // the back pocket on the right, with the window and the initials
       OX = left + colW + colGap + colW / 2;
       piece('pocket', pocketTop, 1, [WIN_CX - WIN_HW, WIN_CX + WIN_HW]);
       inside('× 1', 0, nameY, nameSize); inside('(' + mm(CARD_POCKET) + ')', 0, thickY, thickSize);
+      number(4, numY);
       // the thumb window, open at the bottom: a cut line on this pocket
       doc.setDrawColor(0); doc.setLineWidth(0.3);
       windowPath(new THREE.Path()).getPoints(24).reduce(function (a, b) { doc.line(X(a.x), Y(a.y), X(b.x), Y(b.y)); return b; });
@@ -2012,12 +2025,13 @@
       // from the front, over the front piece; on the right as seen from the
       // back, over the back piece. (The single inner piece used to be drawn
       // as seen from the back, so the front piece lined up with nothing.)
-      [[left + colW / 2, -1], [left + colW + colGap + colW / 2, 1]].forEach(function (c) {
+      [[left + colW / 2, -1, 1], [left + colW + colGap + colW / 2, 1, 3]].forEach(function (c) {
         OX = c[0]; OY = top + CARD_H / 2 * 10 * cfy;
         var m = c[1];
         piece('card', function () { return CARD_H / 2; }, m);
         inside('× 1', 0, -2.5);   // below the pocket edge line
         inside('(' + mm(CARD_BODY) + ')', 0, -2.5 - (20 + 12) * CAP - 0.2 / cfy, 12);
+        number(c[2], -2.5 - (20 + 12) * CAP / 2 - 0.1 / cfy);   // between count and thickness, as on the pockets
         // where the pockets' edge comes, for lining them up when gluing (the
         // grey line on the owner's drawing)
         doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
