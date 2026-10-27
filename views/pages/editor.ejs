@@ -1812,7 +1812,7 @@
     [0, '60,40,28', 0.11], [0.22, '176,122,58', 0.07], [0.41, '91,90,53', 0.13],
     [0.6, '176,122,58', 0.06], [0.8, '60,40,28', 0.10], [1, '91,90,53', 0.07]
   ];
-  function flatten(doc, wm) {
+  function flatten(doc, wm, links) {
     var DPI = 400, WM_DPI = 200;
     var open = function (d) { return window.pdfjsLib.getDocument({ data: d.output('arraybuffer') }).promise; };
     function draw(src, p, dpi, fill) {
@@ -1859,6 +1859,9 @@
           g.drawImage(tint(cs[1], p), 0, 0, c.width, c.height);
           if (p > 1) { out.addPage(); }
           out.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+          (links || []).forEach(function (l) {   // a picture has no links, so they go back on top
+            if (l.page === p) { out.link(l.x, l.y, l.w, l.h, { url: l.url }); }
+          });
           c.width = c.height = cs[1].width = cs[1].height = 0;   // let the memory go before the next page
         });
       }
@@ -2457,7 +2460,30 @@
                         h: (j ? 0 : 5) + lines.length * LH + 1.2 + (j === st.length - 2 ? 2.5 : 0) });
         });
       });
+      // and after it, where the owner shares the making on social media (the
+      // owner, 2026-10-27): each handle a live link, laid over the flattened page
+      var SOC = [['TikTok', '@sloudiary', 'https://www.tiktok.com/@sloudiary'],
+        ['Instagram', '@slou_studio', 'https://www.instagram.com/slou_studio'],
+        ['Facebook', 'slou.lt', 'https://www.facebook.com/slou.lt'],
+        ['YouTube', '@sloustudio', 'https://www.youtube.com/@sloustudio'],
+        ['Patreon', '@SLOU', 'https://www.patreon.com/SLOU', WP.patreonNote]];
+      blocks.push({ social: true, lines: [], h: 4 + 5 + SOC.length * 4.2 });
       function put(b, x, yy) {
+        if (b.social) {
+          yy += 1;
+          doc.setDrawColor(190); doc.setLineWidth(0.2); doc.line(x, yy - 3.5, x + colW2, yy - 3.5);
+          doc.setFontSize(9); doc.setTextColor(40, 36, 31); doc.text(WP.follow, x, yy + 1.5);
+          yy += 6.5;
+          SOC.forEach(function (r) {
+            doc.setFontSize(8); doc.setTextColor(110, 100, 90); doc.text(r[0], x, yy);
+            doc.setTextColor(40, 36, 31); doc.text(r[1], x + 20, yy);
+            var w = doc.getTextWidth(r[1]);
+            links.push({ page: doc.internal.getCurrentPageInfo().pageNumber, x: x + 19.5, y: yy - 3, w: w + 1, h: 4, url: r[2] });
+            if (r[3]) { doc.setTextColor(110, 100, 90); doc.text('(' + r[3] + ')', x + 21 + w, yy); }
+            yy += 4.2;
+          });
+          return;
+        }
         if (b.head) { doc.setFontSize(9.5); doc.setTextColor(40, 36, 31); doc.text(b.head, x, yy); yy += 5; }
         doc.setFontSize(8); doc.setTextColor(80, 72, 64);
         b.lines.forEach(function (ln) { doc.text(ln, x, yy); yy += LH; });
@@ -2483,7 +2509,7 @@
       }
       };
     }
-    var legendPage = null;
+    var legendPage = null, links = [];   // links: clickable spots, put back over the flattened pages
 
     // legend lines and the specs table, shared by both items
     var lx = 118, rx = 195, ly = 70;
@@ -2657,7 +2683,7 @@
     var wm = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
     for (var pg = 1; pg < doc.internal.getNumberOfPages(); pg++) { wm.addPage(); }
     watermark(wm);
-    return flatten(doc, wm).then(function (out) {
+    return flatten(doc, wm, links).then(function (out) {
       out.save(card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
     });
   }
