@@ -1775,6 +1775,65 @@
     pair[1].addEventListener('change', keep);
   });
 
+  // The watermark on every PDF the editor makes (the owner, 2026-10-27): a
+  // round stamp - SLOU in the middle, LEATHERCRAFT round the top, SLOU.LT round
+  // the bottom, all Helvetica capitals like the logo - repeated over each page
+  // in staggered rows, tilted and faint so the cut and stitch lines read through.
+  function watermark(doc) {
+    var R = 24, RI = 17, RM = 20.5, TILT = -12 * Math.PI / 180, PT = 2.835;   // mm; pt per mm
+    var cap = function (size) { return size / PT * 0.72; };
+    // one character (or a word) centred on (x, y) in the stamp's own y-up frame,
+    // its baseline turned to `a` radians; page y runs down
+    function put(cx, cy, s, x, y, a, size) {
+      var w = doc.getTextWidth(s), h = cap(size);
+      var bx = x - Math.cos(a) * w / 2 + Math.sin(a) * h / 2;
+      var by = y - Math.sin(a) * w / 2 - Math.cos(a) * h / 2;
+      doc.text(s, cx + bx, cy - by, { angle: a * 180 / Math.PI });
+    }
+    // a word round the ring, centred on polar angle `mid`; `top` reads clockwise
+    // over the top, otherwise anticlockwise along the bottom
+    function arc(cx, cy, word, mid, top, size, track) {
+      doc.setFontSize(size);
+      var ws = word.split('').map(function (ch) { return doc.getTextWidth(ch); });
+      var span = ws.reduce(function (a, b) { return a + b; }, 0) + track * (ws.length - 1);
+      var t = mid + (top ? 1 : -1) * span / RM / 2;
+      for (var k = 0; k < ws.length; k++) {
+        var th = t + (top ? -1 : 1) * ws[k] / 2 / RM;
+        put(cx, cy, word[k], RM * Math.cos(th), RM * Math.sin(th), th + (top ? -1 : 1) * Math.PI / 2, size);
+        t += (top ? -1 : 1) * (ws[k] + track) / RM;
+      }
+    }
+    function stamp(cx, cy) {
+      doc.setLineWidth(0.7); doc.circle(cx, cy, R, 'S');
+      doc.setLineWidth(0.25); doc.circle(cx, cy, R - 1.2, 'S'); doc.circle(cx, cy, RI, 'S');
+      doc.setFont('helvetica', 'bold');
+      arc(cx, cy, 'LEATHERCRAFT', Math.PI / 2 + TILT, true, 12, 0.9);
+      doc.setFont('helvetica', 'normal');
+      arc(cx, cy, 'SLOU.LT', -Math.PI / 2 + TILT, false, 10, 1.6);
+      [0, Math.PI].forEach(function (th) {               // a dot each side between the words
+        doc.circle(cx + RM * Math.cos(th + TILT), cy - RM * Math.sin(th + TILT), 0.7, 'F');
+      });
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(30);
+      put(cx, cy, 'SLOU', 0, 0, TILT, 30);
+      [6.8, -6.8].forEach(function (d) {                 // a thin rule above and below SLOU
+        var c = Math.cos(TILT), s = Math.sin(TILT), L = 10;
+        doc.line(cx - c * L - s * d, cy - (-s * L + c * d), cx + c * L - s * d, cy - (s * L + c * d));
+      });
+    }
+    for (var pg = 1; pg <= doc.internal.getNumberOfPages(); pg++) {
+      doc.setPage(pg);
+      doc.setGState(new doc.GState({ opacity: 0.06, 'stroke-opacity': 0.06 }));
+      doc.setDrawColor(40, 36, 31); doc.setFillColor(40, 36, 31); doc.setTextColor(40, 36, 31);
+      for (var row = 0; row < 5; row++) {
+        for (var col = 0; col < 4; col++) {
+          stamp((row % 2 ? 0 : 35) + col * 70, 20 + row * 64);
+        }
+      }
+      doc.setGState(new doc.GState({ opacity: 1, 'stroke-opacity': 1 }));
+    }
+    doc.setFont('DejaVu', 'normal');
+  }
+
   // One still of the scene for the pattern: 900 × 1200 px from `pos`,
   // looking at the piece's middle, without the measurements; the view on
   // screen is put back as it was.
@@ -2444,6 +2503,7 @@
     // the card wallet's legend and specs, on a page of their own
     if (legendPage) { doc.addPage(); legendPage(); }
 
+    watermark(doc);
     doc.save(card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
   }
 

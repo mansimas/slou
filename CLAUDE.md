@@ -121,6 +121,10 @@ How it works:
   - Iron slits drawn 1.6 × 0.45 mm.
   - Corner holes: a black awl dot, a circle, and both slits drawn grey with a black border (marked, not punched).
   - Red bracket at the joint, initials as a stamping guide, specs table.
+  - Watermark (`watermark(doc)`, the owner, 2026-10-27): a round stamp - SLOU in
+    the middle, LEATHERCRAFT and SLOU.LT round the ring, Helvetica capitals as in
+    the logo - repeated in staggered rows over every page of every PDF, tilted
+    -12° and at 6% opacity (fill and stroke). Call it on any new PDF before `save`.
   - **Print calibration** (2026-10-14, asked for by the owner, and reported
     working the same day: "viskas tiksliai atitinka, susikalibruoja tobulai"):
     his ML-2160 prints an A4 page small, and by a different amount on each axis
