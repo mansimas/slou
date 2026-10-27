@@ -2442,6 +2442,45 @@
         doc.setTextColor(110, 100, 90); doc.text(r[0], cx, y);
         doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
       });
+
+      // The owner's own way of making it, step by step (the owner, 2026-10-27),
+      // under the picture: two columns, and what does not fit on to a new page,
+      // its two columns balanced. A paragraph is never split, and a step's
+      // heading stays with its first paragraph.
+      var WP = C.process, colX = [15, 108], colW2 = 87, BOT = 285, LH = 3.3;
+      var blocks = [];   // { head, lines, h }
+      doc.setFontSize(8);
+      WP.steps.forEach(function (st, i) {
+        st.slice(1).forEach(function (p, j) {
+          var lines = doc.splitTextToSize(p, colW2);
+          blocks.push({ head: j ? null : (i + 1) + '. ' + st[0], lines: lines,
+                        h: (j ? 0 : 5) + lines.length * LH + 1.2 + (j === st.length - 2 ? 2.5 : 0) });
+        });
+      });
+      function put(b, x, yy) {
+        if (b.head) { doc.setFontSize(9.5); doc.setTextColor(40, 36, 31); doc.text(b.head, x, yy); yy += 5; }
+        doc.setFontSize(8); doc.setTextColor(80, 72, 64);
+        b.lines.forEach(function (ln) { doc.text(ln, x, yy); yy += LH; });
+      }
+      var yy = Math.max(PY + PH, y) + 8;
+      doc.setFontSize(13); doc.setTextColor(40, 36, 31);
+      doc.text(WP.title, 15, yy);
+      var colTop = yy + 8, k = 0;
+      for (var c2 = 0; c2 < 2; c2++) {
+        yy = colTop;
+        while (k < blocks.length && yy + blocks[k].h <= BOT) { put(blocks[k], colX[c2], yy); yy += blocks[k].h; k++; }
+      }
+      if (k < blocks.length) {
+        doc.addPage();
+        var left = blocks.slice(k), total = left.reduce(function (a, b) { return a + b.h; }, 0);
+        var split = 0, acc = 0;   // column 1 takes blocks until it holds about half
+        while (split < left.length && acc + left[split].h / 2 < total / 2) { acc += left[split].h; split++; }
+        yy = 20;
+        left.forEach(function (b, i) {
+          if (i === split) { yy = 20; }
+          put(b, colX[i < split ? 0 : 1], yy); yy += b.h;
+        });
+      }
       };
     }
     var legendPage = null;
