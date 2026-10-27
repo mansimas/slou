@@ -2186,7 +2186,7 @@
       doc.setFontSize(18); doc.setTextColor(40, 36, 31);
       doc.text('SLOU - ' + C.patternTitle, 105, 20, { align: 'center' });
       // and under it "Recommendations" (the owner, 2026-10-26)
-      doc.setFontSize(12); doc.setTextColor(110, 100, 90);
+      doc.setFontSize(13); doc.setTextColor(40, 36, 31);   // dark, 13 pt, like "Darbo eiga" below (the owner, 2026-10-27)
       doc.text(C.recommend, 105, 28, { align: 'center' });
 
       // The finished card wallet as it will come out (the owner, 2026-10-26):
@@ -2490,7 +2490,7 @@
       }
       var yy = Math.max(PY + PH, y) + 8;
       doc.setFontSize(13); doc.setTextColor(40, 36, 31);
-      doc.text(WP.title, 15, yy);
+      doc.text(WP.title, 105, yy, { align: 'center' });   // centred, like "Recommendations" above (the owner, 2026-10-27)
       var colTop = yy + 8, k = 0;
       for (var c2 = 0; c2 < 2; c2++) {
         yy = colTop;

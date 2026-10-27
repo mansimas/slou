@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-27 17:40] - Match card page 2 headings - Owner: "Rekomendacijos" is centred on the card holder page 2, so for a balanced composition "Darbo eiga" is centred too, and both headings are now the same: dark, 13 pt (Rekomendacijos was light grey, 12 pt).
 [2026-10-27 17:35] - Social links on pattern - Owner shares the making process online: after the work process, a "follow" line with TikTok, Instagram, Facebook, YouTube and Patreon handles, each a clickable link laid back over the flattened PDF page; texts in all 7 locales.
 [2026-10-27 10:50] - Add work process to pattern - Owner sent the making process: 10 steps (2: stamping initials or logo) under "Darbo eiga" after the card holder recommendations, two columns, all 7 locales (C.process). LT wording corrected by the owner, impersonal; other locales synced to it (heated spatula).
 [2026-10-27 10:30] - Gradient tones in watermark - Owner: gradients make a watermark harder to remove, but most people print black and white, so the stamps (own layer, tinted in flatten) now vary in darkness (~3-9%), not just colour, with a random ink grain; no single tone to select.
