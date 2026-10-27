@@ -1,7 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
-[2026-10-27 09:05] - Round stamp watermark on PDFs - Owner wanted a more creative watermark: a round stamp (SLOU centre, LEATHERCRAFT and SLOU.LT round the ring, Helvetica capitals like the logo) repeated in staggered rows over every pattern PDF page, tilted and 6% faint so the lines read through.
+[2026-10-27 09:40] - Scattered stamp watermark on PDFs - Owner wanted a creative watermark: round stamp (SLOU centre, LEATHERCRAFT and SLOU.LT round the ring, Helvetica capitals like the logo) scattered unevenly over every PDF page, big and small, each tilted its own way, 6% faint so lines read through.
 [2026-10-26 17:05] - Sanded one pocket corner - Owner (11.png): the front pocket's high top corner stood out past the inner piece; only that one corner is now rounded 1.5 mm in the 3D, as the sanded stack is on the real piece. All other corners and the pattern stay square.
 [2026-10-26 16:45] - Short dashes in editor text - Owner: long dashes look AI-written, so the pattern PDF titles ("SLOU - ...") and all editor UI text in 7 locales now use a short hyphen instead of — or –.
 [2026-10-26 16:30] - Recommendations under page title - Owner: page 2 keeps "SLOU — Kortelių piniginė Nr. 1" at the top and now has "Rekomendacijos" under it, so the page reads as the recommendations; translated in all 7 locales.
