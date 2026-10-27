@@ -1712,7 +1712,8 @@
   // ---------- pattern PDF ----------
   // A 1:1 A4 template: print at 100%, cut, lay on the leather, and punch
   // through the marked slits. jsPDF and a font with Lithuanian letters
-  // (DejaVu Sans) are only fetched on the first click.
+  // (DejaVu Sans) are only fetched on the first click, and pdf.js with them,
+  // which flattens the finished pages (`flatten`).
   var I18N = JSON.parse(document.getElementById('kfI18n').textContent);
   var pdfReady = null;
   function loadPdf() {
@@ -1723,6 +1724,20 @@
       el.onload = ok; el.onerror = fail;
       document.head.appendChild(el);
     });
+    // pdf.js, then its worker as a plain script: with the worker already on
+    // the page pdf.js runs it in the page itself, no cross-origin Worker needed
+    var PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+    function script(src) {
+      return new Promise(function (ok, fail) {
+        var el = document.createElement('script');
+        el.src = src; el.onload = ok; el.onerror = fail;
+        document.head.appendChild(el);
+      });
+    }
+    var pdfjs = script(PDFJS + 'pdf.min.js').then(function () {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
+      return script(PDFJS + 'pdf.worker.min.js');
+    });
     var font = fetch('https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans.ttf')
       .then(function (r) { if (!r.ok) { throw new Error('font ' + r.status); } return r.arrayBuffer(); })
       .then(function (buf) {
@@ -1730,7 +1745,7 @@
         for (var k = 0; k < bytes.length; k += 0x8000) { bin += String.fromCharCode.apply(null, bytes.subarray(k, k + 0x8000)); }
         return btoa(bin);
       });
-    pdfReady = Promise.all([lib, font]).then(function (r) { return r[1]; });
+    pdfReady = Promise.all([lib, font, pdfjs]).then(function (r) { return r[1]; });
     pdfReady.catch(function () { pdfReady = null; });   // let a later click retry
     return pdfReady;
   }
@@ -1774,6 +1789,38 @@
     pair[1].addEventListener('input', keep);
     pair[1].addEventListener('change', keep);
   });
+
+  // Every page rendered, watermark and all, into one picture, and the PDF
+  // rebuilt from those pictures (the owner, 2026-10-27: make the watermark
+  // harder to take off). No separate watermark object or text is left for a PDF
+  // editor to select and delete; it is in the same pixels as the lines. 400 dpi
+  // keeps the lines to 0.06 mm and a page under the 16.7 M pixel canvas limit
+  // of phones, and the picture fills the A4 page exactly, so the calibration
+  // is untouched.
+  function flatten(doc) {
+    var DPI = 400;
+    return window.pdfjsLib.getDocument({ data: doc.output('arraybuffer') }).promise.then(function (src) {
+      var out = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
+      out.setProperties({ title: 'SLOU', author: 'SLOU', creator: 'slou.lt' });
+      function page(p) {
+        return src.getPage(p).then(function (pg) {
+          var vp = pg.getViewport({ scale: DPI / 72 });
+          var c = document.createElement('canvas');
+          c.width = Math.round(vp.width); c.height = Math.round(vp.height);
+          var g = c.getContext('2d');
+          g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+          return pg.render({ canvasContext: g, viewport: vp }).promise.then(function () {
+            if (p > 1) { out.addPage(); }
+            out.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, 210, 297);
+            c.width = c.height = 0;   // let the memory go before the next page
+          });
+        });
+      }
+      var chain = Promise.resolve();
+      for (var p = 1; p <= src.numPages; p++) { chain = chain.then(page.bind(null, p)); }
+      return chain.then(function () { src.destroy(); return out; });
+    });
+  }
 
   // The watermark on every PDF the editor makes (the owner, 2026-10-27): a
   // round stamp - SLOU in the middle, LEATHERCRAFT round the top, SLOU.LT round
@@ -2525,7 +2572,9 @@
     if (legendPage) { doc.addPage(); legendPage(); }
 
     watermark(doc);
-    doc.save(card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
+    return flatten(doc).then(function (out) {
+      out.save(card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
+    });
   }
 
   document.getElementById('kfPattern').addEventListener('click', function (ev) {

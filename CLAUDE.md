@@ -126,7 +126,12 @@ How it works:
     the logo - scattered unevenly over every page of every PDF, 11 of them, big
     and small (0.55-1.5 × a 48 mm stamp), each at its own tilt (`SCATTER`, placed
     by hand so no two touch and every download is alike), at 6% opacity (fill
-    and stroke). Call it on any new PDF before `save`.
+    and stroke). Call it on any new PDF, then `flatten(doc)` and save what that
+    returns: every page is rendered by pdf.js 3.11.174 (cdnjs, loaded with jsPDF)
+    at 400 dpi into one JPEG filling the A4 page, so the watermark is in the same
+    pixels as the lines and a PDF editor finds no object or text to delete (the
+    owner, 2026-10-27: harder to remove). 400 dpi stays under phones' 16.7 M px
+    canvas limit; sizes and calibration are unchanged. ~0.8 MB a page.
   - **Print calibration** (2026-10-14, asked for by the owner, and reported
     working the same day: "viskas tiksliai atitinka, susikalibruoja tobulai"):
     his ML-2160 prints an A4 page small, and by a different amount on each axis
@@ -330,4 +335,4 @@ Render the view with `ejs` + `config/content.js` into a standalone HTML file, th
 ```
 google-chrome --headless=new --no-sandbox --enable-unsafe-swiftshader --use-angle=swiftshader --virtual-time-budget=8000 --screenshot=out.png file://...
 ```
-For close-ups, patch `camera.position`, `controls.target` and `controls.minDistance` in the rendered copy. For the PDF, replace `doc.save(...)` with `doc.output('datauristring')` written into the DOM, then `--dump-dom`, base64-decode, and render with `pdftoppm`.
+For close-ups, patch `camera.position`, `controls.target` and `controls.minDistance` in the rendered copy. For the PDF, replace `out.save(...)` with `out.output('datauristring')` written into the DOM, then `--dump-dom`, base64-decode, and render with `pdftoppm`.
