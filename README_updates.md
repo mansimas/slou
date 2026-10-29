@@ -1,8 +1,9 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-29 19:24] - Card deeper, mouth open - Owner: the 4 mm gap under the card in Nr. 2 looked odd: the card goes almost to the end, 2.5 mm above the fold's outside, the line in the leather with it; the mouth stays open above it, the card showing, as a real card holds it.
 [2026-10-29 19:20] - Natural Tokonole edges Nr. 2 - Owner: Nr. 2's edges looked painted one even colour; they should be natural leather only worked with Tokonole. Now the leather's own wandering colour and fibres run along them, a shade darker, with a soft satin sheen instead of gloss.
-[2026-10-29 19:18] - Softer card bulge shading - Owner: the card shading on Nr. 2 read artificial: bulge gentler (0.9 mm, eased over 4 mm, was 1 over 3), and the side lines now die away where the card ends at the top, the halves closing evenly towards the mouth.
+[2026-10-29 19:18] - Softer card bulge shading - Owner: the card shading on Nr. 2 read artificial: bulge gentler (0.9 mm, eased over 4 mm, was 1 over 3); the mouth stays open with the card showing (closing it towards the mouth was tried and undone).
 [2026-10-29 19:14] - No top outline, foot line up - Owner: no silhouette of the card over its top in Nr. 2 (leather stays lifted up to the open mouth), and the line below the card's foot raised just a touch, 1 mm.
 [2026-10-29 19:00] - Card raised, bulge like Nr. 1 - Owner: cards never reach the fold, so Nr. 2's card stands 4 mm above it; the bulge follows the card with its rounded corners, 1 mm past it and easing over 3 mm (a line right at the card's edge looked unnatural, undone).
 [2026-10-29 18:05] - Bevelled thumb hole edges - Owner: the thumb hole of Nr. 2 is worked with the edge beveler like the outer edges, so its edge now takes the same rounded dome; a stray sliver across the hole this exposed was fixed too.

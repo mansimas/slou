@@ -392,7 +392,8 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   rebuilt from the triangles the hole came apart in two and left a sliver of face
   across it.
 - The cards never go right down into the fold (the owner, 2026-10-29): the card stands
-  `FOLD_CARD` 4 mm above it, so the fold stays closed. The bulge is done as Nr. 1's
+  `FOLD_CARD` above it: 2.5 mm above the fold's outside, under 1 mm clear of the
+  leather inside (4 mm left an odd gap, the owner, 2026-10-29); the line moves with it. The bulge is done as Nr. 1's
   picture does it: `foldLift(x, y)` is full over the card and 1 mm past it, easing to
   nothing (smoothstep) over the next 3 mm all the way round, by distance from the card's
   rounded rectangle (`BANK_HW`, `BANK_LEN`, `BANK_CR`), so its corners are round. A 2 mm
@@ -403,9 +404,9 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   foot is raised 1 mm ("vos vos", the owner): there the lift is full only from the card's
   bottom edge up, easing out below it. Softened the same day, as the shading read
   artificial (the owner): `FOLD_OPEN` 0.9 mm (was 1), eased out over `FOLD_EASE` 4 mm
-  (was 3). The side lines die away where the card ends at the top (the owner): from 1.5
-  mm under the card's top edge to the mouth the whole lift eases to nothing, evenly
-  across, so the mouth closes and no line forms there. A hard
+  (was 3). Above the card the mouth stays open and the card shows in it, as a card holds
+  it open (the owner): closing the halves evenly towards the mouth, so the side lines
+  died away there, was tried and undone the same day. A hard
   step at the card's foot (t², read as a strong shadow) and the long slow slope there
   were both rejected. The face grid is finer where it eases out.
 - Not done yet: a page 2 picture and work process like Nr. 1.

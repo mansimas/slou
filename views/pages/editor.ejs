@@ -331,7 +331,10 @@
   // open top and show through the thumb notch.
   // 0.9 mm open, easing out over 4 mm: softer than the 1 mm over 3 mm it was,
   // whose shading read as artificial (the owner, 2026-10-29)
-  var FOLD_OPEN = 0.09, FOLD_CARD = 0.4, FOLD_EASE = 0.4;
+  // The card almost right down into the fold, not quite (the owner,
+  // 2026-10-29: 4 mm left an odd gap): 2.5 mm above its outside, under 1 mm
+  // clear of the leather inside it; the line in the leather moves with it.
+  var FOLD_OPEN = 0.09, FOLD_CARD = 0.25, FOLD_EASE = 0.4;
   var BANK_HW = 5.398 / 2, BANK_LEN = 8.56, BANK_CR = 0.318;   // ISO ID-1: 85.6 × 54 mm, 3.18 mm corners
   function foldLift(x, y) {
     var cy = FOLD_BOT + FOLD_CARD + BANK_LEN / 2, r = BANK_CR + 0.1;
@@ -342,11 +345,10 @@
     var qx = Math.abs(x) - (BANK_HW + 0.1 - r), qy = Math.abs(Math.min(y - 0.1, cy) - cy) - (BANK_LEN / 2 + 0.1 - r);
     var d = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;   // out from the card, past 1 mm
     var t = Math.min(1, Math.max(0, 1 - d / FOLD_EASE));
-    // and the side lines die away where the card ends at the top (the owner,
-    // 2026-10-29): above it the halves come back together, evenly across, from
-    // just under the card's top edge to the mouth, so no line forms there either
-    var ct = cy + BANK_LEN / 2 - 0.15, w = Math.min(1, Math.max(0, (y - ct) / (FOLD_TOP - ct)));
-    return FOLD_OPEN / 2 * t * t * (3 - 2 * t) * (1 - w * w * (3 - 2 * w));
+    // Above the card the mouth stays open, the card showing in it, as a card
+    // in it holds it open (the owner, 2026-10-29; closing it evenly towards
+    // the mouth was tried and undone)
+    return FOLD_OPEN / 2 * t * t * (3 - 2 * t);
   }
   // The flat outline, CCW. Beside the fold the two corner roundings meet in a
   // point on the drawing; here that point is a 0.3 mm round (`rho`), so the
