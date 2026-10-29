@@ -358,6 +358,15 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   6 mm above the fold (`FOLD_END`), the last 2 stitches at each of the 4 ends doubled.
 - Pattern: one sheet, the flat piece grain up, front half on top, fold dashed, slits on
   both halves mirrored across the fold, legend and specs on the right, no 50 mm square.
+- From the owner's Etsy screenshots (`pavyzdziai/Ekrano kopija 2026-10-29 *.png`, the
+  GR Handcraft listing): the fold with the thumb notch is the bottom, the cards go in at
+  the open top and show through the notch, and with cards in it the halves bulge apart
+  in the middle while staying glued at the sides. So the 3D carries a bank card standing
+  on the fold (`cardMat`), and the halves stand `FOLD_OPEN` 1 mm apart round it
+  (`foldLift`: nothing within 1 mm of the stitch line, eased over 3 mm), the bend opening
+  with them. `FOLD_RHO` is 0.3 mm (1 mm left a dimple in the folded corner; a little is
+  still there close up). Easing the dome out at the fold was tried and opened a gap
+  between the layers there instead.
 - Not done yet: a page 2 picture and work process like Nr. 1, a SLOU stamp.
 
 ### Example photos

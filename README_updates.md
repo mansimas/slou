@@ -1,7 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
-[2026-10-29 17:21] - Etsy video not reachable - Owner shared an Etsy listing to show the real card holder Nr. 2 on video; Etsy blocks automated access (403), so asked for screenshots or the video file in pavyzdziai/korteline2/ instead.
+[2026-10-29 17:29] - Card inside card holder 2 - Owner's Etsy screenshots show how cards go in: added a bank card inside Nr. 2, standing on the fold and showing in the thumb notch; the halves stand 1 mm apart round it, glued at the sides; folded-corner dimple made smaller.
 [2026-10-29 17:16] - Card holder Nr. 2 added - Owner wants a third item from a found example (pvz1/pvz2): one 1.6 mm piece, 70 x 184.4 mm, folded, Ø 25 mm thumb hole, sides stitched; built in 3D (real fold) and as a pattern PDF, with the owner's own stitch and techniques; 7 locales.
 [2026-10-29 16:30] - Copyright notice on patterns - Owner found a good example from another maker: every pattern PDF page now ends with "© SLOU" and a note that it is for personal use and small businesses only, no mass production, no sharing or reselling; in all 7 locales (`pattern.rights`).
 [2026-10-29 15:04] - Visible leader dots on picture - Owner: the dots at the ends of the page 2 leader lines (thickness notes) vanished on the dark leather edge, in colour and grey prints. Now a black dot in a white ring, with a white halo under each line, so they show on any print.
