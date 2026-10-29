@@ -123,13 +123,16 @@ How it works:
   - Red bracket at the joint, initials as a stamping guide, specs table.
   - Watermark (`watermark(doc)`, the owner, 2026-10-27): a round stamp - SLOU in
     the middle, LEATHERCRAFT and SLOU.LT round the ring, Helvetica capitals as in
-    the logo - scattered unevenly over every page of every PDF, 11 of them, big
-    and small (0.55-1.5 × a 48 mm stamp), each at its own tilt (`SCATTER`, placed
-    by hand so no two touch and every download is alike). It is drawn solid
+    the logo - placed by hand per page (`watermark(doc, spots)`, a list per page,
+    set in `makePattern`) over what someone would most want to clean off and
+    take: each template, the picture, the specs, the work process and links,
+    with smaller ones round the rest (the owner, 2026-10-29); big and small
+    (0.4-1.35 × a 48 mm stamp; on the card page 1 the templates each get a clearly different size), each at its own tilt, no two touching, every
+    download alike. It is drawn solid
     black on its own jsPDF (`wm`, a page per page)
     and coloured in `flatten(doc, wm)` with a diagonal gradient (`WM_STOPS`, leather
-    browns and olive) plus a radial one, varying in darkness (~3-9% darker than
-    the paper) and not only colour, since most people print black and white (the
+    browns and olive) plus a radial one, varying in darkness (~4-12% darker than
+    the paper; 3-9% until 2026-10-29) and not only colour, since most people print black and white (the
     owner), and a random ink grain on every pixel; multiplied into the
     page at 200 dpi, so there is no single tone to select (the owner, 2026-10-27).
     Call it on any new PDF, then `flatten(doc, wm)` and save what that
