@@ -392,7 +392,11 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   nothing (smoothstep) over the next 3 mm all the way round, by distance from the card's
   rounded rectangle (`BANK_HW`, `BANK_LEN`, `BANK_CR`), so its corners are round. A 2 mm
   ease centred on the card's edge (to put the line where the card ends) was tried and
-  undone the same day: it looked unnatural (the owner). A hard
+  undone the same day: it looked unnatural (the owner).
+  Over the card's top there is no outline at all (the owner, 2026-10-29): the lift stays
+  full right up to the open mouth; only the sides and the foot ease out. The line at the
+  foot is raised 1 mm ("vos vos", the owner): there the lift is full only from the card's
+  bottom edge up, easing out over the 3 mm below it. A hard
   step at the card's foot (t², read as a strong shadow) and the long slow slope there
   were both rejected. The face grid is finer where it eases out.
 - Not done yet: a page 2 picture and work process like Nr. 1.
