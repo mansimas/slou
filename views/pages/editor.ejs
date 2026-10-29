@@ -516,6 +516,25 @@
     l[0].needsUpdate = true;
   });
 
+  // Card holder Nr. 2's SLOU stamp: the same stamp, on the back half, just
+  // above the thumb notch (the owner, 2026-10-29: the logo was missing).
+  // Mirrored for the same reason as Nr. 1's.
+  var logo2Tex = canvasTex(true), logo2BumpTex = canvasTex(false);
+  [[logo2Tex, 'rgba(28,13,2,.55)', true], [logo2BumpTex, '#000', false]].forEach(function (l) {
+    var g = l[0].image.getContext('2d'), px = TEX_N / TEX_SPAN;
+    g.drawImage(grain, 0, 0);
+    if (l[2]) { g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(0, 0, TEX_N, TEX_N); }
+    g.save();
+    g.translate(TEX_N / 2, TEX_N / 2 - (FOLD_BOT + FOLD_T + FOLD_HOLE + 0.75) * px);
+    g.scale(-1, 1);
+    g.font = '800 ' + (0.62 * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = l[1]; g.filter = 'blur(1px)';
+    g.fillText('SLOU', 0, 0);
+    g.restore();
+    l[0].needsUpdate = true;
+  });
+
   // ---------- materials ----------
   var leatherMat = new THREE.MeshStandardMaterial({ map: colorTex, bumpMap: bumpTex, bumpScale: 1.5, roughness: 0.72 });
   var backMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: bumpTex, bumpScale: 1, roughness: 0.85 });
@@ -535,6 +554,7 @@
   var pocketEdgeMat = burnished(), bodyEdgeMat = burnished();
   var bodyGrainMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1.5, roughness: 0.72 });
   var cardMat = new THREE.MeshStandardMaterial({ color: 0x24467d, roughness: 0.4 });   // the bank card in card holder Nr. 2
+  var fold2BackMat = new THREE.MeshStandardMaterial({ map: logo2Tex, bumpMap: logo2BumpTex, bumpScale: 1.5, roughness: 0.72 });   // Nr. 2's back, with the stamp
   // Twisted waxed thread: diagonal plies wound round each stitch.
   var plyTex = (function () {
     // three plies round the thread; repeat set so they run at ~45 deg
@@ -660,6 +680,7 @@
     backMat.color.copy(c).multiplyScalar(0.9);
     edgeMat.color.copy(c).multiplyScalar(0.55);
     bodyGrainMat.color.copy(c);
+    fold2BackMat.color.copy(c);
     var pc = new THREE.Color(state.pocket);
     pocketFrontMat.color.copy(pc);
     pocketBackMat.color.copy(pc);
@@ -1117,6 +1138,108 @@
     src.groups.forEach(function (g) {
       for (var i = g.start; i < g.start + g.count; i += 3) { tris.push([ix[i], ix[i + 1], ix[i + 2], g.materialIndex]); }
     });
+    // The two faces come from `leatherPiece` as long triangles between outline
+    // points: nothing inside them could bend or bulge. Each face is laid again
+    // on a grid, 4 mm cells, finer across the bend (0.25 mm) and where the
+    // bulge eases out beside the stitch lines (0.5 mm); the cells are cut to
+    // the face's own outline, so it still meets the edge exactly. The thumb
+    // hole is joined to the outline by a cut along a grid line (a keyhole), so
+    // each cell is clipped against one polygon.
+    function lines(lo, hi, fine) {
+      var out = [];
+      for (var v = lo; v < hi; v += 0.4) { out.push(v); }
+      fine.forEach(function (f) { for (var v = f[0]; v <= f[1] + 1e-9; v += f[2]) { out.push(v); } });
+      out.push(hi);
+      out.sort(function (a, b) { return a - b; });
+      return out.filter(function (v, i) { return !i || v - out[i - 1] > 1e-4; });
+    }
+    function clip(poly, ax, val, keepHi) {
+      var out = [];
+      poly.forEach(function (A, i) {
+        var B = poly[(i + 1) % poly.length], ina = keepHi ? A[ax] >= val : A[ax] <= val, inb = keepHi ? B[ax] >= val : B[ax] <= val;
+        if (ina) { out.push(A); }
+        if (ina !== inb) {
+          var t = (val - A[ax]) / (B[ax] - A[ax]), Q = { x: A.x + t * (B.x - A.x), y: A.y + t * (B.y - A.y) };
+          Q[ax] = val; out.push(Q);
+        }
+      });
+      return out;
+    }
+    [0, 2].forEach(function (gi) {
+      var mine = tris.filter(function (t) { return t[3] === gi; });
+      if (!mine.length) { return; }
+      tris = tris.filter(function (t) { return t[3] !== gi; });
+      // the face's outline loops, from the edges only one of its triangles uses
+      var count = {}, after = {};
+      mine.forEach(function (t) {
+        for (var e = 0; e < 3; e++) {
+          var a = t[e], b = t[(e + 1) % 3], k = Math.min(a, b) + '_' + Math.max(a, b);
+          count[k] = (count[k] || 0) + 1; after[a] = after[a] || {}; after[a][b] = true;
+        }
+      });
+      var next = {};
+      mine.forEach(function (t) {
+        for (var e = 0; e < 3; e++) {
+          var a = t[e], b = t[(e + 1) % 3];
+          if (count[Math.min(a, b) + '_' + Math.max(a, b)] === 1) { next[a] = b; }
+        }
+      });
+      var seen = {}, loops = [];
+      Object.keys(next).forEach(function (k0) {
+        if (seen[k0]) { return; }
+        var loop = [], v = +k0;
+        while (!seen[v] && next[v] !== undefined) { seen[v] = true; loop.push({ x: P[v * 3], y: P[v * 3 + 1] }); v = next[v]; }
+        loops.push(loop);
+      });
+      function area(l) { var A = 0; l.forEach(function (p, i) { var q = l[(i + 1) % l.length]; A += p.x * q.y - q.x * p.y; }); return A / 2; }
+      loops.sort(function (a, b) { return Math.abs(area(b)) - Math.abs(area(a)); });
+      var outer = loops[0], zc = P[mine[0][0] * 3 + 2], c0 = mine[0][0];
+      var key = 0;   // the keyhole's cut runs up from the hole's top point
+      loops.slice(1).forEach(function (hole) {
+        var hi = 0;
+        hole.forEach(function (p, i) { if (p.y > hole[hi].y) { hi = i; } });
+        var H = hole[hi], best = null;
+        outer.forEach(function (p, i) {
+          var q = outer[(i + 1) % outer.length];
+          if ((p.x - H.x) * (q.x - H.x) > 0 || p.x === q.x) { return; }
+          var y = p.y + (H.x - p.x) / (q.x - p.x) * (q.y - p.y);
+          if (y > H.y && (!best || y < best.y)) { best = { y: y, i: i }; }
+        });
+        var Q = { x: H.x, y: best.y };
+        var ring = hole.slice(hi).concat(hole.slice(0, hi + 1));
+        outer = outer.slice(0, best.i + 1).concat([Q], ring, [Q], outer.slice(best.i + 1));
+        key = H.x;
+      });
+      var r1 = FOLD_W / 2 - STITCH_INSET - 0.1, r0 = r1 - 0.3;
+      var xs = lines(-FOLD_W / 2 - 0.01, FOLD_W / 2 + 0.01, [[-r1 - 0.05, -r0 + 0.05, 0.05], [r0 - 0.05, r1 + 0.05, 0.05], [key, key, 1]]);
+      var ss = lines(-FOLD_L - 0.01, FOLD_L + 0.01, [[-Z - 0.03, Z + 0.03, 0.025]]);
+      var ids = {};
+      function vid(p) {
+        var k = Math.round(p.x * 1e5) + ',' + Math.round(p.y * 1e5);
+        if (ids[k] === undefined) {
+          ids[k] = P.length / 3;
+          P.push(p.x, p.y, zc); Nm.push(0, 0, gi === 0 ? 1 : -1); U.push(p.x, p.y);
+          Cl.push(Cl[c0 * 3], Cl[c0 * 3 + 1], Cl[c0 * 3 + 2]);
+        }
+        return ids[k];
+      }
+      for (var i = 0; i < xs.length - 1; i++) {
+        var col = clip(clip(outer, 'x', xs[i], true), 'x', xs[i + 1], false);
+        if (col.length < 3) { continue; }
+        for (var j = 0; j < ss.length - 1; j++) {
+          var cell = clip(clip(col, 'y', ss[j], true), 'y', ss[j + 1], false);
+          if (cell.length < 3) { continue; }
+          var V = cell.map(function (p) { return new THREE.Vector2(p.x, p.y); });
+          THREE.ShapeUtils.triangulateShape(V, []).forEach(function (t) {
+            var A = V[t[0]], B = V[t[1]], C = V[t[2]];
+            if (Math.abs((B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x)) < 1e-10) { return; }
+            var ccw = (B.x - A.x) * (C.y - A.y) - (B.y - A.y) * (C.x - A.x) > 0, q = [vid(A), vid(B), vid(C)];
+            // wound to face out: up on the grain side (0), down on the flesh side (2)
+            tris.push(ccw === (gi === 0) ? [q[0], q[1], q[2], gi] : [q[0], q[2], q[1], gi]);
+          });
+        }
+      }
+    });
     var Z = FOLD_B + 0.02, MAX = 0.03;
     for (var round = 0; round < 20; round++) {
       var mids = {}, any = false;
@@ -1190,6 +1313,11 @@
     fob.children.slice().forEach(function (m) { fob.remove(m); if (m.geometry !== stitchGeo && m.geometry !== holeGeo) { m.geometry.dispose(); } });
 
     var card = state.product === 'card', fold = state.product === 'card2', holesAt, crossings = [], addPockets = null, runs = null;
+    // Nr. 2 is one piece of leather, so its two faces must read as one colour
+    // (the owner, 2026-10-29): the light behind it as strong as the one in
+    // front, and placed as its mirror image
+    backLight.intensity = fold ? 2.2 : 1.2;
+    backLight.position.set(fold ? -5 : -4, fold ? 8 : 5, -10);
     if (fold) {
       // Card holder Nr. 2: the one piece, cut flat and folded (`folded`). Its
       // edges as on Nr. 1: up the glued sides and round the corners one dome
@@ -1199,7 +1327,7 @@
       var foldStack = function (p, hole) { return hole ? 0 : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R); };
       var thumb = new THREE.Path(); thumb.absarc(0, 0, FOLD_HOLE, 0, Math.PI * 2, true);
       var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], new THREE.Color(state.leather).multiplyScalar(0.62), null, null, null, FOLD_T);
-      fob.add(new THREE.Mesh(folded(flat.geometry), [leatherMat, bodyEdgeMat, backMat, bodyGrainMat]));
+      fob.add(new THREE.Mesh(folded(flat.geometry), [leatherMat, bodyEdgeMat, backMat, fold2BackMat]));
       flat.geometry.dispose();
       // a bank card inside (ISO ID-1, 85.6 × 54 × 0.76 mm, 3.18 mm corners),
       // standing on the fold, as in the owner's screenshots: it shows in the

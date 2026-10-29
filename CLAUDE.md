@@ -367,7 +367,15 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   with them. `FOLD_RHO` is 0.3 mm (1 mm left a dimple in the folded corner; a little is
   still there close up). Easing the dome out at the fold was tried and opened a gap
   between the layers there instead.
-- Not done yet: a page 2 picture and work process like Nr. 1, a SLOU stamp.
+- SLOU stamp (the owner, 2026-10-29) on the back half, just above the thumb notch
+  (`logo2Tex`, `fold2BackMat`), mirrored like Nr. 1's; not on the pattern.
+- One piece, one colour (the owner, 2026-10-29): both faces use the same leather; for
+  Nr. 2 `build()` makes the back light as strong as the front one (2.2) and its mirror
+  image, or the back read darker. Other items keep 1.2.
+- `folded()` lays both faces again on a grid (4 mm cells, 0.25 mm across the bend, 0.5 mm
+  where the bulge eases out), clipped to the face's outline with the thumb hole joined
+  by a keyhole cut; without it the faces were long triangles that could not bulge.
+- Not done yet: a page 2 picture and work process like Nr. 1.
 
 ### Example photos
 `pavyzdziai/` (one folder per item: `korteline/`, `pakabukas/`) is where the
