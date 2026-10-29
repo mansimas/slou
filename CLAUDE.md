@@ -338,6 +338,28 @@ locked keyfob stitch, unchanged:
   the drawing. Thread
   ends are not marked. Calibration is shared with the keyfob.
 
+### Card holder Nr. 2 (sulankstoma kortelinė)
+Added 2026-10-29: the third "Item" (`product: 'card2'`, texts in `content.*.editor.card2`),
+from a pattern the owner found (`pavyzdziai/pvz1.pdf` drawing, `pvz2.pdf` notes;
+GR Handcraft). Only its shape and size are taken from it: the stitch and every
+technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
+- One piece of 1.6 mm veg-tan (`FOLD_T`), 70 × 184.4 mm flat (`FOLD_W`, 2 × `FOLD_L`),
+  folded in the middle; corners rounded 6 mm (`FOLD_R`); a Ø 25 mm hole on the fold
+  (`FOLD_HOLE`), so each face has a half-round thumb notch. Where the corner
+  roundings meet beside the fold (a point on the drawing) there is a 1 mm round
+  (`FOLD_RHO`), so the edge can be set in.
+- 3D: built flat by `leatherPiece` (new `stackT` argument, the stack is the two
+  halves) and folded by `folded()`: triangles cut finer across the bend (no edge over
+  0.3 mm along the piece; cutting them small every way made 300 000 triangles and
+  stalled the PDF), then wrapped round a centre line of radius FOLD_T / 2, so the
+  flesh sides meet. Sides and corners one glued dome; the open tops and the thumb
+  hole each their own edge.
+- Two open seams (`runs`), down the left, up the right, from 6 mm under the top to
+  6 mm above the fold (`FOLD_END`), the last 2 stitches at each of the 4 ends doubled.
+- Pattern: one sheet, the flat piece grain up, front half on top, fold dashed, slits on
+  both halves mirrored across the fold, legend and specs on the right, no 50 mm square.
+- Not done yet: a page 2 picture and work process like Nr. 1, a SLOU stamp.
+
 ### Example photos
 `pavyzdziai/` (one folder per item: `korteline/`, `pakabukas/`) is where the
 owner drops photos of real pieces. Look there before working on an item, and

@@ -61,8 +61,8 @@
 <section class="kf">
   <div class="wrap">
     <header class="kf__head">
-      <h1 id="kfTitle" data-keyfob="<%= e.title %>" data-card="<%= e.card.title %>"><%= e.title %></h1>
-      <p id="kfLead" data-keyfob="<%= e.lead %>" data-card="<%= e.card.lead %>"><%= e.lead %></p>
+      <h1 id="kfTitle" data-keyfob="<%= e.title %>" data-card="<%= e.card.title %>" data-card2="<%= e.card2.title %>"><%= e.title %></h1>
+      <p id="kfLead" data-keyfob="<%= e.lead %>" data-card="<%= e.card.lead %>" data-card2="<%= e.card2.lead %>"><%= e.lead %></p>
     </header>
 
     <div class="kf__grid">
@@ -79,7 +79,7 @@
         <div>
           <span class="kf__label"><%= e.product %></span>
           <div class="kf__opts" data-group="product">
-            <% ['keyfob', 'card'].forEach(function (k, i) { %>
+            <% ['keyfob', 'card', 'card2'].forEach(function (k, i) { %>
               <button type="button" class="kf__btn" data-value="<%= k %>" aria-pressed="<%= i === 0 %>"><%= e.products[k] %></button>
             <% }); %>
           </div>
@@ -166,7 +166,7 @@
   </div>
 </section>
 
-<script type="application/json" id="kfI18n"><%- JSON.stringify({ pattern: e.pattern, measure: e.measure, calib: e.calib, card: e.card }).replace(/</g, '\\u003c') %></script>
+<script type="application/json" id="kfI18n"><%- JSON.stringify({ pattern: e.pattern, measure: e.measure, calib: e.calib, card: e.card, card2: e.card2 }).replace(/</g, '\\u003c') %></script>
 
 <script type="importmap">
   { "imports": {
@@ -306,6 +306,41 @@
   // on the front (side 1) not in the window.
   function inPocket(x, y, side) { return y < pocketTop(x) && !(side > 0 && inWindow(x, y)); }
 
+  // Card holder Nr. 2 (2026-10-29): one piece of veg-tan, 1.6 mm, folded in
+  // half, from a pattern the owner found (pavyzdziai/pvz1.pdf, measured off its
+  // vectors): 70 × 184.4 mm flat, 92.2 mm a half, its corners rounded 6 mm, and
+  // a Ø 25 mm hole on the fold, so each face has a half-round thumb notch at
+  // its foot. Glued and saddle-stitched up both sides with the owner's own
+  // stitch, unchanged, from 6 mm under the top to 6 mm above the fold; the top
+  // is left open. Flat, `s` runs along the piece: 0 on the fold, + up the front.
+  var FOLD_W = 7, FOLD_L = 9.22, FOLD_T = 0.16, FOLD_R = 0.6, FOLD_HOLE = 1.25, FOLD_END = 0.6;
+  // The leather wraps round a centre line of radius FOLD_T / 2, so the flesh
+  // sides of the two halves meet; FOLD_B is half the length the bend takes up.
+  var FOLD_B = Math.PI * FOLD_T / 4;
+  var FOLD_YC = (FOLD_B + FOLD_T - FOLD_L) / 2;   // the bend's centre, so the folded piece is centred
+  var FOLD_TOP = FOLD_YC + FOLD_L - FOLD_B, FOLD_BOT = FOLD_YC - FOLD_T;
+  function foldY(s) { return FOLD_YC + Math.abs(s) - FOLD_B; }   // where flat s is once folded (off the bend)
+  // The flat outline, CCW. Beside the fold the two corner roundings meet in a
+  // point on the drawing; here that point is a 1 mm round (`rho`), so the edge
+  // can be set in without crossing itself. It all lies in the bend.
+  var FOLD_RHO = 0.1, FOLD_DX = Math.sqrt(Math.pow(FOLD_R + FOLD_RHO, 2) - FOLD_R * FOLD_R);
+  var FOLD_GAP = FOLD_W / 2 - FOLD_R + FOLD_DX - FOLD_RHO;   // the fold runs out to here each side
+  function foldOutline() {
+    var sh = new THREE.Shape(), x = FOLD_W / 2, L = FOLD_L, r = FOLD_R, rho = FOLD_RHO, dx = FOLD_DX, PI = Math.PI;
+    var a = Math.atan2(r, dx);   // where the round meets the corners
+    sh.moveTo(-x + r, -L); sh.lineTo(x - r, -L); sh.absarc(x - r, -L + r, r, -PI / 2, 0);
+    sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, a);
+    sh.absarc(x - r + dx, 0, rho, PI + a, PI - a, true);
+    sh.absarc(x - r, r, r, -a, 0);
+    sh.lineTo(x, L - r); sh.absarc(x - r, L - r, r, 0, PI / 2);
+    sh.lineTo(-x + r, L); sh.absarc(-x + r, L - r, r, PI / 2, PI);
+    sh.lineTo(-x, r); sh.absarc(-x + r, r, r, PI, PI + a);
+    sh.absarc(-x + r - dx, 0, rho, a, -a, true);
+    sh.absarc(-x + r, -r, r, PI - a, PI);
+    sh.lineTo(-x, -L + r); sh.absarc(-x + r, -L + r, r, PI, PI * 1.5);
+    return sh;
+  }
+
   // `pocket` is the card holder's second colour: as made, olive pockets on a
   // brown body
   var state = { product: 'keyfob', shape: 'arch', leather: '#9a5527', pocket: '#5b5a35', thread: '#eadcbf', ring: 'silver', text: '' };
@@ -339,7 +374,7 @@
   // Where the view is centred: the card holder sits a touch higher in the
   // frame, clear of the hint text at the foot of the stage (the owner,
   // 2026-10-20); the keyfob keeps its own.
-  function centreY() { return state.product === 'card' ? -0.3 : 0.8; }
+  function centreY() { return state.product === 'keyfob' ? 0.8 : -0.3; }
   controls.autoRotate = true;
   controls.autoRotateSpeed = 1.2;
   controls.addEventListener('start', function () { controls.autoRotate = false; });
@@ -396,6 +431,11 @@
   function textLayout() {
     var txt = state.text.trim().toUpperCase();
     if (!txt) { return null; }
+    if (state.product === 'card2') {
+      // across the front, just above the thumb notch
+      return { txt: txt, vertical: false, x: 0, y: FOLD_BOT + FOLD_T + FOLD_HOLE + 0.9,
+               size: Math.min(0.75, (FOLD_W - 2.2) / (txt.length * 0.72)) };
+    }
     if (state.product === 'card') {
       // across the front pocket, just above the window (as on the owner's piece)
       return { txt: txt, vertical: false, x: 0, y: WIN_Y + WIN_H + 0.75,
@@ -905,8 +945,10 @@
   // `top(p)`, if given, is where the glued stack ends on the front at outline
   // point p (CARD_THICK / 2 by default): in the thumb window the front pocket
   // is cut away, so there the stack is the two bodies and the back pocket.
-  function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp, top) {
-    var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T = CARD_THICK / 2, tp = T, domeNormals = [], matte = {}, sideFace = [];
+  // `stackT`, if given, is half the glued stack's thickness (CARD_THICK / 2 by
+  // default): on the folded card holder the stack is its two halves.
+  function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp, top, stackT) {
+    var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T = stackT || CARD_THICK / 2, tp = T, domeNormals = [], matte = {}, sideFace = [];
     function vert(x, y, zz, c, edge) {
       pos.push(x, y, zz + (squeeze && edge ? squeeze(x, y, zz) : 0)); uv.push(x, y); col.push(c.r, c.g, c.b);
       return pos.length / 3 - 1;
@@ -1047,11 +1089,111 @@
     return path.getPoints(24).filter(function (p, i, all) { return p.distanceTo(all[(i + 1) % all.length]) > 1e-4; });
   }
 
+  // Card holder Nr. 2: the flat piece (built by `leatherPiece`, z from 0 to
+  // FOLD_T, s along y) folded. Its triangles are first cut finer across the
+  // bend, edge by edge so neighbours stay joined, until no edge there spans
+  // over 0.3 mm along the piece (only that matters to the bend, and cutting
+  // them small every way made 300 000 triangles); then every point is
+  // wrapped round the bend's centre line and its
+  // normal turned with it. The grain face comes out as two groups: the front
+  // half (material 0, with the initials) and the back half (material 3).
+  function folded(src) {
+    var P = Array.prototype.slice.call(src.attributes.position.array), Nm = Array.prototype.slice.call(src.attributes.normal.array);
+    var U = Array.prototype.slice.call(src.attributes.uv.array), Cl = Array.prototype.slice.call(src.attributes.color.array);
+    var ix = src.index.array, tris = [];
+    src.groups.forEach(function (g) {
+      for (var i = g.start; i < g.start + g.count; i += 3) { tris.push([ix[i], ix[i + 1], ix[i + 2], g.materialIndex]); }
+    });
+    var Z = FOLD_B + 0.02, MAX = 0.03;
+    for (var round = 0; round < 20; round++) {
+      var mids = {}, any = false;
+      tris.forEach(function (t) {
+        for (var e = 0; e < 3; e++) {
+          var a = t[e], b = t[(e + 1) % 3], k = Math.min(a, b) + '_' + Math.max(a, b);
+          if (k in mids) { continue; }
+          var sa = P[a * 3 + 1], sb = P[b * 3 + 1];
+          if (Math.max(sa, sb) < -Z || Math.min(sa, sb) > Z || Math.abs(sa - sb) <= MAX) { continue; }
+          var v = P.length / 3, j;
+          for (j = 0; j < 3; j++) { P.push((P[a * 3 + j] + P[b * 3 + j]) / 2); Cl.push((Cl[a * 3 + j] + Cl[b * 3 + j]) / 2); }
+          var nx = Nm[a * 3] + Nm[b * 3], ny = Nm[a * 3 + 1] + Nm[b * 3 + 1], nz = Nm[a * 3 + 2] + Nm[b * 3 + 2], nl = Math.hypot(nx, ny, nz) || 1;
+          Nm.push(nx / nl, ny / nl, nz / nl);
+          U.push((U[a * 2] + U[b * 2]) / 2, (U[a * 2 + 1] + U[b * 2 + 1]) / 2);
+          mids[k] = v; any = true;
+        }
+      });
+      if (!any) { break; }
+      var next = [];
+      tris.forEach(function (t) {
+        var m = [0, 1, 2].map(function (e) { var a = t[e], b = t[(e + 1) % 3]; return mids[Math.min(a, b) + '_' + Math.max(a, b)]; });
+        var c = m.filter(function (q) { return q !== undefined; }).length, g = t[3];
+        if (!c) { next.push(t); return; }
+        // turned so the split edges come first: edge 0 is a-b, edge 1 b-c
+        var r = 0;
+        if (c === 1) { r = m[0] !== undefined ? 0 : m[1] !== undefined ? 1 : 2; }
+        if (c === 2) { r = m[2] === undefined ? 0 : m[0] === undefined ? 1 : 2; }
+        var A = t[r], B = t[(r + 1) % 3], C = t[(r + 2) % 3], mab = m[r], mbc = m[(r + 1) % 3], mca = m[(r + 2) % 3];
+        if (c === 1) { next.push([A, mab, C, g], [mab, B, C, g]); }
+        else if (c === 2) { next.push([mab, B, mbc, g], [A, mab, mbc, g], [A, mbc, C, g]); }
+        else { next.push([A, mab, mca, g], [mab, B, mbc, g], [mca, mbc, C, g], [mab, mbc, mca, g]); }
+      });
+      tris = next;
+    }
+    // folded: the front half stays where it is, the back is turned over
+    // under it, and the bend between them is a half-round
+    for (var v = 0; v < P.length / 3; v++) {
+      var sv = P[v * 3 + 1], zz = P[v * 3 + 2], th = Math.max(-1, Math.min(1, sv / FOLD_B)) * Math.PI / 2, y, z;
+      if (sv >= FOLD_B) { y = FOLD_YC + sv - FOLD_B; z = zz; }
+      else if (sv <= -FOLD_B) { y = FOLD_YC - sv - FOLD_B; z = -zz; }
+      else { y = FOLD_YC - zz * Math.cos(th); z = zz * Math.sin(th); }
+      P[v * 3 + 1] = y; P[v * 3 + 2] = z;
+      var ny0 = Nm[v * 3 + 1], nz0 = Nm[v * 3 + 2];
+      Nm[v * 3 + 1] = ny0 * Math.sin(th) - nz0 * Math.cos(th); Nm[v * 3 + 2] = ny0 * Math.cos(th) + nz0 * Math.sin(th);
+      U[v * 2 + 1] = y;   // the texture by where it is once folded, so the initials land on the front
+    }
+    var byMat = [[], [], [], []];
+    tris.forEach(function (t) {
+      var g = t[3];
+      if (g === 0 && P[t[0] * 3 + 2] + P[t[1] * 3 + 2] + P[t[2] * 3 + 2] < 0) { g = 3; }   // the grain on the back half
+      byMat[g].push(t[0], t[1], t[2]);
+    });
+    var geo = new THREE.BufferGeometry(), idx = [];
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(Nm, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(Cl, 3));
+    byMat.forEach(function (list, mi) { geo.addGroup(idx.length, list.length, mi); idx = idx.concat(list); });
+    geo.setIndex(idx);
+    geo.computeBoundingSphere();
+    return geo;
+  }
+
   function build() {
     fob.children.slice().forEach(function (m) { fob.remove(m); if (m.geometry !== stitchGeo && m.geometry !== holeGeo) { m.geometry.dispose(); } });
 
-    var card = state.product === 'card', holesAt, crossings = [], addPockets = null;
-    if (card) {
+    var card = state.product === 'card', fold = state.product === 'card2', holesAt, crossings = [], addPockets = null, runs = null;
+    if (fold) {
+      // Card holder Nr. 2: the one piece, cut flat and folded (`folded`). Its
+      // edges as on Nr. 1: up the glued sides and round the corners one dome
+      // across both halves (stackT), the two open tops and the thumb hole each
+      // its own edge, easing from one to the other round the top corners.
+      var fe = function (t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
+      var foldStack = function (p, hole) { return hole ? 0 : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R); };
+      var thumb = new THREE.Path(); thumb.absarc(0, 0, FOLD_HOLE, 0, Math.PI * 2, true);
+      var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], new THREE.Color(state.leather).multiplyScalar(0.62), null, null, null, FOLD_T);
+      fob.add(new THREE.Mesh(folded(flat.geometry), [leatherMat, bodyEdgeMat, backMat, bodyGrainMat]));
+      flat.geometry.dispose();
+      // two open seams, down the left side and up the right (CCW, like the
+      // outlines), each its own run of equal stitches
+      var hx = FOLD_W / 2 - STITCH_INSET, yT = foldY(FOLD_L - FOLD_END), yB = foldY(FOLD_END);
+      var seam = function (x, y0, y1) {
+        var poly = [];
+        for (var k = 0; k <= 400; k++) { poly.push(new THREE.Vector2(x, y0 + (y1 - y0) * k / 400)); }
+        return divide(poly).concat([poly[400]]);
+      };
+      var leftSeam = seam(-hx, yT, yB);
+      holesAt = leftSeam.concat(seam(hx, yB, yT));
+      runs = [[0, leftSeam.length - 1], [leftSeam.length, holesAt.length - 1]];
+    } else if (card) {
       // Front to back: pocket, body, body, pocket, touching, the middle of the
       // stack at z = 0. The
       // grain faces out on both sides: the front two show their front face,
@@ -1166,7 +1308,7 @@
       holesAt = stitchHoles(outline(state.shape, STITCH_INSET));
     }
     // An open seam (the card holder's U) has no stitch after its last hole.
-    var open = card;
+    var open = card || fold;
 
     // Saddle stitch on both faces. Holes are diamond-chisel slits on the
     // stitch line, about 3.85 mm apart, cut at an angle to it. Each stitch runs
@@ -1175,6 +1317,9 @@
     // corner of the outline gets its own whole number of stitches, so a hole
     // always lands on each corner and joint. The back is the mirror image.
     var n = holesAt.length;
+    // each run of an open seam, first and last hole (Nr. 2 has two)
+    if (open && !runs) { runs = [[0, n - 1]]; }
+    function runOf(k) { return runs.filter(function (r) { return k >= r[0] && k <= r[1]; })[0]; }
     // the open seam has two thread ends, each with its doubled stitches
     var stitches = new THREE.InstancedMesh(stitchGeo, threadMat, n * 2 + OVERLAP * 8 + 32);   // + the pieces of stitches over a pocket edge
     var extra = n * 2;   // next free instance: 2 threads x 2 faces per joint stitch
@@ -1378,7 +1523,7 @@
     // The face the thread lies on at (x, y). The keyfob is one piece; on the
     // card holder the pockets stand one piece proud of the bodies below their
     // top, except in the front pocket's window.
-    function face(x, y, side) { return card ? (inPocket(x, y, side) ? CARD_BODY + CARD_POCKET : CARD_BODY) : zTop; }
+    function face(x, y, side) { return fold ? FOLD_T : card ? (inPocket(x, y, side) ? CARD_BODY + CARD_POCKET : CARD_BODY) : zTop; }
     // stitch k runs from hole k to hole k + 1; both its slits lean off that
     // chord, so every stitch has the same length and lean
     var chords = holesAt.map(function (p, k) {
@@ -1386,8 +1531,8 @@
       return new THREE.Vector2(q2.x - p.x, q2.y - p.y).normalize();
     });
     // an open seam's end holes have a stitch on one side only
-    if (open) { chords[n - 1] = chords[n - 2]; }
-    function chordIn(k) { return open && k === 0 ? chords[0] : chords[(k + n - 1) % n]; }
+    if (open) { runs.forEach(function (r) { chords[r[1]] = chords[r[1] - 1]; }); }
+    function chordIn(k) { return open && runOf(k)[0] === k ? chords[k] : chords[(k + n - 1) % n]; }
     // Thread ending: the closing round is sewn on over the first OVERLAP
     // stitches, so there two threads share the same holes and lie side by
     // side, the second one crossing slightly over the first. Then both ends
@@ -1400,13 +1545,13 @@
     var E = (J - 1 + n) % n;   // the two doubled stitches meet at hole J
     // which holes are corners: the pattern PDF marks those as pinned dots
     var corner = holesAt.map(function (p, k) { return chordIn(k).dot(chords[k]) < Math.cos(Math.PI / 9); });
-    current = { holes: holesAt, chords: chords, chordIn: chordIn, E: E, corner: corner, open: open };
+    current = { holes: holesAt, chords: chords, chordIn: chordIn, E: E, corner: corner, open: open, runs: runs };
     for (var k = 0; k < n; k++) {
       var a = holesAt[k], b = holesAt[(k + 1) % n], d = chords[k];
-      var sewn = !(open && k === n - 1);
+      var run = open ? runOf(k) : null, sewn = !(open && k === run[1]);
       // the card holder's thread starts and ends at the opening, and at each
       // end the last OVERLAP stitches are sewn back over, as on the keyfob joint
-      var doubled = open ? k < OVERLAP || k >= n - 1 - OVERLAP : (k - E + n) % n < OVERLAP;
+      var doubled = open ? k - run[0] < OVERLAP || k >= run[1] - OVERLAP : (k - E + n) % n < OVERLAP;
       // a slit sits between two stitches: lean it off their average direction
       var dh = chordIn(k).clone().add(d).normalize();
       [1, -1].forEach(function (side, i) {
@@ -1443,7 +1588,7 @@
             // together they read as one slightly fuller, plied stitch in the
             // row, not as two separate cords. The holes are untouched.
             [-0.5, 0.5].forEach(function (t, j) {
-              layPair(from, to, za, zb, side, inward, t, j, true, side < 0 && k === n - 2 ? 0.015 : 0);
+              layPair(from, to, za, zb, side, inward, t, j, true, card && side < 0 && k === n - 2 ? 0.015 : 0);
             });
           } else {
           // the keyfob's joint, as approved
@@ -1485,7 +1630,7 @@
     stitches.count = extra;   // only the instances laid
     if (addPockets) { addPockets(); }   // now the dents the stitches press in are known
     fob.add(dimples, holes, stitches);
-    if (card) { return; }   // no key ring on the card holder
+    if (card || fold) { return; }   // no key ring on the card holders
 
     // Key ring threaded through the hole: one length of flat strip wound two
     // turns, and one mesh — the two turns are the same sweep of `bandGeo`, the
@@ -1574,7 +1719,8 @@
     // a CSS2DObject takes its label off the page when it is removed
     dims.children.slice().forEach(function (c) { dims.remove(c); if (c.geometry) { c.geometry.dispose(); } });
     labels.length = 0;
-    var card = state.product === 'card', W = card ? CARD_W : KEY_W, H = card ? CARD_H : KEY_H;
+    var card = state.product === 'card', fold = state.product === 'card2';
+    var W = fold ? FOLD_W : card ? CARD_W : KEY_W, H = fold ? FOLD_TOP - FOLD_BOT : card ? CARD_H : KEY_H;
     var T = 0.12;  // end tick half-length
     // width, under the piece
     var wy = -H / 2 - 0.8;
@@ -1586,7 +1732,7 @@
     segs([[hx, -H / 2], [hx, H / 2], [hx - T, -H / 2], [hx + T, -H / 2], [hx - T, H / 2], [hx + T, H / 2],
           [W / 2 + 0.15, -H / 2], [hx + 0.2, -H / 2], [W / 2 + 0.15, H / 2], [hx + 0.2, H / 2]]);
     label(mm(H), hx, 0);
-    if (!card) {
+    if (!card && !fold) {
       // hole, with a leader line out to the left
       var c45 = Math.SQRT1_2 * HOLE_R;
       segs([[-c45, HOLE_Y + c45], [-W / 2 - 0.5, HOLE_Y + 0.9], [-W / 2 - 0.5, HOLE_Y + 0.9], [-W / 2 - 1.1, HOLE_Y + 0.9]]);
@@ -1594,8 +1740,8 @@
     }
 
     var SPECS = { width: mm(W), height: mm(H), spacing: mm(STITCH_PITCH), inset: mm(STITCH_INSET),
-                  thickness: card ? mm(CARD_THICK) + ' (2 \u00d7 ' + mm(CARD_POCKET) + ' + 2 \u00d7 ' + mm(CARD_BODY) + ')' : mm(THICK),
-                  hole: card ? '\u2014' : '\u00d8 ' + mm(HOLE_R * 2) };
+                  thickness: fold ? mm(2 * FOLD_T) + ' (2 \u00d7 ' + mm(FOLD_T) + ')' : card ? mm(CARD_THICK) + ' (2 \u00d7 ' + mm(CARD_POCKET) + ' + 2 \u00d7 ' + mm(CARD_BODY) + ')' : mm(THICK),
+                  hole: fold ? '\u00d8 ' + mm(2 * FOLD_HOLE) : card ? '\u2014' : '\u00d8 ' + mm(HOLE_R * 2) };
     document.querySelectorAll('[data-spec]').forEach(function (dd) { dd.textContent = SPECS[dd.dataset.spec]; });
   }
   var KEY_W = W, KEY_H = H;
@@ -1683,20 +1829,21 @@
       if (grp.dataset.group === 'product') { setProduct(); } else if (grp.dataset.group === 'shape') { build(); } else {
         applyColors();
         // the card holder's burnished edges carry their shades in the geometry
-        if (state.product === 'card' && (grp.dataset.group === 'leather' || grp.dataset.group === 'pocket')) { build(); }
+        if (state.product !== 'keyfob' && (grp.dataset.group === 'leather' || grp.dataset.group === 'pocket')) { build(); }
       }
     });
   });
 
-  // Keyfob or card holder: the card holder has no shape choice and no ring.
+  // Keyfob or a card holder: the card holders have no shape choice and no
+  // ring, and only Nr. 1 has pockets of a second colour.
   function setProduct() {
-    var card = state.product === 'card';
+    var card = state.product !== 'keyfob';
     document.getElementById('kfShapeBox').hidden = card;
     document.getElementById('kfRingBox').hidden = card;
-    document.getElementById('kfPocketBox').hidden = !card;
+    document.getElementById('kfPocketBox').hidden = state.product !== 'card';
     ['kfTitle', 'kfLead'].forEach(function (id) {
       var el = document.getElementById(id);
-      el.textContent = el.dataset[card ? 'card' : 'keyfob'];
+      el.textContent = el.dataset[state.product];
     });
     paintTextures();   // the initials move
     controls.target.y = centreY();
@@ -1959,21 +2106,35 @@
       }
     }
 
-    var card = state.product === 'card', C = I18N.card;
+    var card = state.product === 'card', C = I18N.card, fold = state.product === 'card2', C2 = I18N.card2;
+    var holder = card || fold;   // either card holder: centred heading, no "how to"
 
     // heading
     doc.setTextColor(40, 36, 31);
     // the card holder's title, and the two lines of notes under it, centred on the
     // sheet (the owner, 2026-10-20)
-    doc.setFontSize(18); doc.text('SLOU - ' + (card ? C.patternTitle : P.title), card ? 105 : 15, 20, { align: card ? 'center' : 'left' });
+    doc.setFontSize(18); doc.text('SLOU - ' + (fold ? C2.patternTitle : card ? C.patternTitle : P.title), holder ? 105 : 15, 20, { align: holder ? 'center' : 'left' });
     doc.setFontSize(9); doc.setTextColor(110, 100, 90);
-    var tx = card ? 105 : 15, ta = { align: card ? 'center' : 'left' };
+    var tx = holder ? 105 : 15, ta = { align: holder ? 'center' : 'left' };
     var printLines = doc.splitTextToSize(P.print, 180);
     doc.text(printLines, tx, 27, ta);
     // the card holder's pattern has no "how to" note (the owner, 2026-10-21)
-    var howLines = card ? [] : doc.splitTextToSize(P.how, 180);
-    if (!card) { doc.text(howLines, tx, 36, ta); }
-    var headEnd = card ? 27 + printLines.length * 3.7 : 36 + howLines.length * 3.7;   // where the notes end
+    var howLines = holder ? [] : doc.splitTextToSize(P.how, 180);
+    if (!holder) { doc.text(howLines, tx, 36, ta); }
+    var headEnd = holder ? 27 + printLines.length * 3.7 : 36 + howLines.length * 3.7;   // where the notes end
+
+    // Dimension lines, shared by the card holders: thin grey lines with end
+    // ticks, outside the pieces, so they never read as cut lines.
+    function dimV(x, y0, y1, label, side) {   // side -1: label left of the line
+      doc.line(x, y0, x, y1); doc.line(x - 1.2, y0, x + 1.2, y0); doc.line(x - 1.2, y1, x + 1.2, y1);
+      var w = doc.getTextWidth(label);
+      doc.text(label, side < 0 ? x - 1 : x + 2.8, (y0 + y1) / 2 + w / 2, { angle: 90 });
+    }
+    function dimH(x0, x1, y, label, side) {   // side -1: label above the line
+      doc.line(x0, y, x1, y); doc.line(x0, y - 1.2, x0, y + 1.2); doc.line(x1, y - 1.2, x1, y + 1.2);
+      doc.text(label, (x0 + x1) / 2, side < 0 ? y - 1 : y + 3, { align: 'center' });
+    }
+    function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
 
     // The card holder: three templates (the owner, 2026-10-20). The two
     // pockets side by side on top, drawn as the mirror pair they are — the
@@ -2138,15 +2299,6 @@
       // outside the pieces, so they never read as cut lines. Drawn true size
       // like everything else; the labels give the nominal size.
       doc.setFontSize(7); doc.setTextColor(90); doc.setDrawColor(120); doc.setLineWidth(0.15);
-      function dimV(x, y0, y1, label, side) {   // side -1: label left of the line
-        doc.line(x, y0, x, y1); doc.line(x - 1.2, y0, x + 1.2, y0); doc.line(x - 1.2, y1, x + 1.2, y1);
-        var w = doc.getTextWidth(label);
-        doc.text(label, side < 0 ? x - 1 : x + 2.8, (y0 + y1) / 2 + w / 2, { angle: 90 });
-      }
-      function dimH(x0, x1, y, label, side) {   // side -1: label above the line
-        doc.line(x0, y, x1, y); doc.line(x0, y - 1.2, x0, y + 1.2); doc.line(x1, y - 1.2, x1, y + 1.2);
-        doc.text(label, (x0 + x1) / 2, side < 0 ? y - 1 : y + 3, { align: 'center' });
-      }
       var R = left + 2 * colW + colGap, xR0 = left + colW + colGap;
       var pBot = top + hB + rowGap + hP, pHi = pBot - hP, pLo = pBot - (POCKET_LO + CARD_H / 2) * 10 * cfy;
       // Where the owner wants them (2026-10-21): the inner piece's size on
@@ -2178,7 +2330,6 @@
       // matter to the maker) and no colours (the maker picks their own leather
       // and thread): only the kind of leather and the thread size (the owner,
       // 2026-10-21).
-      function cap(t) { return t.charAt(0).toUpperCase() + t.slice(1); }
       legendPage = function () {
       doc.setFontSize(18); doc.setTextColor(40, 36, 31);
       doc.text('SLOU - ' + C.patternTitle, 105, 20, { align: 'center' });
@@ -2516,6 +2667,76 @@
     }
     var legendPage = null, links = [];   // links: clickable spots, put back over the flattened pages
 
+    // Card holder Nr. 2: the one piece, flat as it is cut, grain side up, the
+    // front half on top and the fold across the middle as a dashed line. The
+    // slits are on both halves, the back's mirrored across the fold, so once
+    // it is folded and glued they meet hole for hole and are pricked through
+    // both. Laid out like the keyfob's sheet: the piece on the left, the
+    // legend and specs on the right.
+    function foldPattern() {
+      var holes = current.holes, chords = current.chords;
+      OX = 62; OY = headEnd + 9 + FOLD_L * 10 * cfy;   // y = 0 (the fold) on the page
+      doc.setDrawColor(0); doc.setLineWidth(0.3);
+      poly(loopOf(foldOutline()));
+      doc.ellipse(X(0), Y(0), FOLD_HOLE * 10 * cfx, FOLD_HOLE * 10 * cfy);
+      doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
+      [-1, 1].forEach(function (m) { doc.line(X(m * FOLD_HOLE), Y(0), X(m * FOLD_GAP), Y(0)); });
+      doc.setLineDashPattern([], 0);
+      // folded y -> flat s on each half (m = 1 the front, -1 the back)
+      function flatS(y, m) { return m * (y - FOLD_YC + FOLD_B); }
+      [1, -1].forEach(function (m) {
+        current.runs.forEach(function (r) {
+          doc.setDrawColor(190); doc.setLineWidth(0.1);
+          for (var k = r[0]; k < r[1]; k++) { doc.line(X(holes[k].x), Y(flatS(holes[k].y, m)), X(holes[k + 1].x), Y(flatS(holes[k + 1].y, m))); }
+          doc.setDrawColor(0);
+          for (k = r[0]; k <= r[1]; k++) {
+            var dir = current.chordIn(k).clone().add(chords[k]).normalize(), sl = slit(dir, 1);
+            var hx = sl.x * 0.8 * cfx, hy = m * sl.y * 0.8 * cfy, px = X(holes[k].x), py = Y(flatS(holes[k].y, m));
+            doc.setLineWidth(0.45 * (cfx + cfy) / 2);
+            doc.line(px - hx, py + hy, px + hx, py - hy);   // drawn 1.6 mm, like the other patterns'
+          }
+        });
+      });
+      // how many, and the leather's thickness, inside the front half
+      doc.setTextColor(0); doc.setFontSize(20);
+      doc.text('× 1', X(0), Y(5.6), { align: 'center', baseline: 'middle' });
+      doc.setFontSize(12);
+      doc.text('(' + mm(FOLD_T) + ')', X(0), Y(5.6) + 8, { align: 'center', baseline: 'middle' });
+      var L = textLayout();
+      if (L) {
+        doc.setTextColor(150);
+        doc.setFontSize(L.size * 10 * cfy * 72 / 25.4);
+        doc.text(L.txt, X(L.x), Y(flatS(L.y, 1)), { align: 'center', baseline: 'middle' });
+      }
+      // sizes: the width under it, the whole length on the left, one half and
+      // the thumb hole on the right
+      doc.setFontSize(7); doc.setTextColor(90); doc.setDrawColor(120); doc.setLineWidth(0.15);
+      dimH(X(-FOLD_W / 2), X(FOLD_W / 2), Y(-FOLD_L) + 4, mm(FOLD_W), 1);
+      dimV(X(-FOLD_W / 2) - 5, Y(FOLD_L), Y(-FOLD_L), mm(2 * FOLD_L), -1);
+      dimV(X(FOLD_W / 2) + 5, Y(FOLD_L), Y(0), mm(FOLD_L), 1);
+      dimH(X(-FOLD_HOLE), X(FOLD_HOLE), Y(-FOLD_HOLE) + 4, '\u00d8 ' + mm(2 * FOLD_HOLE), 1);
+
+      // legend and specs on the right
+      doc.setFontSize(9); doc.setTextColor(40, 36, 31);
+      key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
+      key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, C.holes);
+      key(function (x, y) {
+        doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
+        doc.line(x, y, x + 8, y); doc.setLineDashPattern([], 0);
+      }, C2.fold);
+      ly += 4;
+      var rows = [
+        [M.width + ' × ' + M.height, mm(FOLD_W) + ' × ' + mm(FOLD_L)],
+        [M.thickness, mm(FOLD_T)],
+        [M.spacing, mm(STITCH_PITCH)],
+        [M.inset, mm(STITCH_INSET)],
+        [P.leather, cap(C.vegtan)],
+        [P.thread, cap(C.threadSize)],
+      ];
+      if (L) { rows.push([P.initials, L.txt]); }
+      table(rows);
+    }
+
     // legend lines and the specs table, shared by both items
     var lx = 118, rx = 195, ly = 70;
     function key(draw, label) {
@@ -2532,6 +2753,8 @@
 
     if (card) {
       cardPattern();
+    } else if (fold) {
+      foldPattern();
     } else {
       // cut line + ring hole
       doc.setDrawColor(0); doc.setLineWidth(0.3);
@@ -2657,7 +2880,7 @@
     // them (the owner, 2026-10-26): one left to the vertical ruler, one up to
     // the horizontal. The note sits 12 mm in so the left arrow has room.
     var noteX = calVx + 12, noteY = calHy + 9;
-    doc.text(doc.splitTextToSize(card ? C.calibNote : P.calibNote, 169), noteX, noteY);
+    doc.text(doc.splitTextToSize(fold ? C2.calibNote : card ? C.calibNote : P.calibNote, 169), noteX, noteY);
     function arrow(x1, y1, x2, y2) {
       var a = Math.atan2(y2 - y1, x2 - x1), c = Math.cos(a), s = Math.sin(a), h = 1.6, w = 0.6;
       doc.line(x1, y1, x2 - c * h, y2 - s * h);
@@ -2672,8 +2895,8 @@
     // once, for anyone who would rather trust a square than a line. Drawn
     // `cfx` by `cfy` so it comes out a true 50 × 50 mm, and its right edge kept
     // 15 mm clear of the page edge. Not on the card holder's pattern: the owner
-    // took it off there (2026-10-20).
-    if (!card) {
+    // took it off there (2026-10-20), and Nr. 2 has none either.
+    if (!holder) {
       var sqNom = 50, sqR = 195, sqB = calHy - 10;
       var sqW = sqNom * cfx, sqH = sqNom * cfy;
       doc.setDrawColor(0); doc.setLineWidth(0.2);
@@ -2710,13 +2933,17 @@
        [55, 250, 0.8, -6], [150, 250, 0.8, 10], [110, 20, 0.55, 6], [110, 285, 0.4, -10]],  // the work process
       [[50, 45, 0.8, -10], [55, 105, 0.6, 12], [150, 45, 0.75, 8], [155, 108, 0.65, -12],  // the work process, the links
        [100, 180, 0.9, 4], [40, 250, 0.6, -15], [170, 240, 0.7, 10], [105, 285, 0.45, 0]]
+    ] : fold ? [
+      [[62, 80, 1.0, -10], [62, 125, 0.45, 8], [62, 180, 0.85, 12],                    // the piece
+       [157, 80, 0.6, 10], [157, 125, 0.95, -8],                                       // the legend, the specs
+       [110, 17, 0.45, 6], [150, 200, 0.55, -12], [30, 268, 0.6, -8], [110, 262, 0.5, -4], [175, 268, 0.8, 14]]
     ] : [
       [[60, 128, 0.7, 10], [64, 170, 0.7, -14],                                          // the keyfob
        [157, 140, 0.95, -8], [165, 85, 0.65, 12],                                        // the specs, the legend
        [110, 20, 0.55, -6], [25, 60, 0.6, -10], [30, 230, 0.8, 14], [175, 235, 0.6, -15], [110, 275, 0.7, 6]]
     ]);
     return flatten(doc, wm, links).then(function (out) {
-      out.save(card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
+      out.save(fold ? 'slou-card-wallet-2-pattern.pdf' : card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
     });
   }
 
@@ -2731,7 +2958,7 @@
   document.getElementById('kfShot').addEventListener('click', function () {
     renderer.render(scene, camera);
     var a = document.createElement('a');
-    a.download = state.product === 'card' ? 'slou-card-wallet.png' : 'slou-keyfob.png';
+    a.download = state.product === 'card2' ? 'slou-card-wallet-2.png' : state.product === 'card' ? 'slou-card-wallet.png' : 'slou-keyfob.png';
     a.href = renderer.domElement.toDataURL('image/png');
     a.click();
   });

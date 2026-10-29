@@ -1,7 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
-[2026-10-29 16:45] - Third item examples checked - Owner wants a third project, another card holder, from examples pvz1/pvz2: pvz1 turned out to be our own SLOU card pattern and pvz2 only the GR Handcraft text page (92 x 70 mm, 4 mm holes), so the drawing was asked for.
+[2026-10-29 17:16] - Card holder Nr. 2 added - Owner wants a third item from a found example (pvz1/pvz2): one 1.6 mm piece, 70 x 184.4 mm, folded, Ø 25 mm thumb hole, sides stitched; built in 3D (real fold) and as a pattern PDF, with the owner's own stitch and techniques; 7 locales.
 [2026-10-29 16:30] - Copyright notice on patterns - Owner found a good example from another maker: every pattern PDF page now ends with "© SLOU" and a note that it is for personal use and small businesses only, no mass production, no sharing or reselling; in all 7 locales (`pattern.rights`).
 [2026-10-29 15:04] - Visible leader dots on picture - Owner: the dots at the ends of the page 2 leader lines (thickness notes) vanished on the dark leather edge, in colour and grey prints. Now a black dot in a white ring, with a white halo under each line, so they show on any print.
 [2026-10-29 13:24] - Watermarks stronger, on key content - Owner: watermark a touch stronger (4-12% darker, was 3-9%), placed by hand per page over what someone would most want to erase and steal (templates, picture, specs, process, links); page 1 sizes varied more, they read too alike.
