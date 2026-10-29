@@ -345,34 +345,39 @@
     var qx = Math.abs(x) - (BANK_HW + 0.1 - r), qy = Math.abs(Math.min(y - 0.1, cy) - cy) - (BANK_LEN / 2 + 0.1 - r);
     var d = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;   // out from the card, past 1 mm
     var t = Math.min(1, Math.max(0, 1 - d / FOLD_EASE));
+    // and nothing in the glued margin outside the stitch lines, down to the
+    // fold: there the halves are glued to each other right to the end (the
+    // owner, 2026-10-29). Reaching it, the lift opened a hole at each corner.
+    t *= Math.min(1, Math.max(0, (FOLD_W / 2 - STITCH_INSET - Math.abs(x)) / 0.15));
     // Above the card the mouth stays open, the card showing in it, as a card
     // in it holds it open (the owner, 2026-10-29; closing it evenly towards
     // the mouth was tried and undone)
     return FOLD_OPEN / 2 * t * t * (3 - 2 * t);
   }
   // The flat outline, CCW. Beside the fold the two corner roundings meet in a
-  // point on the drawing, and `exact` (the pattern) keeps it. In the 3D that
-  // point is a sliver too thin to fold: it curled up and left a little hole
-  // in each corner (the owner, 2026-10-29: glued right to the end, there are
-  // none). So there the roundings stop where the bend does, FOLD_B either side
-  // of the fold, joined by a straight cut across it: the fold then ends in
-  // solid leather, at FOLD_CUT out from the middle.
-  var FOLD_CA = Math.asin((FOLD_R - FOLD_B) / FOLD_R), FOLD_CUT = FOLD_W / 2 - FOLD_R + FOLD_R * Math.cos(FOLD_CA);
-  var FOLD_GAP = FOLD_W / 2 - FOLD_R;   // where the fold runs out to on the pattern (the point)
+  // point, as on the drawing, and `exact` (the pattern) is just that. Folded,
+  // each corner is one plain round corner like the top ones, its foot right
+  // on the fold (the owner's screenshots of the real piece, 2026-10-29). In
+  // the 3D the piece is folded full width, square across the bend, and the
+  // corners are then rounded to that exact FOLD_R arc seen face on
+  // (`foldRound`, in `folded`), as a corner glued and sanded is. Laying the
+  // drawing's point out flat and bending it gave a flat, then a hole there.
+  var FOLD_GAP = FOLD_W / 2 - FOLD_R;   // where the fold runs out to: the corner's foot
   function foldOutline(exact) {
     var sh = new THREE.Shape(), x = FOLD_W / 2, L = FOLD_L, r = FOLD_R, PI = Math.PI;
-    var a = exact ? PI / 2 : FOLD_CA, cx = x - r + r * Math.cos(a), sb = r - r * Math.sin(a);
     sh.moveTo(-x + r, -L); sh.lineTo(x - r, -L); sh.absarc(x - r, -L + r, r, -PI / 2, 0);
-    sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, a);
-    if (!exact) { sh.lineTo(cx, sb); }
-    sh.absarc(x - r, r, r, -a, 0);
+    if (exact) { sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, PI / 2); sh.absarc(x - r, r, r, -PI / 2, 0); }
     sh.lineTo(x, L - r); sh.absarc(x - r, L - r, r, 0, PI / 2);
     sh.lineTo(-x + r, L); sh.absarc(-x + r, L - r, r, PI / 2, PI);
-    sh.lineTo(-x, r); sh.absarc(-x + r, r, r, PI, PI + a);
-    if (!exact) { sh.lineTo(-cx, -sb); }
-    sh.absarc(-x + r, -r, r, PI - a, PI);
+    if (exact) { sh.lineTo(-x, r); sh.absarc(-x + r, r, r, PI, PI * 1.5); sh.absarc(-x + r, -r, r, PI / 2, PI); }
     sh.lineTo(-x, -L + r); sh.absarc(-x + r, -L + r, r, PI, PI * 1.5);
     return sh;
+  }
+  // How far in the side is taken at height h over the fold's foot, so the
+  // folded corner is a FOLD_R arc; and the arc's outward normal angle there.
+  function foldRound(h) {
+    var r = FOLD_R, q = Math.max(0, r - h);
+    return h >= r ? [0, 0] : [r - Math.sqrt(r * r - q * q), -Math.atan2(q, Math.sqrt(r * r - q * q))];
   }
 
   // `pocket` is the card holder's second colour: as made, olive pockets on a
@@ -465,15 +470,20 @@
   function textLayout() {
     var txt = state.text.trim().toUpperCase();
     if (!txt) { return null; }
+    // The card holders' initials are set as the owner stamps them: Helvetica
+    // Neue, 24 pt (the owner, 2026-10-29), so `size`, the em in cm, is 24 pt;
+    // smaller only if a long name would not fit inside the stitching. (The
+    // SLOU stamp is made separately and keeps its own size: `pressLogo`.)
+    var PT24 = 24 / 72 * 2.54;
     if (state.product === 'card2') {
       // across the front, just above the thumb notch
       return { txt: txt, vertical: false, x: 0, y: FOLD_BOT + FOLD_T + FOLD_HOLE + 0.9,
-               size: Math.min(0.75, (FOLD_W - 2.2) / (txt.length * 0.72)) };
+               size: Math.min(PT24, (FOLD_W - 2.2) / (txt.length * 0.72)), neue: true };
     }
     if (state.product === 'card') {
       // across the front pocket, just above the window (as on the owner's piece)
       return { txt: txt, vertical: false, x: 0, y: WIN_Y + WIN_H + 0.75,
-               size: Math.min(0.75, (CARD_W - 2.2) / (txt.length * 0.72)) };
+               size: Math.min(PT24, (CARD_W - 2.2) / (txt.length * 0.72)), neue: true };
     }
     var vertical = txt.length > 3;
     var room = vertical ? H - 4.4 : W - 1;   // stays inside the stitching
@@ -489,7 +499,8 @@
     g.save();
     g.translate(TEX_N / 2 + L.x * px, TEX_N / 2 - L.y * px);
     if (vertical) { g.rotate(-Math.PI / 2); }
-    g.font = '600 ' + size + 'px Helvetica, "Helvetica Neue", Arial, sans-serif';
+    g.font = L.neue ? '500 ' + size + 'px "Helvetica Neue", Helvetica, Arial, sans-serif'
+                    : '600 ' + size + 'px Helvetica, "Helvetica Neue", Arial, sans-serif';
     g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillStyle = style;
     g.filter = 'blur(1px)';
@@ -585,6 +596,7 @@
   // the front, with the initials: painted in `paintTextures` (card holder
   // Nr. 1's front pocket wears it too), and the same leather plain
   var fold2Tex = canvasTex(true), fold2BumpTex = canvasTex(false);
+  paintTextures();   // now that it exists: the first call above ran before it
   var naturalTex = canvasTex(true), naturalBumpTex = canvasTex(false);
   naturalTex.image.getContext('2d').drawImage(natural.col, 0, 0); naturalTex.needsUpdate = true;
   naturalBumpTex.image.getContext('2d').drawImage(natural.bump, 0, 0); naturalBumpTex.needsUpdate = true;
@@ -1400,11 +1412,25 @@
       if (sv >= FOLD_B) { y = FOLD_YC + sv - FOLD_B; z = zz; }
       else if (sv <= -FOLD_B) { y = FOLD_YC - sv - FOLD_B; z = -zz; }
       else { y = FOLD_YC - zz * Math.cos(th); z = zz * Math.sin(th); }
+      // the corner rounded off (foldRound): the last 9 mm of the width drawn
+      // in towards the middle, most at the edge, so the side meets the fold
+      // in an arc; the edge's normals turned with the arc
+      var fr = foldRound(y - FOLD_BOT), c0 = FOLD_W / 2 - FOLD_R - 0.3, ax = Math.abs(px);
+      if (fr[0] && ax > c0) {
+        var f = (ax - c0) / (FOLD_W / 2 - c0);
+        px = Math.sign(px) * (ax - fr[0] * f);
+        P[v * 3] = px;
+      }
+      var turnArc = fr[0] && ax > c0 && Math.abs(Nm[v * 3]) > 0.3 && (ax - c0) / (FOLD_W / 2 - c0) > 0.97;
       var sn = Math.sin(th), lift = foldLift(px, y) * sn;
       var dlx = (foldLift(px + 0.004, y) - foldLift(px - 0.004, y)) / 0.008 * sn, dly = (foldLift(px, y + 0.004) - foldLift(px, y - 0.004)) / 0.008 * sn;
       P[v * 3 + 1] = y; P[v * 3 + 2] = z + lift;
       var ny0 = Nm[v * 3 + 1], nz0 = Nm[v * 3 + 2];
       Nm[v * 3 + 1] = ny0 * sn - nz0 * Math.cos(th); Nm[v * 3 + 2] = ny0 * Math.cos(th) + nz0 * sn;
+      if (turnArc) {   // folded, the edge's normal turned down with the arc
+        var al = fr[1] * Math.sign(Nm[v * 3]), nx1 = Nm[v * 3], ny1 = Nm[v * 3 + 1];
+        Nm[v * 3] = nx1 * Math.cos(al) - ny1 * Math.sin(al); Nm[v * 3 + 1] = nx1 * Math.sin(al) + ny1 * Math.cos(al);
+      }
       // tipped by the slope of the lift
       Nm[v * 3] -= Nm[v * 3 + 2] * dlx; Nm[v * 3 + 1] -= Nm[v * 3 + 2] * dly;
       var nl2 = Math.hypot(Nm[v * 3], Nm[v * 3 + 1], Nm[v * 3 + 2]) || 1;
@@ -1446,18 +1472,9 @@
       // The thumb hole is worked with the edge beveler too, like the outer
       // edges (the owner, 2026-10-29): it takes the same dome, each half's
       // edge rounded off on its grain side.
-      // And into the two fold corners, glued right to the end (the owner,
-      // 2026-10-29), the dome flattens out over the last 3 mm (a stack value
-      // up to 2): rounded, it wrapped round the end of the bend and left a
-      // little hole in each corner.
-      var foldStack = function (p, hole) {
-        if (hole) { return 1; }
-        var dc = Math.hypot(Math.abs(p.x) - FOLD_CUT, p.y);
-        if (dc < 0.3) { return 2 - fe(dc / 0.3); }
-        return 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R);
-      };
+      var foldStack = function (p, hole) { return hole ? 1 : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R); };
       var thumb = new THREE.Path(); thumb.absarc(0, 0, FOLD_HOLE, 0, Math.PI * 2, true);
-      var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], new THREE.Color(state.leather).multiplyScalar(0.78), null, null, null, FOLD_T);   // × the map's ~0.8
+      var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], new THREE.Color(state.leather).multiplyScalar(1.05), null, null, null, FOLD_T);   // × the map's ~0.8: as light as Nr. 1's edges (the owner, 2026-10-29; 0.78 read darker)
       fob.add(new THREE.Mesh(folded(flat.geometry, flat.userData.caps), [fold2FrontMat, fold2EdgeMat, backMat, fold2BackMat]));
       flat.geometry.dispose();
       // a bank card inside (ISO ID-1, 85.6 × 54 × 0.76 mm, 3.18 mm corners),

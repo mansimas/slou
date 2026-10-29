@@ -346,12 +346,15 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
 - One piece of 1.6 mm veg-tan (`FOLD_T`), 70 × 184.4 mm flat (`FOLD_W`, 2 × `FOLD_L`),
   folded in the middle; corners rounded 6 mm (`FOLD_R`); a Ø 25 mm hole on the fold
   (`FOLD_HOLE`), so each face has a half-round thumb notch. Where the corner
-  roundings meet beside the fold (a point on the drawing), `foldOutline(true)` (the pattern)
-  keeps the point; the 3D (`foldOutline()`) stops the roundings where the bend ends
-  (`FOLD_B` either side) and joins them by a straight cut at `FOLD_CUT`, so the fold ends
-  in solid leather. A small round there (`FOLD_RHO`, 1 mm then 0.3 mm) left a dimple,
-  then a hole like a tube end; the owner glues it right to the end, so there are no holes.
-  The edge dome also flattens into each fold corner over 3 mm (a `stack` value over 1).
+  roundings meet beside the fold (a point on the drawing), and `foldOutline(true)` (the
+  pattern) keeps it. Folded, each bottom corner is one plain round corner like the top
+  ones, its foot on the fold (the owner's screenshots, `Ekrano kopija 2026-10-29
+  195239/195304.png`). So the 3D folds the piece full width (`foldOutline()`, straight
+  sides through the fold) and `folded()` then rounds each corner to an exact `FOLD_R`
+  arc seen face on (`foldRound(h)`: the last 9 mm of the width drawn in, the edge
+  normals turned with the arc), as a corner glued and sanded is. Tried and wrong: a 1 mm
+  then 0.3 mm round at the point (dimple, then a hole), a straight cut where the bend
+  ends (a flat), and the drawing's arcs laid out to fold into an arc (a step and a hole).
 - 3D: built flat by `leatherPiece` (new `stackT` argument, the stack is the two
   halves) and folded by `folded()`: triangles cut finer across the bend (no edge over
   0.3 mm along the piece; cutting them small every way made 300 000 triangles and
@@ -386,8 +389,8 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   ~0.8, so the colour is lifted × 1.2. The keyfob and Nr. 1 keep the pebbled `grain`.
 - Edges natural, only worked with Tokonole (the owner, 2026-10-29: Nr. 1's burnished
   edge read as painted one even colour): Nr. 2 has `fold2EdgeMat`, the `natural`
-  leather's colour and fibres running along the edge (×0.78 vertex colour, so ~0.62 on
-  average as before), bumped, satin (roughness 0.5, clearcoat 0.2). Nr. 1 keeps
+  leather's colour and fibres running along the edge (×1.05 vertex colour: as light as
+  Nr. 1's edges, the owner; ×0.78 read darker), bumped, satin (roughness 0.5, clearcoat 0.2). Nr. 1 keeps
   `burnished()`.
 - Nr. 1's grain faces have the same natural leather since 2026-10-29 (the owner: it looks
   more natural): `bodyGrainMat` (`naturalTex`), `pocketFrontMat` (`fold2Tex`, with the
@@ -418,6 +421,12 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   step at the card's foot (t², read as a strong shadow) and the long slow slope there
   were both rejected. The face grid is finer where it eases out.
 - Not done yet: a page 2 picture and work process like Nr. 1.
+
+### Initials (card holders)
+Stamped 24 pt Helvetica Neue (the owner, 2026-10-29): `textLayout()` gives both card
+holders `size` = 24 pt (0.847 cm em), `neue: true` (weight 500), smaller only if the
+name would not fit inside the stitching. The keyfob keeps its own. The SLOU stamp is
+made separately and is not tied to this.
 
 ### The SLOU stamp (both card holders)
 The owner presses the logo with a metal stamp whose letters stand up (2026-10-29): the

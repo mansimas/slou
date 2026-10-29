@@ -1,6 +1,9 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-29 20:06] - Smooth oval fold corners - Owner's screenshots: folded, each bottom corner is one plain round corner, its foot on the fold. The 3D now folds Nr. 2 full width and rounds the corners to an exact 6 mm arc, as glued and sanded: no cut, no flat, no hole. Pattern unchanged.
+[2026-10-29 19:56] - Nr. 2 edges as light as Nr. 1 - Owner: card holder Nr. 2's natural Tokonole edges read darker than Nr. 1's; their colour is raised to match (×1.05 of the leather on the natural map, was ×0.78).
+[2026-10-29 19:56] - Initials 24 pt Helvetica Neue - Owner: initials are stamped 24 pt Helvetica Neue (the SLOU logo is made separately and keeps its size); both card holders now set them so, smaller only if a long name would not fit. Also fixed fronts rendering black (texture not painted at start).
 [2026-10-29 19:45] - SLOU logo truly debossed - Owner stamps the logo with a metal stamp of raised letters, so the leather sinks only under them: on both card holders the letters are now hollows (flat smooth floor, soft sloping walls, grain pressed out, a shade darker and glossier), not dark print.
 [2026-10-29 19:37] - Natural leather on Nr. 1 - Owner: give card holder Nr. 1 the same natural leather as Nr. 2, it looks more natural: its inner pieces and pockets (initials, SLOU stamp, pattern picture) now use the natural veg-tan texture; edges and flesh sides unchanged.
 [2026-10-29 19:37] - Closed fold corner holes - Owner glues Nr. 2 right to the end, so the little holes at the fold corners must go: in the 3D the sliver where the corner roundings meet is cut straight where the bend ends, and the edge dome flattens into each corner; the pattern keeps the drawing's point.
