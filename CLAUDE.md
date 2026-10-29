@@ -423,6 +423,12 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   were both rejected. The face grid is finer where it eases out.
 - Not done yet: a page 2 picture and work process like Nr. 1.
 
+### Two cards in Nr. 2
+Since 2026-10-29 (the owner) Nr. 2 holds two cards: the blue one (`cardMat`) in front and
+a red one (`card2Mat`) behind it, both on the same level (the owner; 1.5 mm higher at first). Together
+they are 1.52 mm, so `FOLD_OPEN` is 1.7 mm (0.9 for one card, which they would poke
+through) and `FOLD_EASE` 5 mm (4), keeping the slope about as soft.
+
 ### Cut edge colour (card holder Nr. 2)
 A cut edge is lighter than the faces (the owner, 2026-10-29): the leather's core is near
 its flesh side's colour, only the layer under the grain takes the dye. `withCore(col, k)`

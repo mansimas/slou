@@ -334,7 +334,10 @@
   // The card almost right down into the fold, not quite (the owner,
   // 2026-10-29: 4 mm left an odd gap): 2.5 mm above its outside, under 1 mm
   // clear of the leather inside it; the line in the leather moves with it.
-  var FOLD_OPEN = 0.09, FOLD_CARD = 0.25, FOLD_EASE = 0.4;
+  // Two cards in it since 2026-10-29 (the owner), 1.52 mm together, so the
+  // halves stand 1.7 mm apart round them (0.9 mm for one card), easing out a
+  // little wider to keep the slope as soft as it was.
+  var FOLD_OPEN = 0.17, FOLD_CARD = 0.25, FOLD_EASE = 0.5;
   var BANK_HW = 5.398 / 2, BANK_LEN = 8.56, BANK_CR = 0.318;   // ISO ID-1: 85.6 × 54 mm, 3.18 mm corners
   function foldLift(x, y) {
     var cy = FOLD_BOT + FOLD_CARD + BANK_LEN / 2, r = BANK_CR + 0.1;
@@ -670,7 +673,8 @@
   function burnished() { return new THREE.MeshPhysicalMaterial({ roughness: 0.34, clearcoat: 0.55, clearcoatRoughness: 0.25, vertexColors: true }); }
   var pocketEdgeMat = burnished(), bodyEdgeMat = burnished();
   var bodyGrainMat = new THREE.MeshStandardMaterial({ map: naturalTex, bumpMap: naturalBumpTex, bumpScale: 0.8, roughness: 0.6 });
-  var cardMat = new THREE.MeshStandardMaterial({ color: 0x24467d, roughness: 0.4 });   // the bank card in card holder Nr. 2
+  var cardMat = new THREE.MeshStandardMaterial({ color: 0x24467d, roughness: 0.4 });   // the bank cards in card holder Nr. 2
+  var card2Mat = new THREE.MeshStandardMaterial({ color: 0xa8302e, roughness: 0.4 });   // the second, red
   // Nr. 2's faces: the natural leather (`natural`), smoother and a touch more
   // satin than the pebbled grain, as an oiled veg-tan is
   var fold2FrontMat = new THREE.MeshStandardMaterial({ map: fold2Tex, bumpMap: fold2BumpTex, bumpScale: 0.8, roughness: 0.6 });
@@ -1503,8 +1507,13 @@
       bs.lineTo(-bw + br, bh); bs.quadraticCurveTo(-bw, bh, -bw, bh - br);
       bs.lineTo(-bw, br); bs.quadraticCurveTo(-bw, 0, -bw + br, 0);
       var bank = new THREE.Mesh(new THREE.ExtrudeGeometry(bs, { depth: 0.076, bevelEnabled: false, curveSegments: 8 }), cardMat);
-      bank.position.set(0, FOLD_BOT + FOLD_CARD, -0.038);
+      bank.position.set(0, FOLD_BOT + FOLD_CARD, 0.002);
       fob.add(bank);
+      // and a second card of another colour behind it, standing on the same
+      // level (the owner, 2026-10-29)
+      var bank2 = new THREE.Mesh(bank.geometry.clone(), card2Mat);
+      bank2.position.set(0, FOLD_BOT + FOLD_CARD, -0.078);
+      fob.add(bank2);
       // two open seams, down the left side and up the right (CCW, like the
       // outlines), each its own run of equal stitches
       var hx = FOLD_W / 2 - STITCH_INSET, yT = foldY(FOLD_L - FOLD_END), yB = foldY(FOLD_END);
