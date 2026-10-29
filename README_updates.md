@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-29 15:04] - Visible leader dots on picture - Owner: the dots at the ends of the page 2 leader lines (thickness notes) vanished on the dark leather edge, in colour and grey prints. Now a black dot in a white ring, with a white halo under each line, so they show on any print.
 [2026-10-29 13:24] - Watermarks stronger, on key content - Owner: watermark a touch stronger (4-12% darker, was 3-9%), placed by hand per page over what someone would most want to erase and steal (templates, picture, specs, process, links); page 1 sizes varied more, they read too alike.
 [2026-10-29 13:13] - Bank card size checked - Owner asked if the bank card in the page 2 picture is true to life: checked, it is ISO ID-1 (85.6 x 53.98 x 0.76 mm, 3.18 mm corners), chip placed as ISO 7816; no change, only answered.
 [2026-10-29 13:01] - True proportions card picture - Owner: the card holder picture on PDF page 2 did not read as 70 x 100 (the 42° perspective turn narrowed it). Now no perspective, turned only 15° (owner wanted some turn, not square on): front reads 67.6 x 100, edge layers still show.

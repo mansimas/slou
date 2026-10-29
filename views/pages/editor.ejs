@@ -2430,9 +2430,15 @@
         doc.setTextColor(110, 100, 90); doc.text(r[0], cx, y);
         doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
         r.slice(2).forEach(function (a) {
+          // a white halo under the leader and round its dot, so both still
+          // show on the dark leather edge, printed in colour or in grey (the
+          // owner, 2026-10-29); on the white paper the halo does not show
+          doc.setDrawColor(255); doc.setLineWidth(0.6);
+          doc.line(cx - 2, y - 1, a[0], a[1]);
+          doc.setFillColor(255); doc.circle(a[0], a[1], 0.95, 'F');
           doc.setDrawColor(120); doc.setLineWidth(0.15);
           doc.line(cx - 2, y - 1, a[0], a[1]);
-          doc.setFillColor(40, 36, 31); doc.circle(a[0], a[1], 0.4, 'F');
+          doc.setFillColor(0); doc.circle(a[0], a[1], 0.5, 'F');
         });
       });
       var rest = [[M.width + ' × ' + M.height, mm(CARD_W) + ' × ' + mm(CARD_H)], [P.leather, cap(C.vegtan)]];
