@@ -381,6 +381,11 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   fibres and pores, a flatter relief (bumpScale 0.8) and roughness 0.6
   (`fold2FrontMat` with the initials, `fold2BackMat` with the stamp). The map averages
   ~0.8, so the colour is lifted × 1.2. The keyfob and Nr. 1 keep the pebbled `grain`.
+- Edges natural, only worked with Tokonole (the owner, 2026-10-29: Nr. 1's burnished
+  edge read as painted one even colour): Nr. 2 has `fold2EdgeMat`, the `natural`
+  leather's colour and fibres running along the edge (×0.78 vertex colour, so ~0.62 on
+  average as before), bumped, satin (roughness 0.5, clearcoat 0.2). Nr. 1 keeps
+  `burnished()`.
 - The thumb hole is bevelled like the outer edges (the owner, 2026-10-29): `foldStack`
   gives it the stack's dome, so each half's edge is rounded on its grain side.
   `folded()` takes the face outlines from `leatherPiece` (`mesh.userData.caps`):
@@ -393,10 +398,14 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   rounded rectangle (`BANK_HW`, `BANK_LEN`, `BANK_CR`), so its corners are round. A 2 mm
   ease centred on the card's edge (to put the line where the card ends) was tried and
   undone the same day: it looked unnatural (the owner).
-  Over the card's top there is no outline at all (the owner, 2026-10-29): the lift stays
-  full right up to the open mouth; only the sides and the foot ease out. The line at the
+  Over the card's top there is no outline at all (the owner, 2026-10-29): no card-shaped
+  edge there; only the sides and the foot ease out. The line at the
   foot is raised 1 mm ("vos vos", the owner): there the lift is full only from the card's
-  bottom edge up, easing out over the 3 mm below it. A hard
+  bottom edge up, easing out below it. Softened the same day, as the shading read
+  artificial (the owner): `FOLD_OPEN` 0.9 mm (was 1), eased out over `FOLD_EASE` 4 mm
+  (was 3). The side lines die away where the card ends at the top (the owner): from 1.5
+  mm under the card's top edge to the mouth the whole lift eases to nothing, evenly
+  across, so the mouth closes and no line forms there. A hard
   step at the card's foot (t², read as a strong shadow) and the long slow slope there
   were both rejected. The face grid is finer where it eases out.
 - Not done yet: a page 2 picture and work process like Nr. 1.
