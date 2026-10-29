@@ -2685,6 +2685,18 @@
     // the card wallet's legend and specs, on a page of their own
     if (legendPage) { doc.addPage(); legendPage(); }
 
+    // Whose pattern it is and what it may be used for, at the foot of every
+    // page (the owner, 2026-10-29, after a pattern of another maker's)
+    doc.setFontSize(6);
+    var rights = doc.splitTextToSize(P.rights, 180);
+    for (var rp = 1; rp <= doc.internal.getNumberOfPages(); rp++) {
+      doc.setPage(rp);
+      doc.setFontSize(7); doc.setTextColor(40, 36, 31);
+      doc.text('© SLOU', 105, 287, { align: 'center' });
+      doc.setFontSize(6); doc.setTextColor(110, 100, 90);
+      rights.forEach(function (ln, i) { doc.text(ln, 105, 290 + i * 2.6, { align: 'center' }); });
+    }
+
     var wm = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4' });
     for (var pg = 1; pg < doc.internal.getNumberOfPages(); pg++) { wm.addPage(); }
     // placed by hand rather than at random, so every download looks the same and

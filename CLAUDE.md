@@ -141,6 +141,10 @@ How it works:
     pixels as the lines and a PDF editor finds no object or text to delete (the
     owner, 2026-10-27: harder to remove). 400 dpi stays under phones' 16.7 M px
     canvas limit; sizes and calibration are unchanged. ~0.8 MB a page.
+  - Copyright footer (the owner, 2026-10-29, after another maker's pattern):
+    "© SLOU" and `pattern.rights` (personal use and small businesses only, no
+    mass production, no sharing or reselling) centred at the foot of every
+    page of every PDF, y 287-293, under the rulers and the process text.
   - **Print calibration** (2026-10-14, asked for by the owner, and reported
     working the same day: "viskas tiksliai atitinka, susikalibruoja tobulai"):
     his ML-2160 prints an A4 page small, and by a different amount on each axis
