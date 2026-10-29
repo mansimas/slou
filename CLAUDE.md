@@ -375,6 +375,17 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
 - `folded()` lays both faces again on a grid (4 mm cells, 0.25 mm across the bend, 0.5 mm
   where the bulge eases out), clipped to the face's outline with the thumb hole joined
   by a keyhole cut; without it the faces were long triangles that could not bulge.
+- Leather (the owner, 2026-10-29: as natural and real a brown as possible): Nr. 2 has
+  its own texture, `natural` (`col` and `bump`), after the brown pieces in the Etsy
+  screenshots: wandering soft darker and lighter patches, lighter pull-up scuffs, fine
+  fibres and pores, a flatter relief (bumpScale 0.8) and roughness 0.6
+  (`fold2FrontMat` with the initials, `fold2BackMat` with the stamp). The map averages
+  ~0.8, so the colour is lifted × 1.2. The keyfob and Nr. 1 keep the pebbled `grain`.
+- The thumb hole is bevelled like the outer edges (the owner, 2026-10-29): `foldStack`
+  gives it the stack's dome, so each half's edge is rounded on its grain side.
+  `folded()` takes the face outlines from `leatherPiece` (`mesh.userData.caps`):
+  rebuilt from the triangles the hole came apart in two and left a sliver of face
+  across it.
 - Not done yet: a page 2 picture and work process like Nr. 1.
 
 ### Example photos
