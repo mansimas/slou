@@ -1201,7 +1201,17 @@
           if (glued(z + h / 2)) { gd = Math.abs(zz - z - h / 2); }
           if (glued(z - h / 2)) { gd = Math.min(gd, Math.abs(zz - z + h / 2)); }
           var g = Math.min(1, s) * Math.exp(-Math.pow(gd / 0.012, 2));
-          var v = vert(P.x, P.y, zz, g ? ownCol.clone().multiplyScalar(1 - GLUE_LINE * g) : ownCol, true);
+          // A cut edge is not the colour of the faces: the leather's core is
+          // lighter, nearer its flesh side, and only the layer under the grain
+          // takes the dye (the owner, 2026-10-29). So, where `ownCol.core` is
+          // given, each piece's edge is that lighter core through the middle of
+          // its thickness, going over to its own colour towards the two faces.
+          var ec = ownCol;
+          if (ownCol.core) {
+            var u = Math.min(1, Math.abs(zz - z) / (h / 2));
+            ec = ownCol.clone().lerp(ownCol.core, 1 - Math.pow(u, 2.2));
+          }
+          var v = vert(P.x, P.y, zz, g ? ec.clone().multiplyScalar(1 - GLUE_LINE * g) : ec, true);
           // the normal straight off the dome, not averaged from this piece's
           // own faces: so the shading runs on across the joints between layers
           var slope = (inset(zz + 1e-4, s, ex) - inset(zz - 1e-4, s, ex)) / 2e-4;
@@ -1255,6 +1265,13 @@
     var mesh = new THREE.Mesh(g, mats);
     mesh.userData.caps = capLoops;   // each face's outline and holes, for card holder Nr. 2's `folded`
     return mesh;
+  }
+  // the cut core of a piece's edge (see `leatherPiece`): the leather's colour
+  // taken well towards undyed veg-tan, at the edge's own shade `k`
+  function withCore(col, k) {
+    var c = new THREE.Color(col).multiplyScalar(k);
+    c.core = new THREE.Color(col).lerp(new THREE.Color('#d6b08a'), 0.6).multiplyScalar(k);
+    return c;
   }
   function loopOf(path) {
     return path.getPoints(24).filter(function (p, i, all) { return p.distanceTo(all[(i + 1) % all.length]) > 1e-4; });
@@ -1474,7 +1491,7 @@
       // edge rounded off on its grain side.
       var foldStack = function (p, hole) { return hole ? 1 : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R); };
       var thumb = new THREE.Path(); thumb.absarc(0, 0, FOLD_HOLE, 0, Math.PI * 2, true);
-      var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], new THREE.Color(state.leather).multiplyScalar(1.27), null, null, null, FOLD_T);   // × the map's ~0.8: as light as Nr. 1's edges (the owner, 2026-10-29; 0.78 read darker)
+      var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], withCore(state.leather, 1.27), null, null, null, FOLD_T);   // × the map's ~0.8: as light as Nr. 1's edges (the owner, 2026-10-29; 0.78 read darker)
       fob.add(new THREE.Mesh(folded(flat.geometry, flat.userData.caps), [fold2FrontMat, fold2EdgeMat, backMat, fold2BackMat]));
       flat.geometry.dispose();
       // a bank card inside (ISO ID-1, 85.6 × 54 × 0.76 mm, 3.18 mm corners),
@@ -1560,7 +1577,7 @@
       // grain. Seen from the side, the glued stack shows all four: green, brown,
       // brown, green, with a faint darker line at each glue joint (the owner,
       // 2026-10-19: it has to show that it is glued).
-      var bodyCol = new THREE.Color(state.leather).multiplyScalar(0.75), pocketCol = new THREE.Color(state.pocket).multiplyScalar(0.75);   // 0.62 until the owner found them too dark, 2026-10-29
+      var bodyCol = new THREE.Color(state.leather).multiplyScalar(0.75), pocketCol = new THREE.Color(state.pocket).multiplyScalar(0.75);   // one colour, no lighter core: Nr. 1 keeps its edges as they were (the owner, 2026-10-29)   // 0.62 until the owner found them too dark, 2026-10-29
       // Where the reinforcing stitch wraps a pocket's edge it presses it in
       // (POCKET_DENT): most at the pocket's outer face, nothing at its glued
       // one, a thread's width across and fading out ~0.7 mm into the pocket.

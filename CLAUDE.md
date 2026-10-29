@@ -423,6 +423,15 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   were both rejected. The face grid is finer where it eases out.
 - Not done yet: a page 2 picture and work process like Nr. 1.
 
+### Cut edge colour (card holder Nr. 2)
+A cut edge is lighter than the faces (the owner, 2026-10-29): the leather's core is near
+its flesh side's colour, only the layer under the grain takes the dye. `withCore(col, k)`
+gives each piece's edge colour a `core` (the leather taken 60% towards undyed veg-tan
+`#d6b08a`, at the same shade `k`), and `leatherPiece` runs the edge from that core
+through the middle of each layer to its own colour at the faces (`1 - u^2.2`). Card
+holder Nr. 2 only: the owner asked for Nr. 1 to stay as it was (one colour, ×0.75), and
+the keyfob keeps `edgeMat`.
+
 ### Initials (card holders)
 Stamped 24 pt Helvetica Neue (the owner, 2026-10-29): `textLayout()` gives both card
 holders `size` = 24 pt (0.847 cm em), `neue: true` (weight 500), smaller only if the

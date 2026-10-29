@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-29 20:25] - Lighter cut core, Nr. 2 - Owner: cut leather is lighter in its core, near the flesh side; card holder Nr. 2's edges show a lighter, undyed veg-tan core through each layer's middle, going over to the leather's colour at the faces. Nr. 1 kept as it was.
 [2026-10-29 20:20] - Lighter card holder edges - Owner: the edges were too dark, barely set apart from the leather; both card holders' edges are about a fifth lighter (Nr. 1 ×0.75 of the leather, was 0.62; Nr. 2 matched to it).
 [2026-10-29 20:06] - Smooth oval fold corners - Owner's screenshots: folded, each bottom corner is one plain round corner, its foot on the fold. The 3D now folds Nr. 2 full width and rounds the corners to an exact 6 mm arc, as glued and sanded: no cut, no flat, no hole. Pattern unchanged.
 [2026-10-29 19:56] - Nr. 2 edges as light as Nr. 1 - Owner: card holder Nr. 2's natural Tokonole edges read darker than Nr. 1's; their colour is raised to match (×1.05 of the leather on the natural map, was ×0.78).
