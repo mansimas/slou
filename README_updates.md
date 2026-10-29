@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-29 19:45] - SLOU logo truly debossed - Owner stamps the logo with a metal stamp of raised letters, so the leather sinks only under them: on both card holders the letters are now hollows (flat smooth floor, soft sloping walls, grain pressed out, a shade darker and glossier), not dark print.
 [2026-10-29 19:37] - Natural leather on Nr. 1 - Owner: give card holder Nr. 1 the same natural leather as Nr. 2, it looks more natural: its inner pieces and pockets (initials, SLOU stamp, pattern picture) now use the natural veg-tan texture; edges and flesh sides unchanged.
 [2026-10-29 19:37] - Closed fold corner holes - Owner glues Nr. 2 right to the end, so the little holes at the fold corners must go: in the 3D the sliver where the corner roundings meet is cut straight where the bend ends, and the edge dome flattens into each corner; the pattern keeps the drawing's point.
 [2026-10-29 19:24] - Card deeper, mouth open - Owner: the 4 mm gap under the card in Nr. 2 looked odd: the card goes almost to the end, 2.5 mm above the fold's outside, the line in the leather with it; the mouth stays open above it, the card showing, as a real card holds it.

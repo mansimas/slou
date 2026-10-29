@@ -588,43 +588,55 @@
   var naturalTex = canvasTex(true), naturalBumpTex = canvasTex(false);
   naturalTex.image.getContext('2d').drawImage(natural.col, 0, 0); naturalTex.needsUpdate = true;
   naturalBumpTex.image.getContext('2d').drawImage(natural.bump, 0, 0); naturalBumpTex.needsUpdate = true;
-  // the back pocket: the natural leather (since 2026-10-29, as on Nr. 2) and
-  // the SLOU stamp at the foot, centred, as on the
-  // owner's piece. Mirrored on the canvas, because the back face carries the
-  // same texture coordinates as the front and is seen from behind.
-  var logoTex = canvasTex(true), logoBumpTex = canvasTex(false);
-  [[logoTex, 'rgba(28,13,2,.55)', true], [logoBumpTex, '#000', false]].forEach(function (l) {
-    var g = l[0].image.getContext('2d'), px = TEX_N / TEX_SPAN;
-    g.drawImage(l[2] ? natural.col : natural.bump, 0, 0);
-    g.save();
-    g.translate(TEX_N / 2, TEX_N / 2 + (CARD_H / 2 - 0.85) * px);
-    g.scale(-1, 1);
-    g.font = '800 ' + (0.62 * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
-    g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillStyle = l[1]; g.filter = 'blur(1px)';
-    g.fillText('SLOU', 0, 0);
-    g.restore();
-    l[0].needsUpdate = true;
-  });
-  paintTextures();
-
-  // Card holder Nr. 2's SLOU stamp: the same stamp, on the back half, just
-  // above the thumb notch (the owner, 2026-10-29: the logo was missing).
-  // Mirrored for the same reason as Nr. 1's.
-  var logo2Tex = canvasTex(true), logo2BumpTex = canvasTex(false);
-  [[logo2Tex, 'rgba(28,13,2,.55)', true], [logo2BumpTex, '#000', false]].forEach(function (l) {
-    var g = l[0].image.getContext('2d'), px = TEX_N / TEX_SPAN;
-    g.drawImage(l[2] ? natural.col : natural.bump, 0, 0);
-    g.save();
-    g.translate(TEX_N / 2, TEX_N / 2 - (FOLD_BOT + FOLD_T + FOLD_HOLE + 0.75) * px);
-    g.scale(-1, 1);
-    g.font = '800 ' + (0.62 * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
-    g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillStyle = l[1]; g.filter = 'blur(1px)';
-    g.fillText('SLOU', 0, 0);
-    g.restore();
-    l[0].needsUpdate = true;
-  });
+  // The SLOU stamp, pressed into the leather the way the owner does it
+  // (2026-10-29): a metal stamp whose letters stand up off it, so where the
+  // letters press, the leather sinks, and the letters come out sunk into it
+  // while everything round them stays where it was. So in the relief (bump)
+  // each letter is a hollow: its floor flat and smooth, the grain pressed out
+  // of it, its walls sloping softly down, about 0.3 mm wide. The floor is a
+  // little darker and a touch glossier (`rough`: lower roughness there), as
+  // pressed veg-tan is, and the leather is darkened a little round the walls
+  // where it is drawn down into the letters. `y` is where the stamp sits;
+  // mirrored, because the back face carries the front's texture coordinates
+  // and is seen from behind.
+  function pressLogo(col, bump, rough, y) {
+    var px = TEX_N / TEX_SPAN;
+    function letters(g, style, blur) {
+      g.save();
+      g.translate(TEX_N / 2, TEX_N / 2 - y * px);
+      g.scale(-1, 1);
+      g.font = '800 ' + (0.62 * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.filter = blur ? 'blur(' + blur + 'px)' : 'none';
+      g.fillStyle = style;
+      g.fillText('SLOU', 0, 0);
+      g.restore();
+    }
+    var c = col.image.getContext('2d'), b = bump.image.getContext('2d'), r = rough.image.getContext('2d');
+    // The depth is in the light and shade on the walls, not in the colour:
+    // darkened as much as it was at first, it read as printed (the owner's
+    // stamp is pressed, not inked), so the floor is only a shade darker.
+    c.drawImage(natural.col, 0, 0);
+    letters(c, 'rgba(60,32,12,.08)', 3);     // drawn down round the walls
+    letters(c, 'rgba(48,24,8,.16)', 0.8);    // the pressed floor
+    // the relief runs 2.5 × as deep as the grain's (bumpScale 2 on these
+    // faces, the grain drawn at 40% so it reads as before)
+    b.fillStyle = '#808080'; b.fillRect(0, 0, TEX_N, TEX_N);
+    b.globalAlpha = 0.4; b.drawImage(natural.bump, 0, 0); b.globalAlpha = 1;
+    letters(b, 'rgba(0,0,0,.30)', 3);        // the walls, sloping in
+    letters(b, 'rgba(0,0,0,.35)', 1.6);
+    letters(b, '#262626', 0.6);              // the floor, flat: no grain left in it
+    r.fillStyle = '#fff'; r.fillRect(0, 0, TEX_N, TEX_N);
+    letters(r, '#b8b8b8', 1);
+    [col, bump, rough].forEach(function (t) { t.needsUpdate = true; });
+  }
+  // Nr. 1's back pocket: at the foot, centred, as on the owner's piece
+  var logoTex = canvasTex(true), logoBumpTex = canvasTex(false), logoRoughTex = canvasTex(false);
+  pressLogo(logoTex, logoBumpTex, logoRoughTex, -(CARD_H / 2 - 0.85));
+  // Nr. 2's back half, just above the thumb notch (the owner, 2026-10-29: the
+  // logo was missing)
+  var logo2Tex = canvasTex(true), logo2BumpTex = canvasTex(false), logo2RoughTex = canvasTex(false);
+  pressLogo(logo2Tex, logo2BumpTex, logo2RoughTex, FOLD_BOT + FOLD_T + FOLD_HOLE + 0.75);
 
   // ---------- materials ----------
   var leatherMat = new THREE.MeshStandardMaterial({ map: colorTex, bumpMap: bumpTex, bumpScale: 1.5, roughness: 0.72 });
@@ -636,7 +648,7 @@
   // Its grain faces are the natural leather of Nr. 2 (the owner, 2026-10-29:
   // it looks more natural), as smooth and satin; the flesh sides stay as they were.
   var pocketFrontMat = new THREE.MeshStandardMaterial({ map: fold2Tex, bumpMap: fold2BumpTex, bumpScale: 0.8, roughness: 0.6 });
-  var pocketBackMat = new THREE.MeshStandardMaterial({ map: logoTex, bumpMap: logoBumpTex, bumpScale: 0.8, roughness: 0.6 });
+  var pocketBackMat = new THREE.MeshStandardMaterial({ map: logoTex, bumpMap: logoBumpTex, roughnessMap: logoRoughTex, bumpScale: 2, roughness: 0.6 });
   var pocketFleshMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1, roughness: 0.85 });
   // Burnished edges: Tokonole and a slicker leave the edge smooth, a shade
   // darker than the grain and with a soft natural sheen — not lacquer, so a
@@ -650,7 +662,7 @@
   // Nr. 2's faces: the natural leather (`natural`), smoother and a touch more
   // satin than the pebbled grain, as an oiled veg-tan is
   var fold2FrontMat = new THREE.MeshStandardMaterial({ map: fold2Tex, bumpMap: fold2BumpTex, bumpScale: 0.8, roughness: 0.6 });
-  var fold2BackMat = new THREE.MeshStandardMaterial({ map: logo2Tex, bumpMap: logo2BumpTex, bumpScale: 0.8, roughness: 0.6 });   // with the stamp
+  var fold2BackMat = new THREE.MeshStandardMaterial({ map: logo2Tex, bumpMap: logo2BumpTex, roughnessMap: logo2RoughTex, bumpScale: 2, roughness: 0.6 });   // with the stamp (bumpScale: see pressLogo)
   // and its edges: natural, only worked with Tokonole (the owner, 2026-10-29:
   // they read as painted one even colour). The same leather's fibres and
   // wandering colour run along them, a shade darker (the vertex colour), with
@@ -2805,8 +2817,8 @@
       var key = new THREE.DirectionalLight(0xfff3e0, 2.4);
       key.position.set(4, 7, -9);
       // no SLOU stamp on the pattern (buyers may use their own)
-      var stamp = [pocketBackMat.map, pocketBackMat.bumpMap];
-      pocketBackMat.map = naturalTex; pocketBackMat.bumpMap = naturalBumpTex;
+      var stamp = [pocketBackMat.map, pocketBackMat.bumpMap, pocketBackMat.roughnessMap, pocketBackMat.bumpScale];
+      pocketBackMat.map = naturalTex; pocketBackMat.bumpMap = naturalBumpTex; pocketBackMat.roughnessMap = null; pocketBackMat.bumpScale = 0.8; pocketBackMat.needsUpdate = true;
 
       var IW = 1000, IH = 1600, PX = 8, PY = 30, PW = 118, PH = PW * IH / IW;
       var was = { ratio: renderer.getPixelRatio(),
@@ -2829,7 +2841,7 @@
       fob.remove(bank, print); scene.remove(key); measures.visible = was.measures;
       bank.geometry.dispose(); print.geometry.dispose(); bankMat.dispose(); faceMat.dispose(); faceTex.dispose();
       if (pocketMesh) { pocketMesh.geometry.dispose(); pocketMesh.geometry = flatGeo; }
-      pocketBackMat.map = stamp[0]; pocketBackMat.bumpMap = stamp[1];
+      pocketBackMat.map = stamp[0]; pocketBackMat.bumpMap = stamp[1]; pocketBackMat.roughnessMap = stamp[2]; pocketBackMat.bumpScale = stamp[3]; pocketBackMat.needsUpdate = true;
       renderer.setPixelRatio(was.ratio); renderer.setSize(was.size.x, was.size.y, false); renderer.setClearColor(was.clear, was.alpha);
       renderer.render(scene, camera);
       doc.addImage(shot, 'JPEG', PX, PY, PW, PH);

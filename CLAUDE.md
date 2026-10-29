@@ -419,6 +419,16 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   were both rejected. The face grid is finer where it eases out.
 - Not done yet: a page 2 picture and work process like Nr. 1.
 
+### The SLOU stamp (both card holders)
+The owner presses the logo with a metal stamp whose letters stand up (2026-10-29): the
+leather sinks only under the letters, everything round them stays put. `pressLogo(col,
+bump, rough, y)` draws it so: in the relief each letter is a hollow, a flat smooth floor
+(no grain), walls sloping in over ~0.3 mm (three blurred passes); the floor a shade
+darker (×0.16 alpha, darker read as ink) and glossier (`roughnessMap`), a faint shadow
+round the walls. Those faces have `bumpScale 2` with the grain drawn at 40% so it reads
+as before. Nr. 1's back pocket and Nr. 2's back half; Nr. 1's pattern picture swaps the
+stamp out (and the bump scale back to 0.8).
+
 ### Example photos
 `pavyzdziai/` (one folder per item: `korteline/`, `pakabukas/`) is where the
 owner drops photos of real pieces. Look there before working on an item, and
