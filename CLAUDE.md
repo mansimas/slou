@@ -311,7 +311,8 @@ locked keyfob stitch, unchanged:
     0.1 mm short of the edge. Without those three, a light hairline showed
     at every joint.
   - The edge colour is in vertex colours (`burnished()`: a satin physical
-    material with a light clearcoat, ×0.62 of the grain), so a leather or
+    material with a light clearcoat, ×0.75 of the grain; ×0.62 until the owner
+    found it too dark, 2026-10-29), so a leather or
     pocket colour change rebuilds the card holder. Card holder only: the
     keyfob keeps `edgeMat` and its 3-step extruded bevel.
 - **Work on the card holder only** (the owner, 2026-10-19). Do not change
@@ -389,8 +390,8 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   ~0.8, so the colour is lifted × 1.2. The keyfob and Nr. 1 keep the pebbled `grain`.
 - Edges natural, only worked with Tokonole (the owner, 2026-10-29: Nr. 1's burnished
   edge read as painted one even colour): Nr. 2 has `fold2EdgeMat`, the `natural`
-  leather's colour and fibres running along the edge (×1.05 vertex colour: as light as
-  Nr. 1's edges, the owner; ×0.78 read darker), bumped, satin (roughness 0.5, clearcoat 0.2). Nr. 1 keeps
+  leather's colour and fibres running along the edge (×1.27 vertex colour, as light as
+  Nr. 1's edges; ×0.78, then ×1.05, read too dark, the owner), bumped, satin (roughness 0.5, clearcoat 0.2). Nr. 1 keeps
   `burnished()`.
 - Nr. 1's grain faces have the same natural leather since 2026-10-29 (the owner: it looks
   more natural): `bodyGrainMat` (`naturalTex`), `pocketFrontMat` (`fold2Tex`, with the

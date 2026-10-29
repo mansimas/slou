@@ -1474,7 +1474,7 @@
       // edge rounded off on its grain side.
       var foldStack = function (p, hole) { return hole ? 1 : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R); };
       var thumb = new THREE.Path(); thumb.absarc(0, 0, FOLD_HOLE, 0, Math.PI * 2, true);
-      var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], new THREE.Color(state.leather).multiplyScalar(1.05), null, null, null, FOLD_T);   // × the map's ~0.8: as light as Nr. 1's edges (the owner, 2026-10-29; 0.78 read darker)
+      var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], new THREE.Color(state.leather).multiplyScalar(1.27), null, null, null, FOLD_T);   // × the map's ~0.8: as light as Nr. 1's edges (the owner, 2026-10-29; 0.78 read darker)
       fob.add(new THREE.Mesh(folded(flat.geometry, flat.userData.caps), [fold2FrontMat, fold2EdgeMat, backMat, fold2BackMat]));
       flat.geometry.dispose();
       // a bank card inside (ISO ID-1, 85.6 × 54 × 0.76 mm, 3.18 mm corners),
@@ -1560,7 +1560,7 @@
       // grain. Seen from the side, the glued stack shows all four: green, brown,
       // brown, green, with a faint darker line at each glue joint (the owner,
       // 2026-10-19: it has to show that it is glued).
-      var bodyCol = new THREE.Color(state.leather).multiplyScalar(0.62), pocketCol = new THREE.Color(state.pocket).multiplyScalar(0.62);
+      var bodyCol = new THREE.Color(state.leather).multiplyScalar(0.75), pocketCol = new THREE.Color(state.pocket).multiplyScalar(0.75);   // 0.62 until the owner found them too dark, 2026-10-29
       // Where the reinforcing stitch wraps a pocket's edge it presses it in
       // (POCKET_DENT): most at the pocket's outer face, nothing at its glued
       // one, a thread's width across and fading out ~0.7 mm into the pocket.
