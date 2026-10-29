@@ -2384,26 +2384,28 @@
       pocketBackMat.map = backColorTex; pocketBackMat.bumpMap = plainBumpTex;
 
       var IW = 1000, IH = 1600, PX = 8, PY = 30, PW = 118, PH = PW * IH / IW;
-      var was = { pos: camera.position.clone(), aspect: camera.aspect, fov: camera.fov, near: camera.near, ratio: renderer.getPixelRatio(),
+      var was = { ratio: renderer.getPixelRatio(),
         size: renderer.getSize(new THREE.Vector2()), clear: renderer.getClearColor(new THREE.Color()),
         alpha: renderer.getClearAlpha(), measures: measures.visible };
-      // a long lens, so near and far parts keep their true proportions:
-      // everything at its real size, only smaller (the owner, 2026-10-26)
-      var TURN = 42 * Math.PI / 180, RISE = 14 * Math.PI / 180, DIST = 57, LENS = 12, aim = new THREE.Vector3(0, 0.2, 0);
+      // Everything at its real size, only smaller (the owner, 2026-10-26):
+      // seen without perspective, and turned only a little, 15° (the owner,
+      // 2026-10-29: at 42° the front read narrower than 70 × 100; square on
+      // it did not look turned), so the front reads 67.6 × 100 and the right
+      // edge with its layers still shows.
+      var TURN = 15 * Math.PI / 180, RISE = 6 * Math.PI / 180, DIST = 57, FW = 8.2, FH = FW * IH / IW, FX = 0.07, FY = 0.03;
+      var view = new THREE.OrthographicCamera(FX - FW / 2, FX + FW / 2, FY + FH / 2, FY - FH / 2, DIST - 15, DIST + 15);
+      view.position.set(-Math.sin(TURN) * Math.cos(RISE) * DIST, Math.sin(RISE) * DIST, -Math.cos(TURN) * Math.cos(RISE) * DIST);
+      view.lookAt(0, 0, 0); view.updateMatrixWorld();
       fob.add(bank, print); scene.add(key); measures.visible = false;
       renderer.setPixelRatio(1); renderer.setSize(IW, IH, false); renderer.setClearColor(0xffffff, 1);
-      camera.aspect = IW / IH; camera.fov = LENS; camera.near = DIST - 15; camera.updateProjectionMatrix();
-      camera.position.set(-Math.sin(TURN) * Math.cos(RISE) * DIST, aim.y + Math.sin(RISE) * DIST, -Math.cos(TURN) * Math.cos(RISE) * DIST);
-      camera.lookAt(aim); camera.updateMatrixWorld();
-      renderer.render(scene, camera);
-      var shot = renderer.domElement.toDataURL('image/jpeg', 0.92), view = camera.clone();
+      renderer.render(scene, view);
+      var shot = renderer.domElement.toDataURL('image/jpeg', 0.92);
       // and the editor put back as it was
       fob.remove(bank, print); scene.remove(key); measures.visible = was.measures;
       bank.geometry.dispose(); print.geometry.dispose(); bankMat.dispose(); faceMat.dispose(); faceTex.dispose();
       if (pocketMesh) { pocketMesh.geometry.dispose(); pocketMesh.geometry = flatGeo; }
       pocketBackMat.map = stamp[0]; pocketBackMat.bumpMap = stamp[1];
       renderer.setPixelRatio(was.ratio); renderer.setSize(was.size.x, was.size.y, false); renderer.setClearColor(was.clear, was.alpha);
-      camera.position.copy(was.pos); camera.aspect = was.aspect; camera.fov = was.fov; camera.near = was.near; camera.updateProjectionMatrix(); camera.lookAt(controls.target);
       renderer.render(scene, camera);
       doc.addImage(shot, 'JPEG', PX, PY, PW, PH);
       // a point of the front frame, where it lands on the page

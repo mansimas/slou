@@ -325,7 +325,7 @@ locked keyfob stitch, unchanged:
   piece (window as a solid cut line, initials). On page 2 both are one row, "Išorinė detalė × 2" (`C.outer`, the owner, 2026-10-26). Below, the
   inner piece × 2 (`C.body`; never call it a "main" piece), with the legend; each template carries its name only inside (`inside()`, "× 2" only where cut twice), so it survives cutting out,
   numbered 1-4 in a circle (0.5 mm line) left of its count (`number()`, the owner, 2026-10-27), down each column: left inner 1, front pocket 2, right inner 3, back pocket 4;
-  beside it. Under the picture on page 2, the owner's work process, 9 steps (`C.process`, the owner, 2026-10-27), two columns, paragraphs never split, the rest on a third page with balanced columns. No 50 mm square on this pattern (the owner, 2026-10-20), so the specs table fits under the legend: one A4 sheet. No
+  beside it. The picture on page 2 is orthographic, turned only 15° and raised 6° (the owner, 2026-10-29): the front reads 67.6 × 100. A 42° turn read narrower than 70 × 100; square on (a cavalier view) did not look turned enough. Under the picture on page 2, the owner's work process, 9 steps (`C.process`, the owner, 2026-10-27), two columns, paragraphs never split, the rest on a third page with balanced columns. No 50 mm square on this pattern (the owner, 2026-10-20), so the specs table fits under the legend: one A4 sheet. No
   doubled-stitch brackets and no slit angle in the legend (`C.holes`; the owner, 2026-10-20). The
   body carries the slanted pocket edge as a dashed line, like the grey line on
   the drawing. Thread
