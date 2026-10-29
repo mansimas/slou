@@ -320,14 +320,22 @@
   var FOLD_YC = (FOLD_B + FOLD_T - FOLD_L) / 2;   // the bend's centre, so the folded piece is centred
   var FOLD_TOP = FOLD_YC + FOLD_L - FOLD_B, FOLD_BOT = FOLD_YC - FOLD_T;
   function foldY(s) { return FOLD_YC + Math.abs(s) - FOLD_B; }   // where flat s is once folded (off the bend)
-  // With cards in it the two halves stand apart in the middle and stay glued
-  // at the sides (the owner's screenshots, 2026-10-29): FOLD_OPEN between them
-  // inside, nothing for 1 mm beside the stitch line, easing over the next 3 mm.
-  // The fold opens with them. The cards go in at the open top and show
-  // through the thumb notch.
-  var FOLD_OPEN = 0.1;
-  function foldLift(x) {
-    var t = Math.min(1, Math.max(0, (FOLD_W / 2 - STITCH_INSET - 0.1 - Math.abs(x)) / 0.3));
+  // With cards in it the two halves stand apart round the card and stay
+  // glued at the sides (the owner's screenshots, 2026-10-29), as the front
+  // pocket stands over the card on Nr. 1's picture: FOLD_OPEN between them
+  // over the card, running 1 mm past its edge and easing back to nothing over
+  // the next 3 mm, all the way round it, rounded at its rounded corners (the
+  // owner: a long slow slope below the card, and a hard line where it ends,
+  // were both wrong; a 2 mm ease centred on the card's edge looked unnatural). The cards never go right down into the fold: the card
+  // stands FOLD_CARD above it, so the fold stays closed. They go in at the
+  // open top and show through the thumb notch.
+  var FOLD_OPEN = 0.1, FOLD_CARD = 0.4;
+  var BANK_HW = 5.398 / 2, BANK_LEN = 8.56, BANK_CR = 0.318;   // ISO ID-1: 85.6 × 54 mm, 3.18 mm corners
+  function foldLift(x, y) {
+    var cy = FOLD_BOT + FOLD_CARD + BANK_LEN / 2, r = BANK_CR + 0.1;
+    var qx = Math.abs(x) - (BANK_HW + 0.1 - r), qy = Math.abs(y - cy) - (BANK_LEN / 2 + 0.1 - r);
+    var d = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;   // out from the card, past 1 mm
+    var t = Math.min(1, Math.max(0, 1 - d / 0.3));
     return FOLD_OPEN / 2 * t * t * (3 - 2 * t);
   }
   // The flat outline, CCW. Beside the fold the two corner roundings meet in a
@@ -1270,9 +1278,12 @@
         outer = outer.slice(0, best.i + 1).concat([Q], ring, [Q], outer.slice(best.i + 1));
         key = H.x;
       });
-      var r1 = FOLD_W / 2 - STITCH_INSET - 0.1, r0 = r1 - 0.3;
-      var xs = lines(-FOLD_W / 2 - 0.01, FOLD_W / 2 + 0.01, [[-r1 - 0.05, -r0 + 0.05, 0.05], [r0 - 0.05, r1 + 0.05, 0.05], [key, key, 1]]);
-      var ss = lines(-FOLD_L - 0.01, FOLD_L + 0.01, [[-Z - 0.03, Z + 0.03, 0.025]]);
+      // finer where the bulge eases out: beside the card's sides, below its
+      // foot and near the open top, as flat s on both halves
+      var r1 = BANK_HW + 0.45, r0 = BANK_HW - 0.45, cb = FOLD_BOT + FOLD_CARD - FOLD_YC + FOLD_B, ct = cb + BANK_LEN;
+      var xs = lines(-FOLD_W / 2 - 0.01, FOLD_W / 2 + 0.01, [[-r1, -r0, 0.05], [r0, r1, 0.05], [key, key, 1]]);
+      var ss = lines(-FOLD_L - 0.01, FOLD_L + 0.01, [[-Z - 0.03, Z + 0.03, 0.025], [cb - 0.45, cb + 0.45, 0.04], [-cb - 0.45, -cb + 0.45, 0.04],
+                                                     [ct - 0.45, FOLD_L, 0.05], [-FOLD_L, -ct + 0.45, 0.05]]);
       var ids = {};
       function vid(p) {
         var k = Math.round(p.x * 1e5) + ',' + Math.round(p.y * 1e5);
@@ -1346,12 +1357,13 @@
       if (sv >= FOLD_B) { y = FOLD_YC + sv - FOLD_B; z = zz; }
       else if (sv <= -FOLD_B) { y = FOLD_YC - sv - FOLD_B; z = -zz; }
       else { y = FOLD_YC - zz * Math.cos(th); z = zz * Math.sin(th); }
-      var sn = Math.sin(th), lift = foldLift(px) * sn, dlift = (foldLift(px + 0.004) - foldLift(px - 0.004)) / 0.008 * sn;
+      var sn = Math.sin(th), lift = foldLift(px, y) * sn;
+      var dlx = (foldLift(px + 0.004, y) - foldLift(px - 0.004, y)) / 0.008 * sn, dly = (foldLift(px, y + 0.004) - foldLift(px, y - 0.004)) / 0.008 * sn;
       P[v * 3 + 1] = y; P[v * 3 + 2] = z + lift;
       var ny0 = Nm[v * 3 + 1], nz0 = Nm[v * 3 + 2];
       Nm[v * 3 + 1] = ny0 * sn - nz0 * Math.cos(th); Nm[v * 3 + 2] = ny0 * Math.cos(th) + nz0 * sn;
       // tipped by the slope of the lift
-      Nm[v * 3] -= Nm[v * 3 + 2] * dlift;
+      Nm[v * 3] -= Nm[v * 3 + 2] * dlx; Nm[v * 3 + 1] -= Nm[v * 3 + 2] * dly;
       var nl2 = Math.hypot(Nm[v * 3], Nm[v * 3 + 1], Nm[v * 3 + 2]) || 1;
       Nm[v * 3] /= nl2; Nm[v * 3 + 1] /= nl2; Nm[v * 3 + 2] /= nl2;
       U[v * 2 + 1] = y;   // the texture by where it is once folded, so the initials land on the front
@@ -1397,15 +1409,15 @@
       fob.add(new THREE.Mesh(folded(flat.geometry, flat.userData.caps), [fold2FrontMat, bodyEdgeMat, backMat, fold2BackMat]));
       flat.geometry.dispose();
       // a bank card inside (ISO ID-1, 85.6 × 54 × 0.76 mm, 3.18 mm corners),
-      // standing on the fold, as in the owner's screenshots: it shows in the
-      // thumb notch and stops about 5 mm under the open top
-      var bw = 5.398 / 2, bh = 8.56, br = 0.318, bs = new THREE.Shape();
+      // FOLD_CARD above the fold, as in the owner's screenshots: it shows in
+      // the thumb notch and stops about 3 mm under the open top
+      var bw = BANK_HW, bh = BANK_LEN, br = BANK_CR, bs = new THREE.Shape();
       bs.moveTo(-bw + br, 0); bs.lineTo(bw - br, 0); bs.quadraticCurveTo(bw, 0, bw, br);
       bs.lineTo(bw, bh - br); bs.quadraticCurveTo(bw, bh, bw - br, bh);
       bs.lineTo(-bw + br, bh); bs.quadraticCurveTo(-bw, bh, -bw, bh - br);
       bs.lineTo(-bw, br); bs.quadraticCurveTo(-bw, 0, -bw + br, 0);
       var bank = new THREE.Mesh(new THREE.ExtrudeGeometry(bs, { depth: 0.076, bevelEnabled: false, curveSegments: 8 }), cardMat);
-      bank.position.set(0, FOLD_BOT + FOLD_T + 0.05, -0.038);
+      bank.position.set(0, FOLD_BOT + FOLD_CARD, -0.038);
       fob.add(bank);
       // two open seams, down the left side and up the right (CCW, like the
       // outlines), each its own run of equal stitches

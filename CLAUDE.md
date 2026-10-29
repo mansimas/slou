@@ -386,6 +386,15 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   `folded()` takes the face outlines from `leatherPiece` (`mesh.userData.caps`):
   rebuilt from the triangles the hole came apart in two and left a sliver of face
   across it.
+- The cards never go right down into the fold (the owner, 2026-10-29): the card stands
+  `FOLD_CARD` 4 mm above it, so the fold stays closed. The bulge is done as Nr. 1's
+  picture does it: `foldLift(x, y)` is full over the card and 1 mm past it, easing to
+  nothing (smoothstep) over the next 3 mm all the way round, by distance from the card's
+  rounded rectangle (`BANK_HW`, `BANK_LEN`, `BANK_CR`), so its corners are round. A 2 mm
+  ease centred on the card's edge (to put the line where the card ends) was tried and
+  undone the same day: it looked unnatural (the owner). A hard
+  step at the card's foot (t², read as a strong shadow) and the long slow slope there
+  were both rejected. The face grid is finer where it eases out.
 - Not done yet: a page 2 picture and work process like Nr. 1.
 
 ### Example photos
