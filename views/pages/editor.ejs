@@ -349,17 +349,19 @@
     var qx = Math.abs(x) - (BANK_HW + 0.1 - r), qy = Math.abs(Math.min(y - 0.1, cy) - cy) - (BANK_LEN / 2 + 0.1 - r);
     var d = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;   // out from the card, past 1 mm
     var t = Math.min(1, Math.max(0, 1 - d / FOLD_EASE));
-    // And below the end of the stitching the side lines simply die away a
-    // little as they run down to the card's foot (the owner, 2026-10-29): the
-    // same rise round the card, its side slope only eased halfway towards the
-    // broad soft one, and never raised. (Widening the slope instead, or
-    // spreading it over the card's lowest 15 mm, was not what she meant.)
-    var foot = cy - BANK_LEN / 2, sEnd = foldY(FOLD_END), wb = Math.min(1, Math.max(0, (sEnd - y) / (sEnd - foot)));
+    // And the side lines fade out towards the bottom too (the owner,
+    // 2026-10-29: not all the way down): over the card's lowest 15 mm the
+    // side slopes go halfway to the same broad soft one as above its top: the
+    // card is still under the leather there, so the rise still follows it,
+    // only subtly (all the way, it lost the card). Starting the fade at the
+    // seam's end instead, over its last few mm, left a dark shadow at the
+    // card's bottom corners, so it was put back to this (the owner).
+    var foot = cy - BANK_LEN / 2, wb = Math.min(1, Math.max(0, (foot + 1.5 - y) / 1.5));
     if (wb > 0) {
       var ty = Math.min(1, Math.max(0, 1 - (foot - y) / FOLD_EASE));
       var xi0 = BANK_HW - 1.0, xo0 = FOLD_W / 2 - STITCH_INSET, b0 = Math.min(1, Math.max(0, (xo0 - Math.abs(x)) / (xo0 - xi0)));
       wb = 0.55 * wb * wb * (3 - 2 * wb);
-      t = t * (1 - wb) + Math.min(t, ty * b0 * b0 * (3 - 2 * b0)) * wb;
+      t = t * (1 - wb) + ty * b0 * b0 * (3 - 2 * b0) * wb;
     }
     // and nothing in the glued margin outside the stitch lines, down to the
     // fold: there the halves are glued to each other right to the end (the
