@@ -527,11 +527,21 @@
     b.drawImage(grain, 0, 0);
     drawText(b, '#000');
     bumpTex.needsUpdate = true;
-    // card holder Nr. 2's front: its own natural leather, the same initials
+    // the natural leather with the initials: card holder Nr. 1's front
+    // pocket (`fold2Tex`), and Nr. 2's back (`fold2BackTex`), mirrored there
+    // as the back face is seen from behind
     if (typeof fold2Tex !== 'undefined') {
-      var f = fold2Tex.image.getContext('2d'), fb = fold2BumpTex.image.getContext('2d');
-      f.filter = 'none'; f.drawImage(natural.col, 0, 0); drawText(f, 'rgba(28,13,2,.62)'); fold2Tex.needsUpdate = true;
-      fb.filter = 'none'; fb.drawImage(natural.bump, 0, 0); drawText(fb, '#000'); fold2BumpTex.needsUpdate = true;
+      [[fold2Tex, fold2BumpTex, false], [fold2BackTex, fold2BackBumpTex, true]].forEach(function (t) {
+        [[t[0], natural.col, 'rgba(28,13,2,.62)'], [t[1], natural.bump, '#000']].forEach(function (l) {
+          var g = l[0].image.getContext('2d');
+          g.filter = 'none'; g.drawImage(l[1], 0, 0);
+          g.save();
+          if (t[2]) { g.translate(TEX_N, 0); g.scale(-1, 1); }
+          drawText(g, l[2]);
+          g.restore();
+          l[0].needsUpdate = true;
+        });
+      });
     }
   }
   paintTextures();
@@ -599,6 +609,7 @@
   // the front, with the initials: painted in `paintTextures` (card holder
   // Nr. 1's front pocket wears it too), and the same leather plain
   var fold2Tex = canvasTex(true), fold2BumpTex = canvasTex(false);
+  var fold2BackTex = canvasTex(true), fold2BackBumpTex = canvasTex(false);
   paintTextures();   // now that it exists: the first call above ran before it
   var naturalTex = canvasTex(true), naturalBumpTex = canvasTex(false);
   naturalTex.image.getContext('2d').drawImage(natural.col, 0, 0); naturalTex.needsUpdate = true;
@@ -614,12 +625,12 @@
   // where it is drawn down into the letters. `y` is where the stamp sits;
   // mirrored, because the back face carries the front's texture coordinates
   // and is seen from behind.
-  function pressLogo(col, bump, rough, y) {
+  function pressLogo(col, bump, rough, y, front) {
     var px = TEX_N / TEX_SPAN;
     function letters(g, style, blur) {
       g.save();
       g.translate(TEX_N / 2, TEX_N / 2 - y * px);
-      g.scale(-1, 1);
+      if (!front) { g.scale(-1, 1); }   // a front face is not mirrored
       g.font = '800 ' + (0.62 * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
       g.textAlign = 'center'; g.textBaseline = 'middle';
       g.filter = blur ? 'blur(' + blur + 'px)' : 'none';
@@ -648,10 +659,11 @@
   // Nr. 1's back pocket: at the foot, centred, as on the owner's piece
   var logoTex = canvasTex(true), logoBumpTex = canvasTex(false), logoRoughTex = canvasTex(false);
   pressLogo(logoTex, logoBumpTex, logoRoughTex, -(CARD_H / 2 - 0.85));
-  // Nr. 2's back half, just above the thumb notch (the owner, 2026-10-29: the
-  // logo was missing)
+  // Nr. 2's front, just above the thumb notch, the blue card's side: the back,
+  // where the red card is, never carries the logo (the owner, 2026-10-29), so
+  // the initials went there
   var logo2Tex = canvasTex(true), logo2BumpTex = canvasTex(false), logo2RoughTex = canvasTex(false);
-  pressLogo(logo2Tex, logo2BumpTex, logo2RoughTex, FOLD_BOT + FOLD_T + FOLD_HOLE + 0.75);
+  pressLogo(logo2Tex, logo2BumpTex, logo2RoughTex, FOLD_BOT + FOLD_T + FOLD_HOLE + 0.75, true);
 
   // ---------- materials ----------
   var leatherMat = new THREE.MeshStandardMaterial({ map: colorTex, bumpMap: bumpTex, bumpScale: 1.5, roughness: 0.72 });
@@ -677,8 +689,8 @@
   var card2Mat = new THREE.MeshStandardMaterial({ color: 0xa8302e, roughness: 0.4 });   // the second, red
   // Nr. 2's faces: the natural leather (`natural`), smoother and a touch more
   // satin than the pebbled grain, as an oiled veg-tan is
-  var fold2FrontMat = new THREE.MeshStandardMaterial({ map: fold2Tex, bumpMap: fold2BumpTex, bumpScale: 0.8, roughness: 0.6 });
-  var fold2BackMat = new THREE.MeshStandardMaterial({ map: logo2Tex, bumpMap: logo2BumpTex, roughnessMap: logo2RoughTex, bumpScale: 2, roughness: 0.6 });   // with the stamp (bumpScale: see pressLogo)
+  var fold2FrontMat = new THREE.MeshStandardMaterial({ map: logo2Tex, bumpMap: logo2BumpTex, roughnessMap: logo2RoughTex, bumpScale: 2, roughness: 0.6 });   // with the stamp (bumpScale: see pressLogo)
+  var fold2BackMat = new THREE.MeshStandardMaterial({ map: fold2BackTex, bumpMap: fold2BackBumpTex, bumpScale: 0.8, roughness: 0.6 });   // with the initials
   // and its edges: natural, only worked with Tokonole (the owner, 2026-10-29:
   // they read as painted one even colour). The same leather's fibres and
   // wandering colour run along them, a shade darker (the vertex colour), with
@@ -3038,7 +3050,10 @@
       if (L) {
         doc.setTextColor(150);
         doc.setFontSize(L.size * 10 * cfy * 72 / 25.4);
-        doc.text(L.txt, X(L.x), Y(flatS(L.y, 1)), { align: 'center', baseline: 'middle' });
+        // on the back half (the owner, 2026-10-29), turned half round: folded
+        // over, it then reads the right way up seen from the back
+        // (jsPDF does not centre turned text, so it starts half its width right)
+        doc.text(L.txt, X(L.x) + doc.getTextWidth(L.txt) / 2, Y(flatS(L.y, -1)), { baseline: 'middle', angle: 180 });
       }
       // sizes: the width under it, the whole length on the left, one half and
       // the thumb hole on the right

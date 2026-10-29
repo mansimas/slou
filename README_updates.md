@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-29 20:53] - Nr. 2 logo front, initials back - Owner: the red card stays at the back, and the back never carries the logo; Nr. 2's SLOU stamp moved to the front (blue card side), the initials to the back, and on the pattern the initials guide to the back half, turned to read once folded.
 [2026-10-29 20:33] - Second card in Nr. 2 - Owner: put one more card, of another colour, into card holder Nr. 2: a red card behind the blue one, both standing level; the halves now stand 1.7 mm apart round the two (0.9 for one), easing out over 5 mm to stay soft.
 [2026-10-29 20:25] - Lighter cut core, Nr. 2 - Owner: cut leather is lighter in its core, near the flesh side; card holder Nr. 2's edges show a lighter, undyed veg-tan core through each layer's middle, going over to the leather's colour at the faces. Nr. 1 kept as it was.
 [2026-10-29 20:20] - Lighter card holder edges - Owner: the edges were too dark, barely set apart from the leather; both card holders' edges are about a fifth lighter (Nr. 1 ×0.75 of the leather, was 0.62; Nr. 2 matched to it).

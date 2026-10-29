@@ -423,6 +423,13 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   were both rejected. The face grid is finer where it eases out.
 - Not done yet: a page 2 picture and work process like Nr. 1.
 
+### Nr. 2: logo front, initials back
+The back (the red card's side, z < 0) never carries the logo (the owner, 2026-10-29): the
+SLOU stamp is on the front, above the thumb notch (`fold2FrontMat` with `logo2Tex`,
+`pressLogo(..., front = true)`, not mirrored), the initials on the back
+(`fold2BackMat`, `fold2BackTex`, drawn mirrored in `paintTextures`). On the pattern the
+initials guide is on the back (lower) half, turned 180° so it reads once folded.
+
 ### Two cards in Nr. 2
 Since 2026-10-29 (the owner) Nr. 2 holds two cards: the blue one (`cardMat`) in front and
 a red one (`card2Mat`) behind it, both on the same level (the owner; 1.5 mm higher at first). Together
