@@ -423,9 +423,12 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   mouth the side slopes spread evenly into one broad smoothstep, from 1 cm inside the
   card's side to the stitch line. A quick 1.5 mm switch to an arch made a ledge. The same
   at the bottom (the owner: the side lines must not run all the way down): over the
-  card's lowest 15 mm they go 55% of the way to that broad slope: the card is still under
-  the leather there, so the rise must still follow it, only subtly (all the way lost the
-  card, the owner). A hard
+  seam's ends: the side lines stay full up the stitched sides and fade out from where the
+  stitching ends (the owner). At the bottom, from the seam's last hole to the card's foot,
+  the ease round the card simply widens, up to 2.5 × `FOLD_EASE`; at the top, from the
+  seam's top end to the mouth, the broad slope above. (Tried: one broad slope over the
+  card's lowest 15 mm lost the card; halfway left lines to the bottom; mixing in the
+  broad slope over the last few mm left a crease in each corner.) A hard
   step at the card's foot (t², read as a strong shadow) and the long slow slope there
   were both rejected. The face grid is finer where it eases out.
 - Pattern pages 2-3 (2026-10-29, the owner: made after Nr. 1's): "Rekomendacijos", a still
