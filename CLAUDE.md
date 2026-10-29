@@ -424,7 +424,14 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   card's side to the stitch line. A quick 1.5 mm switch to an arch made a ledge. A hard
   step at the card's foot (t², read as a strong shadow) and the long slow slope there
   were both rejected. The face grid is finer where it eases out.
-- Not done yet: a page 2 picture and work process like Nr. 1.
+- Pattern pages 2-3 (2026-10-29, the owner: made after Nr. 1's): "Rekomendacijos", a still
+  of the 3D model with its two cards (no perspective, turned 15°, SLOU stamp swapped out),
+  specs with leaders (`C2.piece` with a leader to each half, pitch, thread, inset) and the
+  rest under a rule (size, `C2.notch` Ø 25 mm, leather, initials), then the work process.
+  `processPages(WP, steps, y0)` lays out the process for both card holders (it was inside
+  Nr. 1's page). `card2.steps` in `content.js`: a list is Nr. 2's own step, a number reuses
+  `card.process.steps[n]` (flesh side, sanding, stitching, polishing, finishing). Nr. 2's
+  own steps were drafted by Claude for the owner to correct.
 
 ### Nr. 2: logo front, initials back
 The back (the red card's side, z < 0) never carries the logo (the owner, 2026-10-29): the

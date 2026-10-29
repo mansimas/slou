@@ -2960,70 +2960,77 @@
         doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
       });
 
-      // The owner's own way of making it, step by step (the owner, 2026-10-27),
-      // under the picture: two columns, and what does not fit on to a new page,
-      // its two columns balanced. A paragraph is never split, and a step's
-      // heading stays with its first paragraph.
-      var WP = C.process, colX = [15, 108], colW2 = 87, BOT = 285, LH = 3.3;
-      var blocks = [];   // { head, lines, h }
-      doc.setFontSize(8);
-      WP.steps.forEach(function (st, i) {
-        st.slice(1).forEach(function (p, j) {
-          var lines = doc.splitTextToSize(p, colW2);
-          blocks.push({ head: j ? null : (i + 1) + '. ' + st[0], lines: lines,
-                        h: (j ? 0 : 5) + lines.length * LH + 1.2 + (j === st.length - 2 ? 2.5 : 0) });
-        });
-      });
-      // and after it, where the owner shares the making on social media (the
-      // owner, 2026-10-27): each handle a live link, laid over the flattened page
-      var SOC = [['TikTok', '@sloudiary', 'https://www.tiktok.com/@sloudiary'],
-        ['Instagram', '@slou_studio', 'https://www.instagram.com/slou_studio'],
-        ['Facebook', 'slou.lt', 'https://www.facebook.com/slou.lt'],
-        ['YouTube', '@sloustudio', 'https://www.youtube.com/@sloustudio'],
-        ['Patreon', '@SLOU', 'https://www.patreon.com/SLOU', WP.patreonNote]];
-      blocks.push({ social: true, lines: [], h: 4 + 5 + SOC.length * 4.2 });
-      function put(b, x, yy) {
-        if (b.social) {
-          yy += 1;
-          doc.setDrawColor(190); doc.setLineWidth(0.2); doc.line(x, yy - 3.5, x + colW2, yy - 3.5);
-          doc.setFontSize(9); doc.setTextColor(40, 36, 31); doc.text(WP.follow, x, yy + 1.5);
-          yy += 6.5;
-          SOC.forEach(function (r) {
-            doc.setFontSize(8); doc.setTextColor(110, 100, 90); doc.text(r[0], x, yy);
-            doc.setTextColor(40, 36, 31); doc.text(r[1], x + 20, yy);
-            var w = doc.getTextWidth(r[1]);
-            links.push({ page: doc.internal.getCurrentPageInfo().pageNumber, x: x + 19.5, y: yy - 3, w: w + 1, h: 4, url: r[2] });
-            if (r[3]) { doc.setTextColor(110, 100, 90); doc.text('(' + r[3] + ')', x + 21 + w, yy); }
-            yy += 4.2;
-          });
-          return;
-        }
-        if (b.head) { doc.setFontSize(9.5); doc.setTextColor(40, 36, 31); doc.text(b.head, x, yy); yy += 5; }
-        doc.setFontSize(8); doc.setTextColor(80, 72, 64);
-        b.lines.forEach(function (ln) { doc.text(ln, x, yy); yy += LH; });
-      }
-      var yy = Math.max(PY + PH, y) + 8;
-      doc.setFontSize(13); doc.setTextColor(40, 36, 31);
-      doc.text(WP.title, 105, yy, { align: 'center' });   // centred, like "Recommendations" above (the owner, 2026-10-27)
-      var colTop = yy + 8, k = 0;
-      for (var c2 = 0; c2 < 2; c2++) {
-        yy = colTop;
-        while (k < blocks.length && yy + blocks[k].h <= BOT) { put(blocks[k], colX[c2], yy); yy += blocks[k].h; k++; }
-      }
-      if (k < blocks.length) {
-        doc.addPage();
-        var left = blocks.slice(k), total = left.reduce(function (a, b) { return a + b.h; }, 0);
-        var split = 0, acc = 0;   // column 1 takes blocks until it holds about half
-        while (split < left.length && acc + left[split].h / 2 < total / 2) { acc += left[split].h; split++; }
-        yy = 20;
-        left.forEach(function (b, i) {
-          if (i === split) { yy = 20; }
-          put(b, colX[i < split ? 0 : 1], yy); yy += b.h;
-        });
-      }
+      processPages(C.process, C.process.steps, Math.max(PY + PH, y) + 8);
       };
     }
     var legendPage = null, links = [];   // links: clickable spots, put back over the flattened pages
+
+    // The work process on a card holder's page 2, from y0 down, and on to a
+    // page of its own if it runs over (shared by both card holders). `WP`
+    // gives the title and the social links, `steps` the steps.
+    function processPages(WP, steps, y0) {
+    // The owner's own way of making it, step by step (the owner, 2026-10-27),
+    // under the picture: two columns, and what does not fit on to a new page,
+    // its two columns balanced. A paragraph is never split, and a step's
+    // heading stays with its first paragraph.
+    var colX = [15, 108], colW2 = 87, BOT = 285, LH = 3.3;
+    var blocks = [];   // { head, lines, h }
+    doc.setFontSize(8);
+    steps.forEach(function (st, i) {
+      st.slice(1).forEach(function (p, j) {
+        var lines = doc.splitTextToSize(p, colW2);
+        blocks.push({ head: j ? null : (i + 1) + '. ' + st[0], lines: lines,
+                      h: (j ? 0 : 5) + lines.length * LH + 1.2 + (j === st.length - 2 ? 2.5 : 0) });
+      });
+    });
+    // and after it, where the owner shares the making on social media (the
+    // owner, 2026-10-27): each handle a live link, laid over the flattened page
+    var SOC = [['TikTok', '@sloudiary', 'https://www.tiktok.com/@sloudiary'],
+      ['Instagram', '@slou_studio', 'https://www.instagram.com/slou_studio'],
+      ['Facebook', 'slou.lt', 'https://www.facebook.com/slou.lt'],
+      ['YouTube', '@sloustudio', 'https://www.youtube.com/@sloustudio'],
+      ['Patreon', '@SLOU', 'https://www.patreon.com/SLOU', WP.patreonNote]];
+    blocks.push({ social: true, lines: [], h: 4 + 5 + SOC.length * 4.2 });
+    function put(b, x, yy) {
+      if (b.social) {
+        yy += 1;
+        doc.setDrawColor(190); doc.setLineWidth(0.2); doc.line(x, yy - 3.5, x + colW2, yy - 3.5);
+        doc.setFontSize(9); doc.setTextColor(40, 36, 31); doc.text(WP.follow, x, yy + 1.5);
+        yy += 6.5;
+        SOC.forEach(function (r) {
+          doc.setFontSize(8); doc.setTextColor(110, 100, 90); doc.text(r[0], x, yy);
+          doc.setTextColor(40, 36, 31); doc.text(r[1], x + 20, yy);
+          var w = doc.getTextWidth(r[1]);
+          links.push({ page: doc.internal.getCurrentPageInfo().pageNumber, x: x + 19.5, y: yy - 3, w: w + 1, h: 4, url: r[2] });
+          if (r[3]) { doc.setTextColor(110, 100, 90); doc.text('(' + r[3] + ')', x + 21 + w, yy); }
+          yy += 4.2;
+        });
+        return;
+      }
+      if (b.head) { doc.setFontSize(9.5); doc.setTextColor(40, 36, 31); doc.text(b.head, x, yy); yy += 5; }
+      doc.setFontSize(8); doc.setTextColor(80, 72, 64);
+      b.lines.forEach(function (ln) { doc.text(ln, x, yy); yy += LH; });
+    }
+    var yy = y0;
+    doc.setFontSize(13); doc.setTextColor(40, 36, 31);
+    doc.text(WP.title, 105, yy, { align: 'center' });   // centred, like "Recommendations" above (the owner, 2026-10-27)
+    var colTop = yy + 8, k = 0;
+    for (var c2 = 0; c2 < 2; c2++) {
+      yy = colTop;
+      while (k < blocks.length && yy + blocks[k].h <= BOT) { put(blocks[k], colX[c2], yy); yy += blocks[k].h; k++; }
+    }
+    if (k < blocks.length) {
+      doc.addPage();
+      var left = blocks.slice(k), total = left.reduce(function (a, b) { return a + b.h; }, 0);
+      var split = 0, acc = 0;   // column 1 takes blocks until it holds about half
+      while (split < left.length && acc + left[split].h / 2 < total / 2) { acc += left[split].h; split++; }
+      yy = 20;
+      left.forEach(function (b, i) {
+        if (i === split) { yy = 20; }
+        put(b, colX[i < split ? 0 : 1], yy); yy += b.h;
+      });
+    }
+    }
 
     // Card holder Nr. 2: the one piece, flat as it is cut, grain side up, the
     // front half on top and the fold across the middle as a dashed line. The
@@ -3096,6 +3103,76 @@
       ];
       if (L) { rows.push([P.initials, L.txt]); }
       table(rows);
+
+      // Page 2, as Nr. 1's (the owner, 2026-10-29: made after it): the
+      // finished card holder, the specs with leaders to it, and the owner's
+      // work process, the steps Nr. 1 shares taken from Nr. 1's own
+      // (C2.steps: a number is one of Nr. 1's steps).
+      legendPage = function () {
+        doc.setFontSize(18); doc.setTextColor(40, 36, 31);
+        doc.text('SLOU - ' + C2.patternTitle, 105, 20, { align: 'center' });
+        doc.setFontSize(13);
+        doc.text(C.recommend, 105, 28, { align: 'center' });
+        // A still of the 3D model, with its two cards, seen as Nr. 1's is: no
+        // perspective, turned 15° so the right edge and its two layers show.
+        // Without the SLOU stamp (buyers may use their own).
+        var key = new THREE.DirectionalLight(0xfff3e0, 2.4);
+        key.position.set(-4, 7, 9);
+        var keep = [fold2FrontMat.map, fold2FrontMat.bumpMap, fold2FrontMat.roughnessMap, fold2FrontMat.bumpScale];
+        fold2FrontMat.map = naturalTex; fold2FrontMat.bumpMap = naturalBumpTex; fold2FrontMat.roughnessMap = null; fold2FrontMat.bumpScale = 0.8; fold2FrontMat.needsUpdate = true;
+        var IW = 1000, IH = 1600, PX = 8, PY = 30, PW = 118, PH = PW * IH / IW;
+        var was = { ratio: renderer.getPixelRatio(), size: renderer.getSize(new THREE.Vector2()),
+          clear: renderer.getClearColor(new THREE.Color()), alpha: renderer.getClearAlpha(), measures: measures.visible };
+        var TURN = 15 * Math.PI / 180, RISE = 6 * Math.PI / 180, DIST = 57, FW = 8.2, FH = FW * IH / IW, FX = 0.07, FY = 0.03;
+        var view = new THREE.OrthographicCamera(FX - FW / 2, FX + FW / 2, FY + FH / 2, FY - FH / 2, DIST - 15, DIST + 15);
+        view.position.set(Math.sin(TURN) * Math.cos(RISE) * DIST, Math.sin(RISE) * DIST, Math.cos(TURN) * Math.cos(RISE) * DIST);
+        view.lookAt(0, 0, 0); view.updateMatrixWorld();
+        scene.add(key); measures.visible = false;
+        renderer.setPixelRatio(1); renderer.setSize(IW, IH, false); renderer.setClearColor(0xffffff, 1);
+        renderer.render(scene, view);
+        var shot = renderer.domElement.toDataURL('image/jpeg', 0.92);
+        scene.remove(key); measures.visible = was.measures;
+        fold2FrontMat.map = keep[0]; fold2FrontMat.bumpMap = keep[1]; fold2FrontMat.roughnessMap = keep[2]; fold2FrontMat.bumpScale = keep[3]; fold2FrontMat.needsUpdate = true;
+        renderer.setPixelRatio(was.ratio); renderer.setSize(was.size.x, was.size.y, false); renderer.setClearColor(was.clear, was.alpha);
+        renderer.render(scene, camera);
+        doc.addImage(shot, 'JPEG', PX, PY, PW, PH);
+        function proj(x, y, z) {
+          var q = new THREE.Vector3(x, y, z).project(view);
+          return [PX + (q.x + 1) / 2 * PW, PY + (1 - q.y) / 2 * PH];
+        }
+        // the specs beside it, as on Nr. 1: leaders to the part each is about,
+        // sorted so none cross, and the rest under a rule
+        var E = FOLD_W / 2, seamX = E - STITCH_INSET;
+        var notes = [
+          [C2.piece, mm(FOLD_T), proj(E - 0.02, 2.0, FOLD_T / 2), proj(E - 0.02, 1.8, -FOLD_T / 2)],   // a leader to each half
+          [M.spacing, mm(STITCH_PITCH), proj(seamX, -0.7, FOLD_T)],
+          [P.thread, cap(C.threadSize), proj(seamX, -1.2, FOLD_T)],
+          [M.inset, mm(STITCH_INSET), proj(E - STITCH_INSET / 2, -1.7, FOLD_T)],
+        ].sort(function (u, v) { return u[2][1] - v[2][1]; });
+        var cx = 142, cr = 200, y = 0;
+        doc.setFontSize(9);
+        notes.forEach(function (r) {
+          y = Math.max(y + 9, r[2][1] - 18);
+          doc.setTextColor(110, 100, 90); doc.text(r[0], cx, y);
+          doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
+          r.slice(2).forEach(function (a) {   // white halo, then the leader and its dot
+            doc.setDrawColor(255); doc.setLineWidth(0.6); doc.line(cx - 2, y - 1, a[0], a[1]);
+            doc.setFillColor(255); doc.circle(a[0], a[1], 0.95, 'F');
+            doc.setDrawColor(120); doc.setLineWidth(0.15); doc.line(cx - 2, y - 1, a[0], a[1]);
+            doc.setFillColor(0); doc.circle(a[0], a[1], 0.5, 'F');
+          });
+        });
+        var rest = [[M.width + ' × ' + M.height, mm(FOLD_W) + ' × ' + mm(FOLD_L)], [C2.notch, '\u00d8 ' + mm(2 * FOLD_HOLE)], [P.leather, cap(C.vegtan)]];
+        if (L) { rest.push([P.initials, L.txt]); }
+        y += 5;
+        doc.setDrawColor(170); doc.setLineWidth(0.2); doc.line(cx, y, cr, y);
+        rest.forEach(function (r) {
+          y += 6;
+          doc.setTextColor(110, 100, 90); doc.text(r[0], cx, y);
+          doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
+        });
+        processPages(C.process, C2.steps.map(function (st) { return typeof st === 'number' ? C.process.steps[st] : st; }), Math.max(PY + PH, y) + 8);
+      };
     }
 
     // legend lines and the specs table, shared by both items
@@ -3297,7 +3374,12 @@
     ] : fold ? [
       [[62, 80, 1.0, -10], [62, 125, 0.45, 8], [62, 180, 0.85, 12],                    // the piece
        [157, 80, 0.6, 10], [157, 125, 0.95, -8],                                       // the legend, the specs
-       [110, 17, 0.45, 6], [150, 200, 0.55, -12], [30, 268, 0.6, -8], [110, 262, 0.5, -4], [175, 268, 0.8, 14]]
+       [110, 17, 0.45, 6], [150, 200, 0.55, -12], [30, 268, 0.6, -8], [110, 262, 0.5, -4], [175, 268, 0.8, 14]],
+      [[60, 100, 1.0, -10], [66, 165, 0.9, 12],                                          // page 2, as Nr. 1's: the picture
+       [170, 100, 0.7, 8], [170, 150, 0.6, -12],                                         // the specs
+       [55, 250, 0.8, -6], [150, 250, 0.8, 10], [110, 20, 0.55, 6], [110, 285, 0.4, -10]],  // the work process
+      [[50, 45, 0.8, -10], [55, 105, 0.6, 12], [150, 45, 0.75, 8], [155, 108, 0.65, -12],  // page 3
+       [100, 180, 0.9, 4], [40, 250, 0.6, -15], [170, 240, 0.7, 10], [105, 285, 0.45, 0]]
     ] : [
       [[60, 128, 0.7, 10], [64, 170, 0.7, -14],                                          // the keyfob
        [157, 140, 0.95, -8], [165, 85, 0.65, 12],                                        // the specs, the legend
