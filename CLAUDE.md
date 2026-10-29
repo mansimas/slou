@@ -346,8 +346,12 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
 - One piece of 1.6 mm veg-tan (`FOLD_T`), 70 × 184.4 mm flat (`FOLD_W`, 2 × `FOLD_L`),
   folded in the middle; corners rounded 6 mm (`FOLD_R`); a Ø 25 mm hole on the fold
   (`FOLD_HOLE`), so each face has a half-round thumb notch. Where the corner
-  roundings meet beside the fold (a point on the drawing) there is a 1 mm round
-  (`FOLD_RHO`), so the edge can be set in.
+  roundings meet beside the fold (a point on the drawing), `foldOutline(true)` (the pattern)
+  keeps the point; the 3D (`foldOutline()`) stops the roundings where the bend ends
+  (`FOLD_B` either side) and joins them by a straight cut at `FOLD_CUT`, so the fold ends
+  in solid leather. A small round there (`FOLD_RHO`, 1 mm then 0.3 mm) left a dimple,
+  then a hole like a tube end; the owner glues it right to the end, so there are no holes.
+  The edge dome also flattens into each fold corner over 3 mm (a `stack` value over 1).
 - 3D: built flat by `leatherPiece` (new `stackT` argument, the stack is the two
   halves) and folded by `folded()`: triangles cut finer across the bend (no edge over
   0.3 mm along the piece; cutting them small every way made 300 000 triangles and
@@ -364,9 +368,8 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   in the middle while staying glued at the sides. So the 3D carries a bank card standing
   on the fold (`cardMat`), and the halves stand `FOLD_OPEN` 1 mm apart round it
   (`foldLift`: nothing within 1 mm of the stitch line, eased over 3 mm), the bend opening
-  with them. `FOLD_RHO` is 0.3 mm (1 mm left a dimple in the folded corner; a little is
-  still there close up). Easing the dome out at the fold was tried and opened a gap
-  between the layers there instead.
+  with them. Easing the dome out at the fold to the piece's own rounding was
+  tried and opened a gap between the layers there instead.
 - SLOU stamp (the owner, 2026-10-29) on the back half, just above the thumb notch
   (`logo2Tex`, `fold2BackMat`), mirrored like Nr. 1's; not on the pattern.
 - One piece, one colour (the owner, 2026-10-29): both faces use the same leather; for
@@ -386,6 +389,11 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   leather's colour and fibres running along the edge (×0.78 vertex colour, so ~0.62 on
   average as before), bumped, satin (roughness 0.5, clearcoat 0.2). Nr. 1 keeps
   `burnished()`.
+- Nr. 1's grain faces have the same natural leather since 2026-10-29 (the owner: it looks
+  more natural): `bodyGrainMat` (`naturalTex`), `pocketFrontMat` (`fold2Tex`, with the
+  initials), `pocketBackMat` (`logoTex`, now drawn on `natural`), colours × 1.2; the
+  pattern picture's stamp-less back uses `naturalTex`. Its flesh sides and edges are
+  unchanged.
 - The thumb hole is bevelled like the outer edges (the owner, 2026-10-29): `foldStack`
   gives it the stack's dome, so each half's edge is rounded on its grain side.
   `folded()` takes the face outlines from `leatherPiece` (`mesh.userData.caps`):

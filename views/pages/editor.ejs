@@ -351,23 +351,25 @@
     return FOLD_OPEN / 2 * t * t * (3 - 2 * t);
   }
   // The flat outline, CCW. Beside the fold the two corner roundings meet in a
-  // point on the drawing; here that point is a 0.3 mm round (`rho`), so the
-  // outline does not double back on itself. It all lies in the bend. At 1 mm
-  // it left a dimple in the folded corner, which on the real piece is one
-  // clean rounding (the owner's screenshots of it, 2026-10-29).
-  var FOLD_RHO = 0.03, FOLD_DX = Math.sqrt(Math.pow(FOLD_R + FOLD_RHO, 2) - FOLD_R * FOLD_R);
-  var FOLD_GAP = FOLD_W / 2 - FOLD_R + FOLD_DX - FOLD_RHO;   // the fold runs out to here each side
-  function foldOutline() {
-    var sh = new THREE.Shape(), x = FOLD_W / 2, L = FOLD_L, r = FOLD_R, rho = FOLD_RHO, dx = FOLD_DX, PI = Math.PI;
-    var a = Math.atan2(r, dx);   // where the round meets the corners
+  // point on the drawing, and `exact` (the pattern) keeps it. In the 3D that
+  // point is a sliver too thin to fold: it curled up and left a little hole
+  // in each corner (the owner, 2026-10-29: glued right to the end, there are
+  // none). So there the roundings stop where the bend does, FOLD_B either side
+  // of the fold, joined by a straight cut across it: the fold then ends in
+  // solid leather, at FOLD_CUT out from the middle.
+  var FOLD_CA = Math.asin((FOLD_R - FOLD_B) / FOLD_R), FOLD_CUT = FOLD_W / 2 - FOLD_R + FOLD_R * Math.cos(FOLD_CA);
+  var FOLD_GAP = FOLD_W / 2 - FOLD_R;   // where the fold runs out to on the pattern (the point)
+  function foldOutline(exact) {
+    var sh = new THREE.Shape(), x = FOLD_W / 2, L = FOLD_L, r = FOLD_R, PI = Math.PI;
+    var a = exact ? PI / 2 : FOLD_CA, cx = x - r + r * Math.cos(a), sb = r - r * Math.sin(a);
     sh.moveTo(-x + r, -L); sh.lineTo(x - r, -L); sh.absarc(x - r, -L + r, r, -PI / 2, 0);
     sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, a);
-    sh.absarc(x - r + dx, 0, rho, PI + a, PI - a, true);
+    if (!exact) { sh.lineTo(cx, sb); }
     sh.absarc(x - r, r, r, -a, 0);
     sh.lineTo(x, L - r); sh.absarc(x - r, L - r, r, 0, PI / 2);
     sh.lineTo(-x + r, L); sh.absarc(-x + r, L - r, r, PI / 2, PI);
     sh.lineTo(-x, r); sh.absarc(-x + r, r, r, PI, PI + a);
-    sh.absarc(-x + r - dx, 0, rho, a, -a, true);
+    if (!exact) { sh.lineTo(-cx, -sb); }
     sh.absarc(-x + r, -r, r, PI - a, PI);
     sh.lineTo(-x, -L + r); sh.absarc(-x + r, -L + r, r, PI, PI * 1.5);
     return sh;
@@ -523,24 +525,6 @@
   var plainBumpTex = canvasTex(false);
   plainBumpTex.image.getContext('2d').drawImage(grain, 0, 0);
   plainBumpTex.needsUpdate = true;
-  // the back pocket: grain and the SLOU stamp at the foot, centred, as on the
-  // owner's piece. Mirrored on the canvas, because the back face carries the
-  // same texture coordinates as the front and is seen from behind.
-  var logoTex = canvasTex(true), logoBumpTex = canvasTex(false);
-  [[logoTex, 'rgba(28,13,2,.55)', true], [logoBumpTex, '#000', false]].forEach(function (l) {
-    var g = l[0].image.getContext('2d'), px = TEX_N / TEX_SPAN;
-    g.drawImage(grain, 0, 0);
-    if (l[2]) { g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(0, 0, TEX_N, TEX_N); }
-    g.save();
-    g.translate(TEX_N / 2, TEX_N / 2 + (CARD_H / 2 - 0.85) * px);
-    g.scale(-1, 1);
-    g.font = '800 ' + (0.62 * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
-    g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillStyle = l[1]; g.filter = 'blur(1px)';
-    g.fillText('SLOU', 0, 0);
-    g.restore();
-    l[0].needsUpdate = true;
-  });
 
   // Card holder Nr. 2's leather, as natural as it can be made (the owner,
   // 2026-10-29), after the brown pieces in the owner's screenshots of the
@@ -598,8 +582,30 @@
     bo.filter = 'blur(0.7px)'; bo.drawImage(bump, 0, 0);
     return { col: colOut, bump: bumpOut };
   })();
-  // the front, with the initials: painted in `paintTextures`
+  // the front, with the initials: painted in `paintTextures` (card holder
+  // Nr. 1's front pocket wears it too), and the same leather plain
   var fold2Tex = canvasTex(true), fold2BumpTex = canvasTex(false);
+  var naturalTex = canvasTex(true), naturalBumpTex = canvasTex(false);
+  naturalTex.image.getContext('2d').drawImage(natural.col, 0, 0); naturalTex.needsUpdate = true;
+  naturalBumpTex.image.getContext('2d').drawImage(natural.bump, 0, 0); naturalBumpTex.needsUpdate = true;
+  // the back pocket: the natural leather (since 2026-10-29, as on Nr. 2) and
+  // the SLOU stamp at the foot, centred, as on the
+  // owner's piece. Mirrored on the canvas, because the back face carries the
+  // same texture coordinates as the front and is seen from behind.
+  var logoTex = canvasTex(true), logoBumpTex = canvasTex(false);
+  [[logoTex, 'rgba(28,13,2,.55)', true], [logoBumpTex, '#000', false]].forEach(function (l) {
+    var g = l[0].image.getContext('2d'), px = TEX_N / TEX_SPAN;
+    g.drawImage(l[2] ? natural.col : natural.bump, 0, 0);
+    g.save();
+    g.translate(TEX_N / 2, TEX_N / 2 + (CARD_H / 2 - 0.85) * px);
+    g.scale(-1, 1);
+    g.font = '800 ' + (0.62 * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = l[1]; g.filter = 'blur(1px)';
+    g.fillText('SLOU', 0, 0);
+    g.restore();
+    l[0].needsUpdate = true;
+  });
   paintTextures();
 
   // Card holder Nr. 2's SLOU stamp: the same stamp, on the back half, just
@@ -627,8 +633,10 @@
   // The card holder in two colours: the bodies in `state.leather`, the
   // pockets in `state.pocket`. The front pocket carries the initials, the
   // back one the SLOU stamp; the bodies' grain is plain.
-  var pocketFrontMat = new THREE.MeshStandardMaterial({ map: colorTex, bumpMap: bumpTex, bumpScale: 1.5, roughness: 0.72 });
-  var pocketBackMat = new THREE.MeshStandardMaterial({ map: logoTex, bumpMap: logoBumpTex, bumpScale: 1.5, roughness: 0.72 });
+  // Its grain faces are the natural leather of Nr. 2 (the owner, 2026-10-29:
+  // it looks more natural), as smooth and satin; the flesh sides stay as they were.
+  var pocketFrontMat = new THREE.MeshStandardMaterial({ map: fold2Tex, bumpMap: fold2BumpTex, bumpScale: 0.8, roughness: 0.6 });
+  var pocketBackMat = new THREE.MeshStandardMaterial({ map: logoTex, bumpMap: logoBumpTex, bumpScale: 0.8, roughness: 0.6 });
   var pocketFleshMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1, roughness: 0.85 });
   // Burnished edges: Tokonole and a slicker leave the edge smooth, a shade
   // darker than the grain and with a soft natural sheen — not lacquer, so a
@@ -637,7 +645,7 @@
   // the glued stack is burnished to one shade, each piece's own edge to its own.
   function burnished() { return new THREE.MeshPhysicalMaterial({ roughness: 0.34, clearcoat: 0.55, clearcoatRoughness: 0.25, vertexColors: true }); }
   var pocketEdgeMat = burnished(), bodyEdgeMat = burnished();
-  var bodyGrainMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1.5, roughness: 0.72 });
+  var bodyGrainMat = new THREE.MeshStandardMaterial({ map: naturalTex, bumpMap: naturalBumpTex, bumpScale: 0.8, roughness: 0.6 });
   var cardMat = new THREE.MeshStandardMaterial({ color: 0x24467d, roughness: 0.4 });   // the bank card in card holder Nr. 2
   // Nr. 2's faces: the natural leather (`natural`), smoother and a touch more
   // satin than the pebbled grain, as an oiled veg-tan is
@@ -775,14 +783,14 @@
     leatherMat.color.copy(c);
     backMat.color.copy(c).multiplyScalar(0.9);
     edgeMat.color.copy(c).multiplyScalar(0.55);
-    bodyGrainMat.color.copy(c);
+    bodyGrainMat.color.copy(c).multiplyScalar(1.2);   // the natural map averages ~0.8
     // the natural map is about 0.8 on average, so the colour is lifted to
     // keep the chosen shade
     fold2FrontMat.color.copy(c).multiplyScalar(1.2);
     fold2BackMat.color.copy(c).multiplyScalar(1.2);
     var pc = new THREE.Color(state.pocket);
-    pocketFrontMat.color.copy(pc);
-    pocketBackMat.color.copy(pc);
+    pocketFrontMat.color.copy(pc).multiplyScalar(1.2);
+    pocketBackMat.color.copy(pc).multiplyScalar(1.2);
     pocketFleshMat.color.copy(pc).multiplyScalar(0.9);
     threadMat.color.set(state.thread);
     holeMat.color.copy(c).multiplyScalar(0.12);
@@ -1079,7 +1087,9 @@
   // point p (CARD_THICK / 2 by default): in the thumb window the front pocket
   // is cut away, so there the stack is the two bodies and the back pocket.
   // `stackT`, if given, is half the glued stack's thickness (CARD_THICK / 2 by
-  // default): on the folded card holder the stack is its two halves.
+  // default): on the folded card holder the stack is its two halves. A
+  // `stack` value over 1 (up to 2) is the stack's dome flattened, 2 being a
+  // square edge: card holder Nr. 2's fold corners, glued to the very end.
   function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp, top, stackT) {
     var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T = stackT || CARD_THICK / 2, tp = T, domeNormals = [], matte = {}, sideFace = [];
     function vert(x, y, zz, c, edge) {
@@ -1098,7 +1108,9 @@
       }
       // the stack's dome, from its back face (-T) to its front one (tp)
       var all = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - Math.pow((zz - (tp - T) / 2) / ((tp + T) / 2), 2))));
-      return own + (all - own) * s;
+      var k = s > 1 ? 2 - s : 1;
+      s = Math.min(1, s);
+      return k * (own + (all - own) * s);
     }
     // resampled every 0.5 mm, so the rounding can change along a straight
     // run; the material on the left, so the outline runs CCW and holes CW
@@ -1157,14 +1169,14 @@
         // a hairline of their own).
         for (var j = 0; j <= S; j++) {
           var fz = j === 0 ? z + h / 2 : j === S ? z - h / 2 : null;   // a face, if this is its edge
-          var e = fz !== null && glued(fz) ? 0.008 * s : 0;   // glued faces only, not the stack's outer ones
+          var e = fz !== null && glued(fz) ? 0.008 * Math.min(1, s) : 0;   // glued faces only, not the stack's outer ones
           var zz = z + (h / 2 + e) * Math.sin(Math.PI / 2 - j / S * Math.PI), d = inset(zz, s, ex) + (e ? 0.003 : 0), P = setIn(zz, d);
           // its own colour, darkened a touch within ~0.15 mm of a glued face:
           // the glue line
           var gd = 1e9;
           if (glued(z + h / 2)) { gd = Math.abs(zz - z - h / 2); }
           if (glued(z - h / 2)) { gd = Math.min(gd, Math.abs(zz - z + h / 2)); }
-          var g = s * Math.exp(-Math.pow(gd / 0.012, 2));
+          var g = Math.min(1, s) * Math.exp(-Math.pow(gd / 0.012, 2));
           var v = vert(P.x, P.y, zz, g ? ownCol.clone().multiplyScalar(1 - GLUE_LINE * g) : ownCol, true);
           // the normal straight off the dome, not averaged from this piece's
           // own faces: so the shading runs on across the joints between layers
@@ -1178,7 +1190,7 @@
         rings.push(ring);
         // a glued face stops 0.1 mm short of the edge: run right out to it, its
         // rim showed through the joint as a light hairline
-        var gf = glued(z + h / 2) ? 0.01 * s : 0, gb = glued(z - h / 2) ? 0.01 * s : 0;
+        var gf = glued(z + h / 2) ? 0.01 * Math.min(1, s) : 0, gb = glued(z - h / 2) ? 0.01 * Math.min(1, s) : 0;
         capLoops[0][li].push(setIn(z + h / 2, inset(z + h / 2, s, ex) + gf));
         capLoops[1][li].push(setIn(z - h / 2, inset(z - h / 2, s, ex) + gb));
       });
@@ -1422,7 +1434,16 @@
       // The thumb hole is worked with the edge beveler too, like the outer
       // edges (the owner, 2026-10-29): it takes the same dome, each half's
       // edge rounded off on its grain side.
-      var foldStack = function (p, hole) { return hole ? 1 : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R); };
+      // And into the two fold corners, glued right to the end (the owner,
+      // 2026-10-29), the dome flattens out over the last 3 mm (a stack value
+      // up to 2): rounded, it wrapped round the end of the bend and left a
+      // little hole in each corner.
+      var foldStack = function (p, hole) {
+        if (hole) { return 1; }
+        var dc = Math.hypot(Math.abs(p.x) - FOLD_CUT, p.y);
+        if (dc < 0.3) { return 2 - fe(dc / 0.3); }
+        return 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R);
+      };
       var thumb = new THREE.Path(); thumb.absarc(0, 0, FOLD_HOLE, 0, Math.PI * 2, true);
       var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], new THREE.Color(state.leather).multiplyScalar(0.78), null, null, null, FOLD_T);   // × the map's ~0.8
       fob.add(new THREE.Mesh(folded(flat.geometry, flat.userData.caps), [fold2FrontMat, fold2EdgeMat, backMat, fold2BackMat]));
@@ -2785,7 +2806,7 @@
       key.position.set(4, 7, -9);
       // no SLOU stamp on the pattern (buyers may use their own)
       var stamp = [pocketBackMat.map, pocketBackMat.bumpMap];
-      pocketBackMat.map = backColorTex; pocketBackMat.bumpMap = plainBumpTex;
+      pocketBackMat.map = naturalTex; pocketBackMat.bumpMap = naturalBumpTex;
 
       var IW = 1000, IH = 1600, PX = 8, PY = 30, PW = 118, PH = PW * IH / IW;
       var was = { ratio: renderer.getPixelRatio(),
@@ -2933,7 +2954,7 @@
       var holes = current.holes, chords = current.chords;
       OX = 62; OY = headEnd + 9 + FOLD_L * 10 * cfy;   // y = 0 (the fold) on the page
       doc.setDrawColor(0); doc.setLineWidth(0.3);
-      poly(loopOf(foldOutline()));
+      poly(loopOf(foldOutline(true)));
       doc.ellipse(X(0), Y(0), FOLD_HOLE * 10 * cfx, FOLD_HOLE * 10 * cfy);
       doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
       [-1, 1].forEach(function (m) { doc.line(X(m * FOLD_HOLE), Y(0), X(m * FOLD_GAP), Y(0)); });
