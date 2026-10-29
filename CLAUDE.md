@@ -418,7 +418,10 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   artificial (the owner): `FOLD_OPEN` 0.9 mm (was 1), eased out over `FOLD_EASE` 4 mm
   (was 3). Above the card the mouth stays open and the card shows in it, as a card holds
   it open (the owner): closing the halves evenly towards the mouth, so the side lines
-  died away there, was tried and undone the same day. A hard
+  died away there, was tried and undone the same day. Instead the side lines fade above the card
+  (the owner, 2026-10-29: no lines where there are no cards): from the card's top to the
+  mouth the side slopes spread evenly into one broad smoothstep, from 1 cm inside the
+  card's side to the stitch line. A quick 1.5 mm switch to an arch made a ledge. A hard
   step at the card's foot (t², read as a strong shadow) and the long slow slope there
   were both rejected. The face grid is finer where it eases out.
 - Not done yet: a page 2 picture and work process like Nr. 1.

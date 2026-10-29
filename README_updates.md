@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-29 21:32] - Side lines stop at card top - Owner: on Nr. 2 the card's side lines should not run up to the mouth where there are no cards; above the card's top they now spread out evenly into one broad soft slope and fade away, the mouth still open.
 [2026-10-29 21:14] - Nr. 2 half set to 92 mm - Owner: make Nr. 2's half 92 mm, not the drawing's 92.2; the piece is now 70 x 184 mm flat, 3D and pattern alike (sizes, slits and labels follow).
 [2026-10-29 21:12] - Why 92.2 mm half - Owner asked why Nr. 2's half is 92.2 mm, not 92: it was measured off pvz1.pdf's vectors (halves 56.3-148.5 and 148.5-240.7 mm); pvz2's text rounds it to 92 mm. No change, only answered.
 [2026-10-29 20:53] - Nr. 2 logo front, initials back - Owner: the red card stays at the back, and the back never carries the logo; Nr. 2's SLOU stamp moved to the front (blue card side), the initials to the back, and on the pattern the initials guide to the back half, turned to read once folded.

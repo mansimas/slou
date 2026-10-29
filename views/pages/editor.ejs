@@ -353,6 +353,18 @@
     // fold: there the halves are glued to each other right to the end (the
     // owner, 2026-10-29). Reaching it, the lift opened a hole at each corner.
     t *= Math.min(1, Math.max(0, (FOLD_W / 2 - STITCH_INSET - Math.abs(x)) / 0.15));
+    // Above the card's top there are no cards, so no lines (the owner,
+    // 2026-10-29): from the card's top to the mouth the side slopes spread
+    // out evenly into one broad, soft one, from 1 cm in from the card's side
+    // to the stitch line, so the line fades away instead of running on up;
+    // the middle stays open, as the mouth is with cards in it.
+    var top = cy + BANK_LEN / 2, w = Math.min(1, Math.max(0, (y - top + 0.1) / (FOLD_TOP - top + 0.1)));
+    if (w > 0) {
+      var xi = BANK_HW - 1.0, xo = FOLD_W / 2 - STITCH_INSET;
+      var b = Math.min(1, Math.max(0, (xo - Math.abs(x)) / (xo - xi)));
+      w = w * w * (3 - 2 * w);
+      t = t * (1 - w) + b * b * (3 - 2 * b) * w;
+    }
     // Above the card the mouth stays open, the card showing in it, as a card
     // in it holds it open (the owner, 2026-10-29; closing it evenly towards
     // the mouth was tried and undone)
@@ -1372,7 +1384,8 @@
       // its foot, as flat s on both halves
       var r1 = BANK_HW + 0.55, r0 = BANK_HW - 0.45, cb = FOLD_BOT + FOLD_CARD - FOLD_YC + FOLD_B;
       var xs = lines(-FOLD_W / 2 - 0.01, FOLD_W / 2 + 0.01, [[-r1, -r0, 0.05], [r0, r1, 0.05], [key, key, 1]]);
-      var ss = lines(-FOLD_L - 0.01, FOLD_L + 0.01, [[-Z - 0.03, Z + 0.03, 0.025], [cb - 0.5, cb + 0.45, 0.04], [-cb - 0.45, -cb + 0.5, 0.04]]);
+      var ss = lines(-FOLD_L - 0.01, FOLD_L + 0.01, [[-Z - 0.03, Z + 0.03, 0.025], [cb - 0.5, cb + 0.45, 0.04], [-cb - 0.45, -cb + 0.5, 0.04],
+                                                     [cb + BANK_LEN - 0.1, cb + BANK_LEN + 0.25, 0.03], [-cb - BANK_LEN - 0.25, -cb - BANK_LEN + 0.1, 0.03]]);   // and where the arch takes over above the card
       var ids = {};
       function vid(p) {
         var k = Math.round(p.x * 1e5) + ',' + Math.round(p.y * 1e5);
