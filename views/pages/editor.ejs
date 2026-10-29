@@ -349,6 +349,17 @@
     var qx = Math.abs(x) - (BANK_HW + 0.1 - r), qy = Math.abs(Math.min(y - 0.1, cy) - cy) - (BANK_LEN / 2 + 0.1 - r);
     var d = Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0) - r;   // out from the card, past 1 mm
     var t = Math.min(1, Math.max(0, 1 - d / FOLD_EASE));
+    // And the side lines fade out towards the bottom too (the owner,
+    // 2026-10-29: not all the way down): over the card's lowest 15 mm the
+    // side slopes spread into the same broad soft one as above its top, so
+    // only the soft rise from its foot is left there.
+    var foot = cy - BANK_LEN / 2, wb = Math.min(1, Math.max(0, (foot + 1.5 - y) / 1.5));
+    if (wb > 0) {
+      var ty = Math.min(1, Math.max(0, 1 - (foot - y) / FOLD_EASE));
+      var xi0 = BANK_HW - 1.0, xo0 = FOLD_W / 2 - STITCH_INSET, b0 = Math.min(1, Math.max(0, (xo0 - Math.abs(x)) / (xo0 - xi0)));
+      wb = wb * wb * (3 - 2 * wb);
+      t = t * (1 - wb) + ty * b0 * b0 * (3 - 2 * b0) * wb;
+    }
     // and nothing in the glued margin outside the stitch lines, down to the
     // fold: there the halves are glued to each other right to the end (the
     // owner, 2026-10-29). Reaching it, the lift opened a hole at each corner.
@@ -3115,11 +3126,9 @@
         doc.text(C.recommend, 105, 28, { align: 'center' });
         // A still of the 3D model, with its two cards, seen as Nr. 1's is: no
         // perspective, turned 15° so the right edge and its two layers show.
-        // Without the SLOU stamp (buyers may use their own).
+        // With the SLOU stamp: the owner wants it kept here (2026-10-29).
         var key = new THREE.DirectionalLight(0xfff3e0, 2.4);
         key.position.set(-4, 7, 9);
-        var keep = [fold2FrontMat.map, fold2FrontMat.bumpMap, fold2FrontMat.roughnessMap, fold2FrontMat.bumpScale];
-        fold2FrontMat.map = naturalTex; fold2FrontMat.bumpMap = naturalBumpTex; fold2FrontMat.roughnessMap = null; fold2FrontMat.bumpScale = 0.8; fold2FrontMat.needsUpdate = true;
         var IW = 1000, IH = 1600, PX = 8, PY = 30, PW = 118, PH = PW * IH / IW;
         var was = { ratio: renderer.getPixelRatio(), size: renderer.getSize(new THREE.Vector2()),
           clear: renderer.getClearColor(new THREE.Color()), alpha: renderer.getClearAlpha(), measures: measures.visible };
@@ -3132,7 +3141,6 @@
         renderer.render(scene, view);
         var shot = renderer.domElement.toDataURL('image/jpeg', 0.92);
         scene.remove(key); measures.visible = was.measures;
-        fold2FrontMat.map = keep[0]; fold2FrontMat.bumpMap = keep[1]; fold2FrontMat.roughnessMap = keep[2]; fold2FrontMat.bumpScale = keep[3]; fold2FrontMat.needsUpdate = true;
         renderer.setPixelRatio(was.ratio); renderer.setSize(was.size.x, was.size.y, false); renderer.setClearColor(was.clear, was.alpha);
         renderer.render(scene, camera);
         doc.addImage(shot, 'JPEG', PX, PY, PW, PH);

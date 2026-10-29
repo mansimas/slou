@@ -421,11 +421,14 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   died away there, was tried and undone the same day. Instead the side lines fade above the card
   (the owner, 2026-10-29: no lines where there are no cards): from the card's top to the
   mouth the side slopes spread evenly into one broad smoothstep, from 1 cm inside the
-  card's side to the stitch line. A quick 1.5 mm switch to an arch made a ledge. A hard
+  card's side to the stitch line. A quick 1.5 mm switch to an arch made a ledge. The same
+  at the bottom (the owner: the side lines must not run all the way down): over the
+  card's lowest 15 mm they spread into that broad slope, leaving only the soft rise from
+  the card's foot. A hard
   step at the card's foot (t², read as a strong shadow) and the long slow slope there
   were both rejected. The face grid is finer where it eases out.
 - Pattern pages 2-3 (2026-10-29, the owner: made after Nr. 1's): "Rekomendacijos", a still
-  of the 3D model with its two cards (no perspective, turned 15°, SLOU stamp swapped out),
+  of the 3D model with its two cards (no perspective, turned 15°, with the SLOU stamp: the owner wants it kept there, unlike Nr. 1's),
   specs with leaders (`C2.piece` with a leader to each half, pitch, thread, inset) and the
   rest under a rule (size, `C2.notch` Ø 25 mm, leather, initials), then the work process.
   `processPages(WP, steps, y0)` lays out the process for both card holders (it was inside
