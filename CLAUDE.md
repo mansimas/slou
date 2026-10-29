@@ -344,7 +344,7 @@ Added 2026-10-29: the third "Item" (`product: 'card2'`, texts in `content.*.edit
 from a pattern the owner found (`pavyzdziai/pvz1.pdf` drawing, `pvz2.pdf` notes;
 GR Handcraft). Only its shape and size are taken from it: the stitch and every
 technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
-- One piece of 1.6 mm veg-tan (`FOLD_T`), 70 × 184.4 mm flat (`FOLD_W`, 2 × `FOLD_L`),
+- One piece of 1.6 mm veg-tan (`FOLD_T`), 70 × 184 mm flat (`FOLD_W`, 2 × `FOLD_L`; 92.2 mm a half on the drawing, set to 92 by the owner, 2026-10-29),
   folded in the middle; corners rounded 6 mm (`FOLD_R`); a Ø 25 mm hole on the fold
   (`FOLD_HOLE`), so each face has a half-round thumb notch. Where the corner
   roundings meet beside the fold (a point on the drawing), and `foldOutline(true)` (the
