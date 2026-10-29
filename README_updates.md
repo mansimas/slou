@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-10-29 21:12] - Why 92.2 mm half - Owner asked why Nr. 2's half is 92.2 mm, not 92: it was measured off pvz1.pdf's vectors (halves 56.3-148.5 and 148.5-240.7 mm); pvz2's text rounds it to 92 mm. No change, only answered.
 [2026-10-29 20:53] - Nr. 2 logo front, initials back - Owner: the red card stays at the back, and the back never carries the logo; Nr. 2's SLOU stamp moved to the front (blue card side), the initials to the back, and on the pattern the initials guide to the back half, turned to read once folded.
 [2026-10-29 20:33] - Second card in Nr. 2 - Owner: put one more card, of another colour, into card holder Nr. 2: a red card behind the blue one, both standing level; the halves now stand 1.7 mm apart round the two (0.9 for one), easing out over 5 mm to stay soft.
 [2026-10-29 20:25] - Lighter cut core, Nr. 2 - Owner: cut leather is lighter in its core, near the flesh side; card holder Nr. 2's edges show a lighter, undyed veg-tan core through each layer's middle, going over to the leather's colour at the faces. Nr. 1 kept as it was.
