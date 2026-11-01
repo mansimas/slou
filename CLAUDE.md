@@ -490,20 +490,40 @@ stitch and every technique are the owner's own.
   `fold2EdgeMat` + `withCore` like card holder Nr. 2.
 - The locked stitch as a closed loop (`stitchHoles`), the keyfob joint in the same
   place (37% down the left side).
-- The strap (`strapPath`, `strapGeo`): a strip 13 mm wide, skived 0.8 mm
-  (`K2_TAB_W`, `K2_TAB_T`), its ends 9 mm in between the layers (`K2_TAB_IN`), so the
-  stitching runs through them. From the side (the owner's `pakabukas/1.png`): both
+- The strap is the back piece's own tongue (the owner, 2026-11-01: make it ours, not
+  the screenshot's separate strap; two pieces, not three). `strapPath`, `strapGeo`: 13 mm
+  wide, skived on the flesh side to 1 mm (`K2_TAB_W`, `K2_TAB_T`), its grain flush with
+  the back face (`K2_TAB_Z`); it folds over the ring and its free end goes 9 mm down in
+  between the layers (`K2_TAB_IN`), so the stitching runs through it.
+  Built as it is cut (the owner, 2026-11-01: the black piece narrows at the top,
+  becomes the strap, wraps the ring and slides in between the leathers, shown
+  realistically): one flat piece, `k2BackShape` (the stadium narrowing through 5 mm
+  shoulders, `K2_NECK_R`, into the tongue), made by `leatherPiece`, then bent by
+  `k2Bend` along `strapPath` from `K2_STUB` up, skived from 1.8 mm to 1 mm over its
+  first 1.5 mm. Its flesh side shows inside the loop (`fob2FleshMat`, second colour).
+  Its returning end runs down the tongue's 3 mm skive slope (`K2_SKIVE_UP`, `k2Inner`)
+  and in between the two layers on the back's flesh face, and the front layer is
+  lifted over it by its thickness (`k2Lift`: 1 mm, 0.2 mm at the skived tip, easing
+  out 2.5 mm past its sides and 3.5 mm past its tip; the front cut finer there by
+  `k2Split`), so the leather over it shows it is there (the owner, 2026-11-01: the
+  thickness shows; sunk flush in a recess it did not read as going in between).
+  The thread follows the lifted face (`face()`), each stitch one straight strand.
+  Past the 10 cm texture the tongue's texture is mirrored (it smeared into streaks).
+  Tried and wrong: a separate strip laid on a cut-off tongue (a line across the neck
+  however the two met). From the side (the owner's `pakabukas/1.png`): both
   plies lie together out of the body and on for 2.5 mm (`K2_TAB_FLAT`), then wrap the
   ring's wire in one small tight teardrop, inside radius 2.5 mm (`K2_LOOP_R`, the wire's
   two turns are 2.4 mm from middle to corner), the wire filling it. A wide loop with the
   plies parting straight out of the body was the first try and was wrong. The B2020 ring
   hangs from the loop swung back 20° (`K2_RING_TILT`), its split at the top.
-- The strap's ends are skived (the owner's choice, 2026-11-01): over the last 6 mm
+- The tongue's free end is skived (the owner's choice, 2026-11-01): over the last 6 mm
   (`K2_SKIVE`) down to 0.2 mm (`K2_SKIVE_T`), on the ply's inner side; hatched on the
   pattern's strap, with `keyfob2.skive` in the legend.
-- Pattern: the body × 2 with the slits, the strap × 1 beside it (fold and insertion
-  depth dashed, length from `strapLen()`), a dashed box on the body where the strap
-  ends sit; legend, specs, rulers and the 50 mm square as on the keyfob.
+- Pattern: the front × 1 with the slits and a dashed box where the tongue's end lies,
+  and beside it the back with its tongue × 1, seen from its grain side (slits mirrored):
+  the fold and the insertion line dashed, the skived end hatched, length from
+  `strapLen()`; turned labels centred by hand (jsPDF ignores `align` on turned text);
+  legend, specs, rulers and the 50 mm square as on the keyfob.
 
 ### Example photos
 `pavyzdziai/` (one folder per item: `korteline/`, `pakabukas/`) is where the

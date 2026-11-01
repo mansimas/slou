@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-01 23:10] - Strap made from back piece - Owner: make it their own, and real: the black back narrows into a 13 mm tongue, bent round the ring; its end goes in between the layers and the front visibly rises over its thickness. 3D, pattern, 7 locales.
 [2026-11-01 22:58] - Keyfob Nr. 2 strap ends skived - Owner picked option 6: the strap ends taper to ~0.2 mm over their last 6 mm so they make no bump between the layers; hatched on the pattern's strap with a legend entry, 7 locales.
 [2026-11-01 22:35] - Keyfob Nr. 2 added - Owner sent 3 screenshots of a two-tone keyfob: new item from their shape only, built with our techniques: 30 × 70 mm stadium, two glued layers, strap wrapping the ring's wire in a tight teardrop (owner's side photo), locked stitch, natural edges, SLOU stamp, pattern PDF; 7 locales.
 [2026-10-29 21:56] - SLOU stamp kept on page 2 - Owner: Nr. 2's pattern page 2 picture may keep the SLOU logo, so it is no longer swapped out there (Nr. 1's page stays without it).

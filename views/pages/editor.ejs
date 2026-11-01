@@ -430,10 +430,17 @@
   // and its two ends put between the layers at the top, K2_TAB_IN deep, so
   // the stitching runs through them. The ring lies in the piece's plane.
   var K2_W = 3, K2_H = 7, K2_T = 0.18;     // each layer 1.8 mm, 3.6 mm glued
-  var K2_TAB_W = 1.3, K2_TAB_T = 0.08, K2_TAB_IN = 0.9;   // strap 13 mm wide, skived to 0.8 mm, 9 mm in
-  // Its two ends are skived thinner still (the owner chose it, 2026-11-01), over
-  // the last K2_SKIVE down to K2_SKIVE_T at the tip, so where they go in between
-  // the layers they make no bump
+  // The strap is the back piece itself (the owner's choice, 2026-11-01: make
+  // it our own, not the screenshot's separate strap): the back is cut with a
+  // tongue K2_TAB_W wide at the top, skived on its flesh side to K2_TAB_T, so
+  // its grain runs on flush with the back face (K2_TAB_Z: where its two plies
+  // meet); it folds over the ring's wire and its end goes K2_TAB_IN down in
+  // between the layers, where the stitching holds it. Two pieces, not three.
+  var K2_TAB_W = 1.3, K2_TAB_T = 0.1, K2_TAB_IN = 0.9;   // tongue 13 mm wide, skived to 1 mm, its end 9 mm in
+  var K2_TAB_Z = -K2_T + 0.003 + K2_TAB_T;
+  // Its end is skived thinner still (the owner chose it, 2026-11-01), over the
+  // last K2_SKIVE down to K2_SKIVE_T at the tip, so where it goes in between
+  // the layers it makes no bump
   var K2_SKIVE = 0.6, K2_SKIVE_T = 0.02;
   // Seen from the side (the owner's pavyzdziai/pakabukas/1.png, 2026-11-01)
   // the two plies lie together out of the body and on for K2_TAB_FLAT, then
@@ -443,7 +450,7 @@
   // angle (K2_RING_TILT, turned about the loop). A wide loop with the plies
   // parting straight out of the body was the first try.
   var K2_LOOP_R = 0.25;                    // inside radius of the loop: just round the wire
-  var K2_TAB_FLAT = 0.25;                  // the plies together past the body's edge
+  var K2_TAB_FLAT = 0.6;                   // the plies together past the body's edge (the back's 3 mm skive slope in it)
   var K2_LOOP_Y = K2_H / 2 + K2_TAB_FLAT + 0.45;   // the loop's centre, where the wire runs
   var K2_RING_TILT = -20 * Math.PI / 180;  // the ring swung back a little on the loop
 
@@ -772,13 +779,15 @@
   var fold2EdgeMat = new THREE.MeshPhysicalMaterial({ map: fold2EdgeTex, bumpMap: fold2EdgeBump, bumpScale: 1, roughness: 0.5, clearcoat: 0.2, clearcoatRoughness: 0.5, vertexColors: true });
   // Keyfob Nr. 2: the natural leather, the front with the initials (the
   // same texture as card holder Nr. 1's front pocket), the back with the SLOU
-  // stamp low down, mirrored as the back is seen from behind, and the strap
-  // plain
+  // stamp low down, mirrored as the back is seen from behind (its tongue,
+  // the strap, wears the same)
   var logo3Tex = canvasTex(true), logo3BumpTex = canvasTex(false), logo3RoughTex = canvasTex(false);
   pressLogo(logo3Tex, logo3BumpTex, logo3RoughTex, -1.7);
   var fob2FrontMat = new THREE.MeshStandardMaterial({ map: fold2Tex, bumpMap: fold2BumpTex, bumpScale: 0.8, roughness: 0.6 });
-  var fob2BackMat = new THREE.MeshStandardMaterial({ map: logo3Tex, bumpMap: logo3BumpTex, roughnessMap: logo3RoughTex, bumpScale: 2, roughness: 0.6 });
-  var fob2StrapMat = new THREE.MeshStandardMaterial({ map: naturalTex, bumpMap: naturalBumpTex, bumpScale: 0.8, roughness: 0.6, side: THREE.DoubleSide });
+  // and the back piece's flesh side, which shows inside the strap's loop:
+  // the second colour, as its flesh is dyed with it
+  var fob2FleshMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1, roughness: 0.85, side: THREE.DoubleSide });
+  var fob2BackMat = new THREE.MeshStandardMaterial({ map: logo3Tex, bumpMap: logo3BumpTex, roughnessMap: logo3RoughTex, bumpScale: 2, roughness: 0.6, side: THREE.DoubleSide });   // two-sided: the strap (its tongue) wears it too
   // Twisted waxed thread: diagonal plies wound round each stitch.
   var plyTex = (function () {
     // three plies round the thread; repeat set so they run at ~45 deg
@@ -911,7 +920,7 @@
     var sc = new THREE.Color(state.second);
     fob2FrontMat.color.copy(c).multiplyScalar(1.2);
     fob2BackMat.color.copy(sc).multiplyScalar(1.2);
-    fob2StrapMat.color.copy(sc).multiplyScalar(1.2);
+    fob2FleshMat.color.copy(sc).multiplyScalar(0.9);
     var pc = new THREE.Color(state.pocket);
     pocketFrontMat.color.copy(pc).multiplyScalar(1.2);
     pocketBackMat.color.copy(pc).multiplyScalar(1.2);
@@ -1580,68 +1589,207 @@
     return geo;
   }
 
-  // Keyfob Nr. 2's strap, seen from the side (y up, z out of the front): the
-  // centre line of the strip from its front end, K2_TAB_IN inside the body,
-  // up between the layers, out of the top, round the ring's wire and back down
-  // to its other end. The two plies lie together inside the body and just
-  // past its edge, then part in straight runs that meet the loop round the
-  // wire as tangents, the corners eased. `s` on each point is how far along
-  // the strip it is, so `s` at the end is the strap's cut length.
+  // Keyfob Nr. 2's strap is the back piece itself (the owner, 2026-11-01:
+  // the black piece narrows at the top, becomes the strap, wraps the ring and
+  // slides in between the leathers). Seen from the side (y up, z out of the
+  // front) the back piece's tongue, skived on its flesh side to K2_TAB_T,
+  // runs up out of the body, wraps the ring's wire in the tight loop and comes
+  // back down its own flesh face into the body, where its end lies in a
+  // recess skived into the top of the back layer (so it sits flush: no step
+  // where it goes in, no bump under the front), its own end skived to
+  // K2_SKIVE_T. A version that climbed over a skive taper outside the body
+  // showed a ledge on the front. Each point: the strip's centre (y, z), its
+  // thickness `th` and `s`, how far along it is from the free end. The line
+  // starts (at its far end) on the back face K2_STUB up, where the back piece,
+  // cut flat in one with its tongue, starts to bend (k2Bend). Building the
+  // strap as a strip of its own laid onto a cut-off tongue always left a
+  // line across the neck where the two met.
+  var K2_BACK_OUT = -K2_T, K2_STUB = K2_H / 2 + 0.2;
+  // The tongue's flesh face, which the returning end lies on: in the body it
+  // is the back layer's own (z 0, the glue line), so the end goes in between
+  // the two layers and the front is lifted over it (k2Lift); above K2_STUB
+  // the tongue is skived down to K2_TAB_Z over K2_SKIVE_UP, the end running
+  // down over that slope. (Sunk into a recess in the back, the end did not
+  // read as going in between the leathers: the owner, 2026-11-01.)
+  var K2_SKIVE_UP = 0.3;
+  function k2Inner(y) {
+    var f = Math.min(1, Math.max(0, (y - K2_STUB) / K2_SKIVE_UP));
+    return K2_TAB_Z * f * f * (3 - 2 * f);
+  }
   function strapPath() {
     var t = K2_TAB_T, rc = K2_LOOP_R + t / 2, C = { y: K2_LOOP_Y, z: 0 };
-    var y0 = K2_H / 2 - K2_TAB_IN, A = { y: K2_H / 2 + K2_TAB_FLAT, z: t / 2 };
+    var A = { y: K2_H / 2 + K2_TAB_FLAT, z: t / 2 }, E = 0.08;
     var dy = A.y - C.y, dz = A.z, d = Math.hypot(dy, dz), th = Math.atan2(dz, dy) - Math.acos(rc / d);
     var Tp = { y: C.y + rc * Math.cos(th), z: rc * Math.sin(th) };
-    var ux = Tp.y - A.y, uz = Tp.z - A.z, ul = Math.hypot(ux, uz), E = 0.08;
-    var half = [];   // the front half, from its end up to the top of the loop
-    function seg(n, f) { for (var k = 0; k < n; k++) { half.push(f(k / n)); } }
-    seg(60, function (f) { return { y: y0 + (A.y - E - y0) * f, z: t / 2 }; });
+    var ux = Tp.y - A.y, uz = Tp.z - A.z, ul = Math.hypot(ux, uz);
+    // the loop, in its own frame (the plies meet at z = 0), from where the
+    // front ply leaves the flat to the top of the loop
+    var loop = [];
+    function seg(n, f) { for (var k = 0; k < n; k++) { loop.push(f(k / n)); } }
     var B = { y: A.y + ux / ul * E, z: A.z + uz / ul * E };
     seg(16, function (f) { var g = 1 - f; return { y: g * g * (A.y - E) + 2 * g * f * A.y + f * f * B.y, z: g * g * A.z + 2 * g * f * A.z + f * f * B.z }; });
     seg(40, function (f) { return { y: B.y + (Tp.y - B.y) * f, z: B.z + (Tp.z - B.z) * f }; });
     seg(60, function (f) { var a = th * (1 - f); return { y: C.y + rc * Math.cos(a), z: rc * Math.sin(a) }; });
-    var pts = half.concat([{ y: C.y + rc, z: 0 }], half.slice().reverse().map(function (p) { return { y: p.y, z: -p.z }; }));
+    var yF = A.y - E, y0 = K2_H / 2 - K2_TAB_IN, yB = K2_STUB, pts = [], k;
+    // the free end: up from between the layers, on the tongue's flesh face,
+    // skived over its last K2_SKIVE
+    for (k = 0; k <= 80; k++) {
+      var y = y0 + (yF - y0) * k / 80, fs = Math.min(1, (y - y0) / K2_SKIVE), tf = K2_SKIVE_T + (t - K2_SKIVE_T) * fs;
+      pts.push({ y: y, z: k2Inner(y) + tf / 2, th: tf });
+    }
+    loop.forEach(function (q) { pts.push({ y: q.y, z: q.z + K2_TAB_Z, th: t }); });
+    pts.push({ y: C.y + rc, z: K2_TAB_Z, th: t });
+    loop.slice().reverse().forEach(function (q) { pts.push({ y: q.y, z: -q.z + K2_TAB_Z, th: t }); });
+    // and down the back to where the back piece lies flat
+    for (k = 0; k <= 60; k++) {
+      var yb = yF + (yB - yF) * k / 60, tb = k2Inner(yb) - K2_BACK_OUT;
+      pts.push({ y: yb, z: K2_BACK_OUT + tb / 2, th: tb });
+    }
     var acc = 0;
-    pts.forEach(function (p, i) { if (i) { acc += Math.hypot(p.y - pts[i - 1].y, p.z - pts[i - 1].z); } p.s = acc; });
+    pts.forEach(function (q, i) { if (i) { acc += Math.hypot(q.y - pts[i - 1].y, q.z - pts[i - 1].z); } q.s = acc; });
     return pts;
   }
-  // the strap's cut length, to the half millimetre, for the pattern
-  function strapLen() { var pts = strapPath(); return Math.round(pts[pts.length - 1].s * 20) / 20; }
-  // The strip swept along that line: a flat section K2_TAB_W across and
-  // K2_TAB_T thick, its long edges rounded. Its two ends are inside the body,
-  // so they are not capped.
-  function strapGeo() {
-    var pts = strapPath(), hw = K2_TAB_W / 2, ht = K2_TAB_T / 2, rr = 0.03, sec = [], v = [], uv = [], idx = [];
-    [[1, 1], [-1, 1], [-1, -1], [1, -1]].forEach(function (c, ci) {   // CCW in (across, out)
-      for (var k = 0; k <= 4; k++) {
-        var a = (ci + k / 4) * Math.PI / 2;
-        sec.push([c[0] * (hw - rr) + rr * Math.cos(a), c[1] * (ht - rr) + rr * Math.sin(a)]);
-      }
+  // The tongue for the pattern, from the free end, to the half millimetre:
+  // `len` its whole length above the front's top (y = K2_H / 2) on the back
+  // piece, `fold` where it folds over the ring and `ins` the line its end goes
+  // in to, both measured up from the front's top.
+  function strapLen() {
+    var pts = strapPath(), r = function (v) { return Math.round(v * 20) / 20; }, top = K2_H / 2, sIn = 0, sRoot = 0, sFold = 0;
+    pts.forEach(function (q, i) {
+      if (!i) { return; }
+      var a = pts[i - 1];
+      if (a.y < top && q.y >= top && !sIn) { sIn = q.s; }
+      if (q.y > pts[sFold].y) { sFold = i; }
     });
-    var n = sec.length;
-    pts.forEach(function (p, i) {
-      var a = pts[Math.max(0, i - 1)], b = pts[Math.min(pts.length - 1, i + 1)];
-      var ty = b.y - a.y, tz = b.z - a.z, tl = Math.hypot(ty, tz), ny = -tz / tl, nz = ty / tl;
-      // thinner towards each end: the skive (K2_SKIVE), on the inner side of the
-      // ply, so its outer face stays flat against the layer
-      var fs = Math.min(1, Math.min(p.s, pts[pts.length - 1].s - p.s) / K2_SKIVE), th2 = K2_SKIVE_T + (K2_TAB_T - K2_SKIVE_T) * fs;
-      sec.forEach(function (q) {
-        var o = ht - (ht - q[1]) * (th2 / K2_TAB_T);
-        v.push(q[0], p.y + ny * o, p.z + nz * o); uv.push(q[0], p.s);
+    var last = pts[pts.length - 1];
+    sRoot = last.s + (last.y - top);   // on down the back piece's tongue to the front's top
+    sFold = pts[sFold].s;
+    return { len: r(sRoot), fold: r(sRoot - sFold), ins: r(sRoot - sIn) };
+  }
+  // The back piece's outline, flat: the stadium, its top narrowing into the
+  // tongue K2_TAB_W wide through two rounded shoulders (K2_NECK_R), the tongue
+  // running up to `top`.
+  var K2_NECK_R = 0.5;   // 5 mm: wide enough that the narrowing shows above the front
+  function k2BackShape(top) {
+    var R = K2_W / 2, sc = K2_H / 2 - K2_W / 2, sw = K2_TAB_W / 2, rf = K2_NECK_R;
+    var fy = sc + Math.sqrt(Math.pow(R + rf, 2) - Math.pow(sw + rf, 2));   // the shoulder's centre (sw + rf, fy)
+    var ta = Math.atan2(fy - sc, sw + rf), sh = new THREE.Shape(), PI = Math.PI;
+    sh.moveTo(R, -sc); sh.lineTo(R, sc); sh.absarc(0, sc, R, 0, ta);
+    sh.absarc(sw + rf, fy, rf, PI + ta, PI, true);
+    sh.lineTo(sw, top); sh.lineTo(-sw, top); sh.lineTo(-sw, fy);
+    sh.absarc(-sw - rf, fy, rf, 0, -ta, true);
+    sh.absarc(0, sc, R, PI - ta, PI); sh.lineTo(-R, -sc); sh.absarc(0, -sc, R, PI, 2 * PI);
+    return sh;
+  }
+  // The back piece, built flat in one with its tongue by leatherPiece, then
+  // bent along strapPath: every point more than K2_STUB up is carried to
+  // the same distance along the line, its depth in the leather laid across
+  // the line's normal and scaled to the thickness there (the tongue skived
+  // from the back's 1.8 mm to K2_TAB_T over its first 1.5 mm, its end to
+  // K2_SKIVE_T), its normal turned with it. First its triangles are cut finer
+  // along the tongue, edge by edge so neighbours stay joined, until no edge
+  // there spans more than 0.2 mm up it, or the bend would show facets.
+  // Keyfob Nr. 2's pieces cut finer where they bend or rise: a leatherPiece
+  // geometry's triangles split edge by edge (so neighbours stay joined)
+  // wherever `need(ya, yb, xa, xb)` says an edge is too long, then rebuilt
+  // (k2Geo) with its three material groups.
+  // How far the front layer stands up off the back at (x, y): over the
+  // strap's end, which lies between them (the owner, 2026-11-01: the leather
+  // laid over it must show it is there, the thickness shows), by the end's
+  // own thickness (K2_TAB_T, skived to K2_SKIVE_T at its tip), easing off
+  // over 2.5 mm past its sides and 3.5 mm past its tip, as the glued leather
+  // drapes over it.
+  function k2Lift(x, y) {
+    var y0 = K2_H / 2 - K2_TAB_IN, ss = function (t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
+    var fs = Math.min(1, Math.max(0, (y - y0) / K2_SKIVE)), th = K2_SKIVE_T + (K2_TAB_T - K2_SKIVE_T) * fs;
+    var wx = 1 - ss((Math.abs(x) - K2_TAB_W / 2 + 0.05) / 0.25), wy = 1 - ss((y0 - y) / 0.35);
+    return th * wx * wy;
+  }
+  function k2Split(src, need) {
+    var P = Array.prototype.slice.call(src.attributes.position.array), Nm = Array.prototype.slice.call(src.attributes.normal.array);
+    var U = Array.prototype.slice.call(src.attributes.uv.array), Cl = Array.prototype.slice.call(src.attributes.color.array);
+    var ix = src.index.array, tris = [];
+    src.groups.forEach(function (g) {
+      for (var i = g.start; i < g.start + g.count; i += 3) { tris.push([ix[i], ix[i + 1], ix[i + 2], g.materialIndex]); }
+    });
+    for (var round = 0; round < 12; round++) {
+      var mids = {}, any = false;
+      tris.forEach(function (t) {
+        for (var e = 0; e < 3; e++) {
+          var a = t[e], b = t[(e + 1) % 3], k = Math.min(a, b) + '_' + Math.max(a, b);
+          if (k in mids) { continue; }
+          if (!need(P[a * 3 + 1], P[b * 3 + 1], P[a * 3], P[b * 3])) { continue; }
+          var v = P.length / 3, j;
+          for (j = 0; j < 3; j++) { P.push((P[a * 3 + j] + P[b * 3 + j]) / 2); Cl.push((Cl[a * 3 + j] + Cl[b * 3 + j]) / 2); }
+          var nx = Nm[a * 3] + Nm[b * 3], ny = Nm[a * 3 + 1] + Nm[b * 3 + 1], nz = Nm[a * 3 + 2] + Nm[b * 3 + 2], nl = Math.hypot(nx, ny, nz) || 1;
+          Nm.push(nx / nl, ny / nl, nz / nl);
+          U.push((U[a * 2] + U[b * 2]) / 2, (U[a * 2 + 1] + U[b * 2 + 1]) / 2);
+          mids[k] = v; any = true;
+        }
       });
-    });
-    for (var i = 0; i < pts.length - 1; i++) {
-      for (var j = 0; j < n; j++) {
-        var a0 = i * n + j, a1 = i * n + (j + 1) % n, b0 = a0 + n, b1 = a1 + n;
-        idx.push(a0, a1, b1, a0, b1, b0);
-      }
+      if (!any) { break; }
+      var next = [];
+      tris.forEach(function (t) {
+        var m = [0, 1, 2].map(function (e) { var a = t[e], b = t[(e + 1) % 3]; return mids[Math.min(a, b) + '_' + Math.max(a, b)]; });
+        var c = m.filter(function (q) { return q !== undefined; }).length, g = t[3];
+        if (!c) { next.push(t); return; }
+        var r = 0;
+        if (c === 1) { r = m[0] !== undefined ? 0 : m[1] !== undefined ? 1 : 2; }
+        if (c === 2) { r = m[2] === undefined ? 0 : m[0] === undefined ? 1 : 2; }
+        var A = t[r], B = t[(r + 1) % 3], C = t[(r + 2) % 3], mab = m[r], mbc = m[(r + 1) % 3], mca = m[(r + 2) % 3];
+        if (c === 1) { next.push([A, mab, C, g], [mab, B, C, g]); }
+        else if (c === 2) { next.push([mab, B, mbc, g], [A, mab, mbc, g], [A, mbc, C, g]); }
+        else { next.push([A, mab, mca, g], [mab, B, mbc, g], [mca, mbc, C, g], [mab, mbc, mca, g]); }
+      });
+      tris = next;
     }
-    var g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(v, 3));
-    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-    g.setIndex(idx);
-    g.computeVertexNormals();
-    return g;
+    return { P: P, Nm: Nm, U: U, Cl: Cl, tris: tris };
+  }
+  function k2Geo(d) {
+    var P = d.P, Nm = d.Nm, U = d.U, Cl = d.Cl, tris = d.tris;
+    var byMat = [[], [], []];
+    tris.forEach(function (t) { byMat[t[3]].push(t[0], t[1], t[2]); });
+    var geo = new THREE.BufferGeometry(), idx = [];
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute(Nm, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(Cl, 3));
+    byMat.forEach(function (list, mi) { geo.addGroup(idx.length, list.length, mi); idx = idx.concat(list); });
+    geo.setIndex(idx);
+    geo.computeBoundingSphere();
+    return geo;
+  }
+  function k2Bend(src) {
+    var path = strapPath(), S = path[path.length - 1].s;
+    var line = path.slice().reverse().map(function (q) { return { y: q.y, z: q.z, th: q.th, u: S - q.s }; });
+    function at(u) {   // centre, tangent and grain-side normal at distance u up the tongue
+      var i = 1;
+      while (i < line.length - 1 && line[i].u < u) { i++; }
+      var a = line[i - 1], b = line[i], f = Math.min(1, Math.max(0, (u - a.u) / ((b.u - a.u) || 1)));
+      var ty = b.y - a.y, tz = b.z - a.z, tl = Math.hypot(ty, tz) || 1;
+      ty /= tl; tz /= tl;
+      return { y: a.y + (b.y - a.y) * f, z: a.z + (b.z - a.z) * f, th: a.th + (b.th - a.th) * f, ty: ty, tz: tz, gy: tz, gz: -ty };
+    }
+    var d = k2Split(src, function (ya, yb) { return Math.max(ya, yb) >= K2_STUB - 0.01 && Math.abs(ya - yb) > 0.02; }), P = d.P, Nm = d.Nm;
+    for (var v = 0; v < P.length / 3; v++) {
+      var u = P[v * 3 + 1] - K2_STUB;
+      if (u <= 0) { continue; }
+      // the leather's texture spans 10 cm (TEX_SPAN), and the tongue, laid out
+      // flat, runs past its top: there it is mirrored back on itself, so the
+      // grain carries on instead of its last row smearing into streaks
+      var ty0 = TEX_SPAN / 2 - 0.3;
+      if (d.U[v * 2 + 1] > ty0) { d.U[v * 2 + 1] = 2 * ty0 - d.U[v * 2 + 1]; }
+      var L = at(u);
+      var th = L.th;   // the line's: the back's 1.8 mm skived down to the tongue's (k2Inner)
+      var gy = L.y + L.gy * L.th / 2, gz = L.z + L.gz * L.th / 2;   // the grain face on the line
+      var f = (P[v * 3 + 2] + K2_T) / K2_T;                          // 0 at the grain face, 1 at the flesh
+      P[v * 3 + 1] = gy - L.gy * f * th;
+      P[v * 3 + 2] = gz - L.gz * f * th;
+      var ny0 = Nm[v * 3 + 1], nz0 = Nm[v * 3 + 2];
+      Nm[v * 3 + 1] = ny0 * L.ty - nz0 * L.gy;
+      Nm[v * 3 + 2] = ny0 * L.tz - nz0 * L.gz;
+    }
+    return k2Geo(d);
   }
 
   function build() {
@@ -1658,12 +1806,43 @@
       // dome across both, each layer in its own colour with the glue line
       // between, natural and worked with Tokonole as on card holder Nr. 2,
       // the cut core lighter (withCore). The front carries the initials, the
-      // back the SLOU stamp; the strap of the second colour comes out of the
-      // top between the layers.
+      // back the SLOU stamp; the back's tongue (k2Bend) runs on out of its
+      // top, round the ring and back down between the layers.
       var body2 = loopOf(outline('stadium', 0)), all = function () { return 1; };
-      fob.add(leatherPiece([body2], K2_T, K2_T / 2, all, [fob2FrontMat, fold2EdgeMat, backMat], withCore(state.leather, 1.27), null, null, null, K2_T));
-      fob.add(leatherPiece([body2], K2_T, -K2_T / 2, all, [backMat, fold2EdgeMat, fob2BackMat], withCore(state.second, 1.27), null, null, null, K2_T));
-      fob.add(new THREE.Mesh(strapGeo(), fob2StrapMat));
+      var flatFront = leatherPiece([body2], K2_T, K2_T / 2, all, [], withCore(state.leather, 1.27), null, null, null, K2_T);
+      // cut finer over the strap's end and its easing, then lifted over it
+      var region = function (x, y) { return Math.abs(x) < K2_TAB_W / 2 + 0.35 && y > K2_H / 2 - K2_TAB_IN - 0.3; };
+      var fd = k2Split(flatFront.geometry, function (ya, yb, xa, xb) {
+        return (region(xa, ya) || region(xb, yb)) && Math.hypot(xa - xb, ya - yb) > 0.04;
+      });
+      for (var fv = 0; fv < fd.P.length / 3; fv++) {
+        var px = fd.P[fv * 3], py = fd.P[fv * 3 + 1], lz = k2Lift(px, py);
+        if (!lz) { continue; }
+        fd.P[fv * 3 + 2] += lz;
+        var gx = (k2Lift(px + 0.004, py) - k2Lift(px - 0.004, py)) / 0.008, gy = (k2Lift(px, py + 0.004) - k2Lift(px, py - 0.004)) / 0.008;
+        var nz = fd.Nm[fv * 3 + 2];
+        fd.Nm[fv * 3] -= nz * gx; fd.Nm[fv * 3 + 1] -= nz * gy;
+        var nl = Math.hypot(fd.Nm[fv * 3], fd.Nm[fv * 3 + 1], fd.Nm[fv * 3 + 2]) || 1;
+        fd.Nm[fv * 3] /= nl; fd.Nm[fv * 3 + 1] /= nl; fd.Nm[fv * 3 + 2] /= nl;
+      }
+      fob.add(new THREE.Mesh(k2Geo(fd), [fob2FrontMat, fold2EdgeMat, backMat]));
+      flatFront.geometry.dispose();
+      // The back: the same stadium narrowing at the top into its tongue
+      // through two rounded shoulders (k2BackShape), cut flat in one piece
+      // with the tongue, as on the pattern, and then bent round the ring and
+      // back down between the layers (k2Bend). Below the front's outline its
+      // edge is the glued stack's dome; the shoulders and the tongue's sides
+      // stand free, each with its own rounding.
+      var sc2 = K2_H / 2 - K2_W / 2, kp = strapPath();
+      var back2 = loopOf(k2BackShape(K2_STUB + kp[kp.length - 1].s));
+      var backStack = function (p) {
+        var yF = Math.abs(p.x) < K2_W / 2 ? sc2 + Math.sqrt(Math.pow(K2_W / 2, 2) - p.x * p.x) : sc2;
+        var f = Math.min(1, Math.max(0, (p.y - yF + 0.02) / 0.1));
+        return 1 - f * f * (3 - 2 * f);
+      };
+      var flatBack = leatherPiece([back2], K2_T, -K2_T / 2, backStack, [], withCore(state.second, 1.27), null, null, null, K2_T);
+      fob.add(new THREE.Mesh(k2Bend(flatBack.geometry), [fob2FleshMat, fold2EdgeMat, fob2BackMat]));
+      flatBack.geometry.dispose();
       holesAt = stitchHoles(outline('stadium', STITCH_INSET));
     } else if (fold) {
       // Card holder Nr. 2: the one piece, cut flat and folded (`folded`). Its
@@ -1854,8 +2033,11 @@
     // plain stitch, the leather pressed in under it.
     function lay(fa, tb, za, zb, side, slot) {
       var parts, lift = side * 0.005, lift0 = lift, dl0 = fa.distanceTo(tb);
-      if (Math.abs(za - zb) < 1e-6) {
-        parts = [[fa, za, tb, za]];
+      if (Math.abs(za - zb) < 1e-6 || fob2) {
+        // keyfob Nr. 2: where the front rises over the strap's end the two
+        // ends of a stitch sit at slightly different heights; it is still one
+        // straight strand, not the card holder's climb over a pocket edge
+        parts = [[fa, za, tb, zb]];
       } else {
         lift = 0;   // pressed in: the thread is pulled hard over the edge
         var hiFirst = Math.abs(za) > Math.abs(zb);
@@ -2036,7 +2218,7 @@
     // The face the thread lies on at (x, y). The keyfob is one piece; on the
     // card holder the pockets stand one piece proud of the bodies below their
     // top, except in the front pocket's window.
-    function face(x, y, side) { return fob2 ? K2_T : fold ? FOLD_T : card ? (inPocket(x, y, side) ? CARD_BODY + CARD_POCKET : CARD_BODY) : zTop; }
+    function face(x, y, side) { return fob2 ? K2_T + (side > 0 ? k2Lift(x, y) : 0) : fold ? FOLD_T : card ? (inPocket(x, y, side) ? CARD_BODY + CARD_POCKET : CARD_BODY) : zTop; }
     // stitch k runs from hole k to hole k + 1; both its slits lean off that
     // chord, so every stitch has the same length and lean
     var chords = holesAt.map(function (p, k) {
@@ -2196,7 +2378,7 @@
       // loop out of the piece's plane, its split at the top
       var rd = ri + wire / 2;
       r.rotation.x = -Math.PI / 2 + K2_RING_TILT;
-      r.position.set(0, K2_LOOP_Y + rd * Math.cos(K2_RING_TILT), rd * Math.sin(K2_RING_TILT));
+      r.position.set(0, K2_LOOP_Y + rd * Math.cos(K2_RING_TILT), K2_TAB_Z + rd * Math.sin(K2_RING_TILT));
     } else {
       r.rotation.z = Math.PI / 2;   // stand the ring up in the fob's plane
       r.position.set(0, HOLE_Y + ri + wire / 2, 0);   // the band centred on the hole
@@ -3364,29 +3546,41 @@
         return p.distanceTo(all[(k + 1) % all.length]) > 1e-4;
       }));
       if (fob2) {
-        // Keyfob Nr. 2: the body, cut twice (front and back, one in each
-        // colour), and beside it the strap, cut once: a strip K2_TAB_W wide,
-        // as long as it runs in the 3D (strapPath), folded in the middle round
-        // the ring. Dashed: the fold, and on both the strap and the body how
-        // far its ends go in between the layers.
-        var sLen = strapLen(), sx = 3.5, sw = K2_TAB_W / 2;
-        doc.rect(X(sx - sw), Y(sLen / 2), K2_TAB_W * 10 * cfx, sLen * 10 * cfy);
-        doc.setLineWidth(0.15); doc.setLineDashPattern([1.2, 1], 0);
-        [0, -sLen / 2 + K2_TAB_IN, sLen / 2 - K2_TAB_IN].forEach(function (y) { doc.line(X(sx - sw), Y(y), X(sx + sw), Y(y)); });
-        doc.setLineDashPattern([], 0);
-        // the skived ends, hatched grey from each end up to K2_SKIVE
-        doc.setDrawColor(150); doc.setLineWidth(0.12);
-        [-1, 1].forEach(function (e) {
-          var yEnd = e * sLen / 2, yIn = e * (sLen / 2 - K2_SKIVE);
-          doc.line(X(sx - sw), Y(yIn), X(sx + sw), Y(yIn));
-          for (var hx = -sw - K2_SKIVE; hx < sw; hx += 0.15) {
-            var x0 = Math.max(-sw, hx), x1 = Math.min(sw, hx + K2_SKIVE);
-            doc.line(X(sx + x0), Y(yIn + (yEnd - yIn) * (x0 - hx) / K2_SKIVE), X(sx + x1), Y(yIn + (yEnd - yIn) * (x1 - hx) / K2_SKIVE));
-          }
+        // Keyfob Nr. 2: two pieces. On the left (drawn above, with the slits
+        // below) the front, and a dashed box where the tongue's end lies
+        // under it. Beside it the back, seen from its own grain side (so
+        // mirrored), with the tongue: K2_TAB_W wide, running up from the top
+        // as long as it runs in the 3D (strapPath) past the body. Dashed
+        // across it: the fold round the ring, and the line its end goes in
+        // to between the layers; hatched: the skived end.
+        var tg = strapLen(), bx = 3.7, sw = K2_TAB_W / 2, yTop = K2_H / 2 + tg.len;
+        var back = k2BackShape(yTop);   // the shoulders as in the 3D
+        var BX = function (x) { return X(bx + x); };
+        var bp = back.getPoints(48).filter(function (p, k, all) { return p.distanceTo(all[(k + 1) % all.length]) > 1e-4; });
+        bp.forEach(function (a, k) { var b = bp[(k + 1) % bp.length]; doc.line(BX(a.x), Y(a.y), BX(b.x), Y(b.y)); });
+        // its slits: the front's, mirrored, as the back is seen from its grain
+        doc.setDrawColor(190); doc.setLineWidth(0.1);
+        var bh = current.holes, bn = bh.length;
+        bh.forEach(function (a, k) { var b = bh[(k + 1) % bn]; doc.line(BX(-a.x), Y(a.y), BX(-b.x), Y(b.y)); });
+        doc.setDrawColor(0);
+        bh.forEach(function (a, k) {
+          var d = current.chords[(k + bn - 1) % bn].clone().add(current.chords[k]).normalize(), sl = slit(d, 1);
+          var hx = -sl.x * 0.8 * cfx, hy = sl.y * 0.8 * cfy;
+          doc.setLineWidth(0.45 * (cfx + cfy) / 2);
+          doc.line(BX(-a.x) - hx, Y(a.y) + hy, BX(-a.x) + hx, Y(a.y) - hy);
         });
-        doc.setDrawColor(0); doc.setLineWidth(0.15); doc.setLineDashPattern([1.2, 1], 0);
-        doc.rect(X(-sw), Y(K2_H / 2), K2_TAB_W * 10 * cfx, K2_TAB_IN * 10 * cfy);
+        doc.setLineWidth(0.15); doc.setLineDashPattern([1.2, 1], 0);
+        [K2_H / 2 + tg.fold, K2_H / 2 + tg.ins].forEach(function (y) { doc.line(BX(-sw), Y(y), BX(sw), Y(y)); });
+        doc.rect(X(-sw), Y(K2_H / 2), K2_TAB_W * 10 * cfx, K2_TAB_IN * 10 * cfy);   // on the front: where the end lies
         doc.setLineDashPattern([], 0);
+        // the skived end, hatched grey
+        doc.setDrawColor(150); doc.setLineWidth(0.12);
+        var yIn = yTop - K2_SKIVE;
+        doc.line(BX(-sw), Y(yIn), BX(sw), Y(yIn));
+        for (var hx0 = -sw - K2_SKIVE; hx0 < sw; hx0 += 0.15) {
+          var x0 = Math.max(-sw, hx0), x1 = Math.min(sw, hx0 + K2_SKIVE);
+          doc.line(BX(x0), Y(yIn + (x0 - hx0)), BX(x1), Y(yIn + (x1 - hx0)));
+        }
         // turned along the length, clear of the slits; jsPDF does not centre
         // turned text, so it is centred by hand on (x, y)
         var upright = function (t, x, y, size) {
@@ -3394,8 +3588,8 @@
           doc.text(t, x + size * 0.127, y + doc.getTextWidth(t) / 2, { angle: 90 });
         };
         doc.setTextColor(0);
-        upright(K2.strap, X(sx), Y(-sLen / 4), 9);
-        upright(K2.body, X(0), Y(0.3), 11);
+        upright(K2.front, X(0), Y(0.3), 11);
+        upright(K2.back, BX(0), Y(0.3), 11);
       } else {
       doc.ellipse(X(0), Y(HOLE_Y), HOLE_R * 10 * cfx, HOLE_R * 10 * cfy);
       doc.setLineWidth(0.1);
@@ -3485,7 +3679,7 @@
         [P.leather, pressedLabel('leather')],
         [P.thread, pressedLabel('thread')],
       ];
-      if (fob2) { rows.splice(1, 0, [K2.strapSize, mm(K2_TAB_W) + ' × ' + mm(strapLen())]); }
+      if (fob2) { rows.splice(1, 0, [K2.strapSize, mm(K2_TAB_W) + ' × ' + mm(strapLen().len)]); }
       if (L) { rows.push([P.initials, L.txt]); }
       table(rows);
     }
@@ -3589,7 +3783,7 @@
       [[50, 45, 0.8, -10], [55, 105, 0.6, 12], [150, 45, 0.75, 8], [155, 108, 0.65, -12],  // page 3
        [100, 180, 0.9, 4], [40, 250, 0.6, -15], [170, 240, 0.7, 10], [105, 285, 0.45, 0]]
     ] : fob2 ? [
-      [[60, 128, 0.7, 10], [64, 172, 0.6, -14], [97, 150, 0.4, 8],                       // the body, the strap
+      [[60, 128, 0.7, 10], [64, 172, 0.6, -14], [99, 112, 0.45, 8], [99, 160, 0.55, -10],  // the front, the back
        [157, 140, 0.95, -8], [165, 85, 0.65, 12],                                        // the specs, the legend
        [110, 20, 0.55, -6], [25, 60, 0.6, -10], [30, 230, 0.8, 14], [175, 235, 0.6, -15], [110, 275, 0.7, 6]]
     ] : [
