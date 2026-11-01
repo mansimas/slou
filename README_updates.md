@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-01 22:35] - Keyfob Nr. 2 added - Owner sent 3 screenshots of a two-tone keyfob: new item from their shape only, built with our techniques: 30 × 70 mm stadium, two glued layers, strap wrapping the ring's wire in a tight teardrop (owner's side photo), locked stitch, natural edges, SLOU stamp, pattern PDF; 7 locales.
 [2026-10-29 21:56] - SLOU stamp kept on page 2 - Owner: Nr. 2's pattern page 2 picture may keep the SLOU logo, so it is no longer swapped out there (Nr. 1's page stays without it).
 [2026-10-29 21:56] - Side lines fade at bottom - Owner: on Nr. 2 the card's side lines should not run hard all the way down, yet still follow the card: over its lowest 15 mm they go halfway to a broad soft slope (fading from the seam's end gave dark corner shadows, undone).
 [2026-10-29 21:51] - Nr. 2 specs and work process - Owner asked for Nr. 2's technical description, recommendations and work process, made after Nr. 1's: pattern pages 2-3 with the 3D picture, specs with leaders, and 11 steps adapted to one folded piece (shared steps reused); 7 locales.

@@ -477,6 +477,31 @@ round the walls. Those faces have `bumpScale 2` with the grain drawn at 40% so i
 as before. Nr. 1's back pocket and Nr. 2's back half; Nr. 1's pattern picture swaps the
 stamp out (and the bump scale back to 0.8).
 
+### Keyfob Nr. 2 (pakabukas 2)
+Added 2026-11-01: the second "Item" (`product: 'keyfob2'`, texts in `content.*.editor.keyfob2`),
+from the owner's three screenshots of another maker's two-tone keyfob
+(`pavyzdziai/pakabukas/Screenshot_20261026_*.jpg`). Only its shape is taken; the
+stitch and every technique are the owner's own.
+- A stadium (`outline('stadium')`), 30 × 70 mm (`K2_W`, `K2_H`), ends full half-rounds.
+  Two layers of 1.8 mm (`K2_T`) glued: front in the leather colour (initials,
+  `fob2FrontMat` on `fold2Tex`), back in the second colour (`state.second`, the
+  "Second colour" control; SLOU stamp low down, `fob2BackMat`, `logo3Tex`). Built by
+  `leatherPiece` with the whole edge one glued dome, each layer its own colour,
+  `fold2EdgeMat` + `withCore` like card holder Nr. 2.
+- The locked stitch as a closed loop (`stitchHoles`), the keyfob joint in the same
+  place (37% down the left side).
+- The strap (`strapPath`, `strapGeo`): a strip 13 mm wide, skived 0.8 mm
+  (`K2_TAB_W`, `K2_TAB_T`), its ends 9 mm in between the layers (`K2_TAB_IN`), so the
+  stitching runs through them. From the side (the owner's `pakabukas/1.png`): both
+  plies lie together out of the body and on for 2.5 mm (`K2_TAB_FLAT`), then wrap the
+  ring's wire in one small tight teardrop, inside radius 2.5 mm (`K2_LOOP_R`, the wire's
+  two turns are 2.4 mm from middle to corner), the wire filling it. A wide loop with the
+  plies parting straight out of the body was the first try and was wrong. The B2020 ring
+  hangs from the loop swung back 20° (`K2_RING_TILT`), its split at the top.
+- Pattern: the body × 2 with the slits, the strap × 1 beside it (fold and insertion
+  depth dashed, length from `strapLen()`), a dashed box on the body where the strap
+  ends sit; legend, specs, rulers and the 50 mm square as on the keyfob.
+
 ### Example photos
 `pavyzdziai/` (one folder per item: `korteline/`, `pakabukas/`) is where the
 owner drops photos of real pieces. Look there before working on an item, and
