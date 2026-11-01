@@ -498,6 +498,9 @@ stitch and every technique are the owner's own.
   two turns are 2.4 mm from middle to corner), the wire filling it. A wide loop with the
   plies parting straight out of the body was the first try and was wrong. The B2020 ring
   hangs from the loop swung back 20° (`K2_RING_TILT`), its split at the top.
+- The strap's ends are skived (the owner's choice, 2026-11-01): over the last 6 mm
+  (`K2_SKIVE`) down to 0.2 mm (`K2_SKIVE_T`), on the ply's inner side; hatched on the
+  pattern's strap, with `keyfob2.skive` in the legend.
 - Pattern: the body × 2 with the slits, the strap × 1 beside it (fold and insertion
   depth dashed, length from `strapLen()`), a dashed box on the body where the strap
   ends sit; legend, specs, rulers and the 50 mm square as on the keyfob.
