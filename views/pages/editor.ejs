@@ -707,13 +707,15 @@
   // pressed veg-tan is, and the leather is darkened a little round the walls
   // where it is drawn down into the letters. `y` is where the stamp sits;
   // mirrored, because the back face carries the front's texture coordinates
-  // and is seen from behind.
-  function pressLogo(col, bump, rough, y, front) {
+  // and is seen from behind. `side`: turned to read up the piece, bottom to
+  // top, rather than across it.
+  function pressLogo(col, bump, rough, y, front, side) {
     var px = TEX_N / TEX_SPAN;
     function letters(g, style, blur) {
       g.save();
       g.translate(TEX_N / 2, TEX_N / 2 - y * px);
       if (!front) { g.scale(-1, 1); }   // a front face is not mirrored
+      if (side) { g.rotate(-Math.PI / 2); }
       g.font = '800 ' + (0.62 * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
       g.textAlign = 'center'; g.textBaseline = 'middle';
       g.filter = blur ? 'blur(' + blur + 'px)' : 'none';
@@ -785,9 +787,10 @@
   // Keyfob Nr. 2: the natural leather, the front with the initials (the
   // same texture as card holder Nr. 1's front pocket), the back with the SLOU
   // stamp low down, mirrored as the back is seen from behind (its tongue,
-  // the strap, wears the same)
+  // the strap, wears the same); turned to run up the piece, not across it
+  // (the owner, 2026-11-02)
   var logo3Tex = canvasTex(true), logo3BumpTex = canvasTex(false), logo3RoughTex = canvasTex(false);
-  pressLogo(logo3Tex, logo3BumpTex, logo3RoughTex, -1.7);
+  pressLogo(logo3Tex, logo3BumpTex, logo3RoughTex, -1.7, false, true);
   var fob2FrontMat = new THREE.MeshStandardMaterial({ map: fold2Tex, bumpMap: fold2BumpTex, bumpScale: 0.8, roughness: 0.6 });
   // and the back piece's flesh side, which shows inside the strap's loop:
   // the second colour, as its flesh is dyed with it
