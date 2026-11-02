@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-02 23:40] - Keyfob Nr. 2 ring straight - Owner asked why the ring was tilted. It hung swung back 20 deg (my own choice, not his); now it stands straight, in line with the piece, its wire still through the strap loop.
 [2026-11-02 23:20] - Keyfob Nr. 2 builds faster - Owner: switching to keyfob Nr. 2 lagged. The strap bend cut the whole tongue into 0.2 mm rows (1.8 M triangles, ~25 s); now only where it bends, 0.8 mm, plus faster lookup. ~175 k triangles, under 2 s; looks the same.
 [2026-11-02 22:50] - SLOU stamp turned sideways - Owner: SLOU on keyfob Nr. 2's back should run sideways, not horizontally. The stamp now reads along the piece, top to bottom, same place low on the back; other items' stamps unchanged.
 [2026-11-02 22:20] - Strap thins only when inserted - Owner: leather thins only where it goes under the other layer. Tongue and loop full 1.8 mm; only the 9 mm inserted end skived to 0.2 mm. Front rises smoothly, no cross lines (mesh refined), stitches bent along the rise so thread stays visible.

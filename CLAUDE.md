@@ -525,7 +525,8 @@ stitch and every technique are the owner's own.
   ring's wire in one small tight teardrop, inside radius 2.5 mm (`K2_LOOP_R`, the wire's
   two turns are 2.4 mm from middle to corner), the wire filling it. A wide loop with the
   plies parting straight out of the body was the first try and was wrong. The B2020 ring
-  hangs from the loop swung back 20° (`K2_RING_TILT`), its split at the top.
+  hangs from the loop straight, in line with the piece (`K2_RING_TILT` 0; swung back
+  20° at first, the owner asked for it straight, 2026-11-02), its split at the top.
 - The tongue's free end is skived (the owner's choice, 2026-11-01): over all 9 mm that lie
   between the layers (`K2_SKIVE` = `K2_TAB_IN`, 6 mm until 2026-11-02), flat from 1.8 mm down to 0.2 mm (`K2_SKIVE_T`), on the ply's inner side; hatched on the
   pattern's strap, with `keyfob2.skive` in the legend.
