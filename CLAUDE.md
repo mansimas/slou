@@ -485,7 +485,7 @@ stitch and every technique are the owner's own.
 - A stadium (`outline('stadium')`), 30 × 70 mm (`K2_W`, `K2_H`), ends full half-rounds.
   Two layers of 1.8 mm (`K2_T`) glued: front in the leather colour (initials,
   `fob2FrontMat` on `fold2Tex`), back in the second colour (`state.second`, the
-  "Second colour" control; SLOU stamp low down, turned to read up the piece, bottom to top, not across it (the
+  "Second colour" control; SLOU stamp low down, turned to read down the piece, top to bottom, not across it (the
   owner, 2026-11-02; `pressLogo(..., side)`), `fob2BackMat`, `logo3Tex`). Built by
   `leatherPiece` with the whole edge one glued dome, each layer its own colour,
   `fold2EdgeMat` + `withCore` like card holder Nr. 2.
