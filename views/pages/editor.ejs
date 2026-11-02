@@ -1771,14 +1771,33 @@
     var path = strapPath(), S = path[path.length - 1].s;
     var line = path.slice().reverse().map(function (q) { return { y: q.y, z: q.z, th: q.th, u: S - q.s }; });
     function at(u) {   // centre, tangent and grain-side normal at distance u up the tongue
-      var i = 1;
-      while (i < line.length - 1 && line[i].u < u) { i++; }
+      var lo = 1, hi = line.length - 1;
+      while (lo < hi) { var mid = (lo + hi) >> 1; if (line[mid].u < u) { lo = mid + 1; } else { hi = mid; } }
+      var i = lo;
       var a = line[i - 1], b = line[i], f = Math.min(1, Math.max(0, (u - a.u) / ((b.u - a.u) || 1)));
       var ty = b.y - a.y, tz = b.z - a.z, tl = Math.hypot(ty, tz) || 1;
       ty /= tl; tz /= tl;
       return { y: a.y + (b.y - a.y) * f, z: a.z + (b.z - a.z) * f, th: a.th + (b.th - a.th) * f, ty: ty, tz: tz, gy: tz, gz: -ty };
     }
-    var d = k2Split(src, function (ya, yb) { return Math.max(ya, yb) >= K2_STUB - 0.01 && Math.abs(ya - yb) > 0.02; }), P = d.P, Nm = d.Nm;
+    // Cut finer only where the line bends (the loop and the turns into it):
+    // a straight run is mapped exactly by its end points. Cutting the whole
+    // tongue into 0.2 mm rows made ~1.8 million triangles and switching to
+    // keyfob Nr. 2 lagged for seconds (the owner, 2026-11-02).
+    var bends = [];
+    for (var bi = 1; bi < line.length - 1; bi++) {
+      var p0 = line[bi - 1], p1 = line[bi], p2 = line[bi + 1];
+      var a1 = Math.atan2(p1.z - p0.z, p1.y - p0.y), a2 = Math.atan2(p2.z - p1.z, p2.y - p1.y), da = Math.abs(a2 - a1);
+      if (Math.min(da, 2 * Math.PI - da) > 0.004) { bends.push(p1.u); }
+    }
+    function bentIn(ua, ub) {
+      var lo = 0, hi = bends.length;
+      while (lo < hi) { var mid = (lo + hi) >> 1; if (bends[mid] < ua) { lo = mid + 1; } else { hi = mid; } }
+      return lo < bends.length && bends[lo] <= ub;
+    }
+    var d = k2Split(src, function (ya, yb) {
+      var ua = Math.min(ya, yb) - K2_STUB, ub = Math.max(ya, yb) - K2_STUB;
+      return ub >= -0.01 && ub - ua > 0.08 && bentIn(ua - 0.02, ub + 0.02);
+    }), P = d.P, Nm = d.Nm;
     for (var v = 0; v < P.length / 3; v++) {
       var u = P[v * 3 + 1] - K2_STUB;
       if (u <= 0) { continue; }
@@ -1824,7 +1843,7 @@
       // a straight line across the front (the owner, 2026-11-02)
       var rx = K2_TAB_W / 2 + 0.35, ry = K2_H / 2 - K2_TAB_IN - 0.45;
       var fd = k2Split(flatFront.geometry, function (ya, yb, xa, xb) {
-        return Math.min(xa, xb) < rx && Math.max(xa, xb) > -rx && Math.max(ya, yb) > ry && Math.hypot(xa - xb, ya - yb) > 0.04;
+        return Math.min(xa, xb) < rx && Math.max(xa, xb) > -rx && Math.max(ya, yb) > ry && Math.hypot(xa - xb, ya - yb) > 0.08;
       });
       for (var fv = 0; fv < fd.P.length / 3; fv++) {
         var px = fd.P[fv * 3], py = fd.P[fv * 3 + 1], lz = k2Lift(px, py);

@@ -514,6 +514,10 @@ stitch and every technique are the owner's own.
   strand bent along the face (`lay`; straight it cut into the rise and vanished, the owner,
   2026-11-02). The front is cut finer wherever an edge crosses the lifted box, not only
   where it ends in it: a long edge across it stayed flat and showed as a line.
+  Speed (the owner, 2026-11-02: switching to Nr. 2 lagged): `k2Bend` cuts the tongue finer
+  only where `strapPath` bends, to 0.8 mm (the whole tongue to 0.2 mm made 1.8 M
+  triangles, ~25 s), and looks up the line by binary search; the front's rise is cut to
+  0.8 mm (0.4 before). Now ~175 k triangles, under 2 s headless.
   Past the 10 cm texture the tongue's texture is mirrored (it smeared into streaks).
   Tried and wrong: a separate strip laid on a cut-off tongue (a line across the neck
   however the two met). From the side (the owner's `pakabukas/1.png`): both
