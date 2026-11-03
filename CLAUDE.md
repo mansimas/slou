@@ -521,7 +521,9 @@ stitch and every technique are the owner's own.
   Past the 10 cm texture the tongue's texture is mirrored (it smeared into streaks).
   Tried and wrong: a separate strip laid on a cut-off tongue (a line across the neck
   however the two met). From the side (the owner's `pakabukas/1.png`): both
-  plies lie together out of the body and on for 2.5 mm (`K2_TAB_FLAT`), then wrap the
+  plies lie together out of the body for only 1 mm (`K2_TAB_FLAT`; 6 mm until the owner,
+  2026-11-03: nothing glues or sews them there, so nothing presses them together), then
+  open straight to the loop and wrap the
   ring's wire in one small tight teardrop, inside radius 2.5 mm (`K2_LOOP_R`, the wire's
   two turns are 2.4 mm from middle to corner), the wire filling it. A wide loop with the
   plies parting straight out of the body was the first try and was wrong. The B2020 ring

@@ -455,7 +455,10 @@
   // angle (K2_RING_TILT, turned about the loop). A wide loop with the plies
   // parting straight out of the body was the first try.
   var K2_LOOP_R = 0.25;                    // inside radius of the loop: just round the wire
-  var K2_TAB_FLAT = 0.6;                   // the plies together past the body's edge
+  // 1 mm, then they open straight to the loop: past the body nothing glues or
+  // sews them, so nothing presses them together (the owner, 2026-11-03; it was
+  // 6 mm flat, which also held the ring 5 mm further off the piece)
+  var K2_TAB_FLAT = 0.1;                   // the plies together past the body's edge
   var K2_LOOP_Y = K2_H / 2 + K2_TAB_FLAT + 0.45;   // the loop's centre, where the wire runs
   var K2_RING_TILT = 0;                    // the ring straight, in line with the piece (the owner, 2026-11-02; it was swung back 20 deg)
 
