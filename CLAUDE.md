@@ -486,7 +486,7 @@ stitch and every technique are the owner's own.
   Two layers of 1.8 mm (`K2_T`) glued: front in the leather colour (initials,
   `fob2FrontMat` on `fold2Tex`), back in the second colour (`state.second`, the
   "Second colour" control; SLOU stamp low down, turned to read down the piece, top to bottom, not across it (the
-  owner, 2026-11-02; `pressLogo(..., side)`), `fob2BackMat`, `logo3Tex`). Built by
+  owner, 2026-11-02; `pressLogo(..., side)`; 1.4x the card holders' size, `size` argument, centre 14.5 mm below the middle: the owner, 2026-11-08, bigger), `fob2BackMat`, `logo3Tex`). Built by
   `leatherPiece` with the whole edge one glued dome, each layer its own colour,
   `fold2EdgeMat` + `withCore` like card holder Nr. 2.
 - The locked stitch as a closed loop (`stitchHoles`), the keyfob joint in the same

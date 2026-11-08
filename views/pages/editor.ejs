@@ -720,15 +720,15 @@
   // where it is drawn down into the letters. `y` is where the stamp sits;
   // mirrored, because the back face carries the front's texture coordinates
   // and is seen from behind. `side`: turned to read down the piece, top to
-  // bottom, rather than across it.
-  function pressLogo(col, bump, rough, y, front, side) {
+  // bottom, rather than across it. `size`: the letters' scale (1 by default).
+  function pressLogo(col, bump, rough, y, front, side, size) {
     var px = TEX_N / TEX_SPAN;
     function letters(g, style, blur) {
       g.save();
       g.translate(TEX_N / 2, TEX_N / 2 - y * px);
       if (!front) { g.scale(-1, 1); }   // a front face is not mirrored
       if (side) { g.rotate(Math.PI / 2); }
-      g.font = '800 ' + (0.62 * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
+      g.font = '800 ' + (0.62 * (size || 1) * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
       g.textAlign = 'center'; g.textBaseline = 'middle';
       g.filter = blur ? 'blur(' + blur + 'px)' : 'none';
       g.fillStyle = style;
@@ -800,9 +800,11 @@
   // same texture as card holder Nr. 1's front pocket), the back with the SLOU
   // stamp low down, mirrored as the back is seen from behind (its tongue,
   // the strap, wears the same); turned to run down the piece, top to bottom,
-  // not across it (the owner, 2026-11-02)
+  // not across it (the owner, 2026-11-02); 1.4 × the card holders' size
+  // (the owner, 2026-11-08: bigger), about 22 mm long and 8.7 mm em, its
+  // centre raised from 17 to 14.5 mm below the middle to stay clear of the seam
   var logo3Tex = canvasTex(true), logo3BumpTex = canvasTex(false), logo3RoughTex = canvasTex(false);
-  pressLogo(logo3Tex, logo3BumpTex, logo3RoughTex, -1.7 - K2_TEX_SHIFT, false, true);
+  pressLogo(logo3Tex, logo3BumpTex, logo3RoughTex, -1.45 - K2_TEX_SHIFT, false, true, 1.4);
   var fob2FrontMat = new THREE.MeshStandardMaterial({ map: fold2Tex, bumpMap: fold2BumpTex, bumpScale: 0.8, roughness: 0.6 });
   // and the back piece's flesh side, which shows inside the strap's loop:
   // the second colour, as its flesh is dyed with it
