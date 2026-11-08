@@ -1408,11 +1408,12 @@
   // point p (CARD_THICK / 2 by default): in the thumb window the front pocket
   // is cut away, so there the stack is the two bodies and the back pocket.
   // `stackT`, if given, is half the glued stack's thickness (CARD_THICK / 2 by
-  // default): on the folded card holder the stack is its two halves. A
+  // default): on the folded card holder the stack is its two halves. Strictly it
+  // is how far below z = 0 the stack starts; it may be a function of the point. A
   // `stack` value over 1 (up to 2) is the stack's dome flattened, 2 being a
   // square edge: card holder Nr. 2's fold corners, glued to the very end.
   function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp, top, stackT) {
-    var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T = stackT || CARD_THICK / 2, tp = T, domeNormals = [], matte = {}, sideFace = [];
+    var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T0 = typeof stackT === 'function' ? 0 : stackT || CARD_THICK / 2, T = T0, tp = T, domeNormals = [], matte = {}, sideFace = [];
     function vert(x, y, zz, c, edge) {
       pos.push(x, y, zz + (squeeze && edge ? squeeze(x, y, zz) : 0)); uv.push(x, y); col.push(c.r, c.g, c.b);
       return pos.length / 3 - 1;
@@ -1468,6 +1469,9 @@
         // outward (away from the leather), mitred at corners
         var n1 = new THREE.Vector2(p.y - a.y, a.x - p.x).normalize(), n2 = new THREE.Vector2(b.y - p.y, p.x - b.x).normalize();
         var nb = n1.clone().add(n2).normalize(), miter = 1 / Math.max(0.5, nb.dot(n1));
+        // `stackT` may also be a function of the point: where the glued stack
+        // starts lower or higher (the wallet: by the spine only its base and slot)
+        T = typeof stackT === 'function' ? stackT(p) : T0;
         tp = top ? top(p) : T;
         function glued(fz) { return fz > -T + 1e-6 && fz < tp - 1e-6; }
         var s = stack(p, li > 0), ring = [], ex = ramp && !li ? ramp(p) : 0;
@@ -2093,15 +2097,23 @@
       // and stitched (the U round each half: its top, outer side and bottom)
       // the edge is one dome across the stack, two layers above the slot and
       // three where the slot is; the rest is each piece's own edge: the
-      // exterior over the spine, the bases' and slots' inner edges by the
-      // spine, and the slots' tops.
+      // exterior over the spine, the bases' inner edges above the slots (below
+      // them base and slot are one dome, see stackBot), the slots' tops.
       var WE = WAL_W / 2, S = WAL_SPINE, wease = function (t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
       var slotTopAt = function (p) { return Math.abs(p.x) >= S - 1e-3 && p.y < -WAL_H / 2 + walSlotTop(WE - Math.abs(p.x)) - 1e-3 ? 2 * WAL_IN : WAL_IN; };
       var extStack = function (p) { return wease((Math.abs(p.x) - S) / 0.12); };
-      var baseStack = function (p) { return Math.abs(Math.abs(p.x) - S) < 1e-3 ? 0 : 1; };
+      // By the spine the base and its slot are glued with their edges square
+      // and bevelled after, front and back only, as one (the owner, 2026-11-08:
+      // rounded one by one they left a gap between them): one dome across the
+      // two, from the base's flesh side (z 0, not glued to the exterior there)
+      // to the slot's grain. Above the slot the base's edge is its own.
+      // (the bottom corner belongs to the bottom edge, all three layers glued)
+      var atSpine = function (p) { return Math.abs(Math.abs(p.x) - S) < 1e-3 && p.y > -WAL_H / 2 + 1e-3; };
+      var stackBot = function (p) { return atSpine(p) ? 0 : WAL_EXT; };
+      var baseStack = function (p) { return atSpine(p) ? (slotTopAt(p) > WAL_IN ? 1 : 0) : 1; };
       var slotStack = function (p) {
         var ax = Math.abs(p.x);
-        if (Math.abs(ax - S) < 1e-3) { return 0; }
+        if (Math.abs(ax - S) < 1e-3) { return 1; }   // glued to its base by the spine
         return (ax > WE - 1e-3 && p.y < -WAL_H / 2 + walSlotTop(0) - 1e-3) || p.y < -WAL_H / 2 + 1e-3 || (ax > WE - WAL_R - 1e-3 && p.y < -WAL_H / 2 + WAL_R) ? 1 : 0;
       };
       var leatherCol = withCore(state.leather, 1.27), slotCol = withCore(state.pocket, 1.27);
@@ -2120,8 +2132,8 @@
         return mesh;
       };
       [-1, 1].forEach(function (sg) {
-        fob.add(shifted(leatherPiece([loopOf(walShape('base', sg))], WAL_IN, WAL_IN / 2, baseStack, [walBaseMat, walEdgeMat, walFleshMat], leatherCol, null, null, slotTopAt, WAL_EXT), sg));
-        fob.add(shifted(leatherPiece([loopOf(walShape(state.slot, sg))], WAL_IN, WAL_IN * 1.5, slotStack, [walSlotMat, walEdgeMat, walSlotFleshMat], slotCol, null, null, slotTopAt, WAL_EXT), sg));
+        fob.add(shifted(leatherPiece([loopOf(walShape('base', sg))], WAL_IN, WAL_IN / 2, baseStack, [walBaseMat, walEdgeMat, walFleshMat], leatherCol, null, null, slotTopAt, stackBot), sg));
+        fob.add(shifted(leatherPiece([loopOf(walShape(state.slot, sg))], WAL_IN, WAL_IN * 1.5, slotStack, [walSlotMat, walEdgeMat, walSlotFleshMat], slotCol, null, null, function () { return 2 * WAL_IN; }, stackBot), sg));
       });
       // The seams, each an open run of the owner's stitch, the last two
       // stitches at each end doubled. On each half the U through all the

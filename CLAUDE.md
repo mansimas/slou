@@ -575,6 +575,10 @@ edges, the leather and the pattern's style are the owner's own, as on every item
 - Built flat, then opened: `walHinge` bends the exterior round the spine (`walBend`, an
   arc keeping its length) and turns each half `WAL_OPEN` 18° up as one piece, stitches and
   all. Laid flat (no bend) while the grid and measurements are on.
+- By the spine each slot and its base are glued square and bevelled after, front and
+  back only, as one (the owner, 2026-11-08): one oval dome across the two, as the outer
+  edge (`stackBot`: `leatherPiece`'s `stackT` may be a function of the point). Rounded one by
+  one they left a gap at the inner bottom corner. Above the slot the base has its own edge.
 - Pattern (`walletPattern`): page 1 the two bases (1, 2) on top, each slot (3, 4) under its
   base, seen from the grain side, the slot's top dashed on the base, the holes the slot
   covers lighter; page 2 the exterior (5), seen from outside (mirrored), the spine dashed,
