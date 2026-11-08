@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-08 23:50] - Wallet fits view, spine edge - Owner: the wallet did not fit the window and the spine stood out past the halves. The camera now steps back to fit the whole wallet; the spine keeps the halves' edge, so the top and bottom run as one line.
 [2026-11-08 23:43] - Wallet slot edge one dome - Owner: a gap showed between slot and base at the inner corners. They are glued square and bevelled together, front and back only, so by the spine the two now share one oval edge, like the outer edge.
 [2026-11-08 23:27] - Wallet added to editor - Owner: wallet 3D and PDF from pavyzdziai/pinigine (The Boat). Only its shape and sizes taken; stitch, edges, leather and pattern style are the owner's own. Four slot shapes to choose, laid flat while measured, four-page pattern with work process.
 [2026-11-08 22:45] - Keyfob Nr. 2 bigger logo - Owner: make the SLOU stamp bigger. Keyfob Nr. 2 only, letters 1.4x (about 22 mm long), raised 2.5 mm so the U stays clear of the bottom seam; card holders keep their size.

@@ -579,6 +579,10 @@ edges, the leather and the pattern's style are the owner's own, as on every item
   back only, as one (the owner, 2026-11-08): one oval dome across the two, as the outer
   edge (`stackBot`: `leatherPiece`'s `stackT` may be a function of the point). Rounded one by
   one they left a gap at the inner bottom corner. Above the slot the base has its own edge.
+- The exterior over the spine keeps the halves' edge profile (`extTop`: as if the stack ran on,
+  two layers at the top, three at the bottom), so top and bottom are one unbroken line (the
+  owner, 2026-11-08: with its own rounding the spine stood out). `fitView()`: switching to the
+  wallet, the camera steps back until all of it is in the window (`fitDistance`).
 - Pattern (`walletPattern`): page 1 the two bases (1, 2) on top, each slot (3, 4) under its
   base, seen from the grain side, the slot's top dashed on the base, the holes the slot
   covers lighter; page 2 the exterior (5), seen from outside (mirrored), the spine dashed,
