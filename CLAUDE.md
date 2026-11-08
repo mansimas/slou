@@ -583,6 +583,10 @@ edges, the leather and the pattern's style are the owner's own, as on every item
   two layers at the top, three at the bottom), so top and bottom are one unbroken line (the
   owner, 2026-11-08: with its own rounding the spine stood out). `fitView()`: switching to the
   wallet, the camera steps back until all of it is in the window (`fitDistance`).
+- Every seam runs to the very end of the pieces, the last 2 stitches doubled, so the ends
+  cannot peel open with use (the owner, 2026-11-08, photos `pavyzdziai/pinigine/Ekrano kopija
+  2026-11-08 2350*.png`): the U's top and bottom rows end `WAL_END` 1.2 mm from the spine edge
+  (they stopped at the stitch line), the inner seam `WAL_END_IN` just above the U's bottom row.
 - Pattern (`walletPattern`): page 1 the two bases (1, 2) on top, each slot (3, 4) under its
   base, seen from the grain side, the slot's top dashed on the base, the holes the slot
   covers lighter; page 2 the exterior (5), seen from outside (mirrored), the spine dashed,

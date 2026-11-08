@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-08 23:56] - Wallet seams to the ends - Owner, from photos of a finished one: the thread must run to the end of the pieces, its last stitches doubled, so the ends cannot peel with use. Top and bottom rows now reach the spine edge, the inner seam the bottom row.
 [2026-11-08 23:50] - Wallet fits view, spine edge - Owner: the wallet did not fit the window and the spine stood out past the halves. The camera now steps back to fit the whole wallet; the spine keeps the halves' edge, so the top and bottom run as one line.
 [2026-11-08 23:43] - Wallet slot edge one dome - Owner: a gap showed between slot and base at the inner corners. They are glued square and bevelled together, front and back only, so by the spine the two now share one oval edge, like the outer edge.
 [2026-11-08 23:27] - Wallet added to editor - Owner: wallet 3D and PDF from pavyzdziai/pinigine (The Boat). Only its shape and sizes taken; stitch, edges, leather and pattern style are the owner's own. Four slot shapes to choose, laid flat while measured, four-page pattern with work process.
