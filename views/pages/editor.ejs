@@ -1614,7 +1614,12 @@
   // cut flat in one with its tongue, starts to bend (k2Bend). Building the
   // strap as a strip of its own laid onto a cut-off tongue always left a
   // line across the neck where the two met.
-  var K2_BACK_OUT = -K2_T, K2_STUB = K2_H / 2 + 0.2;
+  // K2_STUB must stay below where the loop starts (K2_TAB_FLAT up, less its
+  // 0.8 mm ease): at 2 mm up, once K2_TAB_FLAT went to 1 mm, the tongue ran
+  // up past the loop's start and folded back down onto itself, a Z that stuck
+  // out at the sides (the owner, 2026-11-08).
+  var K2_BACK_OUT = -K2_T, K2_STUB = K2_H / 2;
+  var K2_SPLIT_Y = K2_H / 2 + K2_TAB_FLAT - 0.08;   // where the two plies part (strapPath's yF)
   // The tongue's flesh face, which the returning end lies on: in the body it
   // is the back layer's own (z 0, the glue line), so the end goes in between
   // the two layers and the front is lifted over it (k2Lift); the tongue is
@@ -1622,7 +1627,7 @@
   // (Sunk into a recess in the back, the end did not read as going in
   // between the leathers: the owner, 2026-11-01.)
   function k2Inner(y) {
-    var f = Math.min(1, Math.max(0, (y - K2_STUB) / 0.3));
+    var f = Math.min(1, Math.max(0, (y - K2_STUB) / Math.max(0.01, Math.min(0.3, K2_SPLIT_Y - K2_STUB))));
     return K2_TAB_Z * f * f * (3 - 2 * f);
   }
   function strapPath() {
