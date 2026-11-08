@@ -4,6 +4,7 @@ Put photos of real pieces here (your own work, or examples you like), and Claude
 looks at them before working on that item in `/editor`. One folder per item:
 
 - `korteline/`: card holder
+- `pinigine/`: wallet (kept out of git, see `.gitignore`: a purchased pattern whose licence forbids sharing it)
 - `pakabukas/`: keyfob
 
 Any format the browser opens (jpg, png, webp). Filenames can say what the photo shows,

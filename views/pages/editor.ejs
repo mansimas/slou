@@ -61,8 +61,8 @@
 <section class="kf">
   <div class="wrap">
     <header class="kf__head">
-      <h1 id="kfTitle" data-keyfob="<%= e.title %>" data-card="<%= e.card.title %>" data-card2="<%= e.card2.title %>" data-keyfob2="<%= e.keyfob2.title %>"><%= e.title %></h1>
-      <p id="kfLead" data-keyfob="<%= e.lead %>" data-card="<%= e.card.lead %>" data-card2="<%= e.card2.lead %>" data-keyfob2="<%= e.keyfob2.lead %>"><%= e.lead %></p>
+      <h1 id="kfTitle" data-keyfob="<%= e.title %>" data-card="<%= e.card.title %>" data-card2="<%= e.card2.title %>" data-keyfob2="<%= e.keyfob2.title %>" data-wallet="<%= e.wallet.title %>"><%= e.title %></h1>
+      <p id="kfLead" data-keyfob="<%= e.lead %>" data-card="<%= e.card.lead %>" data-card2="<%= e.card2.lead %>" data-keyfob2="<%= e.keyfob2.lead %>" data-wallet="<%= e.wallet.lead %>"><%= e.lead %></p>
     </header>
 
     <div class="kf__grid">
@@ -79,7 +79,7 @@
         <div>
           <span class="kf__label"><%= e.product %></span>
           <div class="kf__opts" data-group="product">
-            <% ['keyfob', 'keyfob2', 'card', 'card2'].forEach(function (k, i) { %>
+            <% ['keyfob', 'keyfob2', 'card', 'card2', 'wallet'].forEach(function (k, i) { %>
               <button type="button" class="kf__btn" data-value="<%= k %>" aria-pressed="<%= i === 0 %>"><%= e.products[k] %></button>
             <% }); %>
           </div>
@@ -94,6 +94,14 @@
           </div>
         </div>
 
+        <div id="kfSlotBox" hidden>
+          <span class="kf__label"><%= e.wallet.slotShape %></span>
+          <div class="kf__opts" data-group="slot">
+            <% ['straight', 'curved', 'slanted', 'sloped'].forEach(function (k, i) { %>
+              <button type="button" class="kf__btn" data-value="<%= k %>" aria-pressed="<%= i === 1 %>"><%= e.wallet.slots[k] %></button>
+            <% }); %>
+          </div>
+        </div>
         <div>
           <span class="kf__label"><%= e.leather %></span>
           <div class="kf__opts" data-group="leather">
@@ -175,7 +183,7 @@
   </div>
 </section>
 
-<script type="application/json" id="kfI18n"><%- JSON.stringify({ pattern: e.pattern, measure: e.measure, calib: e.calib, card: e.card, card2: e.card2, keyfob2: e.keyfob2 }).replace(/</g, '\\u003c') %></script>
+<script type="application/json" id="kfI18n"><%- JSON.stringify({ pattern: e.pattern, measure: e.measure, calib: e.calib, card: e.card, card2: e.card2, keyfob2: e.keyfob2, wallet: e.wallet }).replace(/</g, '\\u003c') %></script>
 
 <script type="importmap">
   { "imports": {
@@ -471,9 +479,100 @@
   var K2_TEX_SHIFT = 0.9;
   var K2_RING_TILT = 0;                    // the ring straight, in line with the piece (the owner, 2026-11-02; it was swung back 20 deg)
 
+  // The wallet (piniginė, the owner, 2026-11-08): a bifold card wallet, its
+  // shape and size from a pattern the owner found (pavyzdziai/pinigine/
+  // TheBoat_A4.pdf, DS Leather Goods), measured off its vectors; the stitch
+  // and every technique are the owner's own, as on every item. Five pieces:
+  // the exterior, 170 × 106 mm, corners rounded 10 mm, the 26 mm spine in its
+  // middle left free; on each half an interior base, 72 × 106 mm, rounded
+  // on its outer corners; and on each base a slot (pocket), 72 mm wide, its
+  // outer bottom corner rounded 10 mm, its top cut to one of four shapes.
+  // The slot's top as (t, h) in cm: t in from the outer edge, h up from the
+  // bottom; lines ('l') and cubic curves ('c': two controls and the end).
+  var WAL_W = 17, WAL_H = 10.6, WAL_R = 1, WAL_SPINE = 1.3, WAL_PW = WAL_W / 2 - WAL_SPINE;   // WAL_SPINE: half the spine
+  var WAL_EXT = 0.16, WAL_IN = 0.12;      // exterior 1.6 mm, interior pieces 1.2 mm (the drawing: 1.4-1.6 and 1.2-1.4)
+  var WAL_OPEN = 18 * Math.PI / 180;      // each half lifted 18° off flat: the wallet shown a little open
+  var WAL_SLOTS = {
+    straight: [['l', [0, 8.3]], ['l', [7.2, 8.3]]],
+    curved: [['l', [0, 8.3]], ['l', [1.282, 8.3]], ['c', [1.616, 8.3], [1.948, 8.214], [2.24, 8.052]], ['l', [2.616, 7.843]],
+             ['c', [2.916, 7.676], [3.256, 7.588], [3.6, 7.588]], ['c', [3.943, 7.588], [4.284, 7.676], [4.584, 7.843]],
+             ['l', [4.96, 8.052]], ['c', [5.252, 8.214], [5.584, 8.3], [5.918, 8.3]], ['l', [7.2, 8.3]]],
+    slanted: [['l', [0, 8.8]], ['l', [7.2, 7.5]]],
+    sloped: [['l', [0, 8.7]], ['l', [1.22, 8.7]], ['c', [1.988, 8.7], [2.757, 8.518], [3.444, 8.175]], ['l', [3.732, 8.031]],
+             ['c', [4.427, 7.683], [5.204, 7.5], [5.98, 7.5]], ['l', [7.2, 7.5]]]
+  };
+  // the slot's top height at t (cm in from the outer edge), from the
+  // shape sampled finely once
+  var walTopCache = {};
+  function walSlotTop(t, type) {
+    type = type || state.slot;
+    if (!walTopCache[type]) {
+      var pts = [], cur = null;
+      WAL_SLOTS[type].forEach(function (s) {
+        var end = new THREE.Vector2(s[s.length - 1][0], s[s.length - 1][1]);
+        if (!cur || s[0] === 'l') { pts.push(end); }
+        else {
+          var c = new THREE.CubicBezierCurve(cur, new THREE.Vector2(s[1][0], s[1][1]), new THREE.Vector2(s[2][0], s[2][1]), end);
+          pts.push.apply(pts, c.getPoints(32).slice(1));
+        }
+        cur = end;
+      });
+      walTopCache[type] = pts;
+    }
+    var P = walTopCache[type];
+    if (t <= P[0].x) { return P[0].y; }
+    for (var i = 1; i < P.length; i++) {
+      if (t <= P[i].x) { var a = P[i - 1], b = P[i]; return b.x - a.x < 1e-9 ? b.y : a.y + (b.y - a.y) * (t - a.x) / (b.x - a.x); }
+    }
+    return P[P.length - 1].y;
+  }
+  // is (x, y), flat, on a slot (between it and the base is where the cards go)
+  function walInSlot(x, y) { return Math.abs(x) >= WAL_SPINE && y < -WAL_H / 2 + walSlotTop(WAL_W / 2 - Math.abs(x)); }
+  // The pieces' outlines, flat, `sg` the side (1 right, -1 left as seen from
+  // the inside); the exterior is one piece across both.
+  function walShape(kind, sg) {
+    var s = new THREE.Shape(), X = function (x) { return sg * x; }, E = WAL_W / 2, B = -WAL_H / 2, T = WAL_H / 2, R = WAL_R, PI = Math.PI;
+    if (kind === 'ext') {
+      s.moveTo(-E + R, B); s.lineTo(E - R, B); s.absarc(E - R, B + R, R, -PI / 2, 0);
+      s.lineTo(E, T - R); s.absarc(E - R, T - R, R, 0, PI / 2);
+      s.lineTo(-E + R, T); s.absarc(-E + R, T - R, R, PI / 2, PI);
+      s.lineTo(-E, B + R); s.absarc(-E + R, B + R, R, PI, PI * 1.5);
+      return s;
+    }
+    // drawn for the right side, then mirrored point by point for the left
+    var pts = [], p = new THREE.Path();
+    if (kind === 'base') {
+      p.moveTo(WAL_SPINE, B); p.lineTo(E - R, B); p.absarc(E - R, B + R, R, -PI / 2, 0);
+      p.lineTo(E, T - R); p.absarc(E - R, T - R, R, 0, PI / 2); p.lineTo(WAL_SPINE, T);
+    } else {
+      var seg = WAL_SLOTS[kind], at = function (q) { return [E - q[0], B + q[1]]; };
+      p.moveTo(WAL_SPINE, B); p.lineTo(E - R, B); p.absarc(E - R, B + R, R, -PI / 2, 0);
+      var first = at(seg[0][1]);
+      p.lineTo(first[0], first[1]);
+      seg.slice(1).forEach(function (q) {
+        if (q[0] === 'l') { var e = at(q[1]); p.lineTo(e[0], e[1]); }
+        else { var c1 = at(q[1]), c2 = at(q[2]), e2 = at(q[3]); p.bezierCurveTo(c1[0], c1[1], c2[0], c2[1], e2[0], e2[1]); }
+      });
+    }
+    p.getPoints(24).forEach(function (q, i, all) { if (!i || q.distanceTo(all[i - 1]) > 1e-4) { pts.push(new THREE.Vector2(X(q.x), q.y)); } });
+    if (pts[0].distanceTo(pts[pts.length - 1]) < 1e-4) { pts.pop(); }
+    return new THREE.Shape(pts);
+  }
+  // The wallet a little open: the exterior bends round the spine in an arc
+  // (its middle, z0, keeping its length), each half beyond it turned WAL_OPEN
+  // up towards the inside as one rigid piece. (x, z) flat -> bent, and the
+  // angle the point is turned by.
+  function walBend(x, z, a) {
+    if (a < 1e-6) { return { x: x, z: z, th: 0 }; }
+    var S = WAL_SPINE, z0 = -WAL_EXT / 2, R = S / a, d = z - z0, ax = Math.abs(x), sg = x < 0 ? -1 : 1, th, px, pz;
+    if (ax <= S) { th = ax / R; px = (R - d) * Math.sin(th); pz = z0 + R - (R - d) * Math.cos(th); }
+    else { th = a; px = R * Math.sin(a) + (ax - S) * Math.cos(a) - d * Math.sin(a); pz = z0 + R - R * Math.cos(a) + (ax - S) * Math.sin(a) + d * Math.cos(a); }
+    return { x: sg * px, z: pz, th: sg * th };
+  }
+
   // `pocket` is the card holder's second colour: as made, olive pockets on a
   // brown body; `second` is keyfob Nr. 2's (back layer and strap)
-  var state = { product: 'keyfob', shape: 'arch', leather: '#9a5527', pocket: '#5b5a35', second: '#222020', thread: '#eadcbf', ring: 'silver', text: '' };
+  var state = { product: 'keyfob', shape: 'arch', slot: 'curved', leather: '#9a5527', pocket: '#5b5a35', second: '#222020', thread: '#eadcbf', ring: 'silver', text: '' };
 
   // ---------- scene ----------
   var stage = document.getElementById('kfStage');
@@ -504,7 +603,7 @@
   // Where the view is centred: the card holder sits a touch higher in the
   // frame, clear of the hint text at the foot of the stage (the owner,
   // 2026-10-20); the keyfob keeps its own.
-  function centreY() { return state.product === 'keyfob' ? 0.8 : state.product === 'keyfob2' ? 1.6 : -0.3; }
+  function centreY() { return state.product === 'keyfob' ? 0.8 : state.product === 'keyfob2' ? 1.6 : state.product === 'wallet' ? 0 : -0.3; }
   controls.autoRotate = true;
   controls.autoRotateSpeed = 1.2;
   controls.addEventListener('start', function () { controls.autoRotate = false; });
@@ -576,6 +675,13 @@
       return { txt: txt, vertical: false, x: 0, y: WIN_Y + WIN_H + 0.75,
                size: Math.min(PT24, (CARD_W - 2.2) / (txt.length * 0.72)), neue: true };
     }
+    if (state.product === 'wallet') {
+      // the wallet: on the outside of the back cover, low and centred on its
+      // stitched panel, as the SLOU stamp is on the front cover; the outside
+      // is seen from behind, so it is drawn mirrored (`mirror`)
+      return { txt: txt, vertical: false, x: WAL_SPINE + WAL_PW / 2, y: -3.6, neue: true, mirror: true,
+               size: Math.min(PT24, (WAL_PW - 1.4) / (txt.length * 0.72)) };
+    }
     if (state.product === 'keyfob2') {
       // stamped like the card holders' (Helvetica Neue, 24 pt), low on the
       // front; more than three letters run along the length
@@ -595,7 +701,8 @@
     if (!L) { return; }
     var px = TEX_N / TEX_SPAN, txt = L.txt, vertical = L.vertical, size = L.size * px;
     g.save();
-    g.translate(TEX_N / 2 + L.x * px, TEX_N / 2 - L.y * px);
+    g.translate(g.canvas.width / 2 + L.x * px, TEX_N / 2 - L.y * px);   // a wide texture (the wallet's) is 2 × TEX_N across
+    if (L.mirror) { g.scale(-1, 1); }
     if (vertical) { g.rotate(-Math.PI / 2); }
     g.font = L.neue ? '500 ' + size + 'px "Helvetica Neue", Helvetica, Arial, sans-serif'
                     : '600 ' + size + 'px Helvetica, "Helvetica Neue", Arial, sans-serif';
@@ -638,6 +745,7 @@
         });
       });
     }
+    if (typeof walOutTex !== 'undefined') { paintWallet(); }
   }
   paintTextures();
   // grain without the letters, for the card holder's back face
@@ -721,11 +829,18 @@
   // mirrored, because the back face carries the front's texture coordinates
   // and is seen from behind. `side`: turned to read down the piece, top to
   // bottom, rather than across it. `size`: the letters' scale (1 by default).
-  function pressLogo(col, bump, rough, y, front, side, size) {
+  // `cx`: across, in cm (0 by default). A wide texture (the wallet's, two
+  // TEX_N across) gets the leather laid twice, the left one mirrored, so it
+  // runs on unbroken across the middle (`natTile`).
+  function natTile(g, img) {
+    g.drawImage(img, g.canvas.width - TEX_N, 0);
+    if (g.canvas.width > TEX_N) { g.save(); g.translate(TEX_N, 0); g.scale(-1, 1); g.drawImage(img, 0, 0); g.restore(); }
+  }
+  function pressLogo(col, bump, rough, y, front, side, size, cx) {
     var px = TEX_N / TEX_SPAN;
     function letters(g, style, blur) {
       g.save();
-      g.translate(TEX_N / 2, TEX_N / 2 - y * px);
+      g.translate(g.canvas.width / 2 + (cx || 0) * px, TEX_N / 2 - y * px);
       if (!front) { g.scale(-1, 1); }   // a front face is not mirrored
       if (side) { g.rotate(Math.PI / 2); }
       g.font = '800 ' + (0.62 * (size || 1) * px) + 'px "Arial Rounded MT Bold", "Helvetica Neue", Arial, sans-serif';
@@ -739,17 +854,17 @@
     // The depth is in the light and shade on the walls, not in the colour:
     // darkened as much as it was at first, it read as printed (the owner's
     // stamp is pressed, not inked), so the floor is only a shade darker.
-    c.drawImage(natural.col, 0, 0);
+    natTile(c, natural.col);
     letters(c, 'rgba(60,32,12,.08)', 3);     // drawn down round the walls
     letters(c, 'rgba(48,24,8,.16)', 0.8);    // the pressed floor
     // the relief runs 2.5 × as deep as the grain's (bumpScale 2 on these
     // faces, the grain drawn at 40% so it reads as before)
-    b.fillStyle = '#808080'; b.fillRect(0, 0, TEX_N, TEX_N);
-    b.globalAlpha = 0.4; b.drawImage(natural.bump, 0, 0); b.globalAlpha = 1;
+    b.fillStyle = '#808080'; b.fillRect(0, 0, b.canvas.width, TEX_N);
+    b.globalAlpha = 0.4; natTile(b, natural.bump); b.globalAlpha = 1;
     letters(b, 'rgba(0,0,0,.30)', 3);        // the walls, sloping in
     letters(b, 'rgba(0,0,0,.35)', 1.6);
     letters(b, '#262626', 0.6);              // the floor, flat: no grain left in it
-    r.fillStyle = '#fff'; r.fillRect(0, 0, TEX_N, TEX_N);
+    r.fillStyle = '#fff'; r.fillRect(0, 0, r.canvas.width, TEX_N);
     letters(r, '#b8b8b8', 1);
     [col, bump, rough].forEach(function (t) { t.needsUpdate = true; });
   }
@@ -814,6 +929,40 @@
   // behind, dark specks in lines along both edges of the loop, like scratches.
   var fob2FleshMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1, roughness: 0.85 });
   var fob2BackMat = new THREE.MeshStandardMaterial({ map: logo3Tex, bumpMap: logo3BumpTex, roughnessMap: logo3RoughTex, bumpScale: 2, roughness: 0.6 });   // the strap (its tongue) wears it too
+  // The wallet. Its exterior is 17 cm across, wider than the 10 cm leather
+  // texture, so its outside has a texture twice as wide (`wideTex`), the
+  // leather laid mirrored across the spine's middle, with the SLOU stamp on
+  // the front cover and the initials on the back cover, each low and centred
+  // on its stitched panel; mirrored, as the outside is seen from behind. The
+  // front cover is the left half seen from the inside (x < 0), as a book's.
+  function wideTex(srgb) {
+    var c = document.createElement('canvas'); c.width = 2 * TEX_N; c.height = TEX_N;
+    var tex = new THREE.CanvasTexture(c);
+    tex.repeat.set(1 / (2 * TEX_SPAN), 1 / TEX_SPAN);
+    tex.offset.set(0.5, 0.5);
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    if (srgb) { tex.colorSpace = THREE.SRGBColorSpace; }
+    return tex;
+  }
+  var walOutTex = wideTex(true), walOutBump = wideTex(false), walOutRough = wideTex(false);
+  function paintWallet() {
+    pressLogo(walOutTex, walOutBump, walOutRough, -3.6, false, false, 1, -(WAL_SPINE + WAL_PW / 2));
+    if (state.product === 'wallet') {
+      drawText(walOutTex.image.getContext('2d'), 'rgba(28,13,2,.62)');
+      drawText(walOutBump.image.getContext('2d'), '#000');
+    }
+  }
+  paintWallet();
+  var walOutMat = new THREE.MeshStandardMaterial({ map: walOutTex, bumpMap: walOutBump, roughnessMap: walOutRough, bumpScale: 2, roughness: 0.6 });
+  // the inside: the natural leather (each piece's texture shifted onto it,
+  // see build), the flesh sides, and the edges as on keyfob Nr. 2 and card
+  // holder Nr. 2, their texture mirrored past the 10 cm rather than smeared
+  function mirrored(t) { var c = t.clone(); c.wrapS = c.wrapT = THREE.MirroredRepeatWrapping; c.needsUpdate = true; return c; }
+  var walBaseMat = new THREE.MeshStandardMaterial({ map: naturalTex, bumpMap: naturalBumpTex, bumpScale: 0.8, roughness: 0.6 });
+  var walSlotMat = new THREE.MeshStandardMaterial({ map: naturalTex, bumpMap: naturalBumpTex, bumpScale: 0.8, roughness: 0.6 });
+  var walFleshMat = new THREE.MeshStandardMaterial({ map: mirrored(backColorTex), bumpMap: mirrored(plainBumpTex), bumpScale: 1, roughness: 0.85 });
+  var walSlotFleshMat = new THREE.MeshStandardMaterial({ map: mirrored(backColorTex), bumpMap: mirrored(plainBumpTex), bumpScale: 1, roughness: 0.85 });
+  var walEdgeMat = new THREE.MeshPhysicalMaterial({ map: mirrored(fold2EdgeTex), bumpMap: mirrored(fold2EdgeBump), bumpScale: 1, roughness: 0.5, clearcoat: 0.2, clearcoatRoughness: 0.5, vertexColors: true });
   // Twisted waxed thread: diagonal plies wound round each stitch.
   var plyTex = (function () {
     // three plies round the thread; repeat set so they run at ~45 deg
@@ -947,6 +1096,11 @@
     fob2FrontMat.color.copy(c).multiplyScalar(1.2);
     fob2BackMat.color.copy(sc).multiplyScalar(1.2);
     fob2FleshMat.color.copy(sc).multiplyScalar(0.9);
+    walOutMat.color.copy(c).multiplyScalar(1.2);
+    walBaseMat.color.copy(c).multiplyScalar(1.2);
+    walFleshMat.color.copy(c).multiplyScalar(0.9);
+    walSlotMat.color.copy(new THREE.Color(state.pocket)).multiplyScalar(1.2);
+    walSlotFleshMat.color.copy(new THREE.Color(state.pocket)).multiplyScalar(0.9);
     var pc = new THREE.Color(state.pocket);
     pocketFrontMat.color.copy(pc).multiplyScalar(1.2);
     pocketBackMat.color.copy(pc).multiplyScalar(1.2);
@@ -1841,10 +1995,44 @@
     return k2Geo(d);
   }
 
+  // The wallet built flat, opened: every leather piece and bent stitch
+  // point by point (walBend), the stitches, holes and marks, which are all on
+  // the halves, each turned with its half as a whole.
+  function walHinge(a) {
+    if (a < 1e-6) { return; }
+    var S = WAL_SPINE, z0 = -WAL_EXT / 2, R = S / a;
+    var M = [-1, 1].map(function (sg) {
+      return new THREE.Matrix4().makeTranslation(sg * R * Math.sin(a), 0, z0 + R - R * Math.cos(a))
+        .multiply(new THREE.Matrix4().makeRotationY(-sg * a))
+        .multiply(new THREE.Matrix4().makeTranslation(-sg * S, 0, -z0));
+    });
+    var m = new THREE.Matrix4(), p = new THREE.Vector3();
+    fob.children.forEach(function (o) {
+      if (o.isInstancedMesh) {
+        for (var i = 0; i < o.count; i++) {
+          o.getMatrixAt(i, m); p.setFromMatrixPosition(m);
+          o.setMatrixAt(i, m.premultiply(M[p.x < 0 ? 0 : 1]));
+        }
+        o.instanceMatrix.needsUpdate = true;
+        if (o.computeBoundingSphere) { o.computeBoundingSphere(); }
+        return;
+      }
+      if (!o.geometry) { return; }
+      var P = o.geometry.attributes.position, N = o.geometry.attributes.normal;
+      for (var k = 0; k < P.count; k++) {
+        var b = walBend(P.getX(k), P.getZ(k), a), c = Math.cos(b.th), s = Math.sin(b.th);
+        P.setX(k, b.x); P.setZ(k, b.z);
+        if (N) { var nx = N.getX(k), nz = N.getZ(k); N.setX(k, c * nx - s * nz); N.setZ(k, s * nx + c * nz); }
+      }
+      P.needsUpdate = true; if (N) { N.needsUpdate = true; }
+      o.geometry.computeBoundingBox(); o.geometry.computeBoundingSphere();
+    });
+  }
+
   function build() {
     fob.children.slice().forEach(function (m) { fob.remove(m); if (m.geometry !== stitchGeo && m.geometry !== holeGeo) { m.geometry.dispose(); } });
 
-    var card = state.product === 'card', fold = state.product === 'card2', fob2 = state.product === 'keyfob2', holesAt, crossings = [], addPockets = null, runs = null;
+    var card = state.product === 'card', fold = state.product === 'card2', fob2 = state.product === 'keyfob2', wallet = state.product === 'wallet', holesAt, crossings = [], addPockets = null, runs = null, frontRuns = null;
     // Nr. 2 is one piece of leather, so its two faces must read as one colour
     // (the owner, 2026-10-29): the light behind it as strong as the one in
     // front, and placed as its mirror image
@@ -1896,6 +2084,87 @@
       fob.add(new THREE.Mesh(k2Bend(flatBack.geometry), [fob2FleshMat, fold2EdgeMat, fob2BackMat]));
       flatBack.geometry.dispose();
       holesAt = stitchHoles(outline('stadium', STITCH_INSET));
+    } else if (wallet) {
+      // The wallet, built flat and open, the inside towards +z: the exterior
+      // (z from -WAL_EXT to 0), on each half a base on it and a slot on the
+      // base; then bent open round the spine (walHinge, at the end of build).
+      // Edges as on keyfob Nr. 2 and card holder Nr. 2: natural, worked with
+      // Tokonole, the cut core lighter (withCore). Where the pieces are glued
+      // and stitched (the U round each half: its top, outer side and bottom)
+      // the edge is one dome across the stack, two layers above the slot and
+      // three where the slot is; the rest is each piece's own edge: the
+      // exterior over the spine, the bases' and slots' inner edges by the
+      // spine, and the slots' tops.
+      var WE = WAL_W / 2, S = WAL_SPINE, wease = function (t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
+      var slotTopAt = function (p) { return Math.abs(p.x) >= S - 1e-3 && p.y < -WAL_H / 2 + walSlotTop(WE - Math.abs(p.x)) - 1e-3 ? 2 * WAL_IN : WAL_IN; };
+      var extStack = function (p) { return wease((Math.abs(p.x) - S) / 0.12); };
+      var baseStack = function (p) { return Math.abs(Math.abs(p.x) - S) < 1e-3 ? 0 : 1; };
+      var slotStack = function (p) {
+        var ax = Math.abs(p.x);
+        if (Math.abs(ax - S) < 1e-3) { return 0; }
+        return (ax > WE - 1e-3 && p.y < -WAL_H / 2 + walSlotTop(0) - 1e-3) || p.y < -WAL_H / 2 + 1e-3 || (ax > WE - WAL_R - 1e-3 && p.y < -WAL_H / 2 + WAL_R) ? 1 : 0;
+      };
+      var leatherCol = withCore(state.leather, 1.27), slotCol = withCore(state.pocket, 1.27);
+      // the exterior, cut finer across the spine so it can bend there
+      var ext = leatherPiece([loopOf(walShape('ext'))], WAL_EXT, -WAL_EXT / 2, extStack, [], leatherCol, null, null, slotTopAt, WAL_EXT);
+      var ed = k2Split(ext.geometry, function (ya, yb, xa, xb) {
+        return Math.max(xa, xb) > -S - 0.05 && Math.min(xa, xb) < S + 0.05 && Math.abs(xa - xb) > 0.06;
+      });
+      ext.geometry.dispose();
+      fob.add(new THREE.Mesh(k2Geo(ed), [walFleshMat, walEdgeMat, walOutMat]));
+      // each piece's texture shifted onto the 10 cm of leather, its middle on
+      // the texture's middle, so none of it runs off the edge
+      var shifted = function (mesh, sg) {
+        var uv = mesh.geometry.attributes.uv;
+        for (var i = 0; i < uv.count; i++) { uv.setX(i, uv.getX(i) - sg * (S + WAL_PW / 2)); }
+        return mesh;
+      };
+      [-1, 1].forEach(function (sg) {
+        fob.add(shifted(leatherPiece([loopOf(walShape('base', sg))], WAL_IN, WAL_IN / 2, baseStack, [walBaseMat, walEdgeMat, walFleshMat], leatherCol, null, null, slotTopAt, WAL_EXT), sg));
+        fob.add(shifted(leatherPiece([loopOf(walShape(state.slot, sg))], WAL_IN, WAL_IN * 1.5, slotStack, [walSlotMat, walEdgeMat, walSlotFleshMat], slotCol, null, null, slotTopAt, WAL_EXT), sg));
+      });
+      // The seams, each an open run of the owner's stitch, the last two
+      // stitches at each end doubled. On each half the U through all the
+      // layers (from the spine end of the top, round the outer corners, to the
+      // spine end of the bottom), and the inner seam that sews the slot to its
+      // base along the spine side, sewn first, through those two only, so it
+      // is not seen from outside (frontRuns). Its top hole is in the base,
+      // POCKET_END above the slot's edge, so its last stitch climbs over the
+      // edge as on card holder Nr. 1; and the U has a hole there too, on the
+      // outer side, so its stitch crosses the slot's edge the same way.
+      var I = STITCH_INSET, xo = WE - I, xi = S + I, yT = WAL_H / 2 - I, yB = -WAL_H / 2 + I, wr = WAL_R - I, PI = Math.PI;
+      var yCross = -WAL_H / 2 + walSlotTop(I) + POCKET_END;
+      var sample = function (path) {
+        var poly = [];
+        path.curves.filter(function (c) { return c.getLength() > 1e-4; }).forEach(function (c) {
+          var k = Math.max(8, Math.ceil(c.getLength() / 0.005));
+          for (var j = 0; j < k; j++) { poly.push(c.getPointAt(j / k)); }
+        });
+        poly.push(path.curves[path.curves.length - 1].getPointAt(1));
+        return poly;
+      };
+      var uRun = function (sg) {   // CCW like the outlines: the right half from the bottom, the left from the top
+        var a = new THREE.Path(), b = new THREE.Path();
+        if (sg > 0) {
+          a.moveTo(xi, yB); a.lineTo(xo - wr, yB); a.absarc(xo - wr, yB + wr, wr, -PI / 2, 0); a.lineTo(xo, yCross);
+          b.moveTo(xo, yCross); b.lineTo(xo, yT - wr); b.absarc(xo - wr, yT - wr, wr, 0, PI / 2); b.lineTo(xi, yT);
+        } else {
+          a.moveTo(-xi, yT); a.lineTo(-xo + wr, yT); a.absarc(-xo + wr, yT - wr, wr, PI / 2, PI); a.lineTo(-xo, yCross);
+          b.moveTo(-xo, yCross); b.lineTo(-xo, yB + wr); b.absarc(-xo + wr, yB + wr, wr, PI, PI * 1.5); b.lineTo(-xi, yB);
+        }
+        var pb = sample(b);
+        return divide(sample(a)).concat(divide(pb), [pb[pb.length - 1]]);
+      };
+      var innerRun = function (sg) {   // down the right half's spine side, up the left's
+        var yTop = -WAL_H / 2 + walSlotTop(WAL_PW - I) + POCKET_END, yEnd = yB + 0.5, poly = [];
+        for (var k = 0; k <= 400; k++) { poly.push(new THREE.Vector2(sg * xi, sg > 0 ? yTop + (yEnd - yTop) * k / 400 : yEnd + (yTop - yEnd) * k / 400)); }
+        return divide(poly).concat([poly[400]]);
+      };
+      holesAt = []; runs = []; frontRuns = [];
+      [uRun(-1), innerRun(-1), uRun(1), innerRun(1)].forEach(function (h, i) {
+        runs.push([holesAt.length, holesAt.length + h.length - 1]); frontRuns.push(i % 2 === 1);
+        holesAt = holesAt.concat(h);
+      });
     } else if (fold) {
       // Card holder Nr. 2: the one piece, cut flat and folded (`folded`). Its
       // edges as on Nr. 1: up the glued sides and round the corners one dome
@@ -2052,7 +2321,7 @@
       holesAt = stitchHoles(outline(state.shape, STITCH_INSET));
     }
     // An open seam (the card holder's U) has no stitch after its last hole.
-    var open = card || fold;
+    var open = card || fold || wallet;
 
     // Saddle stitch on both faces. Holes are diamond-chisel slits on the
     // stitch line, about 3.85 mm apart, cut at an angle to it. Each stitch runs
@@ -2122,7 +2391,7 @@
         var t0 = 0, t1 = 1;
         for (var it = 0; it < 30; it++) {
           var tm = (t0 + t1) / 2, P = H.clone().lerp(Lo, tm);
-          if (inPocket(P.x, P.y, side)) { t0 = tm; } else { t1 = tm; }
+          if (inPk(P.x, P.y, side)) { t0 = tm; } else { t1 = tm; }
         }
         var u = Lo.clone().sub(H).setZ(0).normalize(), E = H.clone().lerp(Lo, t0), sg = Math.sign(zh);
         // A plain stitch, as it is sewn: the thread pulled straight and tight
@@ -2248,8 +2517,8 @@
         // where the line crosses the pocket edge
         var t0 = 0, t1 = 1, hiA = Math.abs(za) > Math.abs(zb);
         for (var it = 0; it < 30; it++) {
-          var tm = (t0 + t1) / 2, P = fa.clone().lerp(tb, tm), inPk = inPocket(P.x, P.y, side);
-          if (inPk === hiA) { t0 = tm; } else { t1 = tm; }
+          var tm = (t0 + t1) / 2, P = fa.clone().lerp(tb, tm), inP = inPk(P.x, P.y, side);
+          if (inP === hiA) { t0 = tm; } else { t1 = tm; }
         }
         var e = t0 * len, dir = hiA ? 1 : -1, zh = hiA ? za : zb, zl = hiA ? zb : za;
         // On the pocket up to the edge, over it, then down to the body hole in
@@ -2291,10 +2560,12 @@
       fob.add(new THREE.Mesh(tube, threadMat));
     }
     var zTop = DEPTH / 2 + BEVEL;
+    // where the thread is on a pocket (card holder Nr. 1) or a slot (the wallet)
+    function inPk(x, y, side) { return wallet ? side > 0 && walInSlot(x, y) : inPocket(x, y, side); }
     // The face the thread lies on at (x, y). The keyfob is one piece; on the
     // card holder the pockets stand one piece proud of the bodies below their
     // top, except in the front pocket's window.
-    function face(x, y, side) { return fob2 ? K2_T + (side > 0 ? k2Lift(x, y) : 0) : fold ? FOLD_T : card ? (inPocket(x, y, side) ? CARD_BODY + CARD_POCKET : CARD_BODY) : zTop; }
+    function face(x, y, side) { return wallet ? (side > 0 ? (walInSlot(x, y) ? 2 * WAL_IN : WAL_IN) : WAL_EXT) : fob2 ? K2_T + (side > 0 ? k2Lift(x, y) : 0) : fold ? FOLD_T : card ? (inPocket(x, y, side) ? CARD_BODY + CARD_POCKET : CARD_BODY) : zTop; }
     // stitch k runs from hole k to hole k + 1; both its slits lean off that
     // chord, so every stitch has the same length and lean
     var chords = holesAt.map(function (p, k) {
@@ -2317,7 +2588,7 @@
     var E = (J - 1 + n) % n;   // the two doubled stitches meet at hole J
     // which holes are corners: the pattern PDF marks those as pinned dots
     var corner = holesAt.map(function (p, k) { return chordIn(k).dot(chords[k]) < Math.cos(Math.PI / 9); });
-    current = { holes: holesAt, chords: chords, chordIn: chordIn, E: E, corner: corner, open: open, runs: runs };
+    current = { holes: holesAt, chords: chords, chordIn: chordIn, E: E, corner: corner, open: open, runs: runs, frontRuns: frontRuns };
     for (var k = 0; k < n; k++) {
       var a = holesAt[k], b = holesAt[(k + 1) % n], d = chords[k];
       var run = open ? runOf(k) : null, sewn = !(open && k === run[1]);
@@ -2326,7 +2597,12 @@
       var doubled = open ? k - run[0] < OVERLAP || k >= run[1] - OVERLAP : (k - E + n) % n < OVERLAP;
       // a slit sits between two stitches: lean it off their average direction
       var dh = chordIn(k).clone().add(d).normalize();
+      var hidden = frontRuns && frontRuns[runs.indexOf(run)];   // the wallet's inner seam: not through the exterior
       [1, -1].forEach(function (side, i) {
+        if (side < 0 && hidden) {
+          stitches.setMatrixAt(k * 2 + i, zero); holes.setMatrixAt(k * 2 + i, zero); dimples.setMatrixAt(k * 2 + i, zero);
+          return;
+        }
         // The levels the thread lies at, at each end. On the card holder the
         // stitch over the pocket edge goes from the pocket's face to the body's;
         // `lay` sets it over the edge rather than through it.
@@ -2402,6 +2678,7 @@
     stitches.count = extra;   // only the instances laid
     if (addPockets) { addPockets(); }   // now the dents the stitches press in are known
     fob.add(dimples, holes, stitches);
+    if (wallet) { walHinge(measures.visible ? 0 : WAL_OPEN); return; }   // flat while measured
     if (card || fold) { return; }   // no key ring on the card holders
 
     // Key ring threaded through the hole: one length of flat strip wound two
@@ -2500,8 +2777,8 @@
     // a CSS2DObject takes its label off the page when it is removed
     dims.children.slice().forEach(function (c) { dims.remove(c); if (c.geometry) { c.geometry.dispose(); } });
     labels.length = 0;
-    var card = state.product === 'card', fold = state.product === 'card2', fob2 = state.product === 'keyfob2';
-    var W = fob2 ? K2_W : fold ? FOLD_W : card ? CARD_W : KEY_W, H = fob2 ? K2_H : fold ? FOLD_TOP - FOLD_BOT : card ? CARD_H : KEY_H;
+    var card = state.product === 'card', fold = state.product === 'card2', fob2 = state.product === 'keyfob2', wallet = state.product === 'wallet';
+    var W = wallet ? WAL_W : fob2 ? K2_W : fold ? FOLD_W : card ? CARD_W : KEY_W, H = wallet ? WAL_H : fob2 ? K2_H : fold ? FOLD_TOP - FOLD_BOT : card ? CARD_H : KEY_H;
     var T = 0.12;  // end tick half-length
     // width, under the piece
     var wy = -H / 2 - 0.8;
@@ -2513,7 +2790,7 @@
     segs([[hx, -H / 2], [hx, H / 2], [hx - T, -H / 2], [hx + T, -H / 2], [hx - T, H / 2], [hx + T, H / 2],
           [W / 2 + 0.15, -H / 2], [hx + 0.2, -H / 2], [W / 2 + 0.15, H / 2], [hx + 0.2, H / 2]]);
     label(mm(H), hx, 0);
-    if (!card && !fold && !fob2) {
+    if (!card && !fold && !fob2 && !wallet) {
       // hole, with a leader line out to the left
       var c45 = Math.SQRT1_2 * HOLE_R;
       segs([[-c45, HOLE_Y + c45], [-W / 2 - 0.5, HOLE_Y + 0.9], [-W / 2 - 0.5, HOLE_Y + 0.9], [-W / 2 - 1.1, HOLE_Y + 0.9]]);
@@ -2521,8 +2798,8 @@
     }
 
     var SPECS = { width: mm(W), height: mm(H), spacing: mm(STITCH_PITCH), inset: mm(STITCH_INSET),
-                  thickness: fob2 ? mm(2 * K2_T) + ' (2 \u00d7 ' + mm(K2_T) + ')' : fold ? mm(2 * FOLD_T) + ' (2 \u00d7 ' + mm(FOLD_T) + ')' : card ? mm(CARD_THICK) + ' (2 \u00d7 ' + mm(CARD_POCKET) + ' + 2 \u00d7 ' + mm(CARD_BODY) + ')' : mm(THICK),
-                  hole: fob2 ? '\u2014' : fold ? '\u00d8 ' + mm(2 * FOLD_HOLE) : card ? '\u2014' : '\u00d8 ' + mm(HOLE_R * 2) };
+                  thickness: wallet ? mm(WAL_EXT + 2 * WAL_IN) + ' (' + mm(WAL_EXT) + ' + 2 \u00d7 ' + mm(WAL_IN) + ')' : fob2 ? mm(2 * K2_T) + ' (2 \u00d7 ' + mm(K2_T) + ')' : fold ? mm(2 * FOLD_T) + ' (2 \u00d7 ' + mm(FOLD_T) + ')' : card ? mm(CARD_THICK) + ' (2 \u00d7 ' + mm(CARD_POCKET) + ' + 2 \u00d7 ' + mm(CARD_BODY) + ')' : mm(THICK),
+                  hole: wallet || fob2 ? '\u2014' : fold ? '\u00d8 ' + mm(2 * FOLD_HOLE) : card ? '\u2014' : '\u00d8 ' + mm(HOLE_R * 2) };
     document.querySelectorAll('[data-spec]').forEach(function (dd) { dd.textContent = SPECS[dd.dataset.spec]; });
   }
   var KEY_W = W, KEY_H = H;
@@ -2533,6 +2810,7 @@
     ev.currentTarget.setAttribute('aria-pressed', String(on));
     document.getElementById('kfSpecs').hidden = !on;
     measures.visible = on;
+    if (state.product === 'wallet') { build(); }   // laid flat to be measured, opened again after
     // CSS2D labels ignore their parent's visibility, so switch them one by one
     labels.forEach(function (l) { l.visible = on; });
     lockBtn.hidden = !on;
@@ -2607,7 +2885,7 @@
       grp.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === btn)); });
       state[grp.dataset.group] = btn.dataset.value;
       // the item and the shape are geometry; the rest is colour
-      if (grp.dataset.group === 'product') { setProduct(); } else if (grp.dataset.group === 'shape') { build(); } else {
+      if (grp.dataset.group === 'product') { setProduct(); } else if (grp.dataset.group === 'shape' || grp.dataset.group === 'slot') { build(); } else {
         applyColors();
         // the card holder's burnished edges carry their shades in the geometry
         if (state.product !== 'keyfob' && (grp.dataset.group === 'leather' || grp.dataset.group === 'pocket' || grp.dataset.group === 'second')) { build(); }
@@ -2618,10 +2896,11 @@
   // Keyfob or a card holder: the card holders have no shape choice and no
   // ring, and only Nr. 1 has pockets of a second colour.
   function setProduct() {
-    var card = state.product === 'card' || state.product === 'card2';
+    var card = state.product === 'card' || state.product === 'card2' || state.product === 'wallet';   // no ring
     document.getElementById('kfShapeBox').hidden = state.product !== 'keyfob';
     document.getElementById('kfRingBox').hidden = card;
-    document.getElementById('kfPocketBox').hidden = state.product !== 'card';
+    document.getElementById('kfPocketBox').hidden = state.product !== 'card' && state.product !== 'wallet';   // the wallet's slots: the second colour
+    document.getElementById('kfSlotBox').hidden = state.product !== 'wallet';
     document.getElementById('kfSecondBox').hidden = state.product !== 'keyfob2';
     ['kfTitle', 'kfLead'].forEach(function (id) {
       var el = document.getElementById(id);
@@ -2890,13 +3169,14 @@
 
     var card = state.product === 'card', C = I18N.card, fold = state.product === 'card2', C2 = I18N.card2;
     var fob2 = state.product === 'keyfob2', K2 = I18N.keyfob2;
-    var holder = card || fold;   // either card holder: centred heading, no "how to"
+    var wallet = state.product === 'wallet', WL = I18N.wallet;
+    var holder = card || fold || wallet;   // a card holder or the wallet: centred heading, no "how to"
 
     // heading
     doc.setTextColor(40, 36, 31);
     // the card holder's title, and the two lines of notes under it, centred on the
     // sheet (the owner, 2026-10-20)
-    doc.setFontSize(18); doc.text('SLOU - ' + (fold ? C2.patternTitle : card ? C.patternTitle : fob2 ? K2.patternTitle : P.title), holder ? 105 : 15, 20, { align: holder ? 'center' : 'left' });
+    doc.setFontSize(18); doc.text('SLOU - ' + (wallet ? WL.patternTitle : fold ? C2.patternTitle : card ? C.patternTitle : fob2 ? K2.patternTitle : P.title), holder ? 105 : 15, 20, { align: holder ? 'center' : 'left' });
     doc.setFontSize(9); doc.setTextColor(110, 100, 90);
     var tx = holder ? 105 : 15, ta = { align: holder ? 'center' : 'left' };
     var printLines = doc.splitTextToSize(P.print, 180);
@@ -3597,6 +3877,203 @@
       };
     }
 
+    // The wallet (the owner, 2026-11-08), laid out like card holder Nr. 1's:
+    // page 1 the two bases on top, each slot under its base, all seen from
+    // the grain side as they lie inside; page 2 the exterior, seen from its
+    // grain side (the outside, so mirrored), with the legend and the specs
+    // under it; page 3 the finished wallet and the work process. Each piece
+    // carries its number, the count and its thickness inside it, and the
+    // holes it is pricked with: the U through all the layers, and in red the
+    // inner seam that sews each slot to its base first. On a base the holes the
+    // slot covers are lighter: those are pricked through both.
+    function walletPattern() {
+      var holes = current.holes, chords = current.chords;
+      var CAP = 0.0353 * 0.37 / cfy;
+      function runOfK(k) { for (var r = 0; r < current.runs.length; r++) { if (k >= current.runs[r][0] && k <= current.runs[r][1]) { return r; } } return -1; }
+      function inner(k) { return current.frontRuns[runOfK(k)]; }
+      function slitAt(k, m) {
+        var dir = current.chordIn(k).clone().add(chords[k]).normalize(), sl = slit(dir, 1), p = holes[k];
+        var hx = m * sl.x * 0.8 * cfx, hy = sl.y * 0.8 * cfy;
+        doc.setLineWidth(0.45 * (cfx + cfy) / 2);
+        doc.line(X(m * p.x) - hx, Y(p.y) + hy, X(m * p.x) + hx, Y(p.y) - hy);
+      }
+      function outlineOf(shape, m) {
+        doc.setDrawColor(0); doc.setLineWidth(0.3);
+        poly(loopOf(shape).map(function (p) { return new THREE.Vector2(m * p.x, p.y); }));
+      }
+      // the holes on a piece: `mine(k)` says which; `light(k)` which are drawn lighter
+      function holesOn(mine, light, m) {
+        var ks = holes.map(function (p, k) { return k; }).filter(mine);
+        doc.setDrawColor(190); doc.setLineWidth(0.1);
+        for (var j = 1; j < ks.length; j++) {
+          if (ks[j] !== ks[j - 1] + 1 || runOfK(ks[j]) !== runOfK(ks[j - 1])) { continue; }
+          doc.line(X(m * holes[ks[j - 1]].x), Y(holes[ks[j - 1]].y), X(m * holes[ks[j]].x), Y(holes[ks[j]].y));
+        }
+        ks.forEach(function (k) {
+          var lt = light && light(k);
+          if (inner(k)) { doc.setDrawColor(lt ? 235 : 210, lt ? 150 : 40, lt ? 140 : 30); } else { doc.setDrawColor(lt ? 160 : 0); }
+          slitAt(k, m);
+        });
+        doc.setDrawColor(0);
+      }
+      // the number in a circle, the count, the thickness: down the middle
+      function marks(n, x, y, t) {
+        doc.setDrawColor(0); doc.setLineWidth(0.5);
+        doc.circle(X(x), Y(y) - 9, 3.3);
+        doc.setFontSize(14); doc.setTextColor(0);
+        doc.text(String(n), X(x), Y(y) - 9, { align: 'center', baseline: 'middle' });
+        doc.setFontSize(20); doc.text('× 1', X(x), Y(y), { align: 'center', baseline: 'middle' });
+        doc.setFontSize(12); doc.text('(' + mm(t) + ')', X(x), Y(y) + 8, { align: 'center', baseline: 'middle' });
+      }
+      var mid = WAL_SPINE + WAL_PW / 2, colW = WAL_PW * 10 * cfx, colGap = 10, left = (210 - 2 * colW - colGap) / 2;
+      var hB = WAL_H * 10 * cfy, hS = 0;
+      for (var t = 0; t <= WAL_PW; t += 0.05) { hS = Math.max(hS, walSlotTop(t) * 10 * cfy); }
+      var rowGap = 8, below = 297 - 40 - 12, top = headEnd + 6 + Math.max(0, (below - headEnd - 6 - hB - rowGap - hS) / 2);
+      var slotBot = top + hB + rowGap + hS;
+      [[-1, 1, 3], [1, 2, 4]].forEach(function (c) {
+        var sg = c[0], cx = sg < 0 ? left + colW / 2 : left + colW + colGap + colW / 2;
+        // the base
+        OX = cx - sg * mid * 10 * cfx; OY = top + WAL_H / 2 * 10 * cfy;
+        outlineOf(walShape('base', sg), 1);
+        holesOn(function (k) { return holes[k].x * sg > 0; }, function (k) { return walInSlot(holes[k].x, holes[k].y); }, 1);
+        // where the slot's top goes, for lining it up when gluing
+        doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
+        var tp = [];
+        for (var t2 = 0; t2 <= WAL_PW + 1e-9; t2 += 0.1) { tp.push([sg * (WAL_W / 2 - t2), -WAL_H / 2 + walSlotTop(t2)]); }
+        tp.reduce(function (a, b) { doc.line(X(a[0]), Y(a[1]), X(b[0]), Y(b[1])); return b; });
+        doc.setLineDashPattern([], 0);
+        marks(c[1], sg * mid, -1.2, WAL_IN);
+        // and the slot under it
+        OY = slotBot - WAL_H / 2 * 10 * cfy;
+        outlineOf(walShape(state.slot, sg), 1);
+        holesOn(function (k) { return holes[k].x * sg > 0 && walInSlot(holes[k].x, holes[k].y); }, null, 1);
+        marks(c[2], sg * mid, -2.6, WAL_IN);
+      });
+      // sizes: a base's width over it and height down its side, a slot's
+      // width under it and its outer and inner heights beside it
+      doc.setFontSize(7); doc.setTextColor(90); doc.setDrawColor(120); doc.setLineWidth(0.15);
+      dimH(left, left + colW, top - 4, mm(WAL_PW), -1);
+      dimV(left - 5, top, top + hB, mm(WAL_H), -1);
+      var R0 = left + colW + colGap, R1 = R0 + colW;
+      dimH(R0, R1, slotBot + 4, mm(WAL_PW), 1);
+      dimV(R1 + 5, slotBot - walSlotTop(0) * 10 * cfy, slotBot, mm(walSlotTop(0)), 1);
+      if (walSlotTop(WAL_PW) !== walSlotTop(0)) { dimV(R0 - 4, slotBot - walSlotTop(WAL_PW) * 10 * cfy, slotBot, mm(walSlotTop(WAL_PW)), -1); }
+      rulers();
+
+      // page 2: the exterior, seen from outside, with the legend and specs
+      doc.addPage();
+      doc.setFontSize(18); doc.setTextColor(40, 36, 31);
+      doc.text('SLOU - ' + WL.patternTitle, 105, 20, { align: 'center' });
+      var top2 = 34;
+      OX = 105; OY = top2 + WAL_H / 2 * 10 * cfy;
+      outlineOf(walShape('ext'), -1);
+      holesOn(function (k) { return !inner(k); }, null, -1);
+      // the spine: where the bases' inner edges come
+      doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
+      [-1, 1].forEach(function (sg) { doc.line(X(sg * WAL_SPINE), Y(WAL_H / 2), X(sg * WAL_SPINE), Y(-WAL_H / 2)); });
+      doc.setLineDashPattern([], 0);
+      marks(5, mid, 0.6, WAL_EXT);   // on the front cover: the right half, seen from outside
+      var L = textLayout();
+      if (L) {   // the initials, as a stamping guide, on the back cover
+        doc.setTextColor(150);
+        doc.setFontSize(L.size * 10 * cfy * 72 / 25.4);
+        doc.text(L.txt, X(-L.x), Y(L.y), { align: 'center', baseline: 'middle' });
+      }
+      doc.setFontSize(7); doc.setTextColor(90); doc.setDrawColor(120); doc.setLineWidth(0.15);
+      dimH(X(-WAL_W / 2), X(WAL_W / 2), top2 - 4, mm(WAL_W), -1);
+      dimV(X(-WAL_W / 2) - 5, Y(WAL_H / 2), Y(-WAL_H / 2), mm(WAL_H), -1);
+      dimH(X(-WAL_SPINE), X(WAL_SPINE), Y(-WAL_H / 2) + 4, mm(2 * WAL_SPINE), 1);
+      // the legend on the left, the specs on the right
+      var y0 = Y(-WAL_H / 2) + 16;
+      lx = 20; rx = 100; ly = y0;
+      doc.setFontSize(9); doc.setTextColor(40, 36, 31);
+      key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
+      key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, C.holes);
+      key(function (x, y) { doc.setDrawColor(210, 40, 30); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, WL.innerSeam);
+      key(function (x, y) {
+        doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
+        doc.line(x, y, x + 8, y); doc.setLineDashPattern([], 0);
+      }, WL.slotLine + '; ' + WL.spine.charAt(0).toLowerCase() + WL.spine.slice(1));
+      lx = 118; rx = 195; ly = y0;
+      var sl = walSlotTop(0) === walSlotTop(WAL_PW) ? mm(walSlotTop(0)) : mm(walSlotTop(0)) + ' / ' + mm(walSlotTop(WAL_PW));
+      table([
+        ['1, 2 - ' + WL.base, mm(WAL_PW) + ' × ' + mm(WAL_H) + ', ' + mm(WAL_IN)],
+        ['3, 4 - ' + WL.slot, mm(WAL_PW) + ' × ' + sl + ', ' + mm(WAL_IN)],
+        ['5 - ' + WL.outer, mm(WAL_W) + ' × ' + mm(WAL_H) + ', ' + mm(WAL_EXT)],
+        [WL.slotShape, pressedLabel('slot')],
+        [M.spacing, mm(STITCH_PITCH)],
+        [M.inset, mm(STITCH_INSET)],
+        [P.leather, cap(C.vegtan)],
+        [P.thread, cap(C.threadSize)],
+      ].concat(L ? [[P.initials, L.txt]] : []));
+
+      // page 3: the finished wallet, as the card holders' page 2
+      legendPage = function () {
+        doc.setFontSize(18); doc.setTextColor(40, 36, 31);
+        doc.text('SLOU - ' + WL.patternTitle, 105, 20, { align: 'center' });
+        doc.setFontSize(13);
+        doc.text(C.recommend, 105, 28, { align: 'center' });
+        // a still of the 3D model, open as in the editor, no perspective,
+        // seen from in front, a little from the right and above
+        var keyL = new THREE.DirectionalLight(0xfff3e0, 1.6);
+        keyL.position.set(-4, 7, 9);
+        var IW = 1600, IH = 1100, PX = 6, PY = 34, PW = 126, PH = PW * IH / IW;
+        var was = { ratio: renderer.getPixelRatio(), size: renderer.getSize(new THREE.Vector2()),
+          clear: renderer.getClearColor(new THREE.Color()), alpha: renderer.getClearAlpha(), measures: measures.visible };
+        var TURN = 22 * Math.PI / 180, RISE = 16 * Math.PI / 180, DIST = 57, FW = 21.5, FH = FW * IH / IW, FX = -0.2, FY = -0.3;
+        var view = new THREE.OrthographicCamera(FX - FW / 2, FX + FW / 2, FY + FH / 2, FY - FH / 2, DIST - 20, DIST + 20);
+        view.position.set(Math.sin(TURN) * Math.cos(RISE) * DIST, Math.sin(RISE) * DIST, Math.cos(TURN) * Math.cos(RISE) * DIST);
+        view.lookAt(0, 0, 0.6); view.updateMatrixWorld();
+        var flat = measures.visible;
+        if (flat) { measures.visible = false; build(); }   // open, as it is seen
+        scene.add(keyL);
+        renderer.setPixelRatio(1); renderer.setSize(IW, IH, false); renderer.setClearColor(0xffffff, 1);
+        renderer.render(scene, view);
+        var shot = renderer.domElement.toDataURL('image/jpeg', 0.92);
+        scene.remove(keyL); measures.visible = was.measures;
+        if (flat) { build(); }
+        renderer.setPixelRatio(was.ratio); renderer.setSize(was.size.x, was.size.y, false); renderer.setClearColor(was.clear, was.alpha);
+        renderer.render(scene, camera);
+        doc.addImage(shot, 'JPEG', PX, PY, PW, PH);
+        // a point of the flat wallet, where it lands on the page once opened
+        function proj(x, y, z) {
+          var b = walBend(x, z, WAL_OPEN), q = new THREE.Vector3(b.x, y, b.z).project(view);
+          return [PX + (q.x + 1) / 2 * PW, PY + (1 - q.y) / 2 * PH];
+        }
+        var E = WAL_W / 2, seamX = E - STITCH_INSET;
+        var notes = [
+          [WL.outer, mm(WAL_EXT), proj(E - 0.03, 1.0, -WAL_EXT / 2)],
+          [WL.base + ', ' + WL.slot.toLowerCase(), mm(WAL_IN), proj(E - 0.03, 4.3, WAL_IN / 2), proj(E - 0.03, 2.3, WAL_IN * 1.5)],   // one leader to each, above the exterior's
+          [M.spacing, mm(STITCH_PITCH), proj(seamX, -0.8, 2 * WAL_IN)],
+          [P.thread, cap(C.threadSize), proj(seamX, -2.4, 2 * WAL_IN)],
+          [M.inset, mm(STITCH_INSET), proj(E - STITCH_INSET / 2, -3.8, 2 * WAL_IN)],
+        ].sort(function (u, v) { return u[2][1] - v[2][1]; });
+        var cx = 142, cr = 200, y = 30;
+        doc.setFontSize(9);
+        notes.forEach(function (r) {
+          y = Math.max(y + 9, r[2][1] - 6);
+          doc.setTextColor(110, 100, 90); doc.text(r[0], cx, y);
+          doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
+          r.slice(2).forEach(function (a) {   // white halo, then the leader and its dot
+            doc.setDrawColor(255); doc.setLineWidth(0.6); doc.line(cx - 2, y - 1, a[0], a[1]);
+            doc.setFillColor(255); doc.circle(a[0], a[1], 0.95, 'F');
+            doc.setDrawColor(120); doc.setLineWidth(0.15); doc.line(cx - 2, y - 1, a[0], a[1]);
+            doc.setFillColor(0); doc.circle(a[0], a[1], 0.5, 'F');
+          });
+        });
+        var rest = [[WL.openSize, mm(WAL_W) + ' × ' + mm(WAL_H)], [WL.slotShape, pressedLabel('slot')], [P.leather, cap(C.vegtan)]];
+        if (L) { rest.push([P.initials, L.txt]); }
+        y += 5;
+        doc.setDrawColor(170); doc.setLineWidth(0.2); doc.line(cx, y, cr, y);
+        rest.forEach(function (r) {
+          y += 6;
+          doc.setTextColor(110, 100, 90); doc.text(r[0], cx, y);
+          doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
+        });
+        processPages(C.process, WL.steps.map(function (st) { return typeof st === 'number' ? C.process.steps[st] : st; }), Math.max(PY + PH, y) + 8);
+      };
+    }
+
     // legend lines and the specs table, shared by both items
     var lx = 118, rx = 195, ly = 70;
     function key(draw, label) {
@@ -3613,6 +4090,8 @@
 
     if (card) {
       cardPattern();
+    } else if (wallet) {
+      walletPattern();
     } else if (fold) {
       foldPattern();
     } else {
@@ -3775,6 +4254,8 @@
     // two measurements in, they print 270 and 180 mm again and the whole sheet
     // is true size. Those lengths are what A4 leaves once the correction has
     // enlarged them (the clamps are only a backstop for an extreme printer).
+    rulers();
+    function rulers() {
     var calNomV = 270, calNomH = 180;
     var calLenV = Math.min(calNomV * cfy, 292);
     var calVx = 10;                                  // 1 cm in from the left
@@ -3796,7 +4277,7 @@
     // them (the owner, 2026-10-26): one left to the vertical ruler, one up to
     // the horizontal. The note sits 12 mm in so the left arrow has room.
     var noteX = calVx + 12, noteY = calHy + 9;
-    doc.text(doc.splitTextToSize(fold ? C2.calibNote : card ? C.calibNote : fob2 ? P.calibNote.replace('3 × 8', '3 × 7') : P.calibNote, 169), noteX, noteY);
+    doc.text(doc.splitTextToSize(wallet ? WL.calibNote : fold ? C2.calibNote : card ? C.calibNote : fob2 ? P.calibNote.replace('3 × 8', '3 × 7') : P.calibNote, 169), noteX, noteY);
     function arrow(x1, y1, x2, y2) {
       var a = Math.atan2(y2 - y1, x2 - x1), c = Math.cos(a), s = Math.sin(a), h = 1.6, w = 0.6;
       doc.line(x1, y1, x2 - c * h, y2 - s * h);
@@ -3805,6 +4286,7 @@
     doc.setDrawColor(40, 36, 31); doc.setFillColor(40, 36, 31); doc.setLineWidth(0.2);
     arrow(noteX - 1.5, noteY - 1.1, calVx + 0.6, noteY - 1.1);
     arrow(noteX + 25, noteY - 3.3, noteX + 25, calHy + 0.6);
+    }
 
     // And a 5 × 5 cm square in the bottom right corner, 1 cm above the
     // horizontal ruler (2026-10-14): a short measurement in both directions at
@@ -3813,7 +4295,7 @@
     // 15 mm clear of the page edge. Not on the card holder's pattern: the owner
     // took it off there (2026-10-20), and Nr. 2 has none either.
     if (!holder) {
-      var sqNom = 50, sqR = 195, sqB = calHy - 10;
+      var sqNom = 50, sqR = 195, sqB = 297 - 40 - 10;   // 1 cm above the horizontal ruler
       var sqW = sqNom * cfx, sqH = sqNom * cfy;
       doc.setDrawColor(0); doc.setLineWidth(0.2);
       doc.rect(sqR - sqW, sqB - sqH, sqW, sqH);
@@ -3840,7 +4322,17 @@
     for (var pg = 1; pg < doc.internal.getNumberOfPages(); pg++) { wm.addPage(); }
     // placed by hand rather than at random, so every download looks the same and
     // no two stamps touch: x, y (mm), size, tilt (degrees)
-    watermark(wm, card ? [
+    watermark(wm, wallet ? [
+      [[60, 85, 1.1, -10], [150, 92, 0.75, 9], [62, 190, 0.7, 12], [148, 185, 1.15, -8],   // the bases, the slots
+       [105, 140, 0.4, 6], [110, 17, 0.4, 8], [30, 270, 0.85, -8], [105, 262, 0.6, -4], [175, 275, 0.5, 14]],
+      [[60, 85, 1.0, -10], [150, 80, 0.7, 12], [105, 110, 0.45, 6],                       // the exterior
+       [55, 175, 0.8, 8], [160, 180, 0.95, -12], [110, 17, 0.4, -6], [30, 268, 0.7, 10], [175, 268, 0.55, -8]],
+      [[55, 75, 1.0, -10], [100, 100, 0.55, 12],                                          // the picture
+       [170, 75, 0.7, 8], [170, 120, 0.6, -12],                                          // the specs
+       [55, 200, 0.8, -6], [150, 210, 0.8, 10], [110, 20, 0.5, 6], [60, 270, 0.6, 12], [150, 272, 0.5, -10]],  // the work process
+      [[50, 45, 0.8, -10], [55, 105, 0.6, 12], [150, 45, 0.75, 8], [155, 108, 0.65, -12],
+       [100, 180, 0.9, 4], [40, 250, 0.6, -15], [170, 240, 0.7, 10], [105, 285, 0.45, 0]]
+    ] : card ? [
       // the four templates, each its own size (the owner, 2026-10-29: they read too alike)
       [[65, 91, 1.35, -12], [145, 96, 0.7, 9], [155, 128, 0.4, -18], [65, 190, 0.8, 14], [145, 180, 1.25, -8],
        [110, 17, 0.4, 8], [30, 270, 0.85, -8], [105, 262, 0.6, -4], [175, 275, 0.5, 14]],
@@ -3868,7 +4360,7 @@
        [110, 20, 0.55, -6], [25, 60, 0.6, -10], [30, 230, 0.8, 14], [175, 235, 0.6, -15], [110, 275, 0.7, 6]]
     ]);
     return flatten(doc, wm, links).then(function (out) {
-      out.save(fob2 ? 'slou-keyfob-2-pattern.pdf' : fold ? 'slou-card-wallet-2-pattern.pdf' : card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
+      out.save(wallet ? 'slou-wallet-pattern.pdf' : fob2 ? 'slou-keyfob-2-pattern.pdf' : fold ? 'slou-card-wallet-2-pattern.pdf' : card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
     });
   }
 
@@ -3883,7 +4375,7 @@
   document.getElementById('kfShot').addEventListener('click', function () {
     renderer.render(scene, camera);
     var a = document.createElement('a');
-    a.download = state.product === 'keyfob2' ? 'slou-keyfob-2.png' : state.product === 'card2' ? 'slou-card-wallet-2.png' : state.product === 'card' ? 'slou-card-wallet.png' : 'slou-keyfob.png';
+    a.download = state.product === 'wallet' ? 'slou-wallet.png' : state.product === 'keyfob2' ? 'slou-keyfob-2.png' : state.product === 'card2' ? 'slou-card-wallet-2.png' : state.product === 'card' ? 'slou-card-wallet.png' : 'slou-keyfob.png';
     a.href = renderer.domElement.toDataURL('image/png');
     a.click();
   });

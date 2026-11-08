@@ -544,6 +544,46 @@ stitch and every technique are the owner's own.
   `strapLen()`; turned labels centred by hand (jsPDF ignores `align` on turned text);
   legend, specs, rulers and the 50 mm square as on the keyfob.
 
+### The wallet (piniginė)
+Added 2026-11-08: the fifth "Item" (`product: 'wallet'`, texts in `content.*.editor.wallet`),
+from a pattern the owner found (`pavyzdziai/pinigine/TheBoat_A4.pdf`, DS Leather Goods,
+"The Boat", the plain version, not the bifold-with-cash one), measured off its vectors. Only
+its shape and sizes are taken; the stitch (2.8 mm / 3.85 mm, not the drawing's 4 mm), the
+edges, the leather and the pattern's style are the owner's own, as on every item.
+- Five pieces: the exterior 170 × 106 mm (`WAL_W`, `WAL_H`), corners R 10 (`WAL_R`), its
+  26 mm spine (`WAL_SPINE` is half of it) left free; on each half a base 72 × 106 mm
+  (`WAL_PW`), rounded on its outer corners; on each base a slot 72 mm wide, its outer
+  bottom corner R 10, its top one of four shapes (`WAL_SLOTS`, the "Slot shape" control,
+  `state.slot`): straight 83 mm, curved (83 mm with a thumb dip, the default), slanted
+  88 → 75 mm, sloped 87 → 75 mm. `walSlotTop(t)` is its height t cm in from the outer edge.
+  Exterior 1.6 mm (`WAL_EXT`), bases and slots 1.2 mm (`WAL_IN`, = `CARD_POCKET`, which
+  `lay`/`layPair` use where a thread crosses a slot's edge).
+- Colours: exterior and bases `state.leather`, slots `state.pocket` (the pocket colour
+  control, as card holder Nr. 1). Natural leather, edges and cut core as keyfob Nr. 2 and
+  card holder Nr. 2 (`withCore`, `walEdgeMat` with its textures mirrored past 10 cm).
+- The outside (17 cm, wider than the 10 cm texture) has its own 20 cm texture
+  (`wideTex`, `paintWallet`): the leather laid mirrored across the spine's middle, the
+  SLOU stamp on the front cover (x < 0, the left half seen from inside, as a book's), the
+  initials on the back cover, both low and centred on the stitched panel. Bases and slots
+  have their texture shifted onto the 10 cm (`shifted` in `build`).
+- Seams (`runs`): on each half an open U through all the layers (spine end of the top,
+  round the outer corners, spine end of the bottom), with a hole `POCKET_END` above the
+  slot's edge on the outer side so that stitch climbs over the edge; and the inner seam
+  (red on the pattern) down the spine side, slot to base only, sewn first, its top hole
+  `POCKET_END` above the slot's edge, not through the exterior, so nothing of it on the
+  outside (`frontRuns`). The last 2 stitches at every end doubled.
+- Built flat, then opened: `walHinge` bends the exterior round the spine (`walBend`, an
+  arc keeping its length) and turns each half `WAL_OPEN` 18° up as one piece, stitches and
+  all. Laid flat (no bend) while the grid and measurements are on.
+- Pattern (`walletPattern`): page 1 the two bases (1, 2) on top, each slot (3, 4) under its
+  base, seen from the grain side, the slot's top dashed on the base, the holes the slot
+  covers lighter; page 2 the exterior (5), seen from outside (mirrored), the spine dashed,
+  the initials guide on the back cover, legend and specs under it; page 3 the finished
+  wallet (a still, open) with leaders and the work process (`processPages`; `wallet.steps`:
+  numbers reuse card holder Nr. 1's steps, three steps are the wallet's own, drafted by
+  Claude for the owner to correct). Rulers on both template pages (`rulers()`), no 50 mm
+  square, no SLOU stamp drawn.
+
 ### Example photos
 `pavyzdziai/` (one folder per item: `korteline/`, `pakabukas/`) is where the
 owner drops photos of real pieces. Look there before working on an item, and
