@@ -518,11 +518,17 @@ stitch and every technique are the owner's own.
   only where `strapPath` bends, to 0.8 mm (the whole tongue to 0.2 mm made 1.8 M
   triangles, ~25 s), and looks up the line by binary search; the front's rise is cut to
   0.8 mm (0.4 before). Now ~175 k triangles, under 2 s headless.
-  Past the 10 cm texture the tongue's texture is mirrored (it smeared into streaks).
+  The back piece reads its texture `K2_TEX_SHIFT` 9 mm lower, so the visible tongue stays on the
+  10 cm texture (mirroring it put a fold on the loop's top). Its materials are one-sided:
+  two-sided, the needle-thin triangles along the bent strap's sides that faced away were
+  shaded dark, scratch-like specks along the loop's edges (the owner, 2026-11-08). The
+  bend starts at `K2_STUB`, never above where the plies part (`K2_SPLIT_Y`), or the
+  tongue folds back on itself in a Z.
   Tried and wrong: a separate strip laid on a cut-off tongue (a line across the neck
   however the two met). From the side (the owner's `pakabukas/1.png`): both
-  plies lie together out of the body for only 1 mm (`K2_TAB_FLAT`; 6 mm until the owner,
-  2026-11-03: nothing glues or sews them there, so nothing presses them together), then
+  plies lie together out of the body for only 0.5 mm (`K2_TAB_FLAT`; 6 mm until the owner,
+  2026-11-03: nothing glues or sews them there, so nothing presses them together; 1 mm
+  until 2026-11-08, the owner: a touch lower), then
   open straight to the loop and wrap the
   ring's wire in one small tight teardrop, inside radius 2.5 mm (`K2_LOOP_R`, the wire's
   two turns are 2.4 mm from middle to corner), the wire filling it. A wide loop with the

@@ -444,7 +444,8 @@
   // K2_SKIVE_T at the tip. Until then the whole tongue was skived to 1 mm.
   var K2_SKIVE = K2_TAB_IN, K2_SKIVE_T = 0.02;
   function k2EndT(y) {   // the free end's thickness at height y
-    var f = Math.min(1, Math.max(0, (y - (K2_H / 2 - K2_TAB_IN)) / K2_SKIVE));
+    // full thickness by where the plies part, so the loop starts on it with no step
+    var y0 = K2_H / 2 - K2_TAB_IN, f = Math.min(1, Math.max(0, (y - y0) / (Math.min(K2_H / 2, K2_SPLIT_Y) - y0)));
     return K2_SKIVE_T + (K2_T - K2_SKIVE_T) * f;
   }
   // Seen from the side (the owner's pavyzdziai/pakabukas/1.png, 2026-11-01)
@@ -455,11 +456,19 @@
   // angle (K2_RING_TILT, turned about the loop). A wide loop with the plies
   // parting straight out of the body was the first try.
   var K2_LOOP_R = 0.25;                    // inside radius of the loop: just round the wire
-  // 1 mm, then they open straight to the loop: past the body nothing glues or
-  // sews them, so nothing presses them together (the owner, 2026-11-03; it was
-  // 6 mm flat, which also held the ring 5 mm further off the piece)
-  var K2_TAB_FLAT = 0.1;                   // the plies together past the body's edge
+  // 0.5 mm, then they open straight to the loop: past the body nothing glues
+  // or sews them, so nothing presses them together (the owner, 2026-11-03; it
+  // was 6 mm flat, which also held the ring 5 mm further off the piece; 1 mm
+  // until the owner asked for the join a touch lower, 2026-11-08)
+  var K2_TAB_FLAT = 0.05;                  // the plies together past the body's edge
   var K2_LOOP_Y = K2_H / 2 + K2_TAB_FLAT + 0.45;   // the loop's centre, where the wire runs
+  // The back piece laid out flat, tongue and all, runs past the top of the
+  // 10 cm leather texture (TEX_SPAN), so it reads the texture this much lower;
+  // what is past the top then is only the end hidden between the layers. The
+  // SLOU stamp is drawn as much lower again, so it stays where it was. The
+  // tongue used to read the texture mirrored back on itself at 4.7 cm, and
+  // that fold fell right on the top of the loop (the owner, 2026-11-08).
+  var K2_TEX_SHIFT = 0.9;
   var K2_RING_TILT = 0;                    // the ring straight, in line with the piece (the owner, 2026-11-02; it was swung back 20 deg)
 
   // `pocket` is the card holder's second colour: as made, olive pockets on a
@@ -793,12 +802,16 @@
   // the strap, wears the same); turned to run down the piece, top to bottom,
   // not across it (the owner, 2026-11-02)
   var logo3Tex = canvasTex(true), logo3BumpTex = canvasTex(false), logo3RoughTex = canvasTex(false);
-  pressLogo(logo3Tex, logo3BumpTex, logo3RoughTex, -1.7, false, true);
+  pressLogo(logo3Tex, logo3BumpTex, logo3RoughTex, -1.7 - K2_TEX_SHIFT, false, true);
   var fob2FrontMat = new THREE.MeshStandardMaterial({ map: fold2Tex, bumpMap: fold2BumpTex, bumpScale: 0.8, roughness: 0.6 });
   // and the back piece's flesh side, which shows inside the strap's loop:
   // the second colour, as its flesh is dyed with it
-  var fob2FleshMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1, roughness: 0.85, side: THREE.DoubleSide });
-  var fob2BackMat = new THREE.MeshStandardMaterial({ map: logo3Tex, bumpMap: logo3BumpTex, roughnessMap: logo3RoughTex, bumpScale: 2, roughness: 0.6, side: THREE.DoubleSide });   // two-sided: the strap (its tongue) wears it too
+  // One-sided, both of them (the owner, 2026-11-08): bent round the ring,
+  // the needle-thin triangles along the strap's sides tilt every which way,
+  // and two-sided, those that turned their back to the eye were shaded from
+  // behind, dark specks in lines along both edges of the loop, like scratches.
+  var fob2FleshMat = new THREE.MeshStandardMaterial({ map: backColorTex, bumpMap: plainBumpTex, bumpScale: 1, roughness: 0.85 });
+  var fob2BackMat = new THREE.MeshStandardMaterial({ map: logo3Tex, bumpMap: logo3BumpTex, roughnessMap: logo3RoughTex, bumpScale: 2, roughness: 0.6 });   // the strap (its tongue) wears it too
   // Twisted waxed thread: diagonal plies wound round each stitch.
   var plyTex = (function () {
     // three plies round the thread; repeat set so they run at ~45 deg
@@ -1618,16 +1631,19 @@
   // 0.8 mm ease): at 2 mm up, once K2_TAB_FLAT went to 1 mm, the tongue ran
   // up past the loop's start and folded back down onto itself, a Z that stuck
   // out at the sides (the owner, 2026-11-08).
-  var K2_BACK_OUT = -K2_T, K2_STUB = K2_H / 2;
   var K2_SPLIT_Y = K2_H / 2 + K2_TAB_FLAT - 0.08;   // where the two plies part (strapPath's yF)
+  var K2_BACK_OUT = -K2_T, K2_STUB = Math.min(K2_H / 2, K2_SPLIT_Y);
   // The tongue's flesh face, which the returning end lies on: in the body it
   // is the back layer's own (z 0, the glue line), so the end goes in between
   // the two layers and the front is lifted over it (k2Lift); the tongue is
-  // not skived, so above K2_STUB it stays there (K2_TAB_Z, a hair off it).
+  // not skived, so above K2_STUB it eases over 3 mm to K2_TAB_Z, a hair off
+  // it. The loop follows the same ease (both plies alike, so they stay flush):
+  // squeezed into the short run before the loop, the ease was a kink that
+  // showed as a line across the strap where the plies meet (the owner, 2026-11-08).
   // (Sunk into a recess in the back, the end did not read as going in
   // between the leathers: the owner, 2026-11-01.)
   function k2Inner(y) {
-    var f = Math.min(1, Math.max(0, (y - K2_STUB) / Math.max(0.01, Math.min(0.3, K2_SPLIT_Y - K2_STUB))));
+    var f = Math.min(1, Math.max(0, (y - K2_STUB) / 0.3));
     return K2_TAB_Z * f * f * (3 - 2 * f);
   }
   function strapPath() {
@@ -1651,9 +1667,9 @@
       var y = y0 + (yF - y0) * k / 80, tf = k2EndT(y);
       pts.push({ y: y, z: k2Inner(y) + tf / 2, th: tf });
     }
-    loop.forEach(function (q) { pts.push({ y: q.y, z: q.z + K2_TAB_Z, th: t }); });
+    loop.forEach(function (q) { pts.push({ y: q.y, z: q.z + k2Inner(q.y), th: t }); });
     pts.push({ y: C.y + rc, z: K2_TAB_Z, th: t });
-    loop.slice().reverse().forEach(function (q) { pts.push({ y: q.y, z: -q.z + K2_TAB_Z, th: t }); });
+    loop.slice().reverse().forEach(function (q) { pts.push({ y: q.y, z: -q.z + k2Inner(q.y), th: t }); });
     // and down the back to where the back piece lies flat
     for (k = 0; k <= 60; k++) {
       var yb = yF + (yB - yF) * k / 60, tb = k2Inner(yb) - K2_BACK_OUT;
@@ -1807,13 +1823,9 @@
       return ub >= -0.01 && ub - ua > 0.08 && bentIn(ua - 0.02, ub + 0.02);
     }), P = d.P, Nm = d.Nm;
     for (var v = 0; v < P.length / 3; v++) {
+      d.U[v * 2 + 1] -= K2_TEX_SHIFT;   // see K2_TEX_SHIFT
       var u = P[v * 3 + 1] - K2_STUB;
       if (u <= 0) { continue; }
-      // the leather's texture spans 10 cm (TEX_SPAN), and the tongue, laid out
-      // flat, runs past its top: there it is mirrored back on itself, so the
-      // grain carries on instead of its last row smearing into streaks
-      var ty0 = TEX_SPAN / 2 - 0.3;
-      if (d.U[v * 2 + 1] > ty0) { d.U[v * 2 + 1] = 2 * ty0 - d.U[v * 2 + 1]; }
       var L = at(u);
       var th = L.th;   // the line's: the back's 1.8 mm, thinner only at the end (k2EndT)
       var gy = L.y + L.gy * L.th / 2, gz = L.z + L.gz * L.th / 2;   // the grain face on the line

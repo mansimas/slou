@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-08 22:40] - Keyfob Nr. 2 loop cleaned - Owner: scratches on the leather round the ring, join a touch lower, no line across it. Two-sided strap shaded its bent edge slivers dark (now one-sided); plies part 0.5 mm up (was 1); the loop keeps the tongue's ease, so no kink line.
 [2026-11-08 21:59] - Keyfob Nr. 2 loop glitch fixed - Owner: odd bits stuck out at the side where the strap wraps the ring. With the plies now parting 1 mm up, the bend still began 2 mm up, so the tongue folded back on itself in a Z. Bend now starts at the body's top; pattern strap length corrected too.
 [2026-11-03 10:00] - Keyfob Nr. 2 strap shorter - Owner: strap closer to the body, not squeezed past the ring. Past the body nothing glues or sews the plies, so they now open straight to the loop after 1 mm (were pressed flat 6 mm); ring 5 mm closer, pattern strap length follows.
 [2026-11-02 23:40] - Keyfob Nr. 2 ring straight - Owner asked why the ring was tilted. It hung swung back 20 deg (my own choice, not his); now it stands straight, in line with the piece, its wire still through the strap loop.
