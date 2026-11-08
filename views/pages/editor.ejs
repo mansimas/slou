@@ -2700,6 +2700,45 @@
         dimples.setMatrixAt(k * 2 + i, m);
       });
     }
+    // The wallet: at each end of the U by the spine, the thread is wrapped
+    // over the end of the inner pieces (the owner, 2026-11-09, pavyzdziai/
+    // pinigine/1.png): from the last hole straight to their edge, over its
+    // rounding and down onto the exterior in the corner, two threads as at
+    // every doubled end, so the end cannot lift. Laid as layPair lays them:
+    // straight runs with rounded corners, on the dome the stack has there
+    // (stackBot: from the exterior's face, z 0, to the top face).
+    if (wallet) {
+      runs.forEach(function (r, ri) {
+        if (frontRuns[ri]) { return; }
+        [r[0], r[1]].forEach(function (k) {
+          var p = holesAt[k], sg = p.x < 0 ? -1 : 1, zf = face(p.x, p.y, 1), half = zf / 2, off = THREAD_R * 0.7;
+          var row = new THREE.Vector2(0, p.y > 0 ? 1 : -1);   // across the row, towards the outer edge
+          [-0.5, 0.5].forEach(function (t, j) {
+            var y = p.y + row.y * t * JOINT_GAP, lift = 0.005 + 0.003 * j, pts = [];
+            var X = function (d) { return sg * (WAL_SPINE + d); };   // d: out from the spine edge
+            pts.push(new THREE.Vector3(X(WAL_END + 0.02), y, zf - 0.045));            // down in the hole
+            pts.push(new THREE.Vector3(X(WAL_END - 0.03), y, zf + lift));             // out of it, on the face
+            for (var q = 0; q <= 8; q++) {                                            // over the edge's dome
+              var zz = zf - q * zf / 8, u = (zz - half) / half;
+              var ins = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - u * u)));
+              var nz = q === 0 ? 1 : q === 8 ? -0.2 : u, nx = -Math.sqrt(Math.max(0, 1 - nz * nz));
+              pts.push(new THREE.Vector3(X(ins + nx * off), y, zz + nz * off));
+            }
+            pts.push(new THREE.Vector3(X(-0.03), y, off));                            // into the corner on the exterior
+            pts.push(new THREE.Vector3(X(-0.01), y, -0.01));
+            var curve = new THREE.CurvePath();
+            var mid = function (i) { return pts[i].clone().add(pts[i + 1]).multiplyScalar(0.5); };
+            curve.add(new THREE.LineCurve3(pts[0], mid(0)));
+            for (var ci = 1; ci < pts.length - 1; ci++) { curve.add(new THREE.QuadraticBezierCurve3(mid(ci - 1), pts[ci], mid(ci))); }
+            curve.add(new THREE.LineCurve3(mid(pts.length - 2), pts[pts.length - 1]));
+            var tube = new THREE.TubeGeometry(curve, 64, THREAD_R, 12, false);
+            var tuv = tube.attributes.uv, tl = curve.getLength();
+            for (var q2 = 0; q2 < tuv.count; q2++) { tuv.setXY(q2, tuv.getY(q2), tuv.getX(q2) * tl / stitchLen); }
+            fob.add(new THREE.Mesh(tube, threadMat));
+          });
+        });
+      });
+    }
     stitches.count = extra;   // only the instances laid
     if (addPockets) { addPockets(); }   // now the dents the stitches press in are known
     fob.add(dimples, holes, stitches);

@@ -587,6 +587,9 @@ edges, the leather and the pattern's style are the owner's own, as on every item
   cannot peel open with use (the owner, 2026-11-08, photos `pavyzdziai/pinigine/Ekrano kopija
   2026-11-08 2350*.png`): the U's top and bottom rows end `WAL_END` 1.2 mm from the spine edge
   (they stopped at the stitch line), the inner seam `WAL_END_IN` just above the U's bottom row.
+  And at each U end the thread wraps over the inner pieces' end by the spine (the owner,
+  2026-11-09, `pavyzdziai/pinigine/1.png`, circled in blue): two threads from the last hole over
+  the edge's dome down into the corner on the exterior (in `build`, before `stitches.count`).
 - Pattern (`walletPattern`): page 1 the two bases (1, 2) on top, each slot (3, 4) under its
   base, seen from the grain side, the slot's top dashed on the base, the holes the slot
   covers lighter; page 2 the exterior (5), seen from outside (mirrored), the spine dashed,
