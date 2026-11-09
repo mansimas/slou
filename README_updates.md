@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-09 16:15] - Card holder 3 fold corners undone - Owner asked to reverse the near-square fold corners on card holder Nr. 3; they are back to the 6 mm round of before, in the 3D and on the pattern.
 [2026-11-09 16:05] - Card holder 3 square fold corners - Owner, from the photos: a fold meets the side square, it is not cut round. Card holder Nr. 3's fold corners are now almost square (1.5 mm, as sanded) instead of 6 mm, in the 3D and on the pattern.
 [2026-11-09 15:50] - Card holder 3 mouth wrap undone - Owner: the wrap over the mouth's edge was not right. Seams, doubled stitches and the mouth's corners are back as before it (seams 6 mm under the mouth, corners 6 mm).
 [2026-11-09 15:30] - Card holder 3 mouth wrapped - Owner, from the photos: the seam must be finished at the mouth, where cards push the layers apart. Seams now run to 2.8 mm under the mouth and the thread wraps over its edge round both layers; mouth corners 3 mm.

@@ -453,9 +453,6 @@ W 7.5cm"). Only its shape and size are taken: the stitch, edges and leather are 
   cosine over the middle 50 mm (`C3_HALF`), 13 mm deep in the middle (`C3_DEPTH`). That edge is the front's own
   edge (`foldStack` 0 there); the back's top is straight. Tried and wrong the same day: an S-curve waist with
   the thumb notch cut into it (24, then 40 mm deep); the notch is on the fold.
-- The fold's corners are almost square, 1.5 mm as sanded (`C3_FOLDR` via `FOLD_RC`, used by `foldRound`, `FOLD_GAP`
-  and the pattern's outline), not Nr. 2's 6 mm: a fold meets the side square (the owner, 2026-11-09, photo
-  `Ekrano kopija 2026-11-09 154141.png`). The mouth's corners keep `FOLD_R`.
 - SLOU stamp on the front just above the thumb hole (`logo4Tex`, `fold3FrontMat`); initials on the back, as Nr. 2.
 - The fold is round and full, not pressed flat (the owner, 2026-11-09, from the photos): in `folded()` the bend
   goes round an inner radius `PUFF_R` 1 mm (0.7 until the owner asked for a little belly, a drop shape) (its axis raised so the fold's outside stays put) and the halves come
