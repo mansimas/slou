@@ -358,6 +358,7 @@
   var FOLD_OPEN = 0.17, FOLD_CARD = 0.25, FOLD_EASE = 0.5;
   var BANK_HW = 5.398 / 2, BANK_LEN = 8.56, BANK_CR = 0.318;   // ISO ID-1: 85.6 × 54 mm, 3.18 mm corners
   function foldLift(x, y) {
+    if (state.product === 'card3') { return 0; }   // Nr. 3 is shown empty: its halves lie flat together
     var cy = FOLD_BOT + FOLD_CARD + BANK_LEN / 2, r = BANK_CR + 0.1;
     // over the card's top nothing at all: the leather stays lifted right up to
     // the open mouth, no outline of the card there (the owner, 2026-10-29)
@@ -2298,12 +2299,12 @@
       bs.lineTo(-bw, br); bs.quadraticCurveTo(-bw, 0, -bw + br, 0);
       var bank = new THREE.Mesh(new THREE.ExtrudeGeometry(bs, { depth: 0.076, bevelEnabled: false, curveSegments: 8 }), cardMat);
       bank.position.set(0, FOLD_BOT + FOLD_CARD, 0.002);
-      fob.add(bank);
+      if (!fold3) { fob.add(bank); }   // Nr. 3 is shown empty (the owner, 2026-11-09)
       // and a second card of another colour behind it, standing on the same
       // level (the owner, 2026-10-29)
       var bank2 = new THREE.Mesh(bank.geometry.clone(), card2Mat);
       bank2.position.set(0, FOLD_BOT + FOLD_CARD, -0.078);
-      fob.add(bank2);
+      if (!fold3) { fob.add(bank2); }
       // two open seams, down the left side and up the right (CCW, like the
       // outlines), each its own run of equal stitches
       var hx = FOLD_W / 2 - STITCH_INSET, yT = foldY(FOLD_L - FOLD_END), yB = foldY(FOLD_END);

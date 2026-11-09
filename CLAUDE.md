@@ -453,8 +453,8 @@ W 7.5cm"). Only its shape and size are taken: the stitch, edges and leather are 
   edge (`foldStack` 0 there); the back's top is straight. Tried and wrong the same day: an S-curve waist with
   the thumb notch cut into it (24, then 40 mm deep); the notch is on the fold.
 - SLOU stamp on the front just above the thumb hole (`logo4Tex`, `fold3FrontMat`); initials on the back, as Nr. 2.
-- Inside: two cards, as Nr. 2. A folded 50 euro note was tried (the owner, 2026-11-09) and taken out: a real
-  note's design must not be copied, and a stand-in slip looked poor.
+- Shown empty (the owner, 2026-11-09): no cards, and `foldLift` is 0, so the halves lie flat together. A folded
+  50 euro note was tried and taken out: a real note's design must not be copied, and a stand-in slip looked poor.
 - Seams, cards, edges and the pattern as Nr. 2 (sides stitched from 6 mm under the top to 6 mm above the fold).
   Pattern: the flat piece, the hole and the waist's depth dimensioned; page 2 the picture (wider frame) and the process:
   `card3.steps` reuses Nr. 1's steps (numbers) and Nr. 2's (`{c2: n}`), three steps its own, drafted by Claude

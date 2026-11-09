@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-09 13:50] - Card holder 3 shown empty - Owner: no cards inside card holder Nr. 3. Both cards are left out and the halves no longer stand apart round them; they lie flat together.
 [2026-11-09 13:40] - Card holder 3 note removed - Owner asked for a folded 50 euro note in card holder Nr. 3; a plain stand-in slip was tried, but a faithful copy of the note cannot be made and a stand-in looks poor, so it is back to two cards.
 [2026-11-09 13:10] - Card holder No. 3 added - Owner: a new card sleeve from two shop screenshots (H 10 W 7.5 cm), copied as on the photos: one piece folded along 100 mm, a Ø 22 mm thumb hole on the fold, front cut in one smooth 13 mm waist; own pattern, 7 locales.
 [2026-11-09 03:00] - Wallet spine edge one oval - Owner: by the spine the brown must show where the green is glued on, one oval as one piece. The oval is now full width at the bottom (on the exterior) rounding up to the top grain, so the brown stays out under the green.
