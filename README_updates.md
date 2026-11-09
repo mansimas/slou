@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-09 01:20] - Wallet wrap round all layers - Owner: the reinforcement vanished outside; the wrap must hold all layers, horizontally, not across the edge. Each U end's wrap goes over the inner pieces' end, down through a new exterior hole against it, back outside into the last hole. On the template.
 [2026-11-09 01:05] - Wallet slots full 73 mm - Owner: the green slots must be widened like the brown bases. Their top shapes are drawn 72 mm wide, so the last 1 mm by the spine ran on a slant; the top now runs level to the spine edge, the slot a full 73 mm.
 [2026-11-09 00:50] - Wallet wrap leans, two doubled - Owner: the wrap over the inner pieces' end ran straight, unlike the row, and the reinforcement must be the last two. The wrap now leaves the slit tip in the last stitch's own slant; only it and the stitch before are doubled.
 [2026-11-09 00:30] - Wallet stitches exactly 3.85 mm - Owner: a 3.85 mm end wrap looked huge, the short last stitches idiotic. Bases and slots 1 mm longer (73 mm, exterior 172, spine 26); U rows walked at exactly 3.85 mm from the slot edge, ending 1.5-1.9 mm from the spine edge, wrap short again.

@@ -494,6 +494,7 @@
   var WAL_W = 17.2, WAL_H = 10.6, WAL_R = 1, WAL_SPINE = 1.3, WAL_PW = WAL_W / 2 - WAL_SPINE;   // WAL_SPINE: half the spine
   var WAL_EXT = 0.16, WAL_IN = 0.12;      // exterior 1.6 mm, interior pieces 1.2 mm (the drawing: 1.4-1.6 and 1.2-1.4)
   var WAL_END = 0.08;                    // the U's rows are walked at exactly 3.85 mm from the slot edge's hole; the last hole is the last one at least 0.8 mm from the spine edge (it was put 1.2 mm from it, the rows divided evenly; 3.85 mm read huge, the owner, 2026-11-09)
+  var WAL_SPINE_HOLE = 0.05;             // the exterior hole each U end's wrap goes down through: its centre 0.5 mm past the inner pieces' end, its cut against it
   var WAL_END_IN = 0.29;                 // the inner seam's last hole, just above the U's bottom row
   var WAL_OPEN = 18 * Math.PI / 180;      // each half lifted 18° off flat: the wallet shown a little open
   var WAL_SLOTS = {
@@ -2383,8 +2384,9 @@
     // the open seam has two thread ends, each with its doubled stitches
     var stitches = new THREE.InstancedMesh(stitchGeo, threadMat, n * 2 + OVERLAP * 8 + 32);   // + the pieces of stitches over a pocket edge
     var extra = n * 2;   // next free instance: 2 threads x 2 faces per joint stitch
-    var holes = new THREE.InstancedMesh(holeGeo, holeMat, n * 2);
-    var dimples = new THREE.InstancedMesh(dimpleGeo, dimpleMat, n * 2);
+    var holes = new THREE.InstancedMesh(holeGeo, holeMat, n * 2 + 8);     // + the wallet's holes by the spine
+    var dimples = new THREE.InstancedMesh(dimpleGeo, dimpleMat, n * 2 + 8);
+    holes.count = dimples.count = n * 2;
     var m = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), zAxis = new THREE.Vector3(0, 0, 1);
     var from = new THREE.Vector3(), to = new THREE.Vector3(), dir = new THREE.Vector3();
     var pos = new THREE.Vector3(), scl = new THREE.Vector3();
@@ -2726,43 +2728,58 @@
         dimples.setMatrixAt(k * 2 + i, m);
       });
     }
-    // The wallet: at each end of the U by the spine, the thread is wrapped
-    // over the end of the inner pieces (the owner, 2026-11-09, pavyzdziai/
-    // pinigine/1.png): from the last hole straight to their edge, over its
-    // rounding and down onto the exterior in the corner, two threads as at
-    // every doubled end, so the end cannot lift. Laid as layPair lays them:
-    // straight runs with rounded corners, on the dome the stack has there
-    // (stackBot: from the exterior's face, z 0, to the top face).
+    // The wallet: at each end of the U by the spine the thread is wrapped
+    // round all the layers, horizontally, along the row (the owner,
+    // 2026-11-09, pavyzdziai/pinigine/1.png): out of the last hole on the
+    // inside, on along the row over the inner pieces' end, straight down
+    // through the exterior in a hole of its own tight against that end
+    // (WAL_SPINE_HOLE), and back on the outside into the last hole. Two
+    // threads, as at every doubled end, so the end cannot lift. The same loop
+    // laid across, round the wallet's top or bottom edge, was not liked; a
+    // wrap that only went down onto the exterior's face never showed outside.
+    var spineHoles = [];
     if (wallet) {
       runs.forEach(function (r, ri) {
         if (frontRuns[ri]) { return; }
         [r[0], r[1]].forEach(function (k, e) {
-          // The wrap leans like every stitch in the row (the owner, 2026-11-09:
-          // it ran straight across): it leaves the hole from the slit tip a
-          // next stitch would start from and carries on in the last stitch's
-          // own direction, tip to tip, over the edge and down.
           var p = holesAt[k], sg = p.x < 0 ? -1 : 1, zf = face(p.x, p.y, 1), half = zf / 2, off = THREAD_R * 0.7;
-          var c = chords[e ? k - 1 : k], sl = slit(c, 1);
-          var a0 = e ? holesAt[k - 1] : p, b0 = e ? p : holesAt[k + 1];
-          var u = new THREE.Vector2(b0.x - sl.x * SLIT_HALF - a0.x - sl.x * SLIT_HALF, b0.y - sl.y * SLIT_HALF - a0.y - sl.y * SLIT_HALF).normalize();
-          if (!e) { u.negate(); }
-          var st = new THREE.Vector2(p.x + (e ? 1 : -1) * sl.x * SLIT_HALF, p.y + (e ? 1 : -1) * sl.y * SLIT_HALF);
-          var rY = u.y / Math.abs(u.x);   // how far it leans per cm towards the spine
-          var across = new THREE.Vector2(-u.y, u.x);   // the two threads side by side, across the stitch
+          var c = chords[e ? k - 1 : k], cd = new THREE.Vector2(c.x, c.y).multiplyScalar(e ? 1 : -1);   // along the row, towards the spine
+          var h2 = new THREE.Vector2(p.x, p.y).addScaledVector(cd, (Math.abs(p.x) - WAL_SPINE + WAL_SPINE_HOLE) / Math.abs(cd.x)), sl = slit(c, 1), w = e ? 1 : -1;
+          spineHoles.push({ p: h2, dir: c, from: p });
+          var st = new THREE.Vector2(p.x + w * sl.x * SLIT_HALF, p.y + w * sl.y * SLIT_HALF);
+          var t2 = new THREE.Vector2(h2.x - w * sl.x * SLIT_HALF, h2.y - w * sl.y * SLIT_HALF);
+          var u = t2.clone().sub(st).normalize(), across = new THREE.Vector2(-u.y, u.x);
+          // the hole through the exterior, on both its faces, as every hole
+          [1, -1].forEach(function (side) {
+            var zh = side > 0 ? 0 : -WAL_EXT, sv = slit(c, side);
+            q.setFromUnitVectors(up, dir.set(sv.x, sv.y, 0));
+            m.compose(pos.set(h2.x, h2.y, zh + side * 0.002), q, scl.set(1, 1, 1)); holes.setMatrixAt(holes.count, m);
+            m.compose(pos.set(h2.x, h2.y, zh + side * 0.001), q, scl.set(0.5, 0.7, 1)); dimples.setMatrixAt(dimples.count, m);
+            holes.count++; dimples.count++;
+          });
+          // the outside: back from that hole into the last one, two threads as every doubled stitch
+          var so = slit(c, -1), fo = new THREE.Vector3(), to2 = new THREE.Vector3();
+          var A = e ? p : h2, B = e ? h2 : p;
+          fo.set(A.x + so.x * SLIT_HALF, A.y + so.y * SLIT_HALF, 0); to2.set(B.x - so.x * SLIT_HALF, B.y - so.y * SLIT_HALF, 0);
+          [-0.5, 0.5].forEach(function (t, j) {
+            layPair(fo, to2, -WAL_EXT, -WAL_EXT, -1, new THREE.Vector3(-c.y, c.x, 0), t, j, true, 0);
+          });
           [-0.5, 0.5].forEach(function (t, j) {
             var o = across.clone().multiplyScalar(t * JOINT_GAP), lift = 0.005 + 0.003 * j, pts = [];
-            var y0 = st.y + o.y, x0 = st.x + o.x, he = Math.abs(x0) - WAL_SPINE, yE = y0 + rY * he;
+            var x0 = st.x + o.x, y0 = st.y + o.y, x1 = t2.x + o.x, y1 = t2.y + o.y;
             var X = function (d) { return sg * (WAL_SPINE + d); };   // d: out from the spine edge
+            // y runs evenly along the unrolled path: the face, the end, the exterior
+            var dA = Math.abs(x0) - WAL_SPINE, dC = Math.max(0, WAL_SPINE - Math.abs(x1)), tot = dA + zf + dC;
+            var Yat = function (s2) { return y0 + (y1 - y0) * s2 / tot; };
             pts.push(new THREE.Vector3(x0 - u.x * 0.02, y0 - u.y * 0.02, zf - 0.045));   // down in the slit
-            pts.push(new THREE.Vector3(x0 + u.x * 0.03, y0 + u.y * 0.03, zf + lift));                       // out of it, on the face
-            for (var q = 0; q <= 8; q++) {                                            // over the edge's dome
-              var zz = zf - q * zf / 8, uu = (zz - half) / half;
+            pts.push(new THREE.Vector3(x0 + u.x * 0.03, y0 + u.y * 0.03, zf + lift));   // out of it, on the face
+            for (var qq = 0; qq <= 8; qq++) {                                         // over the end's dome
+              var zz = zf - qq * zf / 8, uu = (zz - half) / half;
               var ins = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - uu * uu)));
-              var nz = q === 0 ? 1 : q === 8 ? -0.2 : uu, nx = -Math.sqrt(Math.max(0, 1 - nz * nz));
-              pts.push(new THREE.Vector3(X(ins + nx * off), yE + rY * (zf - zz), zz + nz * off));
+              var nz = qq === 0 ? 1 : qq === 8 ? -0.2 : uu, nx = -Math.sqrt(Math.max(0, 1 - nz * nz));
+              pts.push(new THREE.Vector3(X(ins + nx * off), Yat(dA + zf - zz), zz + nz * off));
             }
-            pts.push(new THREE.Vector3(X(-0.03), yE + rY * (zf + 0.03), off));       // into the corner on the exterior
-            pts.push(new THREE.Vector3(X(-0.01), yE + rY * (zf + 0.05), -0.01));
+            pts.push(new THREE.Vector3(x1 + u.x * 0.02, y1 + u.y * 0.02, -0.06));     // down through the exterior
             var curve = new THREE.CurvePath();
             var mid = function (i) { return pts[i].clone().add(pts[i + 1]).multiplyScalar(0.5); };
             curve.add(new THREE.LineCurve3(pts[0], mid(0)));
@@ -2776,6 +2793,7 @@
         });
       });
     }
+    current.spine = spineHoles;
     stitches.count = extra;   // only the instances laid
     if (addPockets) { addPockets(); }   // now the dents the stitches press in are known
     fob.add(dimples, holes, stitches);
@@ -4084,6 +4102,14 @@
       OX = 105; OY = top2 + WAL_H / 2 * 10 * cfy;
       outlineOf(walShape('ext'), -1);
       holesOn(function (k) { return !inner(k); }, null, -1);
+      // and the hole by each U end the wrap goes down through, against the inner pieces' end
+      (current.spine || []).forEach(function (h) {
+        doc.setDrawColor(190); doc.setLineWidth(0.1);
+        doc.line(X(-h.from.x), Y(h.from.y), X(-h.p.x), Y(h.p.y));
+        var sl = slit(h.dir, 1), hx = -sl.x * 0.8 * cfx, hy = sl.y * 0.8 * cfy;
+        doc.setDrawColor(0); doc.setLineWidth(0.45 * (cfx + cfy) / 2);
+        doc.line(X(-h.p.x) - hx, Y(h.p.y) + hy, X(-h.p.x) + hx, Y(h.p.y) - hy);
+      });
       // the spine: where the bases' inner edges come
       doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
       [-1, 1].forEach(function (sg) { doc.line(X(sg * WAL_SPINE), Y(WAL_H / 2), X(sg * WAL_SPINE), Y(-WAL_H / 2)); });
