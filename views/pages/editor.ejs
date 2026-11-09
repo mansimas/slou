@@ -489,9 +489,11 @@
   // outer bottom corner rounded 10 mm, its top cut to one of four shapes.
   // The slot's top as (t, h) in cm: t in from the outer edge, h up from the
   // bottom; lines ('l') and cubic curves ('c': two controls and the end).
-  // The bases and slots are 73 mm, 1 mm longer towards the spine than the drawing's 72, and the
-  // exterior 172 mm, the spine kept 26 mm, so the rows close on whole 3.85 mm stitches (the owner, 2026-11-09).
-  var WAL_W = 17.2, WAL_H = 10.6, WAL_R = 1, WAL_SPINE = 1.3, WAL_PW = WAL_W / 2 - WAL_SPINE;   // WAL_SPINE: half the spine
+  // The bases and slots are 74 mm, 2 mm longer towards the spine than the drawing's 72, and the
+  // exterior 174 mm, the spine kept 26 mm, so the rows close on whole 3.85 mm stitches and end about
+  // 2.8 mm from the spine edge, as far as the stitch line is from every edge, so the wrap there is as
+  // long as one over an edge (the owner, 2026-11-09; 73 mm first left it 1.5 mm, cramped).
+  var WAL_W = 17.4, WAL_H = 10.6, WAL_R = 1, WAL_SPINE = 1.3, WAL_PW = WAL_W / 2 - WAL_SPINE;   // WAL_SPINE: half the spine
   var WAL_EXT = 0.16, WAL_IN = 0.12;      // exterior 1.6 mm, interior pieces 1.2 mm (the drawing: 1.4-1.6 and 1.2-1.4)
   var WAL_END = 0.08;                    // the U's rows are walked at exactly 3.85 mm from the slot edge's hole; the last hole is the last one at least 0.8 mm from the spine edge (it was put 1.2 mm from it, the rows divided evenly; 3.85 mm read huge, the owner, 2026-11-09)
   var WAL_SPINE_HOLE = 0.05;             // the exterior hole each U end's wrap goes down through: its centre 0.5 mm past the inner pieces' end, its cut against it
@@ -558,7 +560,7 @@
         if (q[0] === 'l') { var e = at(q[1]); p.lineTo(e[0], e[1]); }
         else { var c1 = at(q[1]), c2 = at(q[2]), e2 = at(q[3]); p.bezierCurveTo(c1[0], c1[1], c2[0], c2[1], e2[0], e2[1]); }
       });
-      // the shapes are drawn 72 mm wide; the slot is 73 like its base (the
+      // the shapes are drawn 72 mm wide; the slot is 74 like its base (the
       // owner, 2026-11-09), so its top runs on level to the spine edge
       var last = at(seg[seg.length - 1][seg[seg.length - 1].length - 1]);
       if (last[0] - WAL_SPINE > 1e-4) { p.lineTo(WAL_SPINE, last[1]); }
@@ -2764,22 +2766,27 @@
           [-0.5, 0.5].forEach(function (t, j) {
             layPair(fo, to2, -WAL_EXT, -WAL_EXT, -1, new THREE.Vector3(-c.y, c.x, 0), t, j, true, 0);
           });
+          // Laid as layPair lays a doubled stitch, so it reads like one: the
+          // two threads meet at the slit tips and spread apart, just touching,
+          // only between them; over the end in a few even steps, no tight kinks
+          // (the owner, 2026-11-09: they looked twisted).
           [-0.5, 0.5].forEach(function (t, j) {
-            var o = across.clone().multiplyScalar(t * JOINT_GAP), lift = 0.005 + 0.003 * j, pts = [];
-            var x0 = st.x + o.x, y0 = st.y + o.y, x1 = t2.x + o.x, y1 = t2.y + o.y;
+            var lift = 0.005 + 0.003 * j, pts = [];
             var X = function (d) { return sg * (WAL_SPINE + d); };   // d: out from the spine edge
-            // y runs evenly along the unrolled path: the face, the end, the exterior
-            var dA = Math.abs(x0) - WAL_SPINE, dC = Math.max(0, WAL_SPINE - Math.abs(x1)), tot = dA + zf + dC;
-            var Yat = function (s2) { return y0 + (y1 - y0) * s2 / tot; };
-            pts.push(new THREE.Vector3(x0 - u.x * 0.02, y0 - u.y * 0.02, zf - 0.045));   // down in the slit
-            pts.push(new THREE.Vector3(x0 + u.x * 0.03, y0 + u.y * 0.03, zf + lift));   // out of it, on the face
-            for (var qq = 0; qq <= 8; qq++) {                                         // over the end's dome
-              var zz = zf - qq * zf / 8, uu = (zz - half) / half;
+            var dA = Math.abs(st.x) - WAL_SPINE, dC = Math.max(0, WAL_SPINE - Math.abs(t2.x)), tot = dA + zf + dC;
+            var at = function (x, s2, z) {   // s2: how far along the unrolled path
+              var f = Math.min(1, Math.max(0, s2 / tot)), sp = t * JOINT_GAP * (0.3 + 0.7 * Math.sin(Math.PI * f));
+              return new THREE.Vector3(x + across.x * sp, st.y + (t2.y - st.y) * f + across.y * sp, z);
+            };
+            pts.push(at(st.x - u.x * 0.035, 0, zf - 0.07));                           // down in the slit
+            pts.push(at(st.x + u.x * 0.03, 0.03, zf + lift));                         // out of it, on the face
+            for (var qq = 0; qq <= 4; qq++) {                                         // over the end's dome
+              var zz = zf - qq * zf / 4, uu = (zz - half) / half;
               var ins = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - uu * uu)));
-              var nz = qq === 0 ? 1 : qq === 8 ? -0.2 : uu, nx = -Math.sqrt(Math.max(0, 1 - nz * nz));
-              pts.push(new THREE.Vector3(X(ins + nx * off), Yat(dA + zf - zz), zz + nz * off));
+              var nz = qq === 0 ? 1 : qq === 4 ? -0.2 : uu, nx = -Math.sqrt(Math.max(0, 1 - nz * nz));
+              pts.push(at(X(ins + nx * off), dA + zf - zz, zz + nz * off));
             }
-            pts.push(new THREE.Vector3(x1 + u.x * 0.02, y1 + u.y * 0.02, -0.06));     // down through the exterior
+            pts.push(at(t2.x + u.x * 0.035, tot, -0.07));                             // down through the exterior
             var curve = new THREE.CurvePath();
             var mid = function (i) { return pts[i].clone().add(pts[i + 1]).multiplyScalar(0.5); };
             curve.add(new THREE.LineCurve3(pts[0], mid(0)));

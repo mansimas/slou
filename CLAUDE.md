@@ -585,13 +585,14 @@ edges, the leather and the pattern's style are the owner's own, as on every item
   wallet, the camera steps back until all of it is in the window (`fitDistance`).
 - Every seam runs to the very end of the pieces, the last 2 stitches doubled, so the ends
   cannot peel open with use (the owner, 2026-11-08, photos `pavyzdziai/pinigine/Ekrano kopija
-  2026-11-08 2350*.png`): the U's top and bottom rows end at the last hole at least `WAL_END` 0.8 mm from the spine edge, every stitch exactly 3.85 mm, walked out from the hole over the slot's edge (`walkOut`; the owner, 2026-11-09: 1.2 mm with the rows divided evenly left short stitches, and a 3.85 mm wrap read huge); the curved slot ends 1.9 / 1.5 mm from the edge. For that the bases and slots are 73 mm (1 mm longer at the spine than the drawing) (the slot's top shapes in `WAL_SLOTS` are 72 mm, and `walShape` runs them on level the last 1 mm) and the exterior 172 mm, the spine still 26 mm. The rows used to stop at the stitch line;
+  2026-11-08 2350*.png`): the U's top and bottom rows end at the last hole at least `WAL_END` 0.8 mm from the spine edge, every stitch exactly 3.85 mm, walked out from the hole over the slot's edge (`walkOut`; the owner, 2026-11-09: 1.2 mm with the rows divided evenly left short stitches, and a 3.85 mm wrap read huge); the curved slot ends 2.9 / 2.5 mm from the edge, about the stitch line's 2.8 mm, so the wrap there is as long as one over an edge. For that the bases and slots are 74 mm (2 mm longer at the spine than the drawing; 73 mm first left the wrap 1.5 mm, cramped and twisted) (the slot's top shapes in `WAL_SLOTS` are 72 mm, and `walShape` runs them on level the last 2 mm) and the exterior 174 mm, the spine still 26 mm. The rows used to stop at the stitch line;
   the inner seam runs `WAL_END_IN` just above the U's bottom row.
   And at each U end the thread wraps round all the layers, horizontally, along the row (the owner, 2026-11-09,
   `pavyzdziai/pinigine/1.png`, circled in blue): two threads from the last hole on the inside, over the inner
   pieces' end, straight down through the exterior in a hole of its own tight against that end
   (`WAL_SPINE_HOLE`, centre 0.5 mm past it; `current.spine`, marked on the exterior template), and back on the
-  outside into the last hole as a doubled stitch (in `build`, before `stitches.count`). That wrap counts as the
+  outside into the last hole as a doubled stitch (in `build`, before `stitches.count`). The inside pair is laid as
+  `layPair` lays a doubled stitch: meeting at the slit tips, spreading only between, a few even steps over the end. That wrap counts as the
   last stitch, so the doubled reinforcement at each U end is the wrap and the one stitch before it (`ov`).
   Tried and wrong the same day: a wrap that only went down onto the exterior's face (never showed outside), a
   hole 3.85 mm on in the spine with the thread running along it, and the loop laid across round the wallet's
