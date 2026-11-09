@@ -1827,7 +1827,7 @@
     // 2026-11-09: no opening, no hole at the sides): the fullness is only
     // between the stitch lines, and none in the glued margin outside them.
     function puffX(x) {
-      var t = Math.min(1, Math.max(0, (FOLD_W / 2 - STITCH_INSET - Math.abs(x)) / 0.5));
+      var t = Math.min(1, Math.max(0, (FOLD_W / 2 - STITCH_INSET - 0.15 - Math.abs(x)) / 0.5));   // clear of the bent last stitch
       return t * t * (3 - 2 * t);
     }
     for (var v = 0; v < P.length / 3; v++) {
@@ -2362,8 +2362,26 @@
         for (var k = 0; k <= 400; k++) { poly.push(new THREE.Vector2(x, y0 + (y1 - y0) * k / 400)); }
         return divide(poly).concat([poly[400]]);
       };
-      var leftSeam = seam(-hx, yT, yB);
-      holesAt = leftSeam.concat(seam(hx, yB, yT));
+      var leftSeam = seam(-hx, yT, yB), rightSeam = seam(hx, yB, yT);
+      if (fold3) {
+        // Nr. 3: one more stitch at the foot of each seam, bending in round
+        // the relief notch's corner (the owner, 2026-11-09): its hole one pitch
+        // on from the last, on the stitch line drawn in as the corner is in
+        // the 3D (`folded`: the side drawn in by foldRound's depth, scaled
+        // over the last 9 mm of the width).
+        var c0 = FOLD_W / 2 - FOLD_R - 0.3, fh = (hx - c0) / (FOLD_W / 2 - c0);
+        var lineAt = function (y) { return hx - foldRound(y - FOLD_BOT)[0] * fh; };
+        var last = function (sg) {
+          var lo = FOLD_BOT + 0.02, hi = yB, P0 = new THREE.Vector2(sg * hx, yB);
+          for (var it = 0; it < 40; it++) {   // the point on the line a pitch down from the last hole
+            var m = (lo + hi) / 2, d = P0.distanceTo(new THREE.Vector2(sg * lineAt(m), m));
+            if (d > STITCH_PITCH) { lo = m; } else { hi = m; }
+          }
+          return new THREE.Vector2(sg * lineAt(lo), lo);
+        };
+        leftSeam.push(last(-1)); rightSeam.unshift(last(1));
+      }
+      holesAt = leftSeam.concat(rightSeam);
       runs = [[0, leftSeam.length - 1], [leftSeam.length, holesAt.length - 1]];
     } else if (card) {
       // Front to back: pocket, body, body, pocket, touching, the middle of the
