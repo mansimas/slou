@@ -4013,7 +4013,8 @@
     // legend and specs on the right.
     function foldPattern() {
       var holes = current.holes, chords = current.chords;
-      OX = 62; OY = headEnd + 9 + FOLD_L * 10 * cfy;   // y = 0 (the fold) on the page
+      // Nr. 3: the piece centred on the page, the legend and specs under it (the owner, 2026-11-09)
+      OX = fold3 ? 105 : 62; OY = headEnd + 9 + FOLD_L * 10 * cfy;   // y = 0 (the fold) on the page
       doc.setDrawColor(0); doc.setLineWidth(0.3);
       poly(loopOf(foldOutline(true)));
       if (FOLD_HOLE) { doc.ellipse(X(0), Y(0), FOLD_HOLE * 10 * cfx, FOLD_HOLE * 10 * cfy); }
@@ -4060,7 +4061,8 @@
       if (fold3) { dimV(X(0) + 4, Y(FOLD_L), Y(FOLD_L - C3_DEPTH), mm(C3_DEPTH), 1); }   // Nr. 3: how deep the front's waist is
 
       // legend and specs on the right (Nr. 3, 100 mm wide: moved right, clear of the half's size)
-      if (fold3) { lx = 126; }
+      if (fold3) { lx = 22; rx = 100; ly = Y(-FOLD_L) + 16; }   // the legend under the piece, on the left
+      var ly0 = ly;
       doc.setFontSize(9); doc.setTextColor(40, 36, 31);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, C.holes);
@@ -4068,7 +4070,7 @@
         doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
         doc.line(x, y, x + 8, y); doc.setLineDashPattern([], 0);
       }, C2.fold);
-      ly += 4;
+      if (fold3) { lx = 112; rx = 190; ly = ly0; } else { ly += 4; }   // Nr. 3: the specs beside the legend
       var rows = [
         [M.width + ' × ' + M.height, mm(FOLD_W) + ' × ' + mm(FOLD_L)],
         [M.thickness, mm(FOLD_T)],
@@ -4623,6 +4625,9 @@
       [[50, 45, 0.8, -10], [55, 105, 0.6, 12], [150, 45, 0.75, 8], [155, 108, 0.65, -12],  // the work process, the links
        [100, 180, 0.9, 4], [40, 250, 0.6, -15], [170, 240, 0.7, 10], [105, 285, 0.45, 0]]
     ] : fold ? [
+      state.product === 'card3' ? [[80, 75, 0.9, -10], [140, 110, 0.6, 8], [95, 150, 0.8, 12],   // Nr. 3: the piece, centred
+       [55, 205, 0.55, 10], [150, 210, 0.75, -8],                                      // the legend, the specs
+       [110, 17, 0.45, 6], [30, 268, 0.6, -8], [110, 262, 0.5, -4], [175, 268, 0.8, 14]] :
       [[62, 80, 1.0, -10], [62, 125, 0.45, 8], [62, 180, 0.85, 12],                    // the piece
        [157, 80, 0.6, 10], [157, 125, 0.95, -8],                                       // the legend, the specs
        [110, 17, 0.45, 6], [150, 200, 0.55, -12], [30, 268, 0.6, -8], [110, 262, 0.5, -4], [175, 268, 0.8, 14]],

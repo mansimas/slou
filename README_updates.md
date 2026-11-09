@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-09 15:10] - Card holder 3 pattern centred - Owner: the template should sit in the middle of the PDF page with the text below. The piece is centred, the legend and the specs table side by side under it; watermarks placed to match.
 [2026-11-09 15:00] - Card holder 3 drop-shaped bottom - Owner: the bottom ended too steeply, wanted a slight belly, a drop shape. The fold's inner radius is 1 mm (was 0.7), still fading out over 20 mm, sides still glued flat.
 [2026-11-09 14:45] - Card holder 3 softer fold - Owner: where the fold's fullness ended it left a hard horizontal line. It now fades out gently over 20 mm above the fold instead of 8 mm.
 [2026-11-09 14:30] - Card holder 3 round fold - Owner: folded thick leather is full at the fold, but the sides are glued all the way down. The fold is round (0.7 mm inner radius) only between the stitch lines; the glued side margins stay closed, no opening there.

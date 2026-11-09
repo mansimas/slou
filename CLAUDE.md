@@ -464,7 +464,8 @@ W 7.5cm"). Only its shape and size are taken: the stitch, edges and leather are 
   cards (`foldLift`, as Nr. 2); shown empty and flat first, it looked bare. A folded
   50 euro note was tried and taken out: a real note's design must not be copied, and a stand-in slip looked poor.
 - Seams, cards, edges and the pattern as Nr. 2 (sides stitched from 6 mm under the top to 6 mm above the fold).
-  Pattern: the flat piece, the hole and the waist's depth dimensioned; page 2 the picture (wider frame) and the process:
+  Pattern: the flat piece centred on the page, the legend and the specs side by side under it (the owner,
+  2026-11-09), the hole and the waist's depth dimensioned; page 2 the picture (wider frame) and the process:
   `card3.steps` reuses Nr. 1's steps (numbers) and Nr. 2's (`{c2: n}`), three steps its own, drafted by Claude
   for the owner to correct.
 
