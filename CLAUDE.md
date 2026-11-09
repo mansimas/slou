@@ -585,8 +585,8 @@ edges, the leather and the pattern's style are the owner's own, as on every item
   wallet, the camera steps back until all of it is in the window (`fitDistance`).
 - Every seam runs to the very end of the pieces, the last 2 stitches doubled, so the ends
   cannot peel open with use (the owner, 2026-11-08, photos `pavyzdziai/pinigine/Ekrano kopija
-  2026-11-08 2350*.png`): the U's top and bottom rows end `WAL_END` 1.2 mm from the spine edge
-  (they stopped at the stitch line), the inner seam `WAL_END_IN` just above the U's bottom row.
+  2026-11-08 2350*.png`): the U's top and bottom rows end at the last hole at least `WAL_END` 0.8 mm from the spine edge, every stitch exactly 3.85 mm, walked out from the hole over the slot's edge (`walkOut`; the owner, 2026-11-09: 1.2 mm with the rows divided evenly left short stitches, and a 3.85 mm wrap read huge); the curved slot ends 1.9 / 1.5 mm from the edge. For that the bases and slots are 73 mm (1 mm longer at the spine than the drawing) and the exterior 172 mm, the spine still 26 mm. The rows used to stop at the stitch line;
+  the inner seam runs `WAL_END_IN` just above the U's bottom row.
   And at each U end the thread wraps over the inner pieces' end by the spine (the owner,
   2026-11-09, `pavyzdziai/pinigine/1.png`, circled in blue): two threads from the last hole over
   the edge's dome down into the corner on the exterior (in `build`, before `stitches.count`).
