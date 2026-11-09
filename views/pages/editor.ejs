@@ -496,7 +496,6 @@
   var WAL_W = 17.4, WAL_H = 10.6, WAL_R = 1, WAL_SPINE = 1.3, WAL_PW = WAL_W / 2 - WAL_SPINE;   // WAL_SPINE: half the spine
   var WAL_EXT = 0.16, WAL_IN = 0.12;      // exterior 1.6 mm, interior pieces 1.2 mm (the drawing: 1.4-1.6 and 1.2-1.4)
   var WAL_END = 0.08;                    // the U's rows are walked at exactly 3.85 mm from the slot edge's hole; the last hole is the last one at least 0.8 mm from the spine edge (it was put 1.2 mm from it, the rows divided evenly; 3.85 mm read huge, the owner, 2026-11-09)
-  var WAL_SPINE_HOLE = 0.05;             // the exterior hole each U end's wrap goes down through: centre 0.5 mm past the inner pieces' end, its near tip right at their edge, so the thread drops straight down the end into it, tight (1 mm left it running off on a slant, loose)
   var WAL_END_IN = 0.29;                 // the inner seam's last hole, just above the U's bottom row
   var WAL_OPEN = 18 * Math.PI / 180;      // each half lifted 18° off flat: the wallet shown a little open
   var WAL_SLOTS = {
@@ -2735,10 +2734,23 @@
     // 2026-11-09, pavyzdziai/pinigine/1.png): out of the last hole on the
     // inside, on along the row over the inner pieces' end, straight down
     // through the exterior in a hole of its own tight against that end
-    // (WAL_SPINE_HOLE), and back on the outside into the last hole. Two
+    // (its near tip right at the end), and back on the outside into the last hole. Two
     // threads, as at every doubled end, so the end cannot lift. The same loop
     // laid across, round the wallet's top or bottom edge, was not liked; a
     // wrap that only went down onto the exterior's face never showed outside.
+    // a thread along pts: straight runs, each corner rounded between the
+    // midpoints of its two runs, textured like the stitches
+    function wrapTube(pts) {
+      var curve = new THREE.CurvePath();
+      var mid = function (i) { return pts[i].clone().add(pts[i + 1]).multiplyScalar(0.5); };
+      curve.add(new THREE.LineCurve3(pts[0], mid(0)));
+      for (var ci = 1; ci < pts.length - 1; ci++) { curve.add(new THREE.QuadraticBezierCurve3(mid(ci - 1), pts[ci], mid(ci))); }
+      curve.add(new THREE.LineCurve3(mid(pts.length - 2), pts[pts.length - 1]));
+      var tube = new THREE.TubeGeometry(curve, 160, THREAD_R, 12, false);
+      var tuv = tube.attributes.uv, tl = curve.getLength();
+      for (var q2 = 0; q2 < tuv.count; q2++) { tuv.setXY(q2, tuv.getY(q2), tuv.getX(q2) * tl / stitchLen); }
+      fob.add(new THREE.Mesh(tube, threadMat));
+    }
     var spineHoles = [];
     if (wallet) {
       runs.forEach(function (r, ri) {
@@ -2746,11 +2758,21 @@
         [r[0], r[1]].forEach(function (k, e) {
           var p = holesAt[k], sg = p.x < 0 ? -1 : 1, zf = face(p.x, p.y, 1), half = zf / 2, off = THREAD_R * 0.7;
           var c = chords[e ? k - 1 : k], cd = new THREE.Vector2(c.x, c.y).multiplyScalar(e ? 1 : -1);   // along the row, towards the spine
-          var h2 = new THREE.Vector2(p.x, p.y).addScaledVector(cd, (Math.abs(p.x) - WAL_SPINE + WAL_SPINE_HOLE) / Math.abs(cd.x)), sl = slit(c, 1), w = e ? 1 : -1;
-          spineHoles.push({ p: h2, dir: c, from: p });
+          // The wrap runs on exactly the line and at the slant of the stitches
+          // before it (the owner, 2026-11-09: it did not end in line with the
+          // rest): out of the last hole by the tip a next stitch would leave by,
+          // in the last stitch's own direction (u), straight to the end, over
+          // it and down; the exterior's hole goes where that line meets the
+          // end, its near tip under the thread, cut like every hole (c).
+          var sl = slit(c, 1), w = e ? 1 : -1, q0 = holesAt[e ? k - 1 : k + 1];
           var st = new THREE.Vector2(p.x + w * sl.x * SLIT_HALF, p.y + w * sl.y * SLIT_HALF);
-          var t2 = new THREE.Vector2(h2.x - w * sl.x * SLIT_HALF, h2.y - w * sl.y * SLIT_HALF);
-          var u = t2.clone().sub(st).normalize(), across = new THREE.Vector2(-u.y, u.x);
+          var u = new THREE.Vector2(p.x - w * sl.x * SLIT_HALF - (q0.x + w * sl.x * SLIT_HALF), p.y - w * sl.y * SLIT_HALF - (q0.y + w * sl.y * SLIT_HALF)).normalize();
+          var lineY = function (x) { return st.y + (x - st.x) * u.y / u.x; };
+          var xe = sg * (WAL_SPINE - 0.01);   // where the thread goes down, just past the end (the hole's near tip)
+          var t2 = new THREE.Vector2(xe, lineY(sg * WAL_SPINE));
+          var h2 = new THREE.Vector2(t2.x + w * sl.x * SLIT_HALF, t2.y + w * sl.y * SLIT_HALF);
+          spineHoles.push({ p: h2, dir: c, from: p });
+          var across = new THREE.Vector2(-u.y, u.x);
           // the hole through the exterior, on both its faces, as every hole
           [1, -1].forEach(function (side) {
             var zh = side > 0 ? 0 : -WAL_EXT, sv = slit(c, side);
@@ -2763,8 +2785,19 @@
           var so = slit(c, -1), fo = new THREE.Vector3(), to2 = new THREE.Vector3();
           var A = e ? p : h2, B = e ? h2 : p;
           fo.set(A.x + so.x * SLIT_HALF, A.y + so.y * SLIT_HALF, 0); to2.set(B.x - so.x * SLIT_HALF, B.y - so.y * SLIT_HALF, 0);
-          [-0.5, 0.5].forEach(function (t, j) {
-            layPair(fo, to2, -WAL_EXT, -WAL_EXT, -1, new THREE.Vector3(-c.y, c.x, 0), t, j, true, 0);
+          // each end out of and into its cut along the cut's own direction
+          // (the owner, 2026-11-09: in and out alike), as the inside's wrap
+          var uo = new THREE.Vector2(to2.x - fo.x, to2.y - fo.y).normalize(), ao = new THREE.Vector2(-uo.y, uo.x), zo = -WAL_EXT;
+          [-0.5, 0.5].forEach(function (t) {
+            var o1 = ao.clone().multiplyScalar(t * JOINT_GAP * 0.35), o2 = ao.clone().multiplyScalar(t * JOINT_GAP * 0.5), P = function (x, y, z, o) { return new THREE.Vector3(x + o.x, y + o.y, z); };
+            wrapTube([
+              P(fo.x - so.x * SLIT_HALF * 0.8, fo.y - so.y * SLIT_HALF * 0.8, zo + 0.07, o1),   // up out of the cut, along it
+              P(fo.x - so.x * SLIT_HALF * 0.25, fo.y - so.y * SLIT_HALF * 0.25, zo + 0.01, o1),
+              P(fo.x + uo.x * 0.03, fo.y + uo.y * 0.03, zo - 0.003, o2),
+              P(to2.x - uo.x * 0.03, to2.y - uo.y * 0.03, zo - 0.003, o2),
+              P(to2.x + so.x * SLIT_HALF * 0.25, to2.y + so.y * SLIT_HALF * 0.25, zo + 0.01, o1),
+              P(to2.x + so.x * SLIT_HALF * 0.8, to2.y + so.y * SLIT_HALF * 0.8, zo + 0.07, o1)    // and down into the next, along it
+            ]);
           });
           // Pulled tight, as a wrap is (the owner, 2026-11-09: it looked wavy
           // and loose): the two threads lie side by side at one steady spacing,
@@ -2776,11 +2809,16 @@
             var lift = 0.003, pts = [], hug = THREAD_R * 0.55;
             var X = function (d) { return sg * (WAL_SPINE + d); };   // d: out from the spine edge
             var dA = Math.abs(st.x) - WAL_SPINE, dC = Math.max(0, WAL_SPINE - Math.abs(t2.x)), tot = dA + zf + dC;
-            var at = function (x, s2, z) {   // s2: how far along the unrolled path
+            var at = function (x, s2, z, yy) {   // s2: how far along the unrolled path; yy: off the line, in a cut
               var f = Math.min(1, Math.max(0, s2 / tot)), sp = t * JOINT_GAP * (f <= 0 || f >= 1 ? 0.35 : 0.5);   // one steady spacing; closer only down in the cuts
-              return new THREE.Vector3(x + across.x * sp, st.y + (t2.y - st.y) * f + across.y * sp, z);
+              var y = yy !== undefined ? yy : lineY(Math.abs(x) > WAL_SPINE ? x : sg * WAL_SPINE);   // on the row's line, then straight over and down
+              return new THREE.Vector3(x + across.x * sp, y + across.y * sp, z);
             };
-            pts.push(at(st.x - u.x * 0.035, 0, zf - 0.07));                           // down in the slit
+            // each end goes down into its cut along the cut's own direction, in
+            // towards the hole's middle, as the thread follows the slit (the
+            // owner, 2026-11-09), not straight on along the stitch
+            pts.push(at(st.x - w * sl.x * SLIT_HALF * 0.8, 0, zf - 0.07, st.y - w * sl.y * SLIT_HALF * 0.8));
+            pts.push(at(st.x - w * sl.x * SLIT_HALF * 0.25, 0, zf - 0.01, st.y - w * sl.y * SLIT_HALF * 0.25));   // up out of it along the cut             // down in the slit
             pts.push(at(st.x + u.x * 0.03, 0.03, zf + lift));                         // out of it, on the face
             for (var qq = 0; qq <= 8; qq++) {                                         // round the end, to its widest
               var ph = qq / 8 * Math.PI / 2, dd = CARD_DOME * (1 - Math.sin(ph)), zz = half * (1 + Math.cos(ph));
@@ -2791,16 +2829,9 @@
             // sight: following the dome's lower half it went in under the inner
             // pieces and never reached the hole, and laid onto the exterior first
             // it bent into an S (the owner, 2026-11-09)
-            pts.push(at(t2.x + u.x * 0.02, tot, -0.07));                              // one straight pull down into the exterior's cut
-            var curve = new THREE.CurvePath();
-            var mid = function (i) { return pts[i].clone().add(pts[i + 1]).multiplyScalar(0.5); };
-            curve.add(new THREE.LineCurve3(pts[0], mid(0)));
-            for (var ci = 1; ci < pts.length - 1; ci++) { curve.add(new THREE.QuadraticBezierCurve3(mid(ci - 1), pts[ci], mid(ci))); }
-            curve.add(new THREE.LineCurve3(mid(pts.length - 2), pts[pts.length - 1]));
-            var tube = new THREE.TubeGeometry(curve, 160, THREAD_R, 12, false);
-            var tuv = tube.attributes.uv, tl = curve.getLength();
-            for (var q2 = 0; q2 < tuv.count; q2++) { tuv.setXY(q2, tuv.getY(q2), tuv.getX(q2) * tl / stitchLen); }
-            fob.add(new THREE.Mesh(tube, threadMat));
+            pts.push(at(t2.x + w * sl.x * SLIT_HALF * 0.25, tot, -0.01, t2.y + w * sl.y * SLIT_HALF * 0.25));             // one straight pull to the exterior's cut
+            pts.push(at(t2.x + w * sl.x * SLIT_HALF * 0.8, tot, -0.07, t2.y + w * sl.y * SLIT_HALF * 0.8));              // and down into it along the cut
+            wrapTube(pts);
           });
         });
       });

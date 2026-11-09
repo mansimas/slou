@@ -590,7 +590,9 @@ edges, the leather and the pattern's style are the owner's own, as on every item
   And at each U end the thread wraps round all the layers, horizontally, along the row (the owner, 2026-11-09,
   `pavyzdziai/pinigine/1.png`, circled in blue): two threads from the last hole on the inside, over the inner
   pieces' end, straight down through the exterior in a hole of its own tight against that end
-  (`WAL_SPINE_HOLE`, centre 0.5 mm past it, its near tip at their edge; the thread hugs the dome to its
+  (its near tip right at their edge, where the row's line meets the end: the wrap runs on exactly the line and
+  slant of the stitches before it, and every end, in and out, inside and outside (`wrapTube`), follows its cut's own
+  direction, the owner, 2026-11-09; the thread hugs the dome to its
   widest point, then drops straight down the end into the hole, pulled tight: following the dome's lower half it
   vanished under the pieces, and a hole 1 mm out left it running off on a slant, wavy and loose; `current.spine`, marked on the exterior template), and back on the
   outside into the last hole as a doubled stitch (in `build`, before `stitches.count`). The inside pair lies at one
