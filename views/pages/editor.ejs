@@ -61,8 +61,8 @@
 <section class="kf">
   <div class="wrap">
     <header class="kf__head">
-      <h1 id="kfTitle" data-keyfob="<%= e.title %>" data-card="<%= e.card.title %>" data-card2="<%= e.card2.title %>" data-keyfob2="<%= e.keyfob2.title %>" data-wallet="<%= e.wallet.title %>"><%= e.title %></h1>
-      <p id="kfLead" data-keyfob="<%= e.lead %>" data-card="<%= e.card.lead %>" data-card2="<%= e.card2.lead %>" data-keyfob2="<%= e.keyfob2.lead %>" data-wallet="<%= e.wallet.lead %>"><%= e.lead %></p>
+      <h1 id="kfTitle" data-keyfob="<%= e.title %>" data-card="<%= e.card.title %>" data-card2="<%= e.card2.title %>" data-card3="<%= e.card3.title %>" data-keyfob2="<%= e.keyfob2.title %>" data-wallet="<%= e.wallet.title %>"><%= e.title %></h1>
+      <p id="kfLead" data-keyfob="<%= e.lead %>" data-card="<%= e.card.lead %>" data-card2="<%= e.card2.lead %>" data-card3="<%= e.card3.lead %>" data-keyfob2="<%= e.keyfob2.lead %>" data-wallet="<%= e.wallet.lead %>"><%= e.lead %></p>
     </header>
 
     <div class="kf__grid">
@@ -79,7 +79,7 @@
         <div>
           <span class="kf__label"><%= e.product %></span>
           <div class="kf__opts" data-group="product">
-            <% ['keyfob', 'keyfob2', 'card', 'card2', 'wallet'].forEach(function (k, i) { %>
+            <% ['keyfob', 'keyfob2', 'card', 'card2', 'card3', 'wallet'].forEach(function (k, i) { %>
               <button type="button" class="kf__btn" data-value="<%= k %>" aria-pressed="<%= i === 0 %>"><%= e.products[k] %></button>
             <% }); %>
           </div>
@@ -183,7 +183,7 @@
   </div>
 </section>
 
-<script type="application/json" id="kfI18n"><%- JSON.stringify({ pattern: e.pattern, measure: e.measure, calib: e.calib, card: e.card, card2: e.card2, keyfob2: e.keyfob2, wallet: e.wallet }).replace(/</g, '\\u003c') %></script>
+<script type="application/json" id="kfI18n"><%- JSON.stringify({ pattern: e.pattern, measure: e.measure, calib: e.calib, card: e.card, card2: e.card2, card3: e.card3, keyfob2: e.keyfob2, wallet: e.wallet }).replace(/</g, '\\u003c') %></script>
 
 <script type="importmap">
   { "imports": {
@@ -415,6 +415,9 @@
     sh.moveTo(-x + r, -L); sh.lineTo(x - r, -L); sh.absarc(x - r, -L + r, r, -PI / 2, 0);
     if (exact) { sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, PI / 2); sh.absarc(x - r, r, r, -PI / 2, 0); }
     sh.lineTo(x, L - r); sh.absarc(x - r, L - r, r, 0, PI / 2);
+    if (state.product === 'card3') {   // Nr. 3: the front half's open edge cut in its waist
+      for (var xv = x - r; xv > -x + r + 1e-6; xv -= 0.05) { sh.lineTo(xv, L - card3Depth(xv)); }
+    }
     sh.lineTo(-x + r, L); sh.absarc(-x + r, L - r, r, PI / 2, PI);
     if (exact) { sh.lineTo(-x, r); sh.absarc(-x + r, r, r, PI, PI * 1.5); sh.absarc(-x + r, -r, r, PI / 2, PI); }
     sh.lineTo(-x, -L + r); sh.absarc(-x + r, -L + r, r, PI, PI * 1.5);
@@ -425,6 +428,38 @@
   function foldRound(h) {
     var r = FOLD_R, q = Math.max(0, r - h);
     return h >= r ? [0, 0] : [r - Math.sqrt(r * r - q * q), -Math.atan2(q, Math.sqrt(r * r - q * q))];
+  }
+
+  // Card holder Nr. 3 (2026-11-09): a card sleeve, from the owner's two
+  // screenshots of another maker's piece (pavyzdziai/korteliu pinigine 3/,
+  // "H 10cm W 7.5cm"). Only its shape and size are taken: the stitch, the
+  // edges and the leather are the owner's own, as on every item. Like Nr. 2
+  // it is one piece of veg-tan folded in half, along its long side (100 mm),
+  // glued and stitched up both short sides, open opposite the fold, with a
+  // round thumb hole on the fold; so it is built by Nr. 2's code with its own
+  // sizes (`foldDims`): 100 mm along the fold, 75 mm a half, the hole Ø 22 mm,
+  // the cards lying long side along the fold. The front half's open edge is
+  // cut in one smooth shallow waist (`card3Depth`), as on the photos (the
+  // owner, 2026-11-09: copy it, not an improvised wave): straight for the
+  // first quarter of the length from each side, then curving in to 13 mm
+  // deep in the middle, a raised cosine (concave in the middle, convex where
+  // it leaves the straight), measured off the photo of the black one. The
+  // back's open edge is straight. (A first version put the thumb notch in the
+  // front's waist, 24 then 40 mm deep: wrong, it is on the fold.)
+  var C3_W = 10, C3_L = 7.5, C3_HALF = 2.5, C3_DEPTH = 1.3, C3_HOLE = 1.1;
+  // how far down from the open top the front half is cut, at x (cm from the middle)
+  function card3Depth(x) {
+    var xa = Math.abs(x);
+    return xa >= C3_HALF ? 0 : C3_DEPTH * (1 + Math.cos(Math.PI * xa / C3_HALF)) / 2;
+  }
+  // Nr. 2 and Nr. 3 share the fold code; these set its sizes for the one shown
+  function foldDims() {
+    var three = state.product === 'card3';
+    FOLD_W = three ? C3_W : 7; FOLD_L = three ? C3_L : 9.2; FOLD_HOLE = three ? C3_HOLE : 1.25;
+    BANK_HW = three ? 8.56 / 2 : 5.398 / 2; BANK_LEN = three ? 5.398 : 8.56;
+    FOLD_YC = (FOLD_B + FOLD_T - FOLD_L) / 2;
+    FOLD_TOP = FOLD_YC + FOLD_L - FOLD_B; FOLD_BOT = FOLD_YC - FOLD_T;
+    FOLD_GAP = FOLD_W / 2 - FOLD_R;
   }
 
   // Keyfob Nr. 2 (2026-11-01): from the owner's three screenshots of another
@@ -675,7 +710,14 @@
     // smaller only if a long name would not fit inside the stitching. (The
     // SLOU stamp is made separately and keeps its own size: `pressLogo`.)
     var PT24 = 24 / 72 * 2.54;
+    if (state.product === 'card3') {
+      // Nr. 3: on the back, just above the thumb hole, as on Nr. 2
+      foldDims();
+      return { txt: txt, vertical: false, x: 0, y: FOLD_BOT + FOLD_T + FOLD_HOLE + 0.9,
+               size: Math.min(PT24, (FOLD_W - 2.2) / (txt.length * 0.72)), neue: true };
+    }
     if (state.product === 'card2') {
+      foldDims();
       // across the front, just above the thumb notch
       return { txt: txt, vertical: false, x: 0, y: FOLD_BOT + FOLD_T + FOLD_HOLE + 0.9,
                size: Math.min(PT24, (FOLD_W - 2.2) / (txt.length * 0.72)), neue: true };
@@ -886,6 +928,10 @@
   // the initials went there
   var logo2Tex = canvasTex(true), logo2BumpTex = canvasTex(false), logo2RoughTex = canvasTex(false);
   pressLogo(logo2Tex, logo2BumpTex, logo2RoughTex, FOLD_BOT + FOLD_T + FOLD_HOLE + 0.75, true);
+  // Nr. 3's front: centred just above the thumb hole, as on Nr. 2
+  // (its own sizes: the fold code holds Nr. 2's until it is switched)
+  var logo4Tex = canvasTex(true), logo4BumpTex = canvasTex(false), logo4RoughTex = canvasTex(false);
+  pressLogo(logo4Tex, logo4BumpTex, logo4RoughTex, (FOLD_B + FOLD_T - C3_L) / 2 + C3_HOLE + 0.75, true);
 
   // ---------- materials ----------
   var leatherMat = new THREE.MeshStandardMaterial({ map: colorTex, bumpMap: bumpTex, bumpScale: 1.5, roughness: 0.72 });
@@ -913,6 +959,7 @@
   // satin than the pebbled grain, as an oiled veg-tan is
   var fold2FrontMat = new THREE.MeshStandardMaterial({ map: logo2Tex, bumpMap: logo2BumpTex, roughnessMap: logo2RoughTex, bumpScale: 2, roughness: 0.6 });   // with the stamp (bumpScale: see pressLogo)
   var fold2BackMat = new THREE.MeshStandardMaterial({ map: fold2BackTex, bumpMap: fold2BackBumpTex, bumpScale: 0.8, roughness: 0.6 });   // with the initials
+  var fold3FrontMat = new THREE.MeshStandardMaterial({ map: logo4Tex, bumpMap: logo4BumpTex, roughnessMap: logo4RoughTex, bumpScale: 2, roughness: 0.6 });   // Nr. 3's front, with the stamp
   // and its edges: natural, only worked with Tokonole (the owner, 2026-10-29:
   // they read as painted one even colour). The same leather's fibres and
   // wandering colour run along them, a shade darker (the vertex colour), with
@@ -1101,6 +1148,7 @@
     // the natural map is about 0.8 on average, so the colour is lifted to
     // keep the chosen shade
     fold2FrontMat.color.copy(c).multiplyScalar(1.2);
+    fold3FrontMat.color.copy(c).multiplyScalar(1.2);
     fold2BackMat.color.copy(c).multiplyScalar(1.2);
     var sc = new THREE.Color(state.second);
     fob2FrontMat.color.copy(c).multiplyScalar(1.2);
@@ -2050,7 +2098,8 @@
   function build() {
     fob.children.slice().forEach(function (m) { fob.remove(m); if (m.geometry !== stitchGeo && m.geometry !== holeGeo) { m.geometry.dispose(); } });
 
-    var card = state.product === 'card', fold = state.product === 'card2', fob2 = state.product === 'keyfob2', wallet = state.product === 'wallet', holesAt, crossings = [], addPockets = null, runs = null, frontRuns = null;
+    foldDims();
+    var card = state.product === 'card', fold = state.product === 'card2' || state.product === 'card3', fold3 = state.product === 'card3', fob2 = state.product === 'keyfob2', wallet = state.product === 'wallet', holesAt, crossings = [], addPockets = null, runs = null, frontRuns = null;
     // Nr. 2 is one piece of leather, so its two faces must read as one colour
     // (the owner, 2026-10-29): the light behind it as strong as the one in
     // front, and placed as its mirror image
@@ -2230,10 +2279,14 @@
       // The thumb hole is worked with the edge beveler too, like the outer
       // edges (the owner, 2026-10-29): it takes the same dome, each half's
       // edge rounded off on its grain side.
-      var foldStack = function (p, hole) { return hole ? 1 : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R); };
+      var foldStack = function (p, hole) {
+        // Nr. 3: the front's cut-out open edge is its own edge, as the open tops are
+        if (fold3 && !hole && p.y > FOLD_L - C3_DEPTH - 0.01 && Math.abs(p.x) < C3_HALF + 0.05) { return 0; }
+        return hole ? 1 : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R);
+      };
       var thumb = new THREE.Path(); thumb.absarc(0, 0, FOLD_HOLE, 0, Math.PI * 2, true);
       var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], withCore(state.leather, 1.27), null, null, null, FOLD_T);   // × the map's ~0.8: as light as Nr. 1's edges (the owner, 2026-10-29; 0.78 read darker)
-      fob.add(new THREE.Mesh(folded(flat.geometry, flat.userData.caps), [fold2FrontMat, fold2EdgeMat, backMat, fold2BackMat]));
+      fob.add(new THREE.Mesh(folded(flat.geometry, flat.userData.caps), [fold3 ? fold3FrontMat : fold2FrontMat, fold2EdgeMat, backMat, fold2BackMat]));
       flat.geometry.dispose();
       // a bank card inside (ISO ID-1, 85.6 × 54 × 0.76 mm, 3.18 mm corners),
       // FOLD_CARD above the fold, as in the owner's screenshots: it shows in
@@ -2946,7 +2999,8 @@
     // a CSS2DObject takes its label off the page when it is removed
     dims.children.slice().forEach(function (c) { dims.remove(c); if (c.geometry) { c.geometry.dispose(); } });
     labels.length = 0;
-    var card = state.product === 'card', fold = state.product === 'card2', fob2 = state.product === 'keyfob2', wallet = state.product === 'wallet';
+    foldDims();
+    var card = state.product === 'card', fold = state.product === 'card2' || state.product === 'card3', fob2 = state.product === 'keyfob2', wallet = state.product === 'wallet';
     var W = wallet ? WAL_W : fob2 ? K2_W : fold ? FOLD_W : card ? CARD_W : KEY_W, H = wallet ? WAL_H : fob2 ? K2_H : fold ? FOLD_TOP - FOLD_BOT : card ? CARD_H : KEY_H;
     var T = 0.12;  // end tick half-length
     // width, under the piece
@@ -3079,7 +3133,8 @@
     camera.position.copy(controls.target).addScaledVector(dir, d);
   }
   function setProduct() {
-    var card = state.product === 'card' || state.product === 'card2' || state.product === 'wallet';   // no ring
+    foldDims();
+    var card = state.product === 'card' || state.product === 'card2' || state.product === 'card3' || state.product === 'wallet';   // no ring
     document.getElementById('kfShapeBox').hidden = state.product !== 'keyfob';
     document.getElementById('kfRingBox').hidden = card;
     document.getElementById('kfPocketBox').hidden = state.product !== 'card' && state.product !== 'wallet';   // the wallet's slots: the second colour
@@ -3351,7 +3406,9 @@
       }
     }
 
-    var card = state.product === 'card', C = I18N.card, fold = state.product === 'card2', C2 = I18N.card2;
+    foldDims();
+    var fold3 = state.product === 'card3';
+    var card = state.product === 'card', C = I18N.card, fold = state.product === 'card2' || fold3, C2 = fold3 ? Object.assign({}, I18N.card2, I18N.card3) : I18N.card2;   // Nr. 3: its own texts over Nr. 2's
     var fob2 = state.product === 'keyfob2', K2 = I18N.keyfob2;
     var wallet = state.product === 'wallet', WL = I18N.wallet;
     var holder = card || fold || wallet;   // a card holder or the wallet: centred heading, no "how to"
@@ -3932,7 +3989,7 @@
       OX = 62; OY = headEnd + 9 + FOLD_L * 10 * cfy;   // y = 0 (the fold) on the page
       doc.setDrawColor(0); doc.setLineWidth(0.3);
       poly(loopOf(foldOutline(true)));
-      doc.ellipse(X(0), Y(0), FOLD_HOLE * 10 * cfx, FOLD_HOLE * 10 * cfy);
+      if (FOLD_HOLE) { doc.ellipse(X(0), Y(0), FOLD_HOLE * 10 * cfx, FOLD_HOLE * 10 * cfy); }
       doc.setDrawColor(150); doc.setLineWidth(0.2); doc.setLineDashPattern([2, 1.5], 0);
       [-1, 1].forEach(function (m) { doc.line(X(m * FOLD_HOLE), Y(0), X(m * FOLD_GAP), Y(0)); });
       doc.setLineDashPattern([], 0);
@@ -3953,9 +4010,10 @@
       });
       // how many, and the leather's thickness, inside the front half
       doc.setTextColor(0); doc.setFontSize(20);
-      doc.text('× 1', X(0), Y(5.6), { align: 'center', baseline: 'middle' });
+      var cy0 = fold3 ? 3.6 : 5.6;   // Nr. 3: under the front's waist
+      doc.text('× 1', X(0), Y(cy0), { align: 'center', baseline: 'middle' });
       doc.setFontSize(12);
-      doc.text('(' + mm(FOLD_T) + ')', X(0), Y(5.6) + 8, { align: 'center', baseline: 'middle' });
+      doc.text('(' + mm(FOLD_T) + ')', X(0), Y(cy0) + 8, { align: 'center', baseline: 'middle' });
       var L = textLayout();
       if (L) {
         doc.setTextColor(150);
@@ -3971,7 +4029,8 @@
       dimH(X(-FOLD_W / 2), X(FOLD_W / 2), Y(-FOLD_L) + 4, mm(FOLD_W), 1);
       dimV(X(-FOLD_W / 2) - 5, Y(FOLD_L), Y(-FOLD_L), mm(2 * FOLD_L), -1);
       dimV(X(FOLD_W / 2) + 5, Y(FOLD_L), Y(0), mm(FOLD_L), 1);
-      dimH(X(-FOLD_HOLE), X(FOLD_HOLE), Y(-FOLD_HOLE) + 4, '\u00d8 ' + mm(2 * FOLD_HOLE), 1);
+      if (FOLD_HOLE) dimH(X(-FOLD_HOLE), X(FOLD_HOLE), Y(-FOLD_HOLE) + 4, '\u00d8 ' + mm(2 * FOLD_HOLE), 1);
+      if (fold3) { dimV(X(0) + 4, Y(FOLD_L), Y(FOLD_L - C3_DEPTH), mm(C3_DEPTH), 1); }   // Nr. 3: how deep the front's waist is
 
       // legend and specs on the right
       doc.setFontSize(9); doc.setTextColor(40, 36, 31);
@@ -4007,10 +4066,10 @@
         // With the SLOU stamp: the owner wants it kept here (2026-10-29).
         var key = new THREE.DirectionalLight(0xfff3e0, 2.4);
         key.position.set(-4, 7, 9);
-        var IW = 1000, IH = 1600, PX = 8, PY = 30, PW = 118, PH = PW * IH / IW;
+        var IW = 1000, IH = fold3 ? 1000 : 1600, PX = 8, PY = 30, PW = 118, PH = PW * IH / IW;
         var was = { ratio: renderer.getPixelRatio(), size: renderer.getSize(new THREE.Vector2()),
           clear: renderer.getClearColor(new THREE.Color()), alpha: renderer.getClearAlpha(), measures: measures.visible };
-        var TURN = 15 * Math.PI / 180, RISE = 6 * Math.PI / 180, DIST = 57, FW = 8.2, FH = FW * IH / IW, FX = 0.07, FY = 0.03;
+        var TURN = 15 * Math.PI / 180, RISE = 6 * Math.PI / 180, DIST = 57, FW = fold3 ? 11.6 : 8.2, FH = FW * IH / IW, FX = 0.07, FY = 0.03;
         var view = new THREE.OrthographicCamera(FX - FW / 2, FX + FW / 2, FY + FH / 2, FY - FH / 2, DIST - 15, DIST + 15);
         view.position.set(Math.sin(TURN) * Math.cos(RISE) * DIST, Math.sin(RISE) * DIST, Math.cos(TURN) * Math.cos(RISE) * DIST);
         view.lookAt(0, 0, 0); view.updateMatrixWorld();
@@ -4057,7 +4116,9 @@
           doc.setTextColor(110, 100, 90); doc.text(r[0], cx, y);
           doc.setTextColor(40, 36, 31); doc.text(r[1], cr, y, { align: 'right' });
         });
-        processPages(C.process, C2.steps.map(function (st) { return typeof st === 'number' ? C.process.steps[st] : st; }), Math.max(PY + PH, y) + 8);
+        // Nr. 3's steps: a number is Nr. 1's step, {c2: n} Nr. 2's own
+        var stepOf = function (st) { return typeof st === 'number' ? C.process.steps[st] : st.c2 !== undefined ? stepOf(I18N.card2.steps[st.c2]) : st; };
+        processPages(C.process, C2.steps.map(stepOf), Math.max(PY + PH, y) + 8);
       };
     }
 
@@ -4552,7 +4613,7 @@
        [110, 20, 0.55, -6], [25, 60, 0.6, -10], [30, 230, 0.8, 14], [175, 235, 0.6, -15], [110, 275, 0.7, 6]]
     ]);
     return flatten(doc, wm, links).then(function (out) {
-      out.save(wallet ? 'slou-wallet-pattern.pdf' : fob2 ? 'slou-keyfob-2-pattern.pdf' : fold ? 'slou-card-wallet-2-pattern.pdf' : card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
+      out.save(wallet ? 'slou-wallet-pattern.pdf' : fob2 ? 'slou-keyfob-2-pattern.pdf' : fold ? (state.product === 'card3' ? 'slou-card-wallet-3-pattern.pdf' : 'slou-card-wallet-2-pattern.pdf') : card ? 'slou-card-wallet-pattern.pdf' : 'slou-keyfob-pattern-' + state.shape + '.pdf');
     });
   }
 
@@ -4567,7 +4628,7 @@
   document.getElementById('kfShot').addEventListener('click', function () {
     renderer.render(scene, camera);
     var a = document.createElement('a');
-    a.download = state.product === 'wallet' ? 'slou-wallet.png' : state.product === 'keyfob2' ? 'slou-keyfob-2.png' : state.product === 'card2' ? 'slou-card-wallet-2.png' : state.product === 'card' ? 'slou-card-wallet.png' : 'slou-keyfob.png';
+    a.download = state.product === 'wallet' ? 'slou-wallet.png' : state.product === 'keyfob2' ? 'slou-keyfob-2.png' : state.product === 'card2' ? 'slou-card-wallet-2.png' : state.product === 'card3' ? 'slou-card-wallet-3.png' : state.product === 'card' ? 'slou-card-wallet.png' : 'slou-keyfob.png';
     a.href = renderer.domElement.toDataURL('image/png');
     a.click();
   });

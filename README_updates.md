@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-09 13:10] - Card holder No. 3 added - Owner: a new card sleeve from two shop screenshots (H 10 W 7.5 cm), copied as on the photos: one piece folded along 100 mm, a Ø 22 mm thumb hole on the fold, front cut in one smooth 13 mm waist; own pattern, 7 locales.
 [2026-11-09 03:00] - Wallet spine edge one oval - Owner: by the spine the brown must show where the green is glued on, one oval as one piece. The oval is now full width at the bottom (on the exterior) rounding up to the top grain, so the brown stays out under the green.
 [2026-11-09 02:40] - Wallet wrap in line - Owner: the wraps must end in line with the other stitches, going into and out of holes along the cut. The wrap runs on the row's line and slant, the exterior hole where it meets the end; inside and out every end follows its cut.
 [2026-11-09 02:20] - Wallet wrap pulled tight - Owner: the last stitch still looked wavy and loose, not secured. The pair now lies at one steady spacing, hugs the end's rounding finely sampled, and drops straight down the end into the exterior hole, moved back tight against the end (0.5 mm).

@@ -439,6 +439,25 @@ technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
   `card.process.steps[n]` (flesh side, sanding, stitching, polishing, finishing). Nr. 2's
   own steps were drafted by Claude for the owner to correct.
 
+### Card holder Nr. 3 (kortelių piniginė Nr. 3)
+Added 2026-11-09: the fourth card-type "Item" (`product: 'card3'`, texts in `content.*.editor.card3`), a card
+sleeve from the owner's two screenshots of another maker's shop page (`pavyzdziai/korteliu pinigine 3/`, "H 10cm
+W 7.5cm"). Only its shape and size are taken: the stitch, edges and leather are the owner's own.
+- One piece of 1.6 mm veg-tan folded along its long side (no stitching on that side in the photos), with a
+  round thumb hole on the fold (as Nr. 2's), so it is built by Nr. 2's fold code: `foldDims()` sets `FOLD_W` 10,
+  `FOLD_L` 7.5, `FOLD_HOLE` 1.1 (`C3_HOLE`, Ø 22 mm) and the cards lying long side along the fold
+  (`BANK_HW`/`BANK_LEN` swapped); call it before using any `FOLD_*` value. Shown with the fold at the bottom.
+- The front half's open edge (`foldOutline`, `card3Depth`), copied off the photos (the owner, 2026-11-09: not an
+  improvised wave): straight for the outer quarter of the length at each end, then one smooth waist, a raised
+  cosine over the middle 50 mm (`C3_HALF`), 13 mm deep in the middle (`C3_DEPTH`). That edge is the front's own
+  edge (`foldStack` 0 there); the back's top is straight. Tried and wrong the same day: an S-curve waist with
+  the thumb notch cut into it (24, then 40 mm deep); the notch is on the fold.
+- SLOU stamp on the front just above the thumb hole (`logo4Tex`, `fold3FrontMat`); initials on the back, as Nr. 2.
+- Seams, cards, edges and the pattern as Nr. 2 (sides stitched from 6 mm under the top to 6 mm above the fold).
+  Pattern: the flat piece, the hole and the waist's depth dimensioned; page 2 the picture (wider frame) and the process:
+  `card3.steps` reuses Nr. 1's steps (numbers) and Nr. 2's (`{c2: n}`), three steps its own, drafted by Claude
+  for the owner to correct.
+
 ### Nr. 2: logo front, initials back
 The back (the red card's side, z < 0) never carries the logo (the owner, 2026-10-29): the
 SLOU stamp is on the front, above the thumb notch (`fold2FrontMat` with `logo2Tex`,
