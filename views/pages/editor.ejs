@@ -557,6 +557,10 @@
         if (q[0] === 'l') { var e = at(q[1]); p.lineTo(e[0], e[1]); }
         else { var c1 = at(q[1]), c2 = at(q[2]), e2 = at(q[3]); p.bezierCurveTo(c1[0], c1[1], c2[0], c2[1], e2[0], e2[1]); }
       });
+      // the shapes are drawn 72 mm wide; the slot is 73 like its base (the
+      // owner, 2026-11-09), so its top runs on level to the spine edge
+      var last = at(seg[seg.length - 1][seg[seg.length - 1].length - 1]);
+      if (last[0] - WAL_SPINE > 1e-4) { p.lineTo(WAL_SPINE, last[1]); }
     }
     p.getPoints(24).forEach(function (q, i, all) { if (!i || q.distanceTo(all[i - 1]) > 1e-4) { pts.push(new THREE.Vector2(X(q.x), q.y)); } });
     if (pts[0].distanceTo(pts[pts.length - 1]) < 1e-4) { pts.pop(); }
