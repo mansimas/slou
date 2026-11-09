@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-09 02:00] - Wallet wrap reaches its hole - Owner: the thread did not go into the new exterior hole, it vanished under the pockets. It followed the edge's dome back in underneath; now pulled tight from the dome straight into the hole, moved to 1 mm past the end so it shows.
 [2026-11-09 01:45] - Wallet wraps neat, pieces 74mm - Owner: the horizontal wraps looked twisted, not neat like the vertical ones. They were crammed into 1.5 mm: bases and slots now 74 mm (exterior 174), so rows end ~2.8 mm from the spine; the pair is laid like a doubled stitch.
 [2026-11-09 01:20] - Wallet wrap round all layers - Owner: the reinforcement vanished outside; the wrap must hold all layers, horizontally, not across the edge. Each U end's wrap goes over the inner pieces' end, down through a new exterior hole against it, back outside into the last hole. On the template.
 [2026-11-09 01:05] - Wallet slots full 73 mm - Owner: the green slots must be widened like the brown bases. Their top shapes are drawn 72 mm wide, so the last 1 mm by the spine ran on a slant; the top now runs level to the spine edge, the slot a full 73 mm.

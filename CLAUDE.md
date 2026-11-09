@@ -590,7 +590,8 @@ edges, the leather and the pattern's style are the owner's own, as on every item
   And at each U end the thread wraps round all the layers, horizontally, along the row (the owner, 2026-11-09,
   `pavyzdziai/pinigine/1.png`, circled in blue): two threads from the last hole on the inside, over the inner
   pieces' end, straight down through the exterior in a hole of its own tight against that end
-  (`WAL_SPINE_HOLE`, centre 0.5 mm past it; `current.spine`, marked on the exterior template), and back on the
+  (`WAL_SPINE_HOLE`, centre 1 mm past it, so the thread is seen going in; the thread runs over the dome only to
+  its widest point, then straight down into the hole: following the dome's lower half it vanished under the pieces; `current.spine`, marked on the exterior template), and back on the
   outside into the last hole as a doubled stitch (in `build`, before `stitches.count`). The inside pair is laid as
   `layPair` lays a doubled stitch: meeting at the slit tips, spreading only between, a few even steps over the end. That wrap counts as the
   last stitch, so the doubled reinforcement at each U end is the wrap and the one stitch before it (`ov`).

@@ -496,7 +496,7 @@
   var WAL_W = 17.4, WAL_H = 10.6, WAL_R = 1, WAL_SPINE = 1.3, WAL_PW = WAL_W / 2 - WAL_SPINE;   // WAL_SPINE: half the spine
   var WAL_EXT = 0.16, WAL_IN = 0.12;      // exterior 1.6 mm, interior pieces 1.2 mm (the drawing: 1.4-1.6 and 1.2-1.4)
   var WAL_END = 0.08;                    // the U's rows are walked at exactly 3.85 mm from the slot edge's hole; the last hole is the last one at least 0.8 mm from the spine edge (it was put 1.2 mm from it, the rows divided evenly; 3.85 mm read huge, the owner, 2026-11-09)
-  var WAL_SPINE_HOLE = 0.05;             // the exterior hole each U end's wrap goes down through: its centre 0.5 mm past the inner pieces' end, its cut against it
+  var WAL_SPINE_HOLE = 0.1;              // the exterior hole each U end's wrap goes down through: its centre 1 mm past the inner pieces' end, so the thread is seen going in (0.5 mm hid it under their edge)
   var WAL_END_IN = 0.29;                 // the inner seam's last hole, just above the U's bottom row
   var WAL_OPEN = 18 * Math.PI / 180;      // each half lifted 18° off flat: the wallet shown a little open
   var WAL_SLOTS = {
@@ -2780,12 +2780,16 @@
             };
             pts.push(at(st.x - u.x * 0.035, 0, zf - 0.07));                           // down in the slit
             pts.push(at(st.x + u.x * 0.03, 0.03, zf + lift));                         // out of it, on the face
-            for (var qq = 0; qq <= 4; qq++) {                                         // over the end's dome
+            for (var qq = 0; qq <= 2; qq++) {                                         // over the end's dome, to its widest
               var zz = zf - qq * zf / 4, uu = (zz - half) / half;
               var ins = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - uu * uu)));
-              var nz = qq === 0 ? 1 : qq === 4 ? -0.2 : uu, nx = -Math.sqrt(Math.max(0, 1 - nz * nz));
+              var nz = qq === 0 ? 1 : uu, nx = -Math.sqrt(Math.max(0, 1 - nz * nz));
               pts.push(at(X(ins + nx * off), dA + zf - zz, zz + nz * off));
             }
+            // then pulled tight straight down onto the exterior and into its
+            // hole, in sight: following the dome's lower half it went in under
+            // the inner pieces and never reached the hole (the owner, 2026-11-09)
+            pts.push(at(t2.x - u.x * 0.02, tot - 0.02, lift));                        // on the exterior, at the cut
             pts.push(at(t2.x + u.x * 0.035, tot, -0.07));                             // down through the exterior
             var curve = new THREE.CurvePath();
             var mid = function (i) { return pts[i].clone().add(pts[i + 1]).multiplyScalar(0.5); };
