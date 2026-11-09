@@ -1422,8 +1422,8 @@
   // is how far below z = 0 the stack starts; it may be a function of the point. A
   // `stack` value over 1 (up to 2) is the stack's dome flattened, 2 being a
   // square edge: card holder Nr. 2's fold corners, glued to the very end.
-  function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp, top, stackT) {
-    var S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T0 = typeof stackT === 'function' ? 0 : stackT || CARD_THICK / 2, T = T0, tp = T, domeNormals = [], matte = {}, sideFace = [];
+  function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp, top, stackT, lowCrown) {
+    var LC = false, S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T0 = typeof stackT === 'function' ? 0 : stackT || CARD_THICK / 2, T = T0, tp = T, domeNormals = [], matte = {}, sideFace = [];
     function vert(x, y, zz, c, edge) {
       pos.push(x, y, zz + (squeeze && edge ? squeeze(x, y, zz) : 0)); uv.push(x, y); col.push(c.r, c.g, c.b);
       return pos.length / 3 - 1;
@@ -1440,6 +1440,9 @@
       }
       // the stack's dome, from its back face (-T) to its front one (tp)
       var all = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - Math.pow((zz - (tp - T) / 2) / ((tp + T) / 2), 2))));
+      // lowCrown: the stack stands on another piece there, so its oval runs
+      // from full width at the bottom up to the top grain, one quarter ellipse
+      if (LC) { all = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - Math.pow((zz + T) / (tp + T), 2)))); }
       var k = s > 1 ? 2 - s : 1;
       s = Math.min(1, s);
       return k * (own + (all - own) * s);
@@ -1483,6 +1486,7 @@
         // starts lower or higher (the wallet: by the spine only its base and slot)
         T = typeof stackT === 'function' ? stackT(p) : T0;
         tp = top ? top(p) : T;
+        LC = lowCrown ? lowCrown(p) : false;
         function glued(fz) { return fz > -T + 1e-6 && fz < tp - 1e-6; }
         var s = stack(p, li > 0), ring = [], ex = ramp && !li ? ramp(p) : 0;
         // At a sharp corner each side keeps its own rounding right up to it, and
@@ -2117,18 +2121,21 @@
       // with its own rounding the spine stood out past the halves).
       var extStack = function () { return 1; };
       var extTop = function (p) { return Math.abs(p.x) < S && p.y < 0 ? 2 * WAL_IN : slotTopAt(p); };
-      // By the spine the base and its slot are glued with their edges square
-      // and bevelled after, front and back only, as one (the owner, 2026-11-08:
-      // rounded one by one they left a gap between them): one dome across the
-      // two, from the base's flesh side (z 0, not glued to the exterior there)
-      // to the slot's grain. Above the slot the base's edge is its own.
+      // By the spine the edge follows the outer edges' rule (the owner,
+      // 2026-11-09): one oval across what is glued there, as one piece, not
+      // each piece rounded on its own. The pieces stand on the exterior there,
+      // so the oval is full width at the bottom and rounds up to the top grain
+      // (lowCrown): over base and slot where the slot is, over the base alone
+      // above it. The brown stays out in full where the green lies on it: a
+      // dome centred on the pair tucked the brown in under the green and it
+      // vanished (the owner: it must show where they are glued).
       // (the bottom corner belongs to the bottom edge, all three layers glued)
       var atSpine = function (p) { return Math.abs(Math.abs(p.x) - S) < 1e-3 && p.y > -WAL_H / 2 + 1e-3; };
       var stackBot = function (p) { return atSpine(p) ? 0 : WAL_EXT; };
-      var baseStack = function (p) { return atSpine(p) ? (slotTopAt(p) > WAL_IN ? 1 : 0) : 1; };
+      var baseStack = function () { return 1; };
       var slotStack = function (p) {
         var ax = Math.abs(p.x);
-        if (Math.abs(ax - S) < 1e-3) { return 1; }   // glued to its base by the spine
+        if (Math.abs(ax - S) < 1e-3) { return 1; }   // glued to its base by the spine: one dome with it
         return (ax > WE - 1e-3 && p.y < -WAL_H / 2 + walSlotTop(0) - 1e-3) || p.y < -WAL_H / 2 + 1e-3 || (ax > WE - WAL_R - 1e-3 && p.y < -WAL_H / 2 + WAL_R) ? 1 : 0;
       };
       var leatherCol = withCore(state.leather, 1.27), slotCol = withCore(state.pocket, 1.27);
@@ -2147,8 +2154,8 @@
         return mesh;
       };
       [-1, 1].forEach(function (sg) {
-        fob.add(shifted(leatherPiece([loopOf(walShape('base', sg))], WAL_IN, WAL_IN / 2, baseStack, [walBaseMat, walEdgeMat, walFleshMat], leatherCol, null, null, slotTopAt, stackBot), sg));
-        fob.add(shifted(leatherPiece([loopOf(walShape(state.slot, sg))], WAL_IN, WAL_IN * 1.5, slotStack, [walSlotMat, walEdgeMat, walSlotFleshMat], slotCol, null, null, function () { return 2 * WAL_IN; }, stackBot), sg));
+        fob.add(shifted(leatherPiece([loopOf(walShape('base', sg))], WAL_IN, WAL_IN / 2, baseStack, [walBaseMat, walEdgeMat, walFleshMat], leatherCol, null, null, slotTopAt, stackBot, atSpine), sg));
+        fob.add(shifted(leatherPiece([loopOf(walShape(state.slot, sg))], WAL_IN, WAL_IN * 1.5, slotStack, [walSlotMat, walEdgeMat, walSlotFleshMat], slotCol, null, null, function () { return 2 * WAL_IN; }, stackBot, atSpine), sg));
       });
       // The seams, each an open run of the owner's stitch, the last two
       // stitches at each end doubled. On each half the U through all the

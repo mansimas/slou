@@ -575,10 +575,13 @@ edges, the leather and the pattern's style are the owner's own, as on every item
 - Built flat, then opened: `walHinge` bends the exterior round the spine (`walBend`, an
   arc keeping its length) and turns each half `WAL_OPEN` 18° up as one piece, stitches and
   all. Laid flat (no bend) while the grid and measurements are on.
-- By the spine each slot and its base are glued square and bevelled after, front and
-  back only, as one (the owner, 2026-11-08): one oval dome across the two, as the outer
-  edge (`stackBot`: `leatherPiece`'s `stackT` may be a function of the point). Rounded one by
-  one they left a gap at the inner bottom corner. Above the slot the base has its own edge.
+- By the spine the edge follows the outer edges' rule (the owner, 2026-11-09): one oval across what is glued
+  there, as one piece, over base and slot where the slot is (`stackBot`), over the base alone above it
+  (`baseStack` 1). The pieces stand on the exterior there, so the oval is a quarter ellipse, full width at the
+  bottom and rounding up to the top grain (`leatherPiece`'s `lowCrown`, `atSpine`): the brown stays out in full
+  under the green. Tried and rejected the same day: a dome centred on the pair (it tucked the brown in under the
+  green and it vanished), the base's own narrow edge above (the brown thinned where the green began), and each
+  piece rounded on its own.
 - The exterior over the spine keeps the halves' edge profile (`extTop`: as if the stack ran on,
   two layers at the top, three at the bottom), so top and bottom are one unbroken line (the
   owner, 2026-11-08: with its own rounding the spine stood out). `fitView()`: switching to the
