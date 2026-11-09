@@ -590,6 +590,9 @@ edges, the leather and the pattern's style are the owner's own, as on every item
   And at each U end the thread wraps over the inner pieces' end by the spine (the owner,
   2026-11-09, `pavyzdziai/pinigine/1.png`, circled in blue): two threads from the last hole over
   the edge's dome down into the corner on the exterior (in `build`, before `stitches.count`).
+  The wrap leans like the row (the owner, 2026-11-09: it ran straight across): it leaves from the slit
+  tip a next stitch would start from, in the last stitch's own direction. It counts as the last stitch,
+  so the doubled reinforcement at each U end is the wrap and the one stitch before it (`ov`), not two more.
 - Pattern (`walletPattern`): page 1 the two bases (1, 2) on top, each slot (3, 4) under its
   base, seen from the grain side, the slot's top dashed on the base, the holes the slot
   covers lighter; page 2 the exterior (5), seen from outside (mirrored), the spine dashed,

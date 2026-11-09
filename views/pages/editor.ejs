@@ -2637,7 +2637,11 @@
       var run = open ? runOf(k) : null, sewn = !(open && k === run[1]);
       // the card holder's thread starts and ends at the opening, and at each
       // end the last OVERLAP stitches are sewn back over, as on the keyfob joint
-      var doubled = open ? k - run[0] < OVERLAP || k >= run[1] - OVERLAP : (k - E + n) % n < OVERLAP;
+      // The wallet's U: the wrap over the inner pieces' end is the last stitch
+      // and is sewn twice, so only one stitch in from it is doubled too: the
+      // reinforcement is the last two (the owner, 2026-11-09)
+      var ov = wallet && !frontRuns[runs.indexOf(run)] ? OVERLAP - 1 : OVERLAP;
+      var doubled = open ? k - run[0] < ov || k >= run[1] - ov : (k - E + n) % n < OVERLAP;
       // a slit sits between two stitches: lean it off their average direction
       var dh = chordIn(k).clone().add(d).normalize();
       var hidden = frontRuns && frontRuns[runs.indexOf(run)];   // the wallet's inner seam: not through the exterior
@@ -2728,22 +2732,33 @@
     if (wallet) {
       runs.forEach(function (r, ri) {
         if (frontRuns[ri]) { return; }
-        [r[0], r[1]].forEach(function (k) {
-          var p = holesAt[k], sg = p.x < 0 ? -1 : 1, zf = face(p.x, p.y, 1), half = zf / 2, off = THREAD_R * 0.7, he = Math.abs(p.x) - WAL_SPINE;
-          var row = new THREE.Vector2(0, p.y > 0 ? 1 : -1);   // across the row, towards the outer edge
+        [r[0], r[1]].forEach(function (k, e) {
+          // The wrap leans like every stitch in the row (the owner, 2026-11-09:
+          // it ran straight across): it leaves the hole from the slit tip a
+          // next stitch would start from and carries on in the last stitch's
+          // own direction, tip to tip, over the edge and down.
+          var p = holesAt[k], sg = p.x < 0 ? -1 : 1, zf = face(p.x, p.y, 1), half = zf / 2, off = THREAD_R * 0.7;
+          var c = chords[e ? k - 1 : k], sl = slit(c, 1);
+          var a0 = e ? holesAt[k - 1] : p, b0 = e ? p : holesAt[k + 1];
+          var u = new THREE.Vector2(b0.x - sl.x * SLIT_HALF - a0.x - sl.x * SLIT_HALF, b0.y - sl.y * SLIT_HALF - a0.y - sl.y * SLIT_HALF).normalize();
+          if (!e) { u.negate(); }
+          var st = new THREE.Vector2(p.x + (e ? 1 : -1) * sl.x * SLIT_HALF, p.y + (e ? 1 : -1) * sl.y * SLIT_HALF);
+          var rY = u.y / Math.abs(u.x);   // how far it leans per cm towards the spine
+          var across = new THREE.Vector2(-u.y, u.x);   // the two threads side by side, across the stitch
           [-0.5, 0.5].forEach(function (t, j) {
-            var y = p.y + row.y * t * JOINT_GAP, lift = 0.005 + 0.003 * j, pts = [];
+            var o = across.clone().multiplyScalar(t * JOINT_GAP), lift = 0.005 + 0.003 * j, pts = [];
+            var y0 = st.y + o.y, x0 = st.x + o.x, he = Math.abs(x0) - WAL_SPINE, yE = y0 + rY * he;
             var X = function (d) { return sg * (WAL_SPINE + d); };   // d: out from the spine edge
-            pts.push(new THREE.Vector3(X(he + 0.02), y, zf - 0.045));            // down in the hole
-            pts.push(new THREE.Vector3(X(he - 0.03), y, zf + lift));             // out of it, on the face
+            pts.push(new THREE.Vector3(x0 - u.x * 0.02, y0 - u.y * 0.02, zf - 0.045));   // down in the slit
+            pts.push(new THREE.Vector3(x0 + u.x * 0.03, y0 + u.y * 0.03, zf + lift));                       // out of it, on the face
             for (var q = 0; q <= 8; q++) {                                            // over the edge's dome
-              var zz = zf - q * zf / 8, u = (zz - half) / half;
-              var ins = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - u * u)));
-              var nz = q === 0 ? 1 : q === 8 ? -0.2 : u, nx = -Math.sqrt(Math.max(0, 1 - nz * nz));
-              pts.push(new THREE.Vector3(X(ins + nx * off), y, zz + nz * off));
+              var zz = zf - q * zf / 8, uu = (zz - half) / half;
+              var ins = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - uu * uu)));
+              var nz = q === 0 ? 1 : q === 8 ? -0.2 : uu, nx = -Math.sqrt(Math.max(0, 1 - nz * nz));
+              pts.push(new THREE.Vector3(X(ins + nx * off), yE + rY * (zf - zz), zz + nz * off));
             }
-            pts.push(new THREE.Vector3(X(-0.03), y, off));                            // into the corner on the exterior
-            pts.push(new THREE.Vector3(X(-0.01), y, -0.01));
+            pts.push(new THREE.Vector3(X(-0.03), yE + rY * (zf + 0.03), off));       // into the corner on the exterior
+            pts.push(new THREE.Vector3(X(-0.01), yE + rY * (zf + 0.05), -0.01));
             var curve = new THREE.CurvePath();
             var mid = function (i) { return pts[i].clone().add(pts[i + 1]).multiplyScalar(0.5); };
             curve.add(new THREE.LineCurve3(pts[0], mid(0)));

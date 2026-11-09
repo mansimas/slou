@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-09 00:50] - Wallet wrap leans, two doubled - Owner: the wrap over the inner pieces' end ran straight, unlike the row, and the reinforcement must be the last two. The wrap now leaves the slit tip in the last stitch's own slant; only it and the stitch before are doubled.
 [2026-11-09 00:30] - Wallet stitches exactly 3.85 mm - Owner: a 3.85 mm end wrap looked huge, the short last stitches idiotic. Bases and slots 1 mm longer (73 mm, exterior 172, spine 26); U rows walked at exactly 3.85 mm from the slot edge, ending 1.5-1.9 mm from the spine edge, wrap short again.
 [2026-11-09 00:09] - Wallet ends wrap the edge - Owner (pinigine/1.png): at the spine the thread must also hold the inner pieces' ends. Each of the four U ends now wraps over that edge, two threads from the last hole down into the corner, so the ends cannot lift.
 [2026-11-08 23:56] - Wallet seams to the ends - Owner, from photos of a finished one: the thread must run to the end of the pieces, its last stitches doubled, so the ends cannot peel with use. Top and bottom rows now reach the spine edge, the inner seam the bottom row.
