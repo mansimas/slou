@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-09 14:45] - Card holder 3 softer fold - Owner: where the fold's fullness ended it left a hard horizontal line. It now fades out gently over 20 mm above the fold instead of 8 mm.
 [2026-11-09 14:30] - Card holder 3 round fold - Owner: folded thick leather is full at the fold, but the sides are glued all the way down. The fold is round (0.7 mm inner radius) only between the stitch lines; the glued side margins stay closed, no opening there.
 [2026-11-09 14:15] - Card holder 3 full, cards hidden - Owner: no cards shown, but it should look filled, as if cards were inside. The halves stand apart round two hidden cards again, as on Nr. 2; the cards themselves are not drawn.
 [2026-11-09 14:00] - Card holder 3 narrower 65mm - Owner: it looked square next to the photos. The listing's 10 x 7.5 cm is about 1.33:1, the photos about 1.6:1, so each half is now 65 mm (100 x 65 mm folded, cut 100 x 130), the card still fits.

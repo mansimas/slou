@@ -456,7 +456,8 @@ W 7.5cm"). Only its shape and size are taken: the stitch, edges and leather are 
 - SLOU stamp on the front just above the thumb hole (`logo4Tex`, `fold3FrontMat`); initials on the back, as Nr. 2.
 - The fold is round and full, not pressed flat (the owner, 2026-11-09, from the photos): in `folded()` the bend
   goes round an inner radius `PUFF_R` 0.7 mm (its axis raised so the fold's outside stays put) and the halves come
-  together over `PUFF_H` 8 mm above it (smootherstep), before the seams start; 1 mm over 5 mm read as a teardrop.
+  together over `PUFF_H` 20 mm above it (smootherstep); 1 mm over 5 mm read as a teardrop, and over 8 mm it left a
+  hard horizontal line where it ended (the owner).
   Only between the stitch lines (`puffX`, eased over 5 mm in from them): the sides are glued all the way down,
   so the margin outside them stays closed, no opening at the side (the owner, 2026-11-09). Card holder Nr. 3 only.
 - The cards are not drawn, but it looks filled (the owner, 2026-11-09): the halves stand apart round two hidden

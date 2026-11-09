@@ -1720,7 +1720,7 @@
       // its foot, as flat s on both halves
       var r1 = BANK_HW + 0.55, r0 = BANK_HW - 0.45, cb = FOLD_BOT + FOLD_CARD - FOLD_YC + FOLD_B;
       var xs = lines(-FOLD_W / 2 - 0.01, FOLD_W / 2 + 0.01, [[-r1, -r0, 0.05], [r0, r1, 0.05], [key, key, 1]]);
-      var ss = lines(-FOLD_L - 0.01, FOLD_L + 0.01, [[-Z - 0.03, Z + 0.03, 0.025], [-FOLD_B - 0.85, FOLD_B + 0.85, state.product === 'card3' ? 0.05 : 9], [cb - 0.5, cb + 0.45, 0.04], [-cb - 0.45, -cb + 0.5, 0.04],
+      var ss = lines(-FOLD_L - 0.01, FOLD_L + 0.01, [[-Z - 0.03, Z + 0.03, 0.025], [-FOLD_B - 2.05, FOLD_B + 2.05, state.product === 'card3' ? 0.05 : 9], [cb - 0.5, cb + 0.45, 0.04], [-cb - 0.45, -cb + 0.5, 0.04],
                                                      [cb + BANK_LEN - 0.1, cb + BANK_LEN + 0.25, 0.03], [-cb - BANK_LEN - 0.25, -cb - BANK_LEN + 0.1, 0.03]]);   // and where the arch takes over above the card
       var ids = {};
       function vid(p) {
@@ -1795,7 +1795,7 @@
     // inner radius PUFF_R instead of the flesh sides meeting, its axis raised
     // so the outside of the fold stays where it was, and the halves come back
     // together over the PUFF_H above it (smootherstep), before the seams start.
-    var PUFF_R = state.product === 'card3' ? 0.07 : 0, PUFF_H = 0.8;   // 0.7 mm in, easing over 8 mm (1 mm over 5 read as a teardrop)
+    var PUFF_R = state.product === 'card3' ? 0.07 : 0, PUFF_H = 2.0;   // 0.7 mm in, easing out over 20 mm (1 mm over 5 read as a teardrop; over 8 mm it left a hard horizontal line where it ended, the owner)
     function puff(sv) {   // 1 at the bend, easing to 0 PUFF_H up the half
       var t = Math.min(1, Math.max(0, (Math.abs(sv) - FOLD_B) / PUFF_H));
       return 1 - t * t * t * (t * (6 * t - 15) + 10);
