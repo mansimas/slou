@@ -445,7 +445,8 @@ sleeve from the owner's two screenshots of another maker's shop page (`pavyzdzia
 W 7.5cm"). Only its shape and size are taken: the stitch, edges and leather are the owner's own.
 - One piece of 1.6 mm veg-tan folded along its long side (no stitching on that side in the photos), with a
   round thumb hole on the fold (as Nr. 2's), so it is built by Nr. 2's fold code: `foldDims()` sets `FOLD_W` 10,
-  `FOLD_L` 7.5, `FOLD_HOLE` 1.1 (`C3_HOLE`, Ø 22 mm) and the cards lying long side along the fold
+  `FOLD_L` 6.5 (65 mm a half, not the listing's 75: the photos show it about 1.6 : 1, and at 75 it looked
+  square, the owner, 2026-11-09), `FOLD_HOLE` 1.1 (`C3_HOLE`, Ø 22 mm) and the cards lying long side along the fold
   (`BANK_HW`/`BANK_LEN` swapped); call it before using any `FOLD_*` value. Shown with the fold at the bottom.
 - The front half's open edge (`foldOutline`, `card3Depth`), copied off the photos (the owner, 2026-11-09: not an
   improvised wave): straight for the outer quarter of the length at each end, then one smooth waist, a raised

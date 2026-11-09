@@ -438,7 +438,7 @@
   // it is one piece of veg-tan folded in half, along its long side (100 mm),
   // glued and stitched up both short sides, open opposite the fold, with a
   // round thumb hole on the fold; so it is built by Nr. 2's code with its own
-  // sizes (`foldDims`): 100 mm along the fold, 75 mm a half, the hole Ø 22 mm,
+  // sizes (`foldDims`): 100 mm along the fold, 65 mm a half, the hole Ø 22 mm,
   // the cards lying long side along the fold. The front half's open edge is
   // cut in one smooth shallow waist (`card3Depth`), as on the photos (the
   // owner, 2026-11-09: copy it, not an improvised wave): straight for the
@@ -447,7 +447,9 @@
   // it leaves the straight), measured off the photo of the black one. The
   // back's open edge is straight. (A first version put the thumb notch in the
   // front's waist, 24 then 40 mm deep: wrong, it is on the fold.)
-  var C3_W = 10, C3_L = 7.5, C3_HALF = 2.5, C3_DEPTH = 1.3, C3_HOLE = 1.1;
+  // 65 mm a half, not the listing's 75 (the owner, 2026-11-09): the photos show it longer and narrower, about
+  // 1.6 : 1, and the card (54 mm across) still fits with room; at 75 mm it looked square.
+  var C3_W = 10, C3_L = 6.5, C3_HALF = 2.5, C3_DEPTH = 1.3, C3_HOLE = 1.1;
   // how far down from the open top the front half is cut, at x (cm from the middle)
   function card3Depth(x) {
     var xa = Math.abs(x);
@@ -4033,7 +4035,8 @@
       if (FOLD_HOLE) dimH(X(-FOLD_HOLE), X(FOLD_HOLE), Y(-FOLD_HOLE) + 4, '\u00d8 ' + mm(2 * FOLD_HOLE), 1);
       if (fold3) { dimV(X(0) + 4, Y(FOLD_L), Y(FOLD_L - C3_DEPTH), mm(C3_DEPTH), 1); }   // Nr. 3: how deep the front's waist is
 
-      // legend and specs on the right
+      // legend and specs on the right (Nr. 3, 100 mm wide: moved right, clear of the half's size)
+      if (fold3) { lx = 126; }
       doc.setFontSize(9); doc.setTextColor(40, 36, 31);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.3); doc.line(x, y, x + 8, y); }, P.cut);
       key(function (x, y) { doc.setDrawColor(0); doc.setLineWidth(0.45); doc.line(x + 3.4, y - 0.6, x + 4.6, y + 0.6); }, C.holes);
