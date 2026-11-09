@@ -463,7 +463,12 @@ W 7.5cm"). Only its shape and size are taken: the stitch, edges and leather are 
 - The cards are not drawn, but it looks filled (the owner, 2026-11-09): the halves stand apart round two hidden
   cards (`foldLift`, as Nr. 2); shown empty and flat first, it looked bare. A folded
   50 euro note was tried and taken out: a real note's design must not be copied, and a stand-in slip looked poor.
-- Seams, cards, edges and the pattern as Nr. 2 (sides stitched from 6 mm under the top to 6 mm above the fold).
+- The mouth is finished as on the photos (the owner, 2026-11-09: this finish is a must): the seams run up to
+  `STITCH_INSET` under the mouth and the thread wraps over its edge, round both layers, back into the same hole
+  (two threads, ends along the cuts; in `build`, `fold3`); the wrap counts as the last stitch, so only one more
+  is doubled at that end. The mouth's corners are 3 mm round (`C3_CORNER`) so the seam reaches them; the fold's
+  corners keep `FOLD_R`. At the fold the seams still stop 6 mm above it: the fold holds the layers there.
+- Seams, edges and the pattern otherwise as Nr. 2.
   Pattern: the flat piece centred on the page, the legend and the specs side by side under it (the owner,
   2026-11-09), the hole and the waist's depth dimensioned; page 2 the picture (wider frame) and the process:
   `card3.steps` reuses Nr. 1's steps (numbers) and Nr. 2's (`{c2: n}`), three steps its own, drafted by Claude

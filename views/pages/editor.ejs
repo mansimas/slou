@@ -411,15 +411,17 @@
   // drawing's point out flat and bending it gave a flat, then a hole there.
   var FOLD_GAP = FOLD_W / 2 - FOLD_R;   // where the fold runs out to: the corner's foot
   function foldOutline(exact) {
-    var sh = new THREE.Shape(), x = FOLD_W / 2, L = FOLD_L, r = FOLD_R, PI = Math.PI;
+    // Nr. 3: the mouth's corners only 3 mm round, so the seam and its wrap reach them (the photos);
+    // the fold's corners keep FOLD_R
+    var sh = new THREE.Shape(), x = FOLD_W / 2, L = FOLD_L, r = state.product === 'card3' ? C3_CORNER : FOLD_R, rf = FOLD_R, PI = Math.PI;
     sh.moveTo(-x + r, -L); sh.lineTo(x - r, -L); sh.absarc(x - r, -L + r, r, -PI / 2, 0);
-    if (exact) { sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, PI / 2); sh.absarc(x - r, r, r, -PI / 2, 0); }
+    if (exact) { sh.lineTo(x, -rf); sh.absarc(x - rf, -rf, rf, 0, PI / 2); sh.absarc(x - rf, rf, rf, -PI / 2, 0); }
     sh.lineTo(x, L - r); sh.absarc(x - r, L - r, r, 0, PI / 2);
     if (state.product === 'card3') {   // Nr. 3: the front half's open edge cut in its waist
       for (var xv = x - r; xv > -x + r + 1e-6; xv -= 0.05) { sh.lineTo(xv, L - card3Depth(xv)); }
     }
     sh.lineTo(-x + r, L); sh.absarc(-x + r, L - r, r, PI / 2, PI);
-    if (exact) { sh.lineTo(-x, r); sh.absarc(-x + r, r, r, PI, PI * 1.5); sh.absarc(-x + r, -r, r, PI / 2, PI); }
+    if (exact) { sh.lineTo(-x, rf); sh.absarc(-x + rf, rf, rf, PI, PI * 1.5); sh.absarc(-x + rf, -rf, rf, PI / 2, PI); }
     sh.lineTo(-x, -L + r); sh.absarc(-x + r, -L + r, r, PI, PI * 1.5);
     return sh;
   }
@@ -448,7 +450,7 @@
   // front's waist, 24 then 40 mm deep: wrong, it is on the fold.)
   // 65 mm a half, not the listing's 75 (the owner, 2026-11-09): the photos show it longer and narrower, about
   // 1.6 : 1, and the card (54 mm across) still fits with room; at 75 mm it looked square.
-  var C3_W = 10, C3_L = 6.5, C3_HALF = 2.5, C3_DEPTH = 1.3, C3_HOLE = 1.1;
+  var C3_W = 10, C3_L = 6.5, C3_HALF = 2.5, C3_DEPTH = 1.3, C3_HOLE = 1.1, C3_CORNER = 0.3;
   // how far down from the open top the front half is cut, at x (cm from the middle)
   function card3Depth(x) {
     var xa = Math.abs(x);
@@ -2309,7 +2311,8 @@
       var foldStack = function (p, hole) {
         // Nr. 3: the front's cut-out open edge is its own edge, as the open tops are
         if (fold3 && !hole && p.y > FOLD_L - C3_DEPTH - 0.01 && Math.abs(p.x) < C3_HALF + 0.05) { return 0; }
-        return hole ? 1 : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R);
+        var rc = fold3 ? C3_CORNER : FOLD_R;
+        return hole ? 1 : 1 - fe((Math.abs(p.y) - (FOLD_L - rc)) / rc);
       };
       var thumb = new THREE.Path(); thumb.absarc(0, 0, FOLD_HOLE, 0, Math.PI * 2, true);
       var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], withCore(state.leather, 1.27), null, null, null, FOLD_T);   // × the map's ~0.8: as light as Nr. 1's edges (the owner, 2026-10-29; 0.78 read darker)
@@ -2333,7 +2336,10 @@
       if (!fold3) { fob.add(bank2); }
       // two open seams, down the left side and up the right (CCW, like the
       // outlines), each its own run of equal stitches
-      var hx = FOLD_W / 2 - STITCH_INSET, yT = foldY(FOLD_L - FOLD_END), yB = foldY(FOLD_END);
+      // Nr. 3: the seams run right up to the mouth, the last hole STITCH_INSET under it, and the
+      // thread wraps over the mouth's edge there (below, `fold3`): the mouth is where the card
+      // pushes the layers apart, so it must not be left loose (the owner, 2026-11-09, from the photos)
+      var hx = FOLD_W / 2 - STITCH_INSET, yT = fold3 ? FOLD_TOP - STITCH_INSET : foldY(FOLD_L - FOLD_END), yB = foldY(FOLD_END);
       var seam = function (x, y0, y1) {
         var poly = [];
         for (var k = 0; k <= 400; k++) { poly.push(new THREE.Vector2(x, y0 + (y1 - y0) * k / 400)); }
@@ -2734,8 +2740,10 @@
       // The wallet's U: the wrap over the inner pieces' end is the last stitch
       // and is sewn twice, so only one stitch in from it is doubled too: the
       // reinforcement is the last two (the owner, 2026-11-09)
-      var ov = wallet && !frontRuns[runs.indexOf(run)] ? OVERLAP - 1 : OVERLAP;
-      var doubled = open ? k - run[0] < ov || k >= run[1] - ov : (k - E + n) % n < OVERLAP;
+      var ov = wallet && !frontRuns[runs.indexOf(run)] ? OVERLAP - 1 : OVERLAP, ovA = ov, ovB = ov;
+      // Nr. 3: at the mouth the wrap is the last stitch, so there too only one more is doubled
+      if (fold3 && open) { if (holesAt[run[0]].y > 0) { ovA = OVERLAP - 1; } else { ovB = OVERLAP - 1; } }
+      var doubled = open ? k - run[0] < ovA || k >= run[1] - ovB : (k - E + n) % n < OVERLAP;
       // a slit sits between two stitches: lean it off their average direction
       var dh = chordIn(k).clone().add(d).normalize();
       var hidden = frontRuns && frontRuns[runs.indexOf(run)];   // the wallet's inner seam: not through the exterior
@@ -2837,6 +2845,38 @@
       var tuv = tube.attributes.uv, tl = curve.getLength();
       for (var q2 = 0; q2 < tuv.count; q2++) { tuv.setXY(q2, tuv.getY(q2), tuv.getX(q2) * tl / stitchLen); }
       fob.add(new THREE.Mesh(tube, threadMat));
+    }
+    // Card holder Nr. 3: at the top of each seam the thread wraps over the
+    // mouth's edge, round both layers, from the last hole on the front, over
+    // the edge and back into the same hole from the back, on the row's line
+    // (the owner, 2026-11-09, from the photos: the mouth is finished this
+    // way, or the card pushes the layers apart). Two threads, as at every
+    // doubled end, each end into its cut along the cut.
+    if (fold3) {
+      runs.forEach(function (r) {
+        var k = holesAt[r[0]].y > holesAt[r[1]].y ? r[0] : r[1], p = holesAt[k];
+        var c = new THREE.Vector2(0, 1), off = THREAD_R * 0.7, R = FOLD_T, yc = FOLD_TOP - FOLD_T;
+        var tip = function (side) {   // that face's slit tip on the mouth's side
+          var sl = slit(c, side), w = sl.y > 0 ? 1 : -1;
+          return { x: p.x + w * sl.x * SLIT_HALF, y: p.y + w * sl.y * SLIT_HALF, dx: w * sl.x * SLIT_HALF, dy: w * sl.y * SLIT_HALF };
+        };
+        var tf = tip(1), tb = tip(-1);
+        [-0.5, 0.5].forEach(function (t) {
+          var gx = t * JOINT_GAP * 0.5, pts = [];
+          var at = function (x, y, z) { return new THREE.Vector3(x + gx, y, z); };
+          pts.push(at(tf.x - tf.dx * 0.8, tf.y - tf.dy * 0.8, FOLD_T - 0.07));   // up out of the front's cut, along it
+          pts.push(at(tf.x - tf.dx * 0.25, tf.y - tf.dy * 0.25, FOLD_T - 0.01));
+          pts.push(at(tf.x, tf.y + 0.03, FOLD_T + 0.003));
+          for (var q = 0; q <= 10; q++) {                                        // over the mouth's edge
+            var ph = q / 10 * Math.PI, xx = tf.x + (tb.x - tf.x) * q / 10;
+            pts.push(at(xx, yc + (R + off) * Math.sin(ph), (R + off) * Math.cos(ph)));
+          }
+          pts.push(at(tb.x, tb.y + 0.03, -FOLD_T - 0.003));
+          pts.push(at(tb.x - tb.dx * 0.25, tb.y - tb.dy * 0.25, -FOLD_T + 0.01));
+          pts.push(at(tb.x - tb.dx * 0.8, tb.y - tb.dy * 0.8, -FOLD_T + 0.07));  // and down into the back's cut, along it
+          wrapTube(pts);
+        });
+      });
     }
     var spineHoles = [];
     if (wallet) {

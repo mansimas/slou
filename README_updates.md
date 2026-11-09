@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-09 15:30] - Card holder 3 mouth wrapped - Owner, from the photos: the seam must be finished at the mouth, where cards push the layers apart. Seams now run to 2.8 mm under the mouth and the thread wraps over its edge round both layers; mouth corners 3 mm.
 [2026-11-09 15:10] - Card holder 3 pattern centred - Owner: the template should sit in the middle of the PDF page with the text below. The piece is centred, the legend and the specs table side by side under it; watermarks placed to match.
 [2026-11-09 15:00] - Card holder 3 drop-shaped bottom - Owner: the bottom ended too steeply, wanted a slight belly, a drop shape. The fold's inner radius is 1 mm (was 0.7), still fading out over 20 mm, sides still glued flat.
 [2026-11-09 14:45] - Card holder 3 softer fold - Owner: where the fold's fullness ended it left a hard horizontal line. It now fades out gently over 20 mm above the fold instead of 8 mm.
