@@ -455,7 +455,7 @@ W 7.5cm"). Only its shape and size are taken: the stitch, edges and leather are 
   the thumb notch cut into it (24, then 40 mm deep); the notch is on the fold.
 - SLOU stamp on the front just above the thumb hole (`logo4Tex`, `fold3FrontMat`); initials on the back, as Nr. 2.
 - The fold is round and full, not pressed flat (the owner, 2026-11-09, from the photos): in `folded()` the bend
-  goes round an inner radius `PUFF_R` 0.7 mm (its axis raised so the fold's outside stays put) and the halves come
+  goes round an inner radius `PUFF_R` 1 mm (0.7 until the owner asked for a little belly, a drop shape) (its axis raised so the fold's outside stays put) and the halves come
   together over `PUFF_H` 20 mm above it (smootherstep); 1 mm over 5 mm read as a teardrop, and over 8 mm it left a
   hard horizontal line where it ended (the owner).
   Only between the stitch lines (`puffX`, eased over 5 mm in from them): the sides are glued all the way down,

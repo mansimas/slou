@@ -1795,7 +1795,7 @@
     // inner radius PUFF_R instead of the flesh sides meeting, its axis raised
     // so the outside of the fold stays where it was, and the halves come back
     // together over the PUFF_H above it (smootherstep), before the seams start.
-    var PUFF_R = state.product === 'card3' ? 0.07 : 0, PUFF_H = 2.0;   // 0.7 mm in, easing out over 20 mm (1 mm over 5 read as a teardrop; over 8 mm it left a hard horizontal line where it ended, the owner)
+    var PUFF_R = state.product === 'card3' ? 0.1 : 0, PUFF_H = 2.0;   // 1 mm in (0.7 until the owner asked for a little belly, a drop shape),  easing out over 20 mm (1 mm over 5 read as a teardrop; over 8 mm it left a hard horizontal line where it ended, the owner)
     function puff(sv) {   // 1 at the bend, easing to 0 PUFF_H up the half
       var t = Math.min(1, Math.max(0, (Math.abs(sv) - FOLD_B) / PUFF_H));
       return 1 - t * t * t * (t * (6 * t - 15) + 10);
