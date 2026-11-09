@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-09 14:15] - Card holder 3 full, cards hidden - Owner: no cards shown, but it should look filled, as if cards were inside. The halves stand apart round two hidden cards again, as on Nr. 2; the cards themselves are not drawn.
 [2026-11-09 14:00] - Card holder 3 narrower 65mm - Owner: it looked square next to the photos. The listing's 10 x 7.5 cm is about 1.33:1, the photos about 1.6:1, so each half is now 65 mm (100 x 65 mm folded, cut 100 x 130), the card still fits.
 [2026-11-09 13:50] - Card holder 3 shown empty - Owner: no cards inside card holder Nr. 3. Both cards are left out and the halves no longer stand apart round them; they lie flat together.
 [2026-11-09 13:40] - Card holder 3 note removed - Owner asked for a folded 50 euro note in card holder Nr. 3; a plain stand-in slip was tried, but a faithful copy of the note cannot be made and a stand-in looks poor, so it is back to two cards.
