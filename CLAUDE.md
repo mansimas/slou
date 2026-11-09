@@ -457,7 +457,8 @@ W 7.5cm"). Only its shape and size are taken: the stitch, edges and leather are 
   a small round notch cut into each side on the fold line, R 2.5 mm (`C3_RELIEF`) between round shoulders R 2 mm
   (`C3_SHOULDER`), so the folded thick leather does not push out at the corners. The pattern draws it
   (`foldOutline(true)`); in the 3D `foldRound` uses `card3Relief(h)`, the notch's quarter under its shoulder.
-  Each seam then has one more stitch at its foot, bending in round that corner (`lineAt`, in `build`), and the
+  Each seam then has one more stitch at its foot, bending in round that corner (`lineAt`, in `build`; its hole a further 0.8 mm in, `C3_TUCK`, so it
+  turns more, the owner), and the
   fold's puff stays 1.5 mm clear of it (`puffX`). Earlier tries at these corners (square fold corners, a wrap
   over the mouth) were reverted.
 - SLOU stamp on the front just above the thumb hole (`logo4Tex`, `fold3FrontMat`); initials on the back, as Nr. 2.

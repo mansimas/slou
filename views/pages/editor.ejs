@@ -468,7 +468,7 @@
   // corner at the fold is the notch's quarter (concave) under a round
   // shoulder: how far in the side is at height h over the fold's foot, and the
   // edge's normal angle there (as `foldRound`).
-  var C3_RELIEF = 0.25, C3_SHOULDER = 0.2;
+  var C3_RELIEF = 0.25, C3_SHOULDER = 0.2, C3_TUCK = 0.08;   // C3_TUCK: the last hole 0.8 mm further in (the owner, 2026-11-09)
   function card3Relief(h) {
     var rn = C3_RELIEF, rs = C3_SHOULDER, hc = Math.sqrt((rn + rs) * (rn + rs) - rs * rs), ht = hc * rn / (rn + rs), d, sl;
     h = Math.max(0, h);
@@ -2377,7 +2377,7 @@
             var m = (lo + hi) / 2, d = P0.distanceTo(new THREE.Vector2(sg * lineAt(m), m));
             if (d > STITCH_PITCH) { lo = m; } else { hi = m; }
           }
-          return new THREE.Vector2(sg * lineAt(lo), lo);
+          return new THREE.Vector2(sg * (lineAt(lo) - C3_TUCK), lo);   // a touch further in, so the stitch turns more (the owner)
         };
         leftSeam.push(last(-1)); rightSeam.unshift(last(1));
       }
