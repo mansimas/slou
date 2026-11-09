@@ -413,19 +413,25 @@
   function foldOutline(exact) {
     var sh = new THREE.Shape(), x = FOLD_W / 2, L = FOLD_L, r = FOLD_R, PI = Math.PI;
     sh.moveTo(-x + r, -L); sh.lineTo(x - r, -L); sh.absarc(x - r, -L + r, r, -PI / 2, 0);
-    if (exact) { sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, PI / 2); sh.absarc(x - r, r, r, -PI / 2, 0); }
+    var relief = state.product === 'card3' && exact, rn = C3_RELIEF, rs = C3_SHOULDER, hc = Math.sqrt((rn + rs) * (rn + rs) - rs * rs), a = Math.atan2(hc, rs);
+    if (relief) {   // Nr. 3: the relief notch on the fold, round shoulders either side (`card3Relief`)
+      sh.lineTo(x, -hc); sh.absarc(x - rs, -hc, rs, 0, a, false); sh.absarc(x, 0, rn, a - PI, PI - a, true); sh.absarc(x - rs, hc, rs, -a, 0, false);
+    } else if (exact) { sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, PI / 2); sh.absarc(x - r, r, r, -PI / 2, 0); }
     sh.lineTo(x, L - r); sh.absarc(x - r, L - r, r, 0, PI / 2);
     if (state.product === 'card3') {   // Nr. 3: the front half's open edge cut in its waist
       for (var xv = x - r; xv > -x + r + 1e-6; xv -= 0.05) { sh.lineTo(xv, L - card3Depth(xv)); }
     }
     sh.lineTo(-x + r, L); sh.absarc(-x + r, L - r, r, PI / 2, PI);
-    if (exact) { sh.lineTo(-x, r); sh.absarc(-x + r, r, r, PI, PI * 1.5); sh.absarc(-x + r, -r, r, PI / 2, PI); }
+    if (relief) {
+      sh.lineTo(-x, hc); sh.absarc(-x + rs, hc, rs, PI, PI + a, false); sh.absarc(-x, 0, rn, a, -a, true); sh.absarc(-x + rs, -hc, rs, PI - a, PI, false);
+    } else if (exact) { sh.lineTo(-x, r); sh.absarc(-x + r, r, r, PI, PI * 1.5); sh.absarc(-x + r, -r, r, PI / 2, PI); }
     sh.lineTo(-x, -L + r); sh.absarc(-x + r, -L + r, r, PI, PI * 1.5);
     return sh;
   }
   // How far in the side is taken at height h over the fold's foot, so the
   // folded corner is a FOLD_R arc; and the arc's outward normal angle there.
   function foldRound(h) {
+    if (state.product === 'card3') { return card3Relief(h); }
     var r = FOLD_R, q = Math.max(0, r - h);
     return h >= r ? [0, 0] : [r - Math.sqrt(r * r - q * q), -Math.atan2(q, Math.sqrt(r * r - q * q))];
   }
@@ -454,6 +460,23 @@
     var xa = Math.abs(x);
     return xa >= C3_HALF ? 0 : C3_DEPTH * (1 + Math.cos(Math.PI * xa / C3_HALF)) / 2;
   }
+  // Nr. 3's flat piece has a small round relief notch cut into each side on
+  // the fold line, its shoulders rounded (the owner's photo of the maker's cut
+  // piece, `korteliu pinigine 3/1.png`, 2026-11-09): folded, thick leather
+  // would push out at the corners; with the notch the fold's corner comes in
+  // clean. R 2.5 mm, shoulders R 2 mm, measured off that photo. Folded, each
+  // corner at the fold is the notch's quarter (concave) under a round
+  // shoulder: how far in the side is at height h over the fold's foot, and the
+  // edge's normal angle there (as `foldRound`).
+  var C3_RELIEF = 0.25, C3_SHOULDER = 0.2;
+  function card3Relief(h) {
+    var rn = C3_RELIEF, rs = C3_SHOULDER, hc = Math.sqrt((rn + rs) * (rn + rs) - rs * rs), ht = hc * rn / (rn + rs), d, sl;
+    h = Math.max(0, h);
+    if (h >= hc) { return [0, 0]; }
+    if (h <= ht) { d = Math.sqrt(Math.max(0, rn * rn - h * h)); sl = -h / Math.max(d, 1e-4); }
+    else { var q = hc - h, w = Math.sqrt(Math.max(0, rs * rs - q * q)); d = rs - w; sl = -q / Math.max(w, 1e-4); }
+    return [d, Math.atan(sl)];
+  }
   // Nr. 2 and Nr. 3 share the fold code; these set its sizes for the one shown
   function foldDims() {
     var three = state.product === 'card3';
@@ -461,7 +484,7 @@
     BANK_HW = three ? 8.56 / 2 : 5.398 / 2; BANK_LEN = three ? 5.398 : 8.56;
     FOLD_YC = (FOLD_B + FOLD_T - FOLD_L) / 2;
     FOLD_TOP = FOLD_YC + FOLD_L - FOLD_B; FOLD_BOT = FOLD_YC - FOLD_T;
-    FOLD_GAP = FOLD_W / 2 - FOLD_R;
+    FOLD_GAP = FOLD_W / 2 - (three ? C3_RELIEF : FOLD_R);
   }
 
   // Keyfob Nr. 2 (2026-11-01): from the owner's three screenshots of another
