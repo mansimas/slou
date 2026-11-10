@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-10 10:45] - Card 1 two hidden cards - Owner: card holder Nr. 1 should look as if it held two hidden cards in each slot. The fullness is now two cards' thickness (1.52 mm) in the front pocket, the back pocket and the middle slot.
 [2026-11-10 10:30] - Card holder 2 cards hidden - Owner: take the blue and red cards out of card holder Nr. 2 but keep the fullness they give it, as on Nr. 3. The cards are no longer drawn; the halves still stand apart round them.
 [2026-11-10 10:15] - Card 1 softer shadow, open slot - Owner: a smaller shadow at the bottom of card holder Nr. 1's fuller pockets, and the middle slot holds cards too. Fullness eases in over 16 mm (was 7), shading half as much; the bodies stay apart above the card, the slot's mouth open.
 [2026-11-10 10:00] - Card 1 fuller, wallet 2 logo - Owner: card holder Nr. 1 a little fuller, as with a hidden card in each pocket and the middle slot (as Nr. 3). Wallet Nr. 2's SLOU centred along the bottom seam: midway between its end by the middle and the end's stitch line.

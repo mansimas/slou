@@ -2658,6 +2658,7 @@
           return POCKET_RAMP * w;
         };
       }
+      // Two cards in each slot's worth (the owner, 2026-11-10; one at first).
       // A little fuller, as if a card were in each of the three slots (the
       // front pocket, the back one and the middle between the bodies), the
       // cards themselves not shown (the owner, 2026-11-10, as on Nr. 3). A
@@ -2667,7 +2668,7 @@
       // in the glued margins, easing out over 7 mm in from the sides and the
       // bottom, and on the bodies over the card's top (on a pocket the card
       // holds the mouth open, as on Nr. 2).
-      var CARD_T = 0.076, cardTop = -CARD_H / 2 + STITCH_INSET + 8.56, xs0 = CARD_W / 2 - STITCH_INSET - 0.1, yb0 = -CARD_H / 2 + STITCH_INSET + 0.1;
+      var CARD_T = 2 * 0.076, cardTop = -CARD_H / 2 + STITCH_INSET + 8.56, xs0 = CARD_W / 2 - STITCH_INSET - 0.1, yb0 = -CARD_H / 2 + STITCH_INSET + 0.1;
       function cardFill(x, y, body) {
         var f = ease((xs0 - Math.abs(x)) / 0.7) * ease((y - yb0) / 1.6);   // over 16 mm at the bottom: over 7 it shaded too dark there (the owner, 2026-11-10)
         return body ? f * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6)) : f;   // the middle slot's mouth stays open over the card, a little less than over it (the owner, 2026-11-10: cards go in there too)

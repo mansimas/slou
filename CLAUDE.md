@@ -341,7 +341,8 @@ locked keyfob stitch, unchanged:
 
 - Fuller, as if a card were in each of the three slots, the cards not shown (the owner, 2026-11-10, as on Nr. 3):
   `fuller()` in `build` cuts each piece finer (`k2Split`) and lifts it by `cardFill`: the bodies apart by one card
-  (0.76 mm, half each), each pocket out by its own card more; none at the stitch lines, easing over 7 mm, and on
+  (two cards, 1.52 mm, half each; one card at first, the owner asked for two, 2026-11-10), each pocket out by its own
+  two cards more; none at the stitch lines, easing over 7 mm, and on
   the bodies fading over the card's top.
 
 ### Card holder Nr. 2 (sulankstoma kortelinė)
