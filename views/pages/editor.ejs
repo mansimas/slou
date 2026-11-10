@@ -2669,8 +2669,8 @@
       // holds the mouth open, as on Nr. 2).
       var CARD_T = 0.076, cardTop = -CARD_H / 2 + STITCH_INSET + 8.56, xs0 = CARD_W / 2 - STITCH_INSET - 0.1, yb0 = -CARD_H / 2 + STITCH_INSET + 0.1;
       function cardFill(x, y, body) {
-        var f = ease((xs0 - Math.abs(x)) / 0.7) * ease((y - yb0) / 0.7);
-        return body ? f * (1 - ease((y - cardTop + 0.4) / 0.6)) : f;
+        var f = ease((xs0 - Math.abs(x)) / 0.7) * ease((y - yb0) / 1.6);   // over 16 mm at the bottom: over 7 it shaded too dark there (the owner, 2026-11-10)
+        return body ? f * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6)) : f;   // the middle slot's mouth stays open over the card, a little less than over it (the owner, 2026-11-10: cards go in there too)
       }
       function fuller(mesh, amt, body) {
         var d = k2Split(mesh.geometry, function (ya, yb, xa, xb) {
@@ -2680,7 +2680,7 @@
           var x = d.P[v * 3], y = d.P[v * 3 + 1], f = cardFill(x, y, body);
           if (!f) { continue; }
           d.P[v * 3 + 2] += amt * f;
-          var gx = amt * (cardFill(x + 0.004, y, body) - cardFill(x - 0.004, y, body)) / 0.008, gy = amt * (cardFill(x, y + 0.004, body) - cardFill(x, y - 0.004, body)) / 0.008, nz = d.Nm[v * 3 + 2];
+          var gx = amt * (cardFill(x + 0.004, y, body) - cardFill(x - 0.004, y, body)) / 0.008, gy = 0.5 * amt * (cardFill(x, y + 0.004, body) - cardFill(x, y - 0.004, body)) / 0.008, nz = d.Nm[v * 3 + 2];   // half the slope's shading up and down
           d.Nm[v * 3] -= nz * gx; d.Nm[v * 3 + 1] -= nz * gy;
           var nl = Math.hypot(d.Nm[v * 3], d.Nm[v * 3 + 1], d.Nm[v * 3 + 2]) || 1;
           d.Nm[v * 3] /= nl; d.Nm[v * 3 + 1] /= nl; d.Nm[v * 3 + 2] /= nl;
