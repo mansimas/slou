@@ -490,6 +490,9 @@ SLOU stamp is on the front, above the thumb notch (`fold2FrontMat` with `logo2Te
 initials guide is on the back (lower) half, turned 180° so it reads once folded.
 
 ### Two cards in Nr. 2
+Since 2026-11-10 (the owner) the two cards are not drawn: only the fullness they give it stays (`foldLift`),
+as on Nr. 3. What follows is how that fullness was set up.
+
 Since 2026-10-29 (the owner) Nr. 2 holds two cards: the blue one (`cardMat`) in front and
 a red one (`card2Mat`) behind it, both on the same level (the owner; 1.5 mm higher at first). Together
 they are 1.52 mm, so `FOLD_OPEN` is 1.7 mm (0.9 for one card, which they would poke
