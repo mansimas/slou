@@ -965,9 +965,18 @@
   // `cx`: across, in cm (0 by default). A wide texture (the wallet's, two
   // TEX_N across) gets the leather laid twice, the left one mirrored, so it
   // runs on unbroken across the middle (`natTile`).
+  // the leather laid outward from the canvas's middle, mirrored at every
+  // seam, so a canvas wider than two tiles (wallet Nr. 2's 24 cm) is covered
+  // to its ends too (2 tiles wide it is as it always was)
   function natTile(g, img) {
-    g.drawImage(img, g.canvas.width - TEX_N, 0);
-    if (g.canvas.width > TEX_N) { g.save(); g.translate(TEX_N, 0); g.scale(-1, 1); g.drawImage(img, 0, 0); g.restore(); }
+    var W = g.canvas.width, c = W > TEX_N ? W / 2 : 0;
+    function put(x, flip) { g.save(); g.translate(flip ? x + TEX_N : x, 0); if (flip) { g.scale(-1, 1); } g.drawImage(img, 0, 0); g.restore(); }
+    put(c, false);
+    if (W > TEX_N) {
+      put(c - TEX_N, true);
+      if (c + TEX_N < W) { put(c + TEX_N, true); }
+      if (c - TEX_N > 0) { put(c - 2 * TEX_N, false); }
+    }
   }
   function pressLogo(col, bump, rough, y, front, side, size, cx) {
     var px = TEX_N / TEX_SPAN;
@@ -1073,10 +1082,11 @@
   // the front cover and the initials on the back cover, each low and centred
   // on its stitched panel; mirrored, as the outside is seen from behind. The
   // front cover is the left half seen from the inside (x < 0), as a book's.
-  function wideTex(srgb) {
-    var c = document.createElement('canvas'); c.width = 2 * TEX_N; c.height = TEX_N;
+  function wideTex(srgb, span) {   // span: cm across (20 unless given)
+    span = span || 2 * TEX_SPAN;
+    var c = document.createElement('canvas'); c.width = Math.round(span / TEX_SPAN * TEX_N); c.height = TEX_N;
     var tex = new THREE.CanvasTexture(c);
-    tex.repeat.set(1 / (2 * TEX_SPAN), 1 / TEX_SPAN);
+    tex.repeat.set(1 / span, 1 / TEX_SPAN);
     tex.offset.set(0.5, 0.5);
     tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
     if (srgb) { tex.colorSpace = THREE.SRGBColorSpace; }
@@ -1091,6 +1101,13 @@
     }
   }
   paintWallet();
+  // wallet Nr. 2's exterior: the SLOU stamp where the wallet has it, on the
+  // front cover, only a little lower (the owner, 2026-11-10: in the corner
+  // was tried first)
+  // 24 cm across: the 20 cm one ran out short of the ends and smeared there
+  var w2OutTex = wideTex(true, 24), w2OutBump = wideTex(false, 24), w2OutRough = wideTex(false, 24);
+  pressLogo(w2OutTex, w2OutBump, w2OutRough, -3.75, false, false, 1, -(WAL_SPINE + WAL_PW / 2));
+  var w2OutMat = new THREE.MeshStandardMaterial({ map: w2OutTex, bumpMap: w2OutBump, roughnessMap: w2OutRough, bumpScale: 2, roughness: 0.6 });
   var walOutMat = new THREE.MeshStandardMaterial({ map: walOutTex, bumpMap: walOutBump, roughnessMap: walOutRough, bumpScale: 2, roughness: 0.6 });
   // the inside: the natural leather (each piece's texture shifted onto it,
   // see build), the flesh sides, and the edges as on keyfob Nr. 2 and card
@@ -1237,6 +1254,7 @@
     fob2BackMat.color.copy(sc).multiplyScalar(1.2);
     fob2FleshMat.color.copy(sc).multiplyScalar(0.9);
     walOutMat.color.copy(c).multiplyScalar(1.2);
+    w2OutMat.color.copy(c).multiplyScalar(1.2);
     walBaseMat.color.copy(c).multiplyScalar(1.2);
     w2LiningMat.color.copy(c).multiplyScalar(1.2);
     walFleshMat.color.copy(c).multiplyScalar(0.9);
@@ -2279,7 +2297,7 @@
         return k2Split(g, function (ya, yb, xa, xb) { return Math.max(xa, xb) > -W2_S - 0.05 && Math.min(xa, xb) < W2_S + 0.05 && Math.abs(xa - xb) > 0.06; });
       };
       var ext2 = leatherPiece([w2Ext()], T2, -T2 / 2, function (p) { return 1 - topFree(p, 0.3); }, [], leatherCol2, null, null, stackTop, T2);
-      fob.add(new THREE.Mesh(k2Geo(hingeSplit(ext2.geometry)), [walFleshMat, walEdgeMat, walOutMat]));
+      fob.add(new THREE.Mesh(k2Geo(hingeSplit(ext2.geometry)), [walFleshMat, walEdgeMat, w2OutMat]));
       ext2.geometry.dispose();
       var lin2 = leatherPiece([w2Loop('A')], T2, T2 / 2, function (p) { return 1 - topFree(p, 1.45); }, [], leatherCol2, null, null, stackTop, T2);
       fob.add(new THREE.Mesh(k2Geo(hingeSplit(lin2.geometry)), [w2LiningMat, walEdgeMat, walFleshMat]));
@@ -2302,11 +2320,7 @@
         for (var fv = 0; fv < fd2.P.length / 3; fv++) {
           var qx = fd2.P[fv * 3], qy = fd2.P[fv * 3 + 1], lz = w2Lift(qx, qy);
           if (!lz) { continue; }
-          fd2.P[fv * 3 + 2] += lz;
-          var gx = (w2Lift(qx + 0.004, qy) - w2Lift(qx - 0.004, qy)) / 0.008, gy = (w2Lift(qx, qy + 0.004) - w2Lift(qx, qy - 0.004)) / 0.008, nz2 = fd2.Nm[fv * 3 + 2];
-          fd2.Nm[fv * 3] -= nz2 * gx; fd2.Nm[fv * 3 + 1] -= nz2 * gy;
-          var nl2 = Math.hypot(fd2.Nm[fv * 3], fd2.Nm[fv * 3 + 1], fd2.Nm[fv * 3 + 2]) || 1;
-          fd2.Nm[fv * 3] /= nl2; fd2.Nm[fv * 3 + 1] /= nl2; fd2.Nm[fv * 3 + 2] /= nl2;
+          fd2.P[fv * 3 + 2] += lz;   // the normals left as they are: tipped with the rise, it shaded as a dark band where the back pocket lies under (the owner, 2026-11-10)
         }
         for (var fu = 0; fu < fd2.U.length; fu += 2) { fd2.U[fu] -= sg * (W2_DX + 5.28); }
         fob.add(new THREE.Mesh(k2Geo(fd2), [walSlotMat, walEdgeMat, walSlotFleshMat]));
