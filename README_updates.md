@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-10 00:30] - Wallet No. 2 started - Owner gave six patterns (pavyzdziai/6vnt), to be made one by one. First, Miura M.1 bifold wallet as wallet2: shapes from 1.svg, own stitch, 3D and 7-locale texts; the pattern PDF is not done yet.
 [2026-11-09 20:50] - Card holder 3 last hole in - Owner: tilt the last hole at the fold a little inward so the stitch turns more. Both seams' bottom holes moved 0.8 mm further in from the side.
 [2026-11-09 20:40] - Card holder 3 fold notches - Owner's photo of the maker's cut piece (1.png): a small round relief notch on each side at the fold, so the folded corner comes in clean. Added (R 2.5 mm, shoulders R 2 mm) in 3D and pattern, plus one more stitch bending in round it.
 [2026-11-09 16:15] - Card holder 3 fold corners undone - Owner asked to reverse the near-square fold corners on card holder Nr. 3; they are back to the 6 mm round of before, in the 3D and on the pattern.
