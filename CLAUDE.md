@@ -339,6 +339,11 @@ locked keyfob stitch, unchanged:
   the drawing. Thread
   ends are not marked. Calibration is shared with the keyfob.
 
+- Fuller, as if a card were in each of the three slots, the cards not shown (the owner, 2026-11-10, as on Nr. 3):
+  `fuller()` in `build` cuts each piece finer (`k2Split`) and lifts it by `cardFill`: the bodies apart by one card
+  (0.76 mm, half each), each pocket out by its own card more; none at the stitch lines, easing over 7 mm, and on
+  the bodies fading over the card's top.
+
 ### Card holder Nr. 2 (sulankstoma kortelinė)
 Added 2026-10-29: the third "Item" (`product: 'card2'`, texts in `content.*.editor.card2`),
 from a pattern the owner found (`pavyzdziai/pvz1.pdf` drawing, `pvz2.pdf` notes;

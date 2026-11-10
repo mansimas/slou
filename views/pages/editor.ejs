@@ -1106,7 +1106,7 @@
   // was tried first)
   // 24 cm across: the 20 cm one ran out short of the ends and smeared there
   var w2OutTex = wideTex(true, 24), w2OutBump = wideTex(false, 24), w2OutRough = wideTex(false, 24);
-  pressLogo(w2OutTex, w2OutBump, w2OutRough, -3.75, false, false, 1, -(WAL_SPINE + WAL_PW / 2));
+  pressLogo(w2OutTex, w2OutBump, w2OutRough, -3.75, false, false, 1, -(W2_GAP + W2_L / 2 - STITCH_INSET) / 2);   // centred on the bottom seam's run, from its end by the middle to the end's stitch line (the owner, 2026-11-10)
   var w2OutMat = new THREE.MeshStandardMaterial({ map: w2OutTex, bumpMap: w2OutBump, roughnessMap: w2OutRough, bumpScale: 2, roughness: 0.6 });
   var walOutMat = new THREE.MeshStandardMaterial({ map: walOutTex, bumpMap: walOutBump, roughnessMap: walOutRough, bumpScale: 2, roughness: 0.6 });
   // the inside: the natural leather (each piece's texture shifted onto it,
@@ -2658,12 +2658,42 @@
           return POCKET_RAMP * w;
         };
       }
+      // A little fuller, as if a card were in each of the three slots (the
+      // front pocket, the back one and the middle between the bodies), the
+      // cards themselves not shown (the owner, 2026-11-10, as on Nr. 3). A
+      // card (54 x 85.6 x 0.76 mm) stands centred on the bottom seam: over it
+      // the bodies stand apart by one card, each half of it, and each pocket
+      // out by its own card on top of that; nothing at the stitch lines and
+      // in the glued margins, easing out over 7 mm in from the sides and the
+      // bottom, and on the bodies over the card's top (on a pocket the card
+      // holds the mouth open, as on Nr. 2).
+      var CARD_T = 0.076, cardTop = -CARD_H / 2 + STITCH_INSET + 8.56, xs0 = CARD_W / 2 - STITCH_INSET - 0.1, yb0 = -CARD_H / 2 + STITCH_INSET + 0.1;
+      function cardFill(x, y, body) {
+        var f = ease((xs0 - Math.abs(x)) / 0.7) * ease((y - yb0) / 0.7);
+        return body ? f * (1 - ease((y - cardTop + 0.4) / 0.6)) : f;
+      }
+      function fuller(mesh, amt, body) {
+        var d = k2Split(mesh.geometry, function (ya, yb, xa, xb) {
+          return Math.min(xa, xb) < xs0 && Math.max(xa, xb) > -xs0 && Math.min(ya, yb) < cardTop + 0.3 && Math.max(ya, yb) > yb0 && Math.hypot(xa - xb, ya - yb) > 0.25;
+        });
+        for (var v = 0; v < d.P.length / 3; v++) {
+          var x = d.P[v * 3], y = d.P[v * 3 + 1], f = cardFill(x, y, body);
+          if (!f) { continue; }
+          d.P[v * 3 + 2] += amt * f;
+          var gx = amt * (cardFill(x + 0.004, y, body) - cardFill(x - 0.004, y, body)) / 0.008, gy = amt * (cardFill(x, y + 0.004, body) - cardFill(x, y - 0.004, body)) / 0.008, nz = d.Nm[v * 3 + 2];
+          d.Nm[v * 3] -= nz * gx; d.Nm[v * 3 + 1] -= nz * gy;
+          var nl = Math.hypot(d.Nm[v * 3], d.Nm[v * 3 + 1], d.Nm[v * 3 + 2]) || 1;
+          d.Nm[v * 3] /= nl; d.Nm[v * 3 + 1] /= nl; d.Nm[v * 3 + 2] /= nl;
+        }
+        mesh.geometry.dispose();
+        return new THREE.Mesh(k2Geo(d), mesh.material);
+      }
       addPockets = function () {
-        fob.add(leatherPiece([frontLoop], CARD_POCKET, zp, frontStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol));
-        fob.add(leatherPiece([pocketLoop], CARD_POCKET, -zp, sandedStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, null, null, stackTop));
+        fob.add(fuller(leatherPiece([frontLoop], CARD_POCKET, zp, frontStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol), 1.5 * CARD_T, false));
+        fob.add(fuller(leatherPiece([pocketLoop], CARD_POCKET, -zp, sandedStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, null, null, stackTop), -1.5 * CARD_T, false));
       };
-      fob.add(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol, null, null, stackTop));
-      fob.add(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol, null, null, stackTop));
+      fob.add(fuller(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol, null, null, stackTop), CARD_T / 2, true));
+      fob.add(fuller(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol, null, null, stackTop), -CARD_T / 2, true));
       holesAt = seamHoles();
     } else {
       var shape = solidShape(state.shape, BEVEL);
