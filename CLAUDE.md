@@ -687,6 +687,11 @@ owner: "so it is not a pure copy"), built in `w2Loop()`:
   a level run rounded into the bend (broke), the lining alone lifted and only above the pockets (squeezed),
   the foot glued shut. `sliceAt` cuts each triangle only by the lines that cross it (it rebuilt the whole
   list per line: ~25 s). The faint scuff patches on the lining are the `natural` texture, not geometry.
+- Along the foot, the exterior's and lining's own two-layer rounding (as in the middle) runs `W2_TUCK` 1 mm on
+  in under each front pocket's spine end before the three-layer dome starts (`stackTop`; the owner, 2026-11-14:
+  from the pocket's very end the rounding finished too early and stood up as a steep corner under the pocket's
+  rounded end). Tried and rejected the same day: easing the three-layer dome out over 6 mm, then all the way to
+  the middle (the middle must stay as it was), and easing the pocket's own end (it folded into a flap).
 - The front pocket rises over the back one outside its edge, full 0.2 mm in (`w2Lift`), so it bends over
   that edge (the owner, 2026-11-14: the back pocket's side stuck through the front pocket's top).
 - Speed: the bend and the pocket rise are cut along lines only (`sliceAt`), not by `k2Split` halving every
