@@ -2466,9 +2466,11 @@
       var leatherCol = withCore(state.leather, 1.27), slotCol = withCore(state.pocket, 1.27);
       // the exterior, cut finer across the spine so it can bend there
       var ext = leatherPiece([loopOf(walShape('ext'))], WAL_EXT, -WAL_EXT / 2, extStack, [], leatherCol, null, null, extTop, WAL_EXT);
-      var ed = k2Split(ext.geometry, function (ya, yb, xa, xb) {
-        return Math.max(xa, xb) > -S - 0.05 && Math.min(xa, xb) < S + 0.05 && Math.abs(xa - xb) > 0.06;
-      });
+      // a row of vertices every 0.6 mm across the spine (walBend is straight past
+      // it): as wallet Nr. 2, halving every edge took ~4 s (the owner, 2026-11-14)
+      var spineXs = [];
+      for (var si = -22; si <= 22; si++) { spineXs.push(si * S / 22); }
+      var ed = sliceAt(k2Split(ext.geometry, function () { return false; }), 0, spineXs);
       ext.geometry.dispose();
       fob.add(new THREE.Mesh(k2Geo(ed), [walFleshMat, walEdgeMat, walOutMat]));
       // each piece's texture shifted onto the 10 cm of leather, its middle on
