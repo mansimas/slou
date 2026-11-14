@@ -658,6 +658,7 @@
   var W2_SHOW = 0.8, W2_PR = 0.5;               // how much of a card shows over a pocket; the pockets' corners by the spine
   var W2_POCKET = 0.28 + 5.4 - W2_SHOW;         // a pocket's top over its seam's foot: the stitch line, a card, less what shows
   var W2_S = 0.9, W2_GAP = 0.78;                 // the bend's half width; the U's bottom row stops this far from the middle
+  var W2_TAUT = 6, W2_HOLE = 0.12;               // open, the lining leaves the exterior this far either side of the fold at the top; the small opening between the foot seam's last stitches (see w2Separate)
   // a pocket's top over its foot at x (right side), before its corners are rounded
   function w2RawTop(kind, x) {
     var x0 = kind === 'B' ? W2_BX : W2_DX, w = kind === 'B' ? W2_BW : W2_DW;
@@ -665,14 +666,24 @@
   }
   function w2Round(h, d, r) { r = r || W2_PR; return d < r ? h - r + Math.sqrt(Math.max(0, r * r - (r - d) * (r - d))) : h; }
   // the lining's top at x, under its full height: the pockets' shape again,
-  // over each half from the wallet's end (the front pocket's width, held level
-  // on to the fold), mirrored across the fold and eased over it, so the line
-  // the notes come out of runs with the pockets' (the owner, 2026-11-14)
+  // over each half from the wallet's end (the front pocket's width), mirrored
+  // across the fold, so the line the notes come out of runs with the pockets'
+  // (the owner, 2026-11-14). Once down at the shape's lowest it stays level on
+  // through the middle: "curved" goes down with its own bend and does not rise
+  // again into a hump over the fold, as "sloped" (the owner, the same day)
+  var w2DropCache = {};
   function w2LiningDrop(x) {
-    var mx = 0;
-    for (var t = 0; t <= 7.2; t += 0.05) { mx = Math.max(mx, walSlotTop(t)); }
-    var ax = Math.sqrt(x * x + 0.04) - 0.2, t2 = Math.min(W2_DW, Math.max(0, W2_L / 2 - ax));
-    return walSlotTop(t2 * 7.2 / W2_DW) - mx;
+    var c = w2DropCache[state.slot];
+    if (!c) {   // the shape's highest, and where it first reaches its lowest
+      c = w2DropCache[state.slot] = { mx: 0, mn: 1e9, tmin: 0 };
+      for (var t = 0; t <= 7.2 + 1e-9; t += 0.01) {
+        var h = walSlotTop(t);
+        c.mx = Math.max(c.mx, h);
+        if (h < c.mn - 1e-9) { c.mn = h; c.tmin = t; }
+      }
+    }
+    var mx = c.mx, tmin = c.tmin, ax = Math.abs(x), t2 = Math.min(W2_DW, Math.max(0, W2_L / 2 - ax));
+    return walSlotTop(Math.min(t2 * 7.2 / W2_DW, tmin)) - mx;
   }
   // a piece's outline in the wallet's frame (cm, the middle at 0, 0), CCW
   var w2Cache = {};
@@ -2149,9 +2160,10 @@
       var mids = {}, any = false;
       tris.forEach(function (t) {
         for (var e = 0; e < 3; e++) {
-          var a = t[e], b = t[(e + 1) % 3], k = Math.min(a, b) + '_' + Math.max(a, b);
-          if (k in mids) { continue; }
+          var a = t[e], b = t[(e + 1) % 3];
           if (!need(P[a * 3 + 1], P[b * 3 + 1], P[a * 3], P[b * 3])) { continue; }
+          var k = Math.min(a, b) + '_' + Math.max(a, b);
+          if (k in mids) { continue; }
           var v = P.length / 3, j;
           for (j = 0; j < 3; j++) { P.push((P[a * 3 + j] + P[b * 3 + j]) / 2); Cl.push((Cl[a * 3 + j] + Cl[b * 3 + j]) / 2); }
           var nx = Nm[a * 3] + Nm[b * 3], ny = Nm[a * 3 + 1] + Nm[b * 3 + 1], nz = Nm[a * 3 + 2] + Nm[b * 3 + 2], nl = Math.hypot(nx, ny, nz) || 1;
@@ -2198,39 +2210,60 @@
   // halves every edge, which turned its thin triangles into ~2 M; the bend and
   // the pocket's rise only need rows of vertices across them, which this
   // gives at a few percent of that.
-  function sliceAt(d, axis, lines) {
-    var P = d.P, Nm = d.Nm, U = d.U, Cl = d.Cl, tris = d.tris;
-    lines.forEach(function (c) {
-      var cut = new Map(), next = [];
-      var sd = function (v) { var s = P[v * 3 + axis] - c; return s > 1e-6 ? 1 : s < -1e-6 ? -1 : 0; };
-      var at = function (a, b) {   // the vertex where edge a-b crosses the line
-        var key = Math.min(a, b) * 1e7 + Math.max(a, b);
-        if (cut.has(key)) { return cut.get(key); }
-        var sa = P[a * 3 + axis] - c, sb = P[b * 3 + axis] - c, f = sa / (sa - sb), v = P.length / 3, j;
-        for (j = 0; j < 3; j++) { P.push(P[a * 3 + j] + (P[b * 3 + j] - P[a * 3 + j]) * f); Cl.push(Cl[a * 3 + j] + (Cl[b * 3 + j] - Cl[a * 3 + j]) * f); }
-        P[v * 3 + axis] = c;
-        var nx = Nm[a * 3] + (Nm[b * 3] - Nm[a * 3]) * f, ny = Nm[a * 3 + 1] + (Nm[b * 3 + 1] - Nm[a * 3 + 1]) * f, nz = Nm[a * 3 + 2] + (Nm[b * 3 + 2] - Nm[a * 3 + 2]) * f, nl = Math.hypot(nx, ny, nz) || 1;
-        Nm.push(nx / nl, ny / nl, nz / nl);
-        U.push(U[a * 2] + (U[b * 2] - U[a * 2]) * f, U[a * 2 + 1] + (U[b * 2 + 1] - U[a * 2 + 1]) * f);
-        cut.set(key, v);
-        return v;
-      };
-      tris.forEach(function (t) {
-        var s = [sd(t[0]), sd(t[1]), sd(t[2])], g = t[3];
-        if (s.indexOf(1) < 0 || s.indexOf(-1) < 0) { next.push(t); return; }
-        var r = s.indexOf(0);
-        if (r >= 0) {   // one corner on the line: two triangles
-          var A0 = t[r], B0 = t[(r + 1) % 3], C0 = t[(r + 2) % 3], p = at(B0, C0);
-          next.push([A0, B0, p, g], [A0, p, C0, g]);
-          return;
-        }
-        r = s[0] === s[1] ? 2 : s[0] === s[2] ? 1 : 0;   // the corner alone on its side
-        var A = t[r], B = t[(r + 1) % 3], C = t[(r + 2) % 3], pab = at(A, B), pca = at(C, A);
-        next.push([A, pab, pca, g], [pab, B, C, g], [pab, C, pca, g]);
-      });
-      tris = next;
+  // `lo`, `hi` (optional): cut only triangles that reach into lo..hi on the
+  // other axis; past it the piece is left as it was, so nothing moves there
+  // and a vertex added on a shared edge stays on its line
+  function sliceAt(d, axis, lines, lo, hi) {
+    var P = d.P, Nm = d.Nm, U = d.U, Cl = d.Cl, o = 1 - axis;
+    var L = lines.slice().sort(function (u, v) { return u - v; }), cuts = L.map(function () { return new Map(); });
+    var at = function (li, a, b) {   // the vertex where edge a-b crosses line li
+      var key = Math.min(a, b) * 1e7 + Math.max(a, b), cut = cuts[li], c = L[li];
+      var got = cut.get(key);
+      if (got !== undefined) { return got; }
+      var sa = P[a * 3 + axis] - c, sb = P[b * 3 + axis] - c, f = sa / (sa - sb), v = P.length / 3, j;
+      for (j = 0; j < 3; j++) { P.push(P[a * 3 + j] + (P[b * 3 + j] - P[a * 3 + j]) * f); Cl.push(Cl[a * 3 + j] + (Cl[b * 3 + j] - Cl[a * 3 + j]) * f); }
+      P[v * 3 + axis] = c;
+      var nx = Nm[a * 3] + (Nm[b * 3] - Nm[a * 3]) * f, ny = Nm[a * 3 + 1] + (Nm[b * 3 + 1] - Nm[a * 3 + 1]) * f, nz = Nm[a * 3 + 2] + (Nm[b * 3 + 2] - Nm[a * 3 + 2]) * f, nl = Math.hypot(nx, ny, nz) || 1;
+      Nm.push(nx / nl, ny / nl, nz / nl);
+      U.push(U[a * 2] + (U[b * 2] - U[a * 2]) * f, U[a * 2 + 1] + (U[b * 2 + 1] - U[a * 2 + 1]) * f);
+      cut.set(key, v);
+      return v;
+    };
+    var sd = function (v, c) { var s = P[v * 3 + axis] - c; return s > 1e-6 ? 1 : s < -1e-6 ? -1 : 0; };
+    var out = [];
+    // every triangle meets the lines in the same (sorted) order, so a shared
+    // edge is cut at the same new vertices from both sides
+    d.tris.forEach(function (t) {
+      var v0 = P[t[0] * 3 + axis], v1 = P[t[1] * 3 + axis], v2 = P[t[2] * 3 + axis];
+      var mn = Math.min(v0, v1, v2), mx = Math.max(v0, v1, v2);
+      if (lo !== undefined) {
+        var q0 = P[t[0] * 3 + o], q1 = P[t[1] * 3 + o], q2 = P[t[2] * 3 + o];
+        if (Math.max(q0, q1, q2) < lo || Math.min(q0, q1, q2) > hi) { out.push(t); return; }
+      }
+      var k = 0;
+      while (k < L.length && L[k] <= mn + 1e-6) { k++; }
+      if (k >= L.length || L[k] >= mx - 1e-6) { out.push(t); return; }
+      var pieces = [t];
+      for (; k < L.length && L[k] < mx - 1e-6; k++) {
+        var c = L[k], nextP = [];
+        pieces.forEach(function (q) {
+          var s0 = sd(q[0], c), s1 = sd(q[1], c), s2 = sd(q[2], c), g = q[3];
+          if ((s0 < 1 && s1 < 1 && s2 < 1) || (s0 > -1 && s1 > -1 && s2 > -1)) { nextP.push(q); return; }
+          var sv = [s0, s1, s2], r = sv.indexOf(0);
+          if (r >= 0) {   // one corner on the line: two triangles
+            var A0 = q[r], B0 = q[(r + 1) % 3], C0 = q[(r + 2) % 3], pm = at(k, B0, C0);
+            nextP.push([A0, B0, pm, g], [A0, pm, C0, g]);
+            return;
+          }
+          r = s0 === s1 ? 2 : s0 === s2 ? 1 : 0;   // the corner alone on its side
+          var A = q[r], B = q[(r + 1) % 3], C = q[(r + 2) % 3], pab = at(k, A, B), pca = at(k, C, A);
+          nextP.push([A, pab, pca, g], [pab, B, C, g], [pab, C, pca, g]);
+        });
+        pieces = nextP;
+      }
+      for (var i = 0; i < pieces.length; i++) { out.push(pieces[i]); }
     });
-    return { P: P, Nm: Nm, U: U, Cl: Cl, tris: tris };
+    return { P: P, Nm: Nm, U: U, Cl: Cl, tris: out };
   }
   function k2Bend(src) {
     var path = strapPath(), S = path[path.length - 1].s;
@@ -2283,6 +2316,99 @@
   // The wallet built flat, opened: every leather piece and bent stitch
   // point by point (walBend), the stitches, holes and marks, which are all on
   // the halves, each turned with its half as a whole.
+  // Wallet Nr. 2, open: the exterior and the lining are not glued (the note
+  // compartment is between them), only sewn at the ends and the foot, and the
+  // pockets are sewn to the lining alone. So the exterior keeps its smooth
+  // bend and the lining, with its pockets and their stitches, is pulled taut
+  // across the fold and stands off it (the owner, 2026-11-14): once bent, at
+  // each height one parabola, level in the middle, leaving the exterior at
+  // its own slope X1 either side, so it parts from it gently with no break;
+  // X1 grows evenly from the foot seam's ends (W2_GAP) at the foot to
+  // W2_TAUT at the top, so the gap slopes from a small opening between the
+  // last stitches (W2_HOLE there, eased off going up) to ~8 mm at the top.
+  // Everything but the exterior (userData.w2Ext) is moved by the same amount
+  // at its (x, y), flat, before walHinge bends it. Tried first: an outward bow
+  // of the exterior, a chord eased into a wave, a level run rounded into the
+  // bend (broke), the lining alone lifted, opening only above the pockets.
+  function w2Separate(a) {
+    var R = W2_S / a, H2 = W2_H / 2, zm = W2_T / 2, XE = W2_TAUT + 0.1;
+    var up = function (y) { return Math.min(1, Math.max(0, (y + H2) / W2_H)); };
+    var lift = function (ax, y) {
+      var d = 0, X1 = W2_GAP + (W2_TAUT - W2_GAP) * up(y);
+      if (ax < X1) {
+        var p1 = walBend(X1, zm, a), m1 = Math.tan(Math.min(X1 / R, a)), hc = p1.z - m1 * p1.x / 2;
+        var f = function (dd) { var q = walBend(ax, zm + dd, a); return q.z - (hc + m1 * q.x * q.x / (2 * p1.x)); };
+        if (f(0) < 0) {
+          var lo = 0, hi = 2;
+          for (var it = 0; it < 28; it++) { var mid = (lo + hi) / 2; if (f(mid) < 0) { lo = mid; } else { hi = mid; } }
+          d = (lo + hi) / 2;
+        }
+      }
+      if (ax < W2_GAP) { var u = ax / W2_GAP; d += W2_HOLE * (1 - u * u) * (1 - u * u) * (1 - up(y)); }
+      return d;
+    };
+    // on a grid, read back bilinearly: the search is too slow per vertex
+    var GX = 0.02, GY = 0.1, nx = Math.ceil(XE / GX) + 1, ny = Math.ceil(W2_H / GY) + 1, grid = new Float32Array(nx * ny);
+    for (var j = 0; j < ny; j++) { for (var i = 0; i < nx; i++) { grid[j * nx + i] = lift(i * GX, -H2 + j * GY); } }
+    var at = function (x, y) {
+      var fx = Math.min(nx - 1.001, Math.abs(x) / GX), fy = Math.min(ny - 1.001, Math.max(0, (y + H2) / GY)), i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j;
+      if (Math.abs(x) >= XE) { return 0; }
+      return (grid[j * nx + i] * (1 - u) + grid[j * nx + i + 1] * u) * (1 - v) + (grid[(j + 1) * nx + i] * (1 - u) + grid[(j + 1) * nx + i + 1] * u) * v;
+    };
+    // the turn of a face at (x, y) once bent, against the bend's own
+    var turn = function (x, y) {
+      var e = 0.01, pa = walBend(x - e, zm + at(x - e, y), a), pb = walBend(x + e, zm + at(x + e, y), a);
+      return Math.atan2(pb.z - pa.z, pb.x - pa.x) - walBend(x, zm + at(x, y), a).th;
+    };
+    // rows of vertices to carry the lift: the lining every 3 / 5 mm, the
+    // pockets every 6 / 10 mm (the field is smooth; finer made millions of
+    // triangles); the bend itself, |x| < W2_S, is cut every 0.6 mm already
+    var rows = function (nX, nY) {
+      var xs = [], ys = [];
+      for (var q = 1; q <= nX; q++) { var xq = W2_S + (XE - W2_S) * q / nX; xs.push(xq, -xq); }
+      for (q = 0; q <= nY; q++) { ys.push(-H2 + W2_H * q / nY); }
+      return [xs, ys];
+    };
+    var fine = rows(17, 18), coarse = rows(9, 9);
+    var m = new THREE.Matrix4(), p = new THREE.Vector3();
+    fob.children.slice().forEach(function (o) {
+      if (o.userData.w2Ext) { return; }
+      if (o.isInstancedMesh) {
+        for (var k = 0; k < o.count; k++) {
+          o.getMatrixAt(k, m); p.setFromMatrixPosition(m);
+          var dz = at(p.x, p.y);
+          if (dz) { m.elements[14] += dz; o.setMatrixAt(k, m); }
+        }
+        o.instanceMatrix.needsUpdate = true;
+        return;
+      }
+      if (!o.geometry || !o.geometry.attributes || !o.geometry.attributes.position) { return; }
+      var g = o.geometry;
+      if (g.index && g.groups.length && g.attributes.color && g.attributes.uv) {   // a leather piece: cut finer where it moves
+        var rw = o.userData.w2Lining ? fine : coarse;
+        var dd = sliceAt(sliceAt(k2Split(g, function () { return false; }), 0, rw[0], -H2 - 1, H2 + 1), 1, rw[1], -XE, XE);
+        for (var v = 0; v < dd.P.length / 3; v++) {
+          var x = dd.P[v * 3], y = dd.P[v * 3 + 1], dz2 = at(x, y);
+          if (!dz2) { continue; }
+          dd.P[v * 3 + 2] += dz2;
+          var r = turn(x, y), c = Math.cos(r), sn = Math.sin(r), n0 = dd.Nm[v * 3], n2 = dd.Nm[v * 3 + 2];
+          dd.Nm[v * 3] = c * n0 - sn * n2; dd.Nm[v * 3 + 2] = sn * n0 + c * n2;
+        }
+        o.geometry = k2Geo(dd);
+        g.dispose();
+        return;
+      }
+      var P = g.attributes.position, N = g.attributes.normal;   // a thread: moved as it is
+      for (var w = 0; w < P.count; w++) {
+        var dz3 = at(P.getX(w), P.getY(w));
+        if (!dz3) { continue; }
+        P.setZ(w, P.getZ(w) + dz3);
+        if (N) { var r2 = turn(P.getX(w), P.getY(w)), c2 = Math.cos(r2), s2 = Math.sin(r2), a0 = N.getX(w), a2 = N.getZ(w); N.setX(w, c2 * a0 - s2 * a2); N.setZ(w, s2 * a0 + c2 * a2); }
+      }
+      P.needsUpdate = true; if (N) { N.needsUpdate = true; }
+      if (g.computeBoundingSphere) { g.computeBoundingSphere(); }
+    });
+  }
   function walHinge(a) {
     if (a < 1e-6) { return; }
     var S = hingeS(), z0 = -hingeT() / 2, R = S / a;
@@ -2393,10 +2519,17 @@
         return sliceAt(k2Split(g, function () { return false; }), 0, xs);
       };
       var ext2 = leatherPiece([w2Ext()], T2, -T2 / 2, function (p) { return 1 - topFree(p, 0.3); }, [], leatherCol2, null, null, stackTop, T2);
-      fob.add(new THREE.Mesh(k2Geo(hingeSplit(ext2.geometry)), [walFleshMat, walEdgeMat, w2OutMat]));
+      var ext2m = new THREE.Mesh(k2Geo(hingeSplit(ext2.geometry)), [walFleshMat, walEdgeMat, w2OutMat]);
+      ext2m.userData.w2Ext = true;   // stays as it is when the rest stands off it (w2Separate)
+      fob.add(ext2m);
       ext2.geometry.dispose();
+      // The exterior is 5 mm longer than the lining (on the pattern: it goes
+      // round the outside of the fold); open, the lining stands off it at the
+      // fold, see w2Separate
       var lin2 = leatherPiece([w2Loop('A')], T2, T2 / 2, function (p) { return 1 - topFree(p, 1.45); }, [], leatherCol2, null, null, stackTop, T2);
-      fob.add(new THREE.Mesh(k2Geo(hingeSplit(lin2.geometry)), [w2LiningMat, walEdgeMat, walFleshMat]));
+      var lin2m = new THREE.Mesh(k2Geo(hingeSplit(lin2.geometry)), [w2LiningMat, walEdgeMat, walFleshMat]);
+      lin2m.userData.w2Lining = true;   // cut finer than the pockets when it stands off (w2Separate)
+      fob.add(lin2m);
       lin2.geometry.dispose();
       var shift2 = function (mesh, c) {
         var uv = mesh.geometry.attributes.uv;
@@ -2416,7 +2549,8 @@
           xs2.push(sg * (W2_BX - 0.28 + li * 0.03), sg * (W2_BX + W2_BW - 0.02 + li * 0.03));
           ys2.push(-H2 + W2_BY - 0.28 + li * 0.03);
         }
-        var fd2 = sliceAt(sliceAt(k2Split(fp.geometry, function () { return false; }), 0, xs2), 1, ys2);
+        var bx0 = W2_BX - 0.4, bx1 = W2_BX + W2_BW + 0.4;   // the foot's rows only across the back pocket
+        var fd2 = sliceAt(sliceAt(k2Split(fp.geometry, function () { return false; }), 0, xs2), 1, ys2, sg > 0 ? bx0 : -bx1, sg > 0 ? bx1 : -bx0);
         for (var fv = 0; fv < fd2.P.length / 3; fv++) {
           var qx = fd2.P[fv * 3], qy = fd2.P[fv * 3 + 1], lz = w2Lift(qx, qy);
           if (!lz) { continue; }
@@ -3284,6 +3418,7 @@
     stitches.count = extra;   // only the instances laid
     if (addPockets) { addPockets(); }   // now the dents the stitches press in are known
     fob.add(dimples, holes, stitches);
+    if (wal2 && !measures.visible) { w2Separate(WAL_OPEN); }
     if (wallet || wal2) { walHinge(measures.visible ? 0 : WAL_OPEN); return; }   // flat while measured
     if (card || fold) { return; }   // no key ring on the card holders
 

@@ -670,10 +670,23 @@ owner: "so it is not a pure copy"), built in `w2Loop()`:
   to each pocket's width; each pocket stands `W2_POCKET` over its seam's foot, which leaves `W2_SHOW` 8 mm of
   a bank card showing; the corners by the spine rounded `W2_PR` 5 mm (the back pocket's both top corners);
 - the lining's top follows the same pocket shape (`w2LiningDrop`), over each half from the wallet's end,
-  mirrored across the fold, so it runs with the pockets (the owner, 2026-11-14); a half-round thumb notch on
+  mirrored across the fold, so it runs with the pockets (the owner, 2026-11-14); once at the shape's lowest it
+  stays level through the middle, so "curved" has no hump over the fold (the owner); a half-round thumb notch on
   the fold was tried first and the owner did not like it.
 - The exterior must be longer than the lining (on the outside of the fold): ~pi x the 1.2 mm between their
-  middles, ~4 mm; the pattern gives it 5 mm (`W2_FL` 23.5 vs `W2_L` 23). The 3D keeps both 23 cm.
+  middles, ~4 mm; the pattern gives it 5 mm (`W2_FL` 23.5 vs `W2_L` 23). The 3D keeps both 23 cm, and the
+  two are not glued (the note compartment) and the pockets are sewn to the lining alone, so open, the exterior
+  keeps its smooth bend and the lining, with its pockets and their stitches, stands off it (`w2Separate`, run
+  before `walHinge`, moves everything but the exterior, `userData.w2Ext`): at each height one parabola, level
+  in the middle, leaving the exterior at its own slope X1 either side, so no break (the owner: naturally there
+  is none). X1 grows evenly from the foot seam's ends (`W2_GAP`) at the foot to `W2_TAUT` 60 mm at the top, so
+  the gap slopes from a small opening between the last stitches (`W2_HOLE` 1.2 mm, eased off going up; the
+  owner: from thread to thread, no more, the threads join the pieces) to ~8 mm at the top, with no bulge.
+  Its lift is read off a grid; the lining is cut every 3 / 5 mm to carry it, the pockets every 6 / 10 mm.
+  None while laid flat. Tried first (2026-11-14): an outward bow of the exterior, a chord eased into a wave,
+  a level run rounded into the bend (broke), the lining alone lifted and only above the pockets (squeezed),
+  the foot glued shut. `sliceAt` cuts each triangle only by the lines that cross it (it rebuilt the whole
+  list per line: ~25 s). The faint scuff patches on the lining are the `natural` texture, not geometry.
 - The front pocket rises over the back one outside its edge, full 0.2 mm in (`w2Lift`), so it bends over
   that edge (the owner, 2026-11-14: the back pocket's side stuck through the front pocket's top).
 - Speed: the bend and the pocket rise are cut along lines only (`sliceAt`), not by `k2Split` halving every
