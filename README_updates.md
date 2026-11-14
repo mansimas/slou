@@ -1,7 +1,8 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
-[2026-11-14 17:00] - Wallet 2 own shapes - Owner: make wallet Nr. 2 not a pure copy of the Miura pattern. Pockets now take wallet Nr. 1's slot shapes (same control), heights leave 8 mm of card showing, spine corners R 5; lining top follows the pockets' shape (a thumb notch was tried, disliked).
+[2026-11-14 17:40] - Wallet 2 spine gap - Owner: open, exterior and lining lay flush as if equal. The exterior stays smooth; the lining is pulled taut, straight and level across, standing clear of it: ~5 mm at the free top, less down by the seam, soft rounds.
+[2026-11-14 17:00] - Wallet 2 own shapes - Owner: make wallet Nr. 2 not a pure copy of the Miura pattern. Pockets now take wallet Nr. 1's slot shapes (same control), heights leave 8 mm of card showing, spine corners R 5; lining top follows the pockets' shape, level through the middle (no hump).
 [2026-11-14 16:20] - Wallet faster switch - Owner: yes, speed up wallet Nr. 1 too (~4-5 s to switch to it). Its exterior is now cut along lines across the spine only (sliceAt), as wallet Nr. 2. ~0.9 s, same look.
 [2026-11-14 16:00] - Wallet 2 pocket over edge - Owner: on wallet Nr. 2 the back pocket's side poked through the front pocket's top edge. The front pocket now rises outside the back pocket's edge, full 0.2 mm in from it, so it bends up and over that edge instead.
 [2026-11-14 15:58] - Wallet 2 faster switch - Owner: switching to wallet Nr. 2 lagged (~30 s). Edge-halving turned its thin triangles into ~2 M; the bend and pocket rise are now cut only along lines where they curve (sliceAt). ~1.5 s, same look.

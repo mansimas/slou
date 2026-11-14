@@ -670,10 +670,20 @@ owner: "so it is not a pure copy"), built in `w2Loop()`:
   to each pocket's width; each pocket stands `W2_POCKET` over its seam's foot, which leaves `W2_SHOW` 8 mm of
   a bank card showing; the corners by the spine rounded `W2_PR` 5 mm (the back pocket's both top corners);
 - the lining's top follows the same pocket shape (`w2LiningDrop`), over each half from the wallet's end,
-  mirrored across the fold, so it runs with the pockets (the owner, 2026-11-14); a half-round thumb notch on
+  mirrored across the fold, so it runs with the pockets (the owner, 2026-11-14); once at the shape's lowest it
+  stays level through the middle, so "curved" has no hump over the fold (the owner); a half-round thumb notch on
   the fold was tried first and the owner did not like it.
 - The exterior must be longer than the lining (on the outside of the fold): ~pi x the 1.2 mm between their
-  middles, ~4 mm; the pattern gives it 5 mm (`W2_FL` 23.5 vs `W2_L` 23). The 3D keeps both 23 cm.
+  middles, ~4 mm; the pattern gives it 5 mm (`W2_FL` 23.5 vs `W2_L` 23). The 3D keeps both 23 cm, and the
+  two are not glued (the note compartment), so open, the exterior keeps its smooth bend and the lining is
+  pulled taut across the fold and stands clear of it: straight and level across the middle, rounding onto the
+  exterior's bend in a soft smooth maximum (`W2_TAUT_K` 2 mm), no corner. Low down, held by the foot seam, taut
+  only from its ends (`W2_GAP`); above the back pockets' tops, free, straight over `W2_TAUT` 25 mm either side,
+  reached over `W2_TAUT_UP` 12 mm, so the gap is ~5 mm at the top; none while laid flat (the owner, 2026-11-14:
+  the lining taut and standing off the exterior, the exterior smooth, room at the free top, no odd corner).
+  Tried first: an outward bow of the exterior, a chord eased into a wave, a level run with 3 mm fillets near
+  the middle (read as corners), a smooth blend (did not read as taut). The faint scuff band on the lining's
+  upper left is the `natural` texture, not geometry.
 - The front pocket rises over the back one outside its edge, full 0.2 mm in (`w2Lift`), so it bends over
   that edge (the owner, 2026-11-14: the back pocket's side stuck through the front pocket's top).
 - Speed: the bend and the pocket rise are cut along lines only (`sliceAt`), not by `k2Split` halving every
