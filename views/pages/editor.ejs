@@ -633,36 +633,85 @@
   // up towards the inside as one rigid piece. (x, z) flat -> bent, and the
   // angle the point is turned by.
   // Wallet Nr. 2 (2026-11-09): from a pattern the owner found
-  // (pavyzdziai/6vnt/, Miura Leather M.1 "Bifold Wallet"), its shapes
-  // measured off the vectors of 1.svg. Only the shapes and sizes are taken:
-  // the stitch, edges, leather and pattern are the owner's own. Six pieces:
-  // the exterior (F, 235 x 88 mm on the pattern, a plain rectangle, R 10
-  // corners), the lining (A, 230 x 88, a shallow dip in the middle of its top
-  // so the notes show), on each half a back pocket (B, C: 89 x 54.6, its top
-  // falling towards the spine, sewn to the lining by its bottom edge 14 mm up)
-  // and over it a front pocket (D, E: 105.6 x 54.7, sewn in with the U and up
-  // its spine side). Between lining and exterior the note compartment, open
-  // at the top. Built flat, the inside towards +z, then opened at the spine
-  // like the wallet (walHinge). Outlines in cm: the lining with x along the
-  // wallet and y up from its foot; a pocket in its own frame, its high end at
-  // -x (the wallet's end).
-  var W2_A = [-11.488,0.866,-11.462,0.735,-11.419,0.612,-11.361,0.496,-11.289,0.389,-11.204,0.293,-11.108,0.209,-11.001,0.137,-10.886,0.079,-10.762,0.036,-10.632,0.009,-10.496,0.0,10.499,0.0,10.634,0.009,10.764,0.035,10.887,0.078,11.002,0.136,11.109,0.207,11.205,0.291,11.289,0.387,11.361,0.493,11.419,0.609,11.462,0.732,11.488,0.862,11.497,0.998,11.497,7.799,11.488,7.934,11.462,8.064,11.419,8.187,11.362,8.302,11.29,8.408,11.206,8.504,11.11,8.589,11.004,8.661,10.889,8.719,10.765,8.761,10.635,8.788,10.499,8.797,7.998,8.797,7.487,8.79,6.977,8.768,6.468,8.733,5.96,8.682,5.454,8.618,4.951,8.54,4.449,8.447,3.95,8.34,3.455,8.22,2.962,8.085,2.473,7.937,1.988,7.774,1.664,7.671,1.336,7.586,1.004,7.52,0.671,7.473,0.336,7.445,0.0,7.436,-0.336,7.445,-0.671,7.473,-1.004,7.52,-1.336,7.586,-1.664,7.671,-1.988,7.774,-2.472,7.937,-2.961,8.085,-3.453,8.22,-3.949,8.34,-4.448,8.447,-4.949,8.54,-5.453,8.618,-5.959,8.682,-6.467,8.733,-6.977,8.768,-7.487,8.79,-7.998,8.797,-10.499,8.797,-10.634,8.788,-10.764,8.762,-10.887,8.719,-11.002,8.661,-11.109,8.59,-11.205,8.506,-11.289,8.41,-11.361,8.304,-11.419,8.189,-11.462,8.065,-11.488,7.935,-11.497,7.799,-11.497,1.002];
-  var W2_B = [-4.45,0.0,4.45,0.0,4.45,4.021,4.447,4.074,4.439,4.126,4.425,4.176,4.407,4.224,4.383,4.269,4.356,4.312,4.324,4.351,4.288,4.388,4.249,4.42,4.206,4.449,4.16,4.474,4.111,4.494,3.455,4.703,2.793,4.888,2.125,5.047,1.452,5.181,0.776,5.289,0.096,5.371,-0.587,5.428,-1.271,5.459,-1.957,5.464,-2.643,5.443,-3.328,5.396,-4.012,5.323,-4.074,5.311,-4.132,5.292,-4.186,5.267,-4.237,5.235,-4.283,5.198,-4.325,5.156,-4.361,5.109,-4.392,5.059,-4.417,5.004,-4.435,4.947,-4.446,4.887,-4.45,4.825];
-  var W2_D = [-5.271,0.862,-5.245,0.732,-5.202,0.608,-5.144,0.493,-5.072,0.386,-4.987,0.29,-4.891,0.206,-4.785,0.134,-4.669,0.077,-4.545,0.034,-4.415,0.008,-4.279,0.0,5.28,0.0,5.28,3.372,5.275,3.475,5.26,3.576,5.234,3.673,5.199,3.767,5.155,3.856,5.103,3.94,5.042,4.019,4.974,4.091,4.898,4.157,4.815,4.215,4.726,4.265,4.631,4.307,3.835,4.585,3.029,4.826,2.214,5.028,1.392,5.192,0.565,5.318,-0.268,5.406,-1.103,5.455,-1.94,5.465,-2.778,5.437,-3.615,5.37,-4.449,5.263,-5.28,5.118,-5.28,0.998];
+  // (pavyzdziai/6vnt/, Miura Leather M.1 "Bifold Wallet"). Only its layout
+  // and overall sizes are kept; since 2026-11-14 the outlines are the owner's
+  // own (below), and the stitch, edges, leather and pattern always were. Six
+  // pieces: the exterior (235 x 88 mm on the pattern, a plain rectangle, R 10
+  // corners), the lining (230 x 88, a thumb notch on the fold so the notes
+  // show), on each half a back pocket (89 wide, sewn to the lining by its
+  // bottom edge 14 mm up) and over it a front pocket (105.6 wide, sewn in with
+  // the U and up its spine side). Between lining and exterior the note
+  // compartment, open at the top. Built flat, the inside towards +z, then
+  // opened at the spine like the wallet (walHinge). Outlines in cm, in the
+  // wallet's frame, the middle at 0, 0.
+  // The owner's own shapes (2026-11-14, "so it is not a plain copy"; the
+  // Miura vectors are gone): the pockets' tops are wallet Nr. 1's slot shapes
+  // (WAL_SLOTS, the "Slot shape" control), stretched to each pocket's width;
+  // each pocket is as high as leaves 8 mm of a bank card showing above it
+  // (W2_SHOW); its corners by the spine rounded W2_PR; the lining's top
+  // follows the same shape (w2LiningDrop) in place of the example's long
+  // wave (a thumb notch on the fold was tried first, the owner did not like
+  // it, 2026-11-14).
   var W2_L = 23, W2_H = 8.8, W2_FL = 23.5, W2_R = 1, W2_T = 0.12;   // lining length, height, the exterior's length on the pattern, corners, every piece 1.2 mm
   var W2_BX = 1.78, W2_BY = 1.4, W2_DX = 0.94;   // back pocket: spine side and foot; front pocket: spine side (cm from the middle / foot)
+  var W2_BW = 8.9, W2_DW = W2_L / 2 - W2_DX;    // the pockets' widths (the front one runs out to the wallet's end)
+  var W2_SHOW = 0.8, W2_PR = 0.5;               // how much of a card shows over a pocket; the pockets' corners by the spine
+  var W2_POCKET = 0.28 + 5.4 - W2_SHOW;         // a pocket's top over its seam's foot: the stitch line, a card, less what shows
   var W2_S = 0.9, W2_GAP = 0.78;                 // the bend's half width; the U's bottom row stops this far from the middle
+  // a pocket's top over its foot at x (right side), before its corners are rounded
+  function w2RawTop(kind, x) {
+    var x0 = kind === 'B' ? W2_BX : W2_DX, w = kind === 'B' ? W2_BW : W2_DW;
+    return W2_POCKET + walSlotTop((x0 + w - x) * 7.2 / w) - 8.3;
+  }
+  function w2Round(h, d, r) { r = r || W2_PR; return d < r ? h - r + Math.sqrt(Math.max(0, r * r - (r - d) * (r - d))) : h; }
+  // the lining's top at x, under its full height: the pockets' shape again,
+  // over each half from the wallet's end (the front pocket's width, held level
+  // on to the fold), mirrored across the fold and eased over it, so the line
+  // the notes come out of runs with the pockets' (the owner, 2026-11-14)
+  function w2LiningDrop(x) {
+    var mx = 0;
+    for (var t = 0; t <= 7.2; t += 0.05) { mx = Math.max(mx, walSlotTop(t)); }
+    var ax = Math.sqrt(x * x + 0.04) - 0.2, t2 = Math.min(W2_DW, Math.max(0, W2_L / 2 - ax));
+    return walSlotTop(t2 * 7.2 / W2_DW) - mx;
+  }
   // a piece's outline in the wallet's frame (cm, the middle at 0, 0), CCW
+  var w2Cache = {};
   function w2Loop(kind, sg) {
-    var arr = kind === 'A' ? W2_A : kind === 'B' ? W2_B : W2_D, out = [];
-    var c = kind === 'B' ? W2_BX + 4.45 : W2_DX + 5.28, dy = kind === 'B' ? W2_BY : 0;
-    for (var i = 0; i < arr.length; i += 2) {
-      out.push(kind === 'A' ? new THREE.Vector2(arr[i], arr[i + 1] - W2_H / 2)
-                            : new THREE.Vector2(sg * (c - arr[i]), arr[i + 1] + dy - W2_H / 2));
+    var key = kind + (sg || 0) + state.slot;
+    if (w2Cache[key]) { return w2Cache[key]; }
+    var out = [], H2 = W2_H / 2, E = W2_L / 2, R = W2_R, PI = Math.PI, i;
+    var arc = function (cx, cy, r, a0, a1) { for (var k = 1; k < 12; k++) { var a = a0 + (a1 - a0) * k / 12; out.push(new THREE.Vector2(cx + r * Math.cos(a), cy + r * Math.sin(a))); } };
+    if (kind === 'A') {   // the lining: its top as the pockets', the corners R
+      out.push(new THREE.Vector2(-E + R, -H2), new THREE.Vector2(E - R, -H2)); arc(E - R, -H2 + R, R, -PI / 2, 0);
+      out.push(new THREE.Vector2(E, -H2 + R));
+      var xa = [], na = Math.ceil(2 * E / 0.05);
+      for (i = 0; i <= na; i++) { xa.push(E - 2 * E * i / na); }
+      for (i = 1; i < 20; i++) { xa.push(E - R * i / 20, -E + R * i / 20); }
+      xa.sort(function (u, v) { return v - u; });
+      xa.filter(function (x, j) { return !j || xa[j - 1] - x > 1e-6; }).forEach(function (x) {
+        out.push(new THREE.Vector2(x, w2Round(H2 + w2LiningDrop(x), E - Math.abs(x), R)));
+      });
+      out.push(new THREE.Vector2(-E, -H2 + R)); arc(-E + R, -H2 + R, R, PI, PI * 1.5);
+    } else {
+      var x0 = kind === 'B' ? W2_BX : W2_DX, w = kind === 'B' ? W2_BW : W2_DW, y0 = -H2 + (kind === 'B' ? W2_BY : 0);
+      var top = function (x) {
+        var h = w2Round(w2RawTop(kind, x), x - x0);
+        return y0 + (kind === 'B' ? w2Round(h, x0 + w - x) : h);   // the back pocket rounded at both top corners, the front one by the spine only
+      };
+      out.push(new THREE.Vector2(x0, y0));
+      if (kind === 'B') { out.push(new THREE.Vector2(x0 + w, y0)); }
+      else { out.push(new THREE.Vector2(x0 + w - R, y0)); arc(x0 + w - R, y0 + R, R, -PI / 2, 0); out.push(new THREE.Vector2(x0 + w, y0 + R)); }
+      var n = Math.ceil(w / 0.05), ts = [];
+      for (i = 0; i <= n; i++) { ts.push(x0 + w - w * i / n); }
+      for (i = 1; i < 20; i++) { ts.push(x0 + W2_PR * i / 20); if (kind === 'B') { ts.push(x0 + w - W2_PR * i / 20); } }   // finer round the corners
+      ts.sort(function (u, v) { return v - u; });
+      ts = ts.filter(function (x, j) { return !j || ts[j - 1] - x > 1e-6; });   // no point twice
+      ts.forEach(function (x) { out.push(new THREE.Vector2(x, top(x))); });
+      out.forEach(function (q) { q.x *= sg; });
     }
     var a2 = 0;
-    out.forEach(function (q, i) { var r = out[(i + 1) % out.length]; a2 += q.x * r.y - r.x * q.y; });
-    return a2 < 0 ? out.reverse() : out;
+    out.forEach(function (q, j) { var r = out[(j + 1) % out.length]; a2 += q.x * r.y - r.x * q.y; });
+    return (w2Cache[key] = a2 < 0 ? out.reverse() : out);
   }
   function w2Ext() {   // the exterior, in the 3D as long as the lining (on the pattern W2_FL)
     var sh = new THREE.Shape(), x = W2_L / 2, y = W2_H / 2, r = W2_R, PI = Math.PI;
@@ -687,7 +736,7 @@
   // pocket's top edge)
   function w2Lift(x, y) {
     var ax = Math.abs(x), e = function (t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
-    return W2_T * e((ax - W2_BX + 0.28) / 0.3) * e((W2_BX + 8.9 + 0.28 - ax) / 0.3) * e((y + W2_H / 2 - W2_BY + 0.28) / 0.3);
+    return W2_T * e((ax - W2_BX + 0.28) / 0.3) * e((W2_BX + W2_BW + 0.28 - ax) / 0.3) * e((y + W2_H / 2 - W2_BY + 0.28) / 0.3);
   }
   function hingeS() { return state.product === 'wallet2' ? W2_S : WAL_SPINE; }
   function hingeT() { return state.product === 'wallet2' ? W2_T : WAL_EXT; }
@@ -2322,7 +2371,7 @@
       flatBack.geometry.dispose();
       holesAt = stitchHoles(outline('stadium', STITCH_INSET));
     } else if (wal2) {
-      // Wallet Nr. 2 (see W2_A): flat and open, the inside towards +z. The
+      // Wallet Nr. 2 (see w2Loop): flat and open, the inside towards +z. The
       // exterior (z -T..0), the lining on it, the back pockets on the lining
       // and the front pockets over them. Where the pieces are glued and
       // stitched (the U: round the ends and along the foot) the edge is one
@@ -2356,7 +2405,7 @@
       };
       [-1, 1].forEach(function (sg) {
         // the back pocket: every edge its own
-        fob.add(shift2(leatherPiece([w2Loop('B', sg)], T2, T2 * 1.5, function () { return 0; }, [walSlotMat, walEdgeMat, walSlotFleshMat], pocketCol2), sg * (W2_BX + 4.45)));
+        fob.add(shift2(leatherPiece([w2Loop('B', sg)], T2, T2 * 1.5, function () { return 0; }, [walSlotMat, walEdgeMat, walSlotFleshMat], pocketCol2), sg * (W2_BX + W2_BW / 2)));
         // the front pocket: in the stack along the foot and the end, lifted over the back pocket
         var dStack = function (p) { return p.y < -H2 + 0.01 || Math.abs(p.x) > W2_L / 2 - 0.01 || (Math.abs(p.x) > W2_L / 2 - W2_R - 0.01 && p.y < -H2 + W2_R) ? 1 : 0; };
         var fp = leatherPiece([w2Loop('D', sg)], T2, T2 * 1.5, dStack, [], pocketCol2, null, null, function () { return 2 * T2; }, T2);
@@ -2364,7 +2413,7 @@
         // two sides and its foot); elsewhere it is level and needs none
         var xs2 = [], ys2 = [];
         for (var li = 0; li <= 10; li++) {
-          xs2.push(sg * (W2_BX - 0.28 + li * 0.03), sg * (W2_BX + 8.88 + li * 0.03));
+          xs2.push(sg * (W2_BX - 0.28 + li * 0.03), sg * (W2_BX + W2_BW - 0.02 + li * 0.03));
           ys2.push(-H2 + W2_BY - 0.28 + li * 0.03);
         }
         var fd2 = sliceAt(sliceAt(k2Split(fp.geometry, function () { return false; }), 0, xs2), 1, ys2);
@@ -2373,7 +2422,7 @@
           if (!lz) { continue; }
           fd2.P[fv * 3 + 2] += lz;   // the normals left as they are: tipped with the rise, it shaded as a dark band where the back pocket lies under (the owner, 2026-11-10)
         }
-        for (var fu = 0; fu < fd2.U.length; fu += 2) { fd2.U[fu] -= sg * (W2_DX + 5.28); }
+        for (var fu = 0; fu < fd2.U.length; fu += 2) { fd2.U[fu] -= sg * (W2_DX + W2_DW / 2); }
         fob.add(new THREE.Mesh(k2Geo(fd2), [walSlotMat, walEdgeMat, walSlotFleshMat]));
         fp.geometry.dispose();
       });
@@ -2420,8 +2469,8 @@
         for (var k = 0; k <= 400; k++) { poly.push(new THREE.Vector2(x0 + (x1 - x0) * k / 400, y0 + (y1 - y0) * k / 400)); }
         return divide(poly).concat([poly[400]]);
       };
-      var backFoot = function (sg) { var y = -H2 + W2_BY + I2; return line2(sg * (W2_BX + I2), y, sg * (W2_BX + 8.9 - I2), y); };
-      var frontSide = function (sg) { var x = sg * (W2_DX + I2); return line2(x, -H2 + 3.372 - I2, x, yB2 + WAL_END_IN); };
+      var backFoot = function (sg) { var y = -H2 + W2_BY + I2; return line2(sg * (W2_BX + I2), y, sg * (W2_BX + W2_BW - I2), y); };
+      var frontSide = function (sg) { var x = sg * (W2_DX + I2); return line2(x, -H2 + w2RawTop('D', W2_DX) - W2_PR - I2, x, yB2 + WAL_END_IN); };
       holesAt = []; runs = []; frontRuns = [];
       [uRun2(-1), backFoot(-1), frontSide(-1), uRun2(1), backFoot(1), frontSide(1)].forEach(function (h, i) {
         runs.push([holesAt.length, holesAt.length + h.length - 1]); frontRuns.push(i % 3 !== 0);
@@ -3473,7 +3522,7 @@
     document.getElementById('kfShapeBox').hidden = state.product !== 'keyfob';
     document.getElementById('kfRingBox').hidden = card;
     document.getElementById('kfPocketBox').hidden = state.product !== 'card' && state.product !== 'wallet' && state.product !== 'wallet2';   // the wallet's slots: the second colour
-    document.getElementById('kfSlotBox').hidden = state.product !== 'wallet';
+    document.getElementById('kfSlotBox').hidden = state.product !== 'wallet' && state.product !== 'wallet2';   // wallet Nr. 2's pockets take the same shapes
     document.getElementById('kfSecondBox').hidden = state.product !== 'keyfob2';
     ['kfTitle', 'kfLead'].forEach(function (id) {
       var el = document.getElementById(id);
