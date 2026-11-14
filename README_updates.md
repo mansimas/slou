@@ -1,6 +1,8 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-14 16:00] - Wallet 2 pocket over edge - Owner: on wallet Nr. 2 the back pocket's side poked through the front pocket's top edge. The front pocket now rises outside the back pocket's edge, full 0.2 mm in from it, so it bends up and over that edge instead.
+[2026-11-14 15:58] - Wallet 2 faster switch - Owner: switching to wallet Nr. 2 lagged (~30 s). Edge-halving turned its thin triangles into ~2 M; the bend and pocket rise are now cut only along lines where they curve (sliceAt). ~1.5 s, same look.
 [2026-11-10 10:45] - Card 1 two hidden cards - Owner: card holder Nr. 1 should look as if it held two hidden cards in each slot. The fullness is now two cards' thickness (1.52 mm) in the front pocket, the back pocket and the middle slot.
 [2026-11-10 10:30] - Card holder 2 cards hidden - Owner: take the blue and red cards out of card holder Nr. 2 but keep the fullness they give it, as on Nr. 3. The cards are no longer drawn; the halves still stand apart round them.
 [2026-11-10 10:15] - Card 1 softer shadow, open slot - Owner: a smaller shadow at the bottom of card holder Nr. 1's fuller pockets, and the middle slot holds cards too. Fullness eases in over 16 mm (was 7), shading half as much; the bodies stay apart above the card, the slot's mouth open.
