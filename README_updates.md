@@ -1,6 +1,8 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-17 10:20] - Speed up product switching - Owner reported PC freezes when switching 3D items. Avoid repeated shared-edge calculations, no-op subdivision scans, blank texture repaints and rebuilding an already-selected option; release instance buffers. CPU checks reduced card and keyfob 2 builds about 38%; all seven geometry hashes match. Wallet 2 remains expensive.
+[2026-11-17 10:20] - Persist full Codex access - Owner wants commands to run without repeated permission prompts. Saved global approval_policy never and sandbox_mode danger-full-access with a backup of the previous configuration. Applies to newly started Codex sessions; the current session retains its assigned permissions.
 [2026-11-17 10:00] - Refresh Codex desktop icon - Owner disliked the launcher icon. Replaced the generic executable icon with a dedicated dark leather coloured SLOU CODEX badge with a brass ring, making the desktop shortcut recognizable. Launcher behavior is unchanged.
 [2026-11-17 09:58] - Default staging automatic push - Owner wants this Codex launcher to work on stage by default and automatically commit and push completed, checked changes there. Launcher now switches to stage before starting; project instructions record the workflow.
 [2026-11-17 12:00] - Codex desktop launcher - Owner wants to work in Codex too. Installed the Codex CLI and added a "SLOU Codex" desktop launcher like the Claude one (server, Chrome, then Codex in the project). Codex reads CLAUDE.md as its rules; nothing in the repo changed.

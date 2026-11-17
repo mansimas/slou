@@ -2157,26 +2157,29 @@
     src.groups.forEach(function (g) {
       for (var i = g.start; i < g.start + g.count; i += 3) { tris.push([ix[i], ix[i + 1], ix[i + 2], g.materialIndex]); }
     });
-    for (var round = 0; round < 12; round++) {
-      var mids = {}, any = false;
+    for (var round = 0; need && round < 12; round++) {
+      // All endpoints in this pass predate its new midpoints. A fixed stride
+      // gives each undirected edge a numeric key, without allocating strings.
+      var stride = P.length / 3, mids = new Map(), any = false;
       tris.forEach(function (t) {
         for (var e = 0; e < 3; e++) {
           var a = t[e], b = t[(e + 1) % 3];
+          var k = Math.min(a, b) * stride + Math.max(a, b);
+          if (mids.has(k)) { continue; }
+          mids.set(k, undefined);   // test shared edges only once, including uncut edges
           if (!need(P[a * 3 + 1], P[b * 3 + 1], P[a * 3], P[b * 3])) { continue; }
-          var k = Math.min(a, b) + '_' + Math.max(a, b);
-          if (k in mids) { continue; }
           var v = P.length / 3, j;
           for (j = 0; j < 3; j++) { P.push((P[a * 3 + j] + P[b * 3 + j]) / 2); Cl.push((Cl[a * 3 + j] + Cl[b * 3 + j]) / 2); }
           var nx = Nm[a * 3] + Nm[b * 3], ny = Nm[a * 3 + 1] + Nm[b * 3 + 1], nz = Nm[a * 3 + 2] + Nm[b * 3 + 2], nl = Math.hypot(nx, ny, nz) || 1;
           Nm.push(nx / nl, ny / nl, nz / nl);
           U.push((U[a * 2] + U[b * 2]) / 2, (U[a * 2 + 1] + U[b * 2 + 1]) / 2);
-          mids[k] = v; any = true;
+          mids.set(k, v); any = true;
         }
       });
       if (!any) { break; }
       var next = [];
       tris.forEach(function (t) {
-        var m = [0, 1, 2].map(function (e) { var a = t[e], b = t[(e + 1) % 3]; return mids[Math.min(a, b) + '_' + Math.max(a, b)]; });
+        var m = [0, 1, 2].map(function (e) { var a = t[e], b = t[(e + 1) % 3]; return mids.get(Math.min(a, b) * stride + Math.max(a, b)); });
         var c = m.filter(function (q) { return q !== undefined; }).length, g = t[3];
         if (!c) { next.push(t); return; }
         var r = 0;
@@ -2387,7 +2390,7 @@
       var g = o.geometry;
       if (g.index && g.groups.length && g.attributes.color && g.attributes.uv) {   // a leather piece: cut finer where it moves
         var rw = o.userData.w2Lining ? fine : coarse;
-        var dd = sliceAt(sliceAt(k2Split(g, function () { return false; }), 0, rw[0], -H2 - 1, H2 + 1), 1, rw[1], -XE, XE);
+        var dd = sliceAt(sliceAt(k2Split(g, null), 0, rw[0], -H2 - 1, H2 + 1), 1, rw[1], -XE, XE);
         for (var v = 0; v < dd.P.length / 3; v++) {
           var x = dd.P[v * 3], y = dd.P[v * 3 + 1], dz2 = at(x, y);
           if (!dz2) { continue; }
@@ -2442,7 +2445,11 @@
   }
 
   function build() {
-    fob.children.slice().forEach(function (m) { fob.remove(m); if (m.geometry !== stitchGeo && m.geometry !== holeGeo) { m.geometry.dispose(); } });
+    fob.children.slice().forEach(function (m) {
+      fob.remove(m);
+      if (m.isInstancedMesh) { m.dispose(); }   // release per-instance GPU buffers too
+      if (m.geometry !== stitchGeo && m.geometry !== holeGeo) { m.geometry.dispose(); }
+    });
 
     foldDims();
     var card = state.product === 'card', fold = state.product === 'card2' || state.product === 'card3', fold3 = state.product === 'card3', fob2 = state.product === 'keyfob2', wallet = state.product === 'wallet', wal2 = state.product === 'wallet2', holesAt, crossings = [], addPockets = null, runs = null, frontRuns = null;
@@ -2522,7 +2529,7 @@
         // a row of vertices every 0.6 mm across the bend (walBend is straight past it)
         var xs = [];
         for (var hi2 = -15; hi2 <= 15; hi2++) { xs.push(hi2 * W2_S / 15); }
-        return sliceAt(k2Split(g, function () { return false; }), 0, xs);
+        return sliceAt(k2Split(g, null), 0, xs);
       };
       var ext2 = leatherPiece([w2Ext()], T2, -T2 / 2, function (p) { return 1 - topFree(p, 0.3); }, [], leatherCol2, null, null, stackTop, T2);
       var ext2m = new THREE.Mesh(k2Geo(hingeSplit(ext2.geometry)), [walFleshMat, walEdgeMat, w2OutMat]);
@@ -2556,7 +2563,7 @@
           ys2.push(-H2 + W2_BY - 0.28 + li * 0.03);
         }
         var bx0 = W2_BX - 0.4, bx1 = W2_BX + W2_BW + 0.4;   // the foot's rows only across the back pocket
-        var fd2 = sliceAt(sliceAt(k2Split(fp.geometry, function () { return false; }), 0, xs2), 1, ys2, sg > 0 ? bx0 : -bx1, sg > 0 ? bx1 : -bx0);
+        var fd2 = sliceAt(sliceAt(k2Split(fp.geometry, null), 0, xs2), 1, ys2, sg > 0 ? bx0 : -bx1, sg > 0 ? bx1 : -bx0);
         for (var fv = 0; fv < fd2.P.length / 3; fv++) {
           var qx = fd2.P[fv * 3], qy = fd2.P[fv * 3 + 1], lz = w2Lift(qx, qy);
           if (!lz) { continue; }
@@ -3630,6 +3637,7 @@
     grp.addEventListener('click', function (ev) {
       var btn = ev.target.closest('button');
       if (!btn) { return; }
+      if (state[grp.dataset.group] === btn.dataset.value) { return; }
       grp.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === btn)); });
       state[grp.dataset.group] = btn.dataset.value;
       // the item and the shape are geometry; the rest is colour
@@ -3669,7 +3677,7 @@
       var el = document.getElementById(id);
       el.textContent = el.dataset[state.product];
     });
-    paintTextures();   // the initials move
+    if (state.text.trim()) { paintTextures(); }   // only initials move; blank grain is already painted
     controls.target.y = centreY();
     fitView();
     build();
