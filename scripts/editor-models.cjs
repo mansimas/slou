@@ -31,7 +31,7 @@ async function createBuilder(template) {
     constructor() { this.domElement = el(); this.capabilities = { getMaxAnisotropy: () => 1 }; }
     setSize() {} setPixelRatio() {} setAnimationLoop() {} render() {}
   };
-  class OrbitControls { constructor() { this.target = new THREE.Vector3(); } addEventListener() {} update() {} }
+  class OrbitControls { constructor() { this.target = new THREE.Vector3(); this.mouseButtons = {}; } addEventListener() {} update() {} }
   class CSS2DRenderer { constructor() { this.domElement = el(); } setSize() {} render() {} }
   class CSS2DObject extends THREE.Object3D { constructor(element) { super(); this.element = element; } }
   const source = require('ejs').render(template || fs.readFileSync(path.join(root, 'views/pages/editor.ejs'), 'utf8'), { t: require('../config/content').content.lt });
