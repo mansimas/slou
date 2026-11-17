@@ -6,7 +6,7 @@ Sails.js storefront for handmade leather goods (slou.lt). No database.
 - **Translate every user-facing string into all 7 locales:** LT (default), EN, PT, FR, DE, ES, IT. UI copy lives in `config/content.js` (one block per locale, same keys); product copy is in `config/catalog.js`.
 - **Never start the server** (`sails lift` etc.). The owner runs it. Verify with static checks or a headless-browser render of a standalone HTML copy instead.
 - **Never edit `.tmp/` or `www/`.** They are build output.
-- **Never `git commit` or `git push`.** Leave changes uncommitted for the owner.
+- **Default branch is `stage` (staging).** For work through the SLOU Codex launcher, make changes on `stage`. After completing and checking requested changes, automatically commit and push to `origin/stage` (owner instruction, 2026-11-17). Never push to `main` unless explicitly requested.
 - **Change only what was asked.** Don't carry a tweak over to parts already approved (e.g. a PDF change must not touch the 3D stitching). Offer related changes in one line instead.
 - `config/routes.js` is in a public repo: unlisted pages (orders) are declared in `config/local.js`, which is gitignored.
 - **Keep `README_updates.md` up to date** (owner's rule, 2026-10-14): every request he makes gets one line there, in that file's format — `[date time] - [message, max 5 words] - [description, max 50 words]`, newest first, one line per entry, never wrapped — so the history and the reason behind each change survive. Say *why* it was done, not just what.
@@ -121,6 +121,30 @@ How it works:
   - Iron slits drawn 1.6 × 0.45 mm.
   - Corner holes: a black awl dot, a circle, and both slits drawn grey with a black border (marked, not punched).
   - Red bracket at the joint, initials as a stamping guide, specs table.
+  - Watermark (`watermark(doc)`, the owner, 2026-10-27): a round stamp - SLOU in
+    the middle, LEATHERCRAFT and SLOU.LT round the ring, Helvetica capitals as in
+    the logo - placed by hand per page (`watermark(doc, spots)`, a list per page,
+    set in `makePattern`) over what someone would most want to clean off and
+    take: each template, the picture, the specs, the work process and links,
+    with smaller ones round the rest (the owner, 2026-10-29); big and small
+    (0.4-1.35 × a 48 mm stamp; on the card page 1 the templates each get a clearly different size), each at its own tilt, no two touching, every
+    download alike. It is drawn solid
+    black on its own jsPDF (`wm`, a page per page)
+    and coloured in `flatten(doc, wm)` with a diagonal gradient (`WM_STOPS`, leather
+    browns and olive) plus a radial one, varying in darkness (~4-12% darker than
+    the paper; 3-9% until 2026-10-29) and not only colour, since most people print black and white (the
+    owner), and a random ink grain on every pixel; multiplied into the
+    page at 200 dpi, so there is no single tone to select (the owner, 2026-10-27).
+    Call it on any new PDF, then `flatten(doc, wm)` and save what that
+    returns: every page is rendered by pdf.js 3.11.174 (cdnjs, loaded with jsPDF)
+    at 400 dpi into one JPEG filling the A4 page, so the watermark is in the same
+    pixels as the lines and a PDF editor finds no object or text to delete (the
+    owner, 2026-10-27: harder to remove). 400 dpi stays under phones' 16.7 M px
+    canvas limit; sizes and calibration are unchanged. ~0.8 MB a page.
+  - Copyright footer (the owner, 2026-10-29, after another maker's pattern):
+    "© SLOU" and `pattern.rights` (personal use and small businesses only, no
+    mass production, no sharing or reselling) centred at the foot of every
+    page of every PDF, y 287-293, under the rulers and the process text.
   - **Print calibration** (2026-10-14, asked for by the owner, and reported
     working the same day: "viskas tiksliai atitinka, susikalibruoja tobulai"):
     his ML-2160 prints an A4 page small, and by a different amount on each axis
@@ -173,9 +197,9 @@ locked keyfob stitch, unchanged:
   edge (`CARD_THICK`). Front to back: pocket,
   body, body, pocket (`outline('pocket')`, `outline('card')`). The bodies are
   full size, and the slot between them is the middle pocket. The pocket top
-  is slanted (`pocketTop(x)`): level at 52 mm for 11.3 mm, straight up to
-  81 mm, level for the last 11.3 mm, with square top corners. The bends are
-  eased over `POCKET_EASE 0.5`, because the real cut is soft, not a kink. The
+  is slanted (`pocketTop(x)`): level at 48 mm (52 until 2026-10-20) for 10 mm (11.3 mm until 2026-10-20), straight up to
+  88 mm (81 until 2026-10-20), level for the last 10 mm (11.3 mm until 2026-10-20), with square top corners. The bends are
+  eased over `POCKET_EASE 0.2` (2 mm; 0.5 until the owner asked for a firmer angle, 2026-10-20), soft but not a long curve. The
   drawing's second pocket is the mirror image, which once turned over onto
   the back lines up with the first, so the 3D uses one shape for both.
 - From the owner's photos of the real piece (`pavyzdziai/2026091*.jpg`,
@@ -183,37 +207,82 @@ locked keyfob stitch, unchanged:
   - Two colours: brown bodies (`state.leather`) and olive pockets
     (`state.pocket`, the "Pocket colour" control, card only).
   - Seen from the window side, the pocket is high on the **right**.
-  - The front pocket has an arch-shaped thumb window (`windowPath`, 34 × 38 mm,
-    its foot 7 mm off the bottom), and the initials sit just above it.
+  - Naming (the owner, 2026-10-20): the SLOU-stamp side is the **front**, the window side the **back**; the code still calls the window pocket "front" (`zp`), but every user-facing text must use the owner's names. The window pocket (the initials side) has an arch-shaped thumb window (`windowPath`, 40 × 32 mm (38 tall until the owner lowered it, 2026-10-20); its sides placed so the hole inside the window, in the body, is 1 mm past the green edge, as at the pocket top (42 mm with the edge halfway between holes left a long slope; 34 mm at first), so the arch sits `WIN_CX` 1 mm left of centre and its left foot falls just into the corner rounding, and a superellipse top `WIN_TOP 2.6`, `WIN_FULL 2.3` (a plain half ellipse read as an egg; 1.9 tall at first) for a rounder, oval top that bends from 6 mm up, with no long straight sides),
+    open at the bottom: cut up through the bottom edge (2026-10-20; it was a closed arch 7 mm up). Inside it the stitches lie on the body (`inPocket`, `face(x, y, side)`), and its sides are the pocket's own edge (`frontStack`). The stitch that crosses each side is `stitchGeo` itself, cloned and bent along the line over the edge (`lay`): flat and sunk on the pocket face, then over the edge straight into the body hole (laid flat on the body after the edge, it crept along the leather, which the owner rejected), never a separate tube: a tube looked faceted and blunt next to the plain stitches (the owner, 2026-10-20: threads must look perfect). In the window the bottom edge is a three-layer stack, its dome rounding over into the brown face (`stackTop`, the `top` argument of `leatherPiece`; it was a dark square cut).
   - The back pocket carries a SLOU stamp at the foot (`logoTex`, drawn
     mirrored because the back face is seen from behind).
   - The stitching runs only as high as the pockets: up to the low edge on the
     left and the high one on the right. The body above is not sewn.
   - From the close-ups in `pavyzdziai/korteline/`: the last stitch of each side
-    hugs the pocket edge. Its end hole is in the body, `POCKET_END` (~2 mm)
+    hugs the pocket edge. Its end hole is in the body, `POCKET_END` (1 mm; it was 1.9 mm until the owner asked for it closer to the green)
     *above* the pocket edge, and the hole before it is about as far below, so
     the stitch climbs over the edge. It is one of the doubled end stitches,
     so it is sewn twice, which is the reinforcement. On the PDF those holes
     are on the body template only.
-  - That stitch is pulled hard, and the owner was firm about it: no gap
-    anywhere between thread and leather, and leather is soft, so the tight
-    thread presses a **groove** into the pocket face and lies in it, smooth
-    and level, front and back alike. It is one unbroken thread (saddle stitch),
-    built as one `TubeGeometry` along a `CurvePath` in `lay()`:
-    - it comes up out of the pocket hole on a gentle slope ("nuožulnus kalnelis");
-    - it runs straight in its groove (`grooveGeo`/`grooveMat`: a soft dark strip,
-      0.9 mm wide, from the hole to the edge);
-    - it rolls over the edge on a wide bend, pressing it in by `POCKET_DENT`
-      (0.12 mm, through `pocketDent()` → `leatherPiece(..., squeeze)`, so the
-      pockets are built after the stitches, `addPockets`);
-    - it goes down into the body hole the same gentle way, `DIVE` 1 mm deep.
-  - No tight kinks anywhere: they read as a crumpled, twisted thread. The
-    doubled pair lie side by side, touching (2R + 0.02 mm apart), because
-    overlapping (`JOINT_GAP`) bends cut through each other.
-  - Rejected on the way: two halves bent mid-stitch (air under the thread,
-    looked loose), four straight pieces (looked broken), a curve hugging
-    the whole dome ("no thread can lie like that"), tight bends at the
-    holes (looked crumpled).
+  - **That stitch looks like every other stitch in the row** (the owner's
+    photos `pavyzdziai/korteline/20261019_2057*.jpg`): one thread, the same
+    slant and thickness, in line with the rest, and it flows on into the next
+    stitch. In `lay()` it is one `TubeGeometry` along a `CurvePath`: a
+    straight run from the pocket hole to the pocket edge, one short bend over
+    the edge that presses it in only just (`POCKET_DENT` 0.12 mm, through
+    `pocketDent()` → `leatherPiece(..., squeeze)`, so the pockets are built
+    after the stitches, `addPockets`), then a straight run down into the body
+    hole. Its ends sink into the holes like a plain stitch's.
+  - **It is two threads**, as on every doubled end stitch (the owner's
+    close-ups; taking one away was a mistake the owner caught). Each of the
+    two is that same plain stitch. On the card holder (`open`) a doubled stitch
+    sits **exactly where a single stitch would**: same line, same slit tips,
+    same slant (photo `pavyzdziai/korteline/20261019_162207.jpg`). The two
+    threads are offset ±`JOINT_GAP`/2 across the line and overlap a little,
+    so together they read as one slightly fuller, plied stitch in the row.
+    They are drawn by `layPair()` as one smooth tube each. They **meet at the slit
+    tips** and spread apart, just touching, only between the holes. Each end
+    runs on into the cut and down 0.45 mm, so both threads are seen to go into
+    the hole (the owner, 2026-10-19).
+    Over the pocket edge it is **not** a steep drop: it starts down 1.4 mm
+    before the edge, pressing the rounded edge in, and runs on one easy slope
+    straight into the body hole, with no levelling out on the brown. The tube
+    follows straight runs with quadratic-rounded corners, not Catmull-Rom,
+    which swung the thread out into the air at the bend.
+    Where the threads cross the green edge, the rounded edge itself is
+    pressed in under them (`POCKET_DENT` 0.25 mm, ~0.6 mm wide): only the
+    edge ring moves (`vert(..., edge)`), nothing at the glued face, deepest high
+    on the dome, and none right at the outer face so it stays joined to the flat
+    face. Tried and dropped: a dark shadow decal on the face (its square showed
+    and it covered the thread), and 0.2 mm edge sampling (the inset outline
+    crossed itself at the pocket corners and threw up a flap). The pocket side
+    eases into the glued-stack dome over 1.5 mm below its top (`pocketStack`).
+    The dent is a little wider than the thread (1 mm across, ~0.8 mm into the
+    pocket), so the small shoulder of leather beside the thread slopes off
+    instead of standing up steep (`pavyzdziai/korteline/1.png`). Mini
+    corrections only here. A slanted pocket corner and a wide band worked
+    down along the edge were both tried and reverted the same day.
+    From `pavyzdziai/korteline/2.png` (the owner's paint-over, side view):
+    - **Never widen or reshape the edge under the thread** (the owner,
+      2026-10-20). The burnished edge is the same width everywhere
+      (`CARD_ROUND`), and the green face stays matte green right up to it.
+      A slope made by widening the edge there (`pocketRamp`, 0.9 mm) turned
+      that green into glossy edge and was rejected; so was the narrow dent.
+      The thread simply lies over the edge as it is (`layPair`, R = `CARD_ROUND`).
+    - At the pocket's square top corner the switch is clean (`pocketStack`):
+      the side keeps the stack's dome right up to the corner, and the top keeps
+      its own narrow edge right to it. Easing down the side made the corner
+      stick out. Easing along the top widened the glossy band into a bend
+      (the owner, 2026-10-20).
+      At a sharp corner `leatherPiece` places the corner point where the two
+      set-in edges meet (each with its own rounding), not along the bisector.
+      So the top edge runs straight and horizontal right into the side, square
+      to it. A single bisector mitre ran it off at a slant.
+    - `leatherPiece` adds no resample points within 2 mm of a sharp corner,
+      because points closer than the edge's inset cross over and fold a flap.
+    On the owner's piece the brown slit at the last hole still shows beside
+    the thread; that is right. Tried and rejected on 2026-10-19: threads placed
+    inside the slit at different points along it, and the pair centred on
+    the end hole. Both bent the pair out of line and made the holes look
+    distorted. The keyfob joint keeps its own approved `JOINT_GAP`/`JOINT_DROP` layout.
+  - Rejected (the owner: "like a stuck-on worm crawling"): grooves pressed
+    into the pocket, wide or hugging bends round the edge, and segmented
+    pieces. Keep each thread plain.
 - Edges (the owner, 2026-10-19): rounded with an edge beveler and burnished
   with Tokonole for a natural sheen, and not all alike. The pieces are built
   by `leatherPiece()`, not ExtrudeGeometry, because ExtrudeGeometry rounds
@@ -230,13 +299,20 @@ locked keyfob stitch, unchanged:
     above the pockets) it has its own dome, `CARD_ROUND` 0.5 mm deep, in its
     own shade. A body eases from the stack to its own edge over the first
     1.2 mm above the pocket edge.
+  - One corner only, the front (SLOU-side) pocket's high top corner, is
+    rounded `POCKET_CORNER` 1.5 mm in the 3D (`sanded()`, `sandedStack`): the
+    stack is sanded flush, as on the owner's piece; square, it stood out past
+    the inner piece's edge (`korteline/11.png`). The owner asked for that one
+    corner alone (2026-10-26): every other pocket corner stays square, and
+    the pattern keeps them all square.
   - To keep the dome smooth across the joints, the normals come straight off the dome,
     not from each piece's own faces. Each layer's edge tucks 0.08 mm past
     its glued faces, 0.03 mm under its neighbour, and its glued faces stop
     0.1 mm short of the edge. Without those three, a light hairline showed
     at every joint.
   - The edge colour is in vertex colours (`burnished()`: a satin physical
-    material with a light clearcoat, ×0.62 of the grain), so a leather or
+    material with a light clearcoat, ×0.75 of the grain; ×0.62 until the owner
+    found it too dark, 2026-10-29), so a leather or
     pocket colour change rebuilds the card holder. Card holder only: the
     keyfob keeps `edgeMat` and its 3-step extruded bevel.
 - **Work on the card holder only** (the owner, 2026-10-19). Do not change
@@ -251,13 +327,376 @@ locked keyfob stitch, unchanged:
   open seam (no stitch after the last hole, `chordIn`), and the last
   `OVERLAP` stitches at each end are doubled like the keyfob joint. The thread
   sits on the pocket face below the pocket top and on the body face above it (`face(x, y)`).
-- Pattern PDF: body and pocket side by side, each cut ×2 (the second pocket
-  with the template turned over), with the legend and specs below them. The
-  window is drawn dashed on the pocket, with a note to cut it in the front
-  pocket only. The
+- Pattern PDF (the owner, 2026-10-20): three templates. On top the two
+  pockets as a mirrored pair, each as seen from its own face: the front
+  piece (drawn with `m = -1`; never mention the SLOU stamp on the pattern, buyers may use their own) and the back
+  piece (window as a solid cut line, initials). On page 2 both are one row, "Išorinė detalė × 2" (`C.outer`, the owner, 2026-10-26). Below, the
+  inner piece × 2 (`C.body`; never call it a "main" piece), with the legend; each template carries its name only inside (`inside()`, "× 2" only where cut twice), so it survives cutting out,
+  numbered 1-4 in a circle (0.5 mm line) left of its count (`number()`, the owner, 2026-10-27), down each column: left inner 1, front pocket 2, right inner 3, back pocket 4;
+  beside it. The picture on page 2 is orthographic, turned only 15° and raised 6° (the owner, 2026-10-29): the front reads 67.6 × 100. A 42° turn read narrower than 70 × 100; square on (a cavalier view) did not look turned enough. Its leader lines end in a black dot in a white ring and run over a white halo, so they show on the dark leather in a colour or grey print (the owner, 2026-10-29). Under the picture on page 2, the owner's work process, 9 steps (`C.process`, the owner, 2026-10-27), two columns, paragraphs never split, the rest on a third page with balanced columns. No 50 mm square on this pattern (the owner, 2026-10-20), so the specs table fits under the legend: one A4 sheet. No
+  doubled-stitch brackets and no slit angle in the legend (`C.holes`; the owner, 2026-10-20). The
   body carries the slanted pocket edge as a dashed line, like the grey line on
-  the drawing, and red brackets mark the doubled stitches at both thread
-  ends. Calibration is shared with the keyfob.
+  the drawing. Thread
+  ends are not marked. Calibration is shared with the keyfob.
+
+- Fuller, as if a card were in each of the three slots, the cards not shown (the owner, 2026-11-10, as on Nr. 3):
+  `fuller()` in `build` cuts each piece finer (`k2Split`) and lifts it by `cardFill`: the bodies apart by one card
+  (two cards, 1.52 mm, half each; one card at first, the owner asked for two, 2026-11-10), each pocket out by its own
+  two cards more; none at the stitch lines, easing over 7 mm, and on
+  the bodies fading over the card's top.
+
+### Card holder Nr. 2 (sulankstoma kortelinė)
+Added 2026-10-29: the third "Item" (`product: 'card2'`, texts in `content.*.editor.card2`),
+from a pattern the owner found (`pavyzdziai/pvz1.pdf` drawing, `pvz2.pdf` notes;
+GR Handcraft). Only its shape and size are taken from it: the stitch and every
+technique are the owner's own, as on the keyfob and Nr. 1 (the owner: always).
+- One piece of 1.6 mm veg-tan (`FOLD_T`), 70 × 184 mm flat (`FOLD_W`, 2 × `FOLD_L`; 92.2 mm a half on the drawing, set to 92 by the owner, 2026-10-29),
+  folded in the middle; corners rounded 6 mm (`FOLD_R`); a Ø 25 mm hole on the fold
+  (`FOLD_HOLE`), so each face has a half-round thumb notch. Where the corner
+  roundings meet beside the fold (a point on the drawing), and `foldOutline(true)` (the
+  pattern) keeps it. Folded, each bottom corner is one plain round corner like the top
+  ones, its foot on the fold (the owner's screenshots, `Ekrano kopija 2026-10-29
+  195239/195304.png`). So the 3D folds the piece full width (`foldOutline()`, straight
+  sides through the fold) and `folded()` then rounds each corner to an exact `FOLD_R`
+  arc seen face on (`foldRound(h)`: the last 9 mm of the width drawn in, the edge
+  normals turned with the arc), as a corner glued and sanded is. Tried and wrong: a 1 mm
+  then 0.3 mm round at the point (dimple, then a hole), a straight cut where the bend
+  ends (a flat), and the drawing's arcs laid out to fold into an arc (a step and a hole).
+- 3D: built flat by `leatherPiece` (new `stackT` argument, the stack is the two
+  halves) and folded by `folded()`: triangles cut finer across the bend (no edge over
+  0.3 mm along the piece; cutting them small every way made 300 000 triangles and
+  stalled the PDF), then wrapped round a centre line of radius FOLD_T / 2, so the
+  flesh sides meet. Sides and corners one glued dome; the open tops and the thumb
+  hole each their own edge.
+- Two open seams (`runs`), down the left, up the right, from 6 mm under the top to
+  6 mm above the fold (`FOLD_END`), the last 2 stitches at each of the 4 ends doubled.
+- Pattern: one sheet, the flat piece grain up, front half on top, fold dashed, slits on
+  both halves mirrored across the fold, legend and specs on the right, no 50 mm square.
+- From the owner's Etsy screenshots (`pavyzdziai/Ekrano kopija 2026-10-29 *.png`, the
+  GR Handcraft listing): the fold with the thumb notch is the bottom, the cards go in at
+  the open top and show through the notch, and with cards in it the halves bulge apart
+  in the middle while staying glued at the sides. So the 3D carries a bank card standing
+  on the fold (`cardMat`), and the halves stand `FOLD_OPEN` 1 mm apart round it
+  (`foldLift`: nothing within 1 mm of the stitch line, eased over 3 mm), the bend opening
+  with them. Easing the dome out at the fold to the piece's own rounding was
+  tried and opened a gap between the layers there instead.
+- SLOU stamp (the owner, 2026-10-29) on the back half, just above the thumb notch
+  (`logo2Tex`, `fold2BackMat`), mirrored like Nr. 1's; not on the pattern.
+- One piece, one colour (the owner, 2026-10-29): both faces use the same leather; for
+  Nr. 2 `build()` makes the back light as strong as the front one (2.2) and its mirror
+  image, or the back read darker. Other items keep 1.2.
+- `folded()` lays both faces again on a grid (4 mm cells, 0.25 mm across the bend, 0.5 mm
+  where the bulge eases out), clipped to the face's outline with the thumb hole joined
+  by a keyhole cut; without it the faces were long triangles that could not bulge.
+- Leather (the owner, 2026-10-29: as natural and real a brown as possible): Nr. 2 has
+  its own texture, `natural` (`col` and `bump`), after the brown pieces in the Etsy
+  screenshots: wandering soft darker and lighter patches, lighter pull-up scuffs, fine
+  fibres and pores, a flatter relief (bumpScale 0.8) and roughness 0.6
+  (`fold2FrontMat` with the initials, `fold2BackMat` with the stamp). The map averages
+  ~0.8, so the colour is lifted × 1.2. The keyfob and Nr. 1 keep the pebbled `grain`.
+- Edges natural, only worked with Tokonole (the owner, 2026-10-29: Nr. 1's burnished
+  edge read as painted one even colour): Nr. 2 has `fold2EdgeMat`, the `natural`
+  leather's colour and fibres running along the edge (×1.27 vertex colour, as light as
+  Nr. 1's edges; ×0.78, then ×1.05, read too dark, the owner), bumped, satin (roughness 0.5, clearcoat 0.2). Nr. 1 keeps
+  `burnished()`.
+- Nr. 1's grain faces have the same natural leather since 2026-10-29 (the owner: it looks
+  more natural): `bodyGrainMat` (`naturalTex`), `pocketFrontMat` (`fold2Tex`, with the
+  initials), `pocketBackMat` (`logoTex`, now drawn on `natural`), colours × 1.2; the
+  pattern picture's stamp-less back uses `naturalTex`. Its flesh sides and edges are
+  unchanged.
+- The thumb hole is bevelled like the outer edges (the owner, 2026-10-29): `foldStack`
+  gives it the stack's dome, so each half's edge is rounded on its grain side.
+  `folded()` takes the face outlines from `leatherPiece` (`mesh.userData.caps`):
+  rebuilt from the triangles the hole came apart in two and left a sliver of face
+  across it.
+- The cards never go right down into the fold (the owner, 2026-10-29): the card stands
+  `FOLD_CARD` above it: 2.5 mm above the fold's outside, under 1 mm clear of the
+  leather inside (4 mm left an odd gap, the owner, 2026-10-29); the line moves with it. The bulge is done as Nr. 1's
+  picture does it: `foldLift(x, y)` is full over the card and 1 mm past it, easing to
+  nothing (smoothstep) over the next 3 mm all the way round, by distance from the card's
+  rounded rectangle (`BANK_HW`, `BANK_LEN`, `BANK_CR`), so its corners are round. A 2 mm
+  ease centred on the card's edge (to put the line where the card ends) was tried and
+  undone the same day: it looked unnatural (the owner).
+  Over the card's top there is no outline at all (the owner, 2026-10-29): no card-shaped
+  edge there; only the sides and the foot ease out. The line at the
+  foot is raised 1 mm ("vos vos", the owner): there the lift is full only from the card's
+  bottom edge up, easing out below it. Softened the same day, as the shading read
+  artificial (the owner): `FOLD_OPEN` 0.9 mm (was 1), eased out over `FOLD_EASE` 4 mm
+  (was 3). Above the card the mouth stays open and the card shows in it, as a card holds
+  it open (the owner): closing the halves evenly towards the mouth, so the side lines
+  died away there, was tried and undone the same day. Instead the side lines fade above the card
+  (the owner, 2026-10-29: no lines where there are no cards): from the card's top to the
+  mouth the side slopes spread evenly into one broad smoothstep, from 1 cm inside the
+  card's side to the stitch line. A quick 1.5 mm switch to an arch made a ledge. The same
+  at the bottom (the owner: the side lines must not run all the way down): over the
+  card's lowest 15 mm, the side slopes go 55% of the way to the broad slope above: the card
+  is still under the leather, so the rise follows it subtly (the owner: "gerai"). Starting
+  the fade at the seam's bottom end instead, over its last few mm, in any of three ways
+  (widened slope, a full mix, a half mix kept under the rise), gave a crease or a dark
+  shadow at the card's bottom corners, and was undone. A hard
+  step at the card's foot (t², read as a strong shadow) and the long slow slope there
+  were both rejected. The face grid is finer where it eases out.
+- Pattern pages 2-3 (2026-10-29, the owner: made after Nr. 1's): "Rekomendacijos", a still
+  of the 3D model with its two cards (no perspective, turned 15°, with the SLOU stamp: the owner wants it kept there, unlike Nr. 1's),
+  specs with leaders (`C2.piece` with a leader to each half, pitch, thread, inset) and the
+  rest under a rule (size, `C2.notch` Ø 25 mm, leather, initials), then the work process.
+  `processPages(WP, steps, y0)` lays out the process for both card holders (it was inside
+  Nr. 1's page). `card2.steps` in `content.js`: a list is Nr. 2's own step, a number reuses
+  `card.process.steps[n]` (flesh side, sanding, stitching, polishing, finishing). Nr. 2's
+  own steps were drafted by Claude for the owner to correct.
+
+### Card holder Nr. 3 (kortelių piniginė Nr. 3)
+Added 2026-11-09: the fourth card-type "Item" (`product: 'card3'`, texts in `content.*.editor.card3`), a card
+sleeve from the owner's two screenshots of another maker's shop page (`pavyzdziai/korteliu pinigine 3/`, "H 10cm
+W 7.5cm"). Only its shape and size are taken: the stitch, edges and leather are the owner's own.
+- One piece of 1.6 mm veg-tan folded along its long side (no stitching on that side in the photos), with a
+  round thumb hole on the fold (as Nr. 2's), so it is built by Nr. 2's fold code: `foldDims()` sets `FOLD_W` 10,
+  `FOLD_L` 6.5 (65 mm a half, not the listing's 75: the photos show it about 1.6 : 1, and at 75 it looked
+  square, the owner, 2026-11-09), `FOLD_HOLE` 1.1 (`C3_HOLE`, Ø 22 mm) and the cards lying long side along the fold
+  (`BANK_HW`/`BANK_LEN` swapped); call it before using any `FOLD_*` value. Shown with the fold at the bottom.
+- The front half's open edge (`foldOutline`, `card3Depth`), copied off the photos (the owner, 2026-11-09: not an
+  improvised wave): straight for the outer quarter of the length at each end, then one smooth waist, a raised
+  cosine over the middle 50 mm (`C3_HALF`), 13 mm deep in the middle (`C3_DEPTH`). That edge is the front's own
+  edge (`foldStack` 0 there); the back's top is straight. Tried and wrong the same day: an S-curve waist with
+  the thumb notch cut into it (24, then 40 mm deep); the notch is on the fold.
+- Relief notches at the fold (the owner, 2026-11-09, photo of the maker's cut piece `korteliu pinigine 3/1.png`):
+  a small round notch cut into each side on the fold line, R 2.5 mm (`C3_RELIEF`) between round shoulders R 2 mm
+  (`C3_SHOULDER`), so the folded thick leather does not push out at the corners. The pattern draws it
+  (`foldOutline(true)`); in the 3D `foldRound` uses `card3Relief(h)`, the notch's quarter under its shoulder.
+  Each seam then has one more stitch at its foot, bending in round that corner (`lineAt`, in `build`; its hole a further 0.8 mm in, `C3_TUCK`, so it
+  turns more, the owner), and the
+  fold's puff stays 1.5 mm clear of it (`puffX`). Earlier tries at these corners (square fold corners, a wrap
+  over the mouth) were reverted.
+- SLOU stamp on the front just above the thumb hole (`logo4Tex`, `fold3FrontMat`); initials on the back, as Nr. 2.
+- The fold is round and full, not pressed flat (the owner, 2026-11-09, from the photos): in `folded()` the bend
+  goes round an inner radius `PUFF_R` 1 mm (0.7 until the owner asked for a little belly, a drop shape) (its axis raised so the fold's outside stays put) and the halves come
+  together over `PUFF_H` 20 mm above it (smootherstep); 1 mm over 5 mm read as a teardrop, and over 8 mm it left a
+  hard horizontal line where it ended (the owner).
+  Only between the stitch lines (`puffX`, eased over 5 mm in from them): the sides are glued all the way down,
+  so the margin outside them stays closed, no opening at the side (the owner, 2026-11-09). Card holder Nr. 3 only.
+- The cards are not drawn, but it looks filled (the owner, 2026-11-09): the halves stand apart round two hidden
+  cards (`foldLift`, as Nr. 2); shown empty and flat first, it looked bare. A folded
+  50 euro note was tried and taken out: a real note's design must not be copied, and a stand-in slip looked poor.
+- Seams, cards, edges and the pattern as Nr. 2 (sides stitched from 6 mm under the top to 6 mm above the fold).
+  Pattern: the flat piece centred on the page, the legend and the specs side by side under it (the owner,
+  2026-11-09), the hole and the waist's depth dimensioned; page 2 the picture (wider frame) and the process:
+  `card3.steps` reuses Nr. 1's steps (numbers) and Nr. 2's (`{c2: n}`), three steps its own, drafted by Claude
+  for the owner to correct.
+
+### Nr. 2: logo front, initials back
+The back (the red card's side, z < 0) never carries the logo (the owner, 2026-10-29): the
+SLOU stamp is on the front, above the thumb notch (`fold2FrontMat` with `logo2Tex`,
+`pressLogo(..., front = true)`, not mirrored), the initials on the back
+(`fold2BackMat`, `fold2BackTex`, drawn mirrored in `paintTextures`). On the pattern the
+initials guide is on the back (lower) half, turned 180° so it reads once folded.
+
+### Two cards in Nr. 2
+Since 2026-11-10 (the owner) the two cards are not drawn: only the fullness they give it stays (`foldLift`),
+as on Nr. 3. What follows is how that fullness was set up.
+
+Since 2026-10-29 (the owner) Nr. 2 holds two cards: the blue one (`cardMat`) in front and
+a red one (`card2Mat`) behind it, both on the same level (the owner; 1.5 mm higher at first). Together
+they are 1.52 mm, so `FOLD_OPEN` is 1.7 mm (0.9 for one card, which they would poke
+through) and `FOLD_EASE` 5 mm (4), keeping the slope about as soft.
+
+### Cut edge colour (card holder Nr. 2)
+A cut edge is lighter than the faces (the owner, 2026-10-29): the leather's core is near
+its flesh side's colour, only the layer under the grain takes the dye. `withCore(col, k)`
+gives each piece's edge colour a `core` (the leather taken 60% towards undyed veg-tan
+`#d6b08a`, at the same shade `k`), and `leatherPiece` runs the edge from that core
+through the middle of each layer to its own colour at the faces (`1 - u^2.2`). Card
+holder Nr. 2 only: the owner asked for Nr. 1 to stay as it was (one colour, ×0.75), and
+the keyfob keeps `edgeMat`.
+
+### Initials (card holders)
+Stamped 24 pt Helvetica Neue (the owner, 2026-10-29): `textLayout()` gives both card
+holders `size` = 24 pt (0.847 cm em), `neue: true` (weight 500), smaller only if the
+name would not fit inside the stitching. The keyfob keeps its own. The SLOU stamp is
+made separately and is not tied to this.
+
+### The SLOU stamp (both card holders)
+The owner presses the logo with a metal stamp whose letters stand up (2026-10-29): the
+leather sinks only under the letters, everything round them stays put. `pressLogo(col,
+bump, rough, y)` draws it so: in the relief each letter is a hollow, a flat smooth floor
+(no grain), walls sloping in over ~0.3 mm (three blurred passes); the floor a shade
+darker (×0.16 alpha, darker read as ink) and glossier (`roughnessMap`), a faint shadow
+round the walls. Those faces have `bumpScale 2` with the grain drawn at 40% so it reads
+as before. Nr. 1's back pocket and Nr. 2's back half; Nr. 1's pattern picture swaps the
+stamp out (and the bump scale back to 0.8).
+
+### Keyfob Nr. 2 (pakabukas 2)
+Added 2026-11-01: the second "Item" (`product: 'keyfob2'`, texts in `content.*.editor.keyfob2`),
+from the owner's three screenshots of another maker's two-tone keyfob
+(`pavyzdziai/pakabukas/Screenshot_20261026_*.jpg`). Only its shape is taken; the
+stitch and every technique are the owner's own.
+- A stadium (`outline('stadium')`), 30 × 70 mm (`K2_W`, `K2_H`), ends full half-rounds.
+  Two layers of 1.8 mm (`K2_T`) glued: front in the leather colour (initials,
+  `fob2FrontMat` on `fold2Tex`), back in the second colour (`state.second`, the
+  "Second colour" control; SLOU stamp low down, turned to read down the piece, top to bottom, not across it (the
+  owner, 2026-11-02; `pressLogo(..., side)`; 1.4x the card holders' size, `size` argument, centre 14.5 mm below the middle: the owner, 2026-11-08, bigger), `fob2BackMat`, `logo3Tex`). Built by
+  `leatherPiece` with the whole edge one glued dome, each layer its own colour,
+  `fold2EdgeMat` + `withCore` like card holder Nr. 2.
+- The locked stitch as a closed loop (`stitchHoles`), the keyfob joint in the same
+  place (37% down the left side).
+- The strap is the back piece's own tongue (the owner, 2026-11-01: make it ours, not
+  the screenshot's separate strap; two pieces, not three). `strapPath`, `strapGeo`: 13 mm
+  wide, the back's full 1.8 mm (`K2_TAB_W`), its grain flush with
+  the back face (`K2_TAB_Z`); it folds over the ring and its free end goes 9 mm down in
+  between the layers (`K2_TAB_IN`), so the stitching runs through it.
+  Built as it is cut (the owner, 2026-11-01: the black piece narrows at the top,
+  becomes the strap, wraps the ring and slides in between the leathers, shown
+  realistically): one flat piece, `k2BackShape` (the stadium narrowing through 5 mm
+  shoulders, `K2_NECK_R`, into the tongue), made by `leatherPiece`, then bent by
+  `k2Bend` along `strapPath` from `K2_STUB` up, full thickness: the leather thins only where it goes in under
+  the front (the owner, 2026-11-02; until then the whole tongue was 1 mm). Its flesh side shows inside the loop (`fob2FleshMat`, second colour).
+  Its returning end runs down the tongue's flesh face (`k2Inner`)
+  and in between the two layers on the back's flesh face, and the front layer is
+  lifted over it by its thickness (`k2Lift`: 1.8 mm at the front's edge, easing
+  out 2.5 mm past its sides; up the piece one smootherstep from 3.5 mm past the tip to the
+  top edge, never under the end's thickness `k2EndT`: the skive's straight slope showed hard
+  horizontal lines across the front, the owner, 2026-11-02; the front cut finer there by
+  `k2Split`), so the leather over it shows it is there (the owner, 2026-11-01: the
+  thickness shows; sunk flush in a recess it did not read as going in between).
+  The thread follows the lifted face (`face()`): over the rise each stitch is the plain
+  strand bent along the face (`lay`; straight it cut into the rise and vanished, the owner,
+  2026-11-02). The front is cut finer wherever an edge crosses the lifted box, not only
+  where it ends in it: a long edge across it stayed flat and showed as a line.
+  Speed (the owner, 2026-11-02: switching to Nr. 2 lagged): `k2Bend` cuts the tongue finer
+  only where `strapPath` bends, to 0.8 mm (the whole tongue to 0.2 mm made 1.8 M
+  triangles, ~25 s), and looks up the line by binary search; the front's rise is cut to
+  0.8 mm (0.4 before). Now ~175 k triangles, under 2 s headless.
+  The back piece reads its texture `K2_TEX_SHIFT` 9 mm lower, so the visible tongue stays on the
+  10 cm texture (mirroring it put a fold on the loop's top). Its materials are one-sided:
+  two-sided, the needle-thin triangles along the bent strap's sides that faced away were
+  shaded dark, scratch-like specks along the loop's edges (the owner, 2026-11-08). The
+  bend starts at `K2_STUB`, never above where the plies part (`K2_SPLIT_Y`), or the
+  tongue folds back on itself in a Z.
+  Tried and wrong: a separate strip laid on a cut-off tongue (a line across the neck
+  however the two met). From the side (the owner's `pakabukas/1.png`): both
+  plies lie together out of the body for only 0.5 mm (`K2_TAB_FLAT`; 6 mm until the owner,
+  2026-11-03: nothing glues or sews them there, so nothing presses them together; 1 mm
+  until 2026-11-08, the owner: a touch lower), then
+  open straight to the loop and wrap the
+  ring's wire in one small tight teardrop, inside radius 2.5 mm (`K2_LOOP_R`, the wire's
+  two turns are 2.4 mm from middle to corner), the wire filling it. A wide loop with the
+  plies parting straight out of the body was the first try and was wrong. The B2020 ring
+  hangs from the loop straight, in line with the piece (`K2_RING_TILT` 0; swung back
+  20° at first, the owner asked for it straight, 2026-11-02), its split at the top.
+- The tongue's free end is skived (the owner's choice, 2026-11-01): over all 9 mm that lie
+  between the layers (`K2_SKIVE` = `K2_TAB_IN`, 6 mm until 2026-11-02), flat from 1.8 mm down to 0.2 mm (`K2_SKIVE_T`), on the ply's inner side; hatched on the
+  pattern's strap, with `keyfob2.skive` in the legend.
+- Pattern: the front × 1 with the slits and a dashed box where the tongue's end lies,
+  and beside it the back with its tongue × 1, seen from its grain side (slits mirrored):
+  the fold and the insertion line dashed, the skived end hatched, length from
+  `strapLen()`; turned labels centred by hand (jsPDF ignores `align` on turned text);
+  legend, specs, rulers and the 50 mm square as on the keyfob.
+
+### The wallet (piniginė)
+Added 2026-11-08: the fifth "Item" (`product: 'wallet'`, texts in `content.*.editor.wallet`),
+from a pattern the owner found (`pavyzdziai/pinigine/TheBoat_A4.pdf`, DS Leather Goods,
+"The Boat", the plain version, not the bifold-with-cash one), measured off its vectors. Only
+its shape and sizes are taken; the stitch (2.8 mm / 3.85 mm, not the drawing's 4 mm), the
+edges, the leather and the pattern's style are the owner's own, as on every item.
+- Five pieces: the exterior 170 × 106 mm (`WAL_W`, `WAL_H`), corners R 10 (`WAL_R`), its
+  26 mm spine (`WAL_SPINE` is half of it) left free; on each half a base 72 × 106 mm
+  (`WAL_PW`), rounded on its outer corners; on each base a slot 72 mm wide, its outer
+  bottom corner R 10, its top one of four shapes (`WAL_SLOTS`, the "Slot shape" control,
+  `state.slot`): straight 83 mm, curved (83 mm with a thumb dip, the default), slanted
+  88 → 75 mm, sloped 87 → 75 mm. `walSlotTop(t)` is its height t cm in from the outer edge.
+  Exterior 1.6 mm (`WAL_EXT`), bases and slots 1.2 mm (`WAL_IN`, = `CARD_POCKET`, which
+  `lay`/`layPair` use where a thread crosses a slot's edge).
+- Colours: exterior and bases `state.leather`, slots `state.pocket` (the pocket colour
+  control, as card holder Nr. 1). Natural leather, edges and cut core as keyfob Nr. 2 and
+  card holder Nr. 2 (`withCore`, `walEdgeMat` with its textures mirrored past 10 cm).
+- The outside (17 cm, wider than the 10 cm texture) has its own 20 cm texture
+  (`wideTex`, `paintWallet`): the leather laid mirrored across the spine's middle, the
+  SLOU stamp on the front cover (x < 0, the left half seen from inside, as a book's), the
+  initials on the back cover, both low and centred on the stitched panel. Bases and slots
+  have their texture shifted onto the 10 cm (`shifted` in `build`).
+- Seams (`runs`): on each half an open U through all the layers (spine end of the top,
+  round the outer corners, spine end of the bottom), with a hole `POCKET_END` above the
+  slot's edge on the outer side so that stitch climbs over the edge; and the inner seam
+  (red on the pattern) down the spine side, slot to base only, sewn first, its top hole
+  `POCKET_END` above the slot's edge, not through the exterior, so nothing of it on the
+  outside (`frontRuns`). The last 2 stitches at every end doubled.
+- Built flat, then opened: `walHinge` bends the exterior round the spine (`walBend`, an
+  arc keeping its length) and turns each half `WAL_OPEN` 18° up as one piece, stitches and
+  all. Laid flat (no bend) while the grid and measurements are on.
+- By the spine the edge follows the outer edges' rule (the owner, 2026-11-09): one oval across what is glued
+  there, as one piece, over base and slot where the slot is (`stackBot`), over the base alone above it
+  (`baseStack` 1). The pieces stand on the exterior there, so the oval is a quarter ellipse, full width at the
+  bottom and rounding up to the top grain (`leatherPiece`'s `lowCrown`, `atSpine`): the brown stays out in full
+  under the green. Tried and rejected the same day: a dome centred on the pair (it tucked the brown in under the
+  green and it vanished), the base's own narrow edge above (the brown thinned where the green began), and each
+  piece rounded on its own.
+- The exterior over the spine keeps the halves' edge profile (`extTop`: as if the stack ran on,
+  two layers at the top, three at the bottom), so top and bottom are one unbroken line (the
+  owner, 2026-11-08: with its own rounding the spine stood out). `fitView()`: switching to the
+  wallet, the camera steps back until all of it is in the window (`fitDistance`).
+- Every seam runs to the very end of the pieces, the last 2 stitches doubled, so the ends
+  cannot peel open with use (the owner, 2026-11-08, photos `pavyzdziai/pinigine/Ekrano kopija
+  2026-11-08 2350*.png`): the U's top and bottom rows end at the last hole at least `WAL_END` 0.8 mm from the spine edge, every stitch exactly 3.85 mm, walked out from the hole over the slot's edge (`walkOut`; the owner, 2026-11-09: 1.2 mm with the rows divided evenly left short stitches, and a 3.85 mm wrap read huge); the curved slot ends 2.9 / 2.5 mm from the edge, about the stitch line's 2.8 mm, so the wrap there is as long as one over an edge. For that the bases and slots are 74 mm (2 mm longer at the spine than the drawing; 73 mm first left the wrap 1.5 mm, cramped and twisted) (the slot's top shapes in `WAL_SLOTS` are 72 mm, and `walShape` runs them on level the last 2 mm) and the exterior 174 mm, the spine still 26 mm. The rows used to stop at the stitch line;
+  the inner seam runs `WAL_END_IN` just above the U's bottom row.
+  And at each U end the thread wraps round all the layers, horizontally, along the row (the owner, 2026-11-09,
+  `pavyzdziai/pinigine/1.png`, circled in blue): two threads from the last hole on the inside, over the inner
+  pieces' end, straight down through the exterior in a hole of its own tight against that end
+  (its near tip right at their edge, where the row's line meets the end: the wrap runs on exactly the line and
+  slant of the stitches before it, and every end, in and out, inside and outside (`wrapTube`), follows its cut's own
+  direction, the owner, 2026-11-09; the thread hugs the dome to its
+  widest point, then drops straight down the end into the hole, pulled tight: following the dome's lower half it
+  vanished under the pieces, and a hole 1 mm out left it running off on a slant, wavy and loose; `current.spine`, marked on the exterior template), and back on the
+  outside into the last hole as a doubled stitch (in `build`, before `stitches.count`). The inside pair lies at one
+  steady spacing (closer only down in the cuts), level, pressed a little into the leather, the rounding sampled
+  finely: a layPair-style spread made it bulge and look loose (the owner, 2026-11-09). That wrap counts as the
+  last stitch, so the doubled reinforcement at each U end is the wrap and the one stitch before it (`ov`).
+  Tried and wrong the same day: a wrap that only went down onto the exterior's face (never showed outside), a
+  hole 3.85 mm on in the spine with the thread running along it, and the loop laid across round the wallet's
+  top or bottom edge (the owner did not like the cross wrap).
+- Pattern (`walletPattern`): page 1 the two bases (1, 2) on top, each slot (3, 4) under its
+  base, seen from the grain side, the slot's top dashed on the base, the holes the slot
+  covers lighter; page 2 the exterior (5), seen from outside (mirrored), the spine dashed,
+  the initials guide on the back cover, legend and specs under it; page 3 the finished
+  wallet (a still, open) with leaders and the work process (`processPages`; `wallet.steps`:
+  numbers reuse card holder Nr. 1's steps, three steps are the wallet's own, drafted by
+  Claude for the owner to correct). Rulers on both template pages (`rulers()`), no 50 mm
+  square, no SLOU stamp drawn.
+
+### Wallet Nr. 2 (pinigine 2)
+Added 2026-11-10: the sixth "Item" (`product: 'wallet2'`, texts in `content.*.editor.wallet2`), laid out after
+Miura Leather's M.1 bifold (`pavyzdziai/6vnt/`): exterior, lining, and on each half a back pocket sewn by its
+foot and a front pocket over it. Since 2026-11-14 its outlines are the owner's own, not the example's (the
+owner: "so it is not a pure copy"), built in `w2Loop()`:
+- the pockets' tops are wallet Nr. 1's slot shapes (`WAL_SLOTS`, the same "Slot shape" control), stretched
+  to each pocket's width; each pocket stands `W2_POCKET` over its seam's foot, which leaves `W2_SHOW` 8 mm of
+  a bank card showing; the corners by the spine rounded `W2_PR` 5 mm (the back pocket's both top corners);
+- the lining's top follows the same pocket shape (`w2LiningDrop`), over each half from the wallet's end,
+  mirrored across the fold, so it runs with the pockets (the owner, 2026-11-14); once at the shape's lowest it
+  stays level through the middle, so "curved" has no hump over the fold (the owner); a half-round thumb notch on
+  the fold was tried first and the owner did not like it.
+- The exterior must be longer than the lining (on the outside of the fold): ~pi x the 1.2 mm between their
+  middles, ~4 mm; the pattern gives it 5 mm (`W2_FL` 23.5 vs `W2_L` 23). The 3D keeps both 23 cm, and the
+  two are not glued (the note compartment) and the pockets are sewn to the lining alone, so open, the exterior
+  keeps its smooth bend and the lining, with its pockets and their stitches, stands off it (`w2Separate`, run
+  before `walHinge`, moves everything but the exterior, `userData.w2Ext`): at each height one parabola, level
+  in the middle, leaving the exterior at its own slope X1 either side, so no break (the owner: naturally there
+  is none). X1 grows evenly from the foot seam's ends (`W2_GAP`) at the foot to `W2_TAUT` 60 mm at the top, so
+  the gap slopes from a small opening between the last stitches (`W2_HOLE` 1.2 mm, eased off going up; the
+  owner: from thread to thread, no more, the threads join the pieces) to ~8 mm at the top, with no bulge.
+  Its lift is read off a grid; the lining is cut every 3 / 5 mm to carry it, the pockets every 6 / 10 mm.
+  None while laid flat. Tried first (2026-11-14): an outward bow of the exterior, a chord eased into a wave,
+  a level run rounded into the bend (broke), the lining alone lifted and only above the pockets (squeezed),
+  the foot glued shut. `sliceAt` cuts each triangle only by the lines that cross it (it rebuilt the whole
+  list per line: ~25 s). The faint scuff patches on the lining are the `natural` texture, not geometry.
+- Along the foot, the exterior's and lining's own two-layer rounding (as in the middle) runs `W2_TUCK` 1 mm on
+  in under each front pocket's spine end before the three-layer dome starts (`stackTop`; the owner, 2026-11-14:
+  from the pocket's very end the rounding finished too early and stood up as a steep corner under the pocket's
+  rounded end). Tried and rejected the same day: easing the three-layer dome out over 6 mm, then all the way to
+  the middle (the middle must stay as it was), and easing the pocket's own end (it folded into a flap).
+- The front pocket rises over the back one outside its edge, full 0.2 mm in (`w2Lift`), so it bends over
+  that edge (the owner, 2026-11-14: the back pocket's side stuck through the front pocket's top).
+- Speed: the bend and the pocket rise are cut along lines only (`sliceAt`), not by `k2Split` halving every
+  edge (that made ~2 M triangles, ~30 s to switch to it). Wallet Nr. 1's spine likewise.
+- The pattern PDF is not made yet.
 
 ### Example photos
 `pavyzdziai/` (one folder per item: `korteline/`, `pakabukas/`) is where the
@@ -269,4 +708,4 @@ Render the view with `ejs` + `config/content.js` into a standalone HTML file, th
 ```
 google-chrome --headless=new --no-sandbox --enable-unsafe-swiftshader --use-angle=swiftshader --virtual-time-budget=8000 --screenshot=out.png file://...
 ```
-For close-ups, patch `camera.position`, `controls.target` and `controls.minDistance` in the rendered copy. For the PDF, replace `doc.save(...)` with `doc.output('datauristring')` written into the DOM, then `--dump-dom`, base64-decode, and render with `pdftoppm`.
+For close-ups, patch `camera.position`, `controls.target` and `controls.minDistance` in the rendered copy. For the PDF, replace `out.save(...)` with `out.output('datauristring')` written into the DOM, then `--dump-dom`, base64-decode, and render with `pdftoppm`.
