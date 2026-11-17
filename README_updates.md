@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-17 21:23] - Add wallet leather texture - Use a ChatGPT-generated full-grain leather texture on Wallet No. 2's exterior, lining and card pockets for a more realistic 3D preview.
 [2026-11-17 11:26] - Save approved editor changes - Owner approved the current result and asked to save everything. Keep the wallet 2 optimization, prepared model delivery, browser cache and mouse navigation; verified all implementation changes were committed and synchronized with origin/stage.
 [2026-11-17 11:21] - Reduce wallet two triangles - Owner requested a reversible wallet 2 optimization trial to reduce rendering load. Clip original leather triangles into strips before triangulating, retaining sample rows. Default mesh drops from 1,991,750 to 749,380 triangles (62.4%). Locked stitching, PDF layouts and other products match the baseline; compared six camera views.
 [2026-11-17 11:09] - Compare editor mesh counts - Owner wants vertex and triangle totals to understand model complexity. Measured all 23 shape and measurement variants, including repeated stitch instances. Also updated the offline OrbitControls shim for the new right/middle mouse bindings so server model warmup continues to run.

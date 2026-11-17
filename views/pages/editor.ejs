@@ -1057,7 +1057,8 @@
       if (c - TEX_N > 0) { put(c - 2 * TEX_N, false); }
     }
   }
-  function pressLogo(col, bump, rough, y, front, side, size, cx) {
+  function pressLogo(col, bump, rough, y, front, side, size, cx, leather) {
+    leather = leather || natural;
     var px = TEX_N / TEX_SPAN;
     function letters(g, style, blur) {
       g.save();
@@ -1075,13 +1076,13 @@
     // The depth is in the light and shade on the walls, not in the colour:
     // darkened as much as it was at first, it read as printed (the owner's
     // stamp is pressed, not inked), so the floor is only a shade darker.
-    natTile(c, natural.col);
+    natTile(c, leather.col);
     letters(c, 'rgba(60,32,12,.08)', 3);     // drawn down round the walls
     letters(c, 'rgba(48,24,8,.16)', 0.8);    // the pressed floor
     // the relief runs 2.5 × as deep as the grain's (bumpScale 2 on these
     // faces, the grain drawn at 40% so it reads as before)
     b.fillStyle = '#808080'; b.fillRect(0, 0, b.canvas.width, TEX_N);
-    b.globalAlpha = 0.4; natTile(b, natural.bump); b.globalAlpha = 1;
+    b.globalAlpha = 0.4; natTile(b, leather.bump); b.globalAlpha = 1;
     letters(b, 'rgba(0,0,0,.30)', 3);        // the walls, sloping in
     letters(b, 'rgba(0,0,0,.35)', 1.6);
     letters(b, '#262626', 0.6);              // the floor, flat: no grain left in it
@@ -1185,7 +1186,11 @@
   // was tried first)
   // 24 cm across: the 20 cm one ran out short of the ends and smeared there
   var w2OutTex = wideTex(true, 24), w2OutBump = wideTex(false, 24), w2OutRough = wideTex(false, 24);
-  pressLogo(w2OutTex, w2OutBump, w2OutRough, -3.75, false, false, 1, -(W2_GAP + W2_L / 2 - STITCH_INSET) / 2);   // centred on the bottom seam's run, from its end by the middle to the end's stitch line (the owner, 2026-11-10)
+  function paintWallet2(leather) {
+    // Centre the stamp on the bottom seam's run, between the spine and end.
+    pressLogo(w2OutTex, w2OutBump, w2OutRough, -3.75, false, false, 1, -(W2_GAP + W2_L / 2 - STITCH_INSET) / 2, leather);
+  }
+  paintWallet2();
   var w2OutMat = new THREE.MeshStandardMaterial({ map: w2OutTex, bumpMap: w2OutBump, roughnessMap: w2OutRough, bumpScale: 2, roughness: 0.6 });
   var walOutMat = new THREE.MeshStandardMaterial({ map: walOutTex, bumpMap: walOutBump, roughnessMap: walOutRough, bumpScale: 2, roughness: 0.6 });
   // the inside: the natural leather (each piece's texture shifted onto it,
@@ -1196,7 +1201,25 @@
   var walSlotMat = new THREE.MeshStandardMaterial({ map: naturalTex, bumpMap: naturalBumpTex, bumpScale: 0.8, roughness: 0.6 });
   var walFleshMat = new THREE.MeshStandardMaterial({ map: mirrored(backColorTex), bumpMap: mirrored(plainBumpTex), bumpScale: 1, roughness: 0.85 });
   var walSlotFleshMat = new THREE.MeshStandardMaterial({ map: mirrored(backColorTex), bumpMap: mirrored(plainBumpTex), bumpScale: 1, roughness: 0.85 });
-  var w2LiningMat = new THREE.MeshStandardMaterial({ map: mirrored(naturalTex), bumpMap: mirrored(naturalBumpTex), bumpScale: 0.8, roughness: 0.6 });   // wallet Nr. 2's lining, 23 cm
+  var w2GrainTex = canvasTex(true), w2GrainBump = canvasTex(false);
+  [w2GrainTex, w2GrainBump].forEach(function (tex) { tex.wrapS = tex.wrapT = THREE.MirroredRepeatWrapping; });
+  var w2LiningMat = new THREE.MeshStandardMaterial({ map: w2GrainTex, bumpMap: w2GrainBump, bumpScale: 0.8, roughness: 0.6 });
+  var w2SlotMat = w2LiningMat.clone();
+  w2GrainTex.image.getContext('2d').drawImage(natural.col, 0, 0);
+  w2GrainBump.image.getContext('2d').drawImage(natural.bump, 0, 0);
+  var w2LeatherImage = document.createElement('img');
+  w2LeatherImage.onload = function () {
+    var col = w2GrainTex.image, bump = w2GrainBump.image;
+    col.getContext('2d').drawImage(w2LeatherImage, 0, 0, TEX_N, TEX_N);
+    var b = bump.getContext('2d');
+    b.save();
+    b.filter = 'grayscale(1)';
+    b.drawImage(col, 0, 0);
+    b.restore();
+    w2GrainTex.needsUpdate = w2GrainBump.needsUpdate = true;
+    paintWallet2({ col: col, bump: bump });
+  };
+  w2LeatherImage.src = '/images/wallet-2-leather.jpg';
   var walEdgeMat = new THREE.MeshPhysicalMaterial({ map: mirrored(fold2EdgeTex), bumpMap: mirrored(fold2EdgeBump), bumpScale: 1, roughness: 0.5, clearcoat: 0.2, clearcoatRoughness: 0.5, vertexColors: true });
   // Twisted waxed thread: diagonal plies wound round each stitch.
   var plyTex = (function () {
@@ -1338,6 +1361,7 @@
     w2LiningMat.color.copy(c).multiplyScalar(1.2);
     walFleshMat.color.copy(c).multiplyScalar(0.9);
     walSlotMat.color.copy(new THREE.Color(state.pocket)).multiplyScalar(1.2);
+    w2SlotMat.color.copy(walSlotMat.color);
     walSlotFleshMat.color.copy(new THREE.Color(state.pocket)).multiplyScalar(0.9);
     var pc = new THREE.Color(state.pocket);
     pocketFrontMat.color.copy(pc).multiplyScalar(1.2);
@@ -2586,7 +2610,7 @@
       pocketBackMat, pocketEdgeMat, pocketFleshMat, fold2FrontMat, fold3FrontMat,
       fold2BackMat, fold2EdgeMat, fob2FrontMat, fob2BackMat, fob2FleshMat,
       walOutMat, w2OutMat, walBaseMat, w2LiningMat, walFleshMat, walSlotMat,
-      walSlotFleshMat, walEdgeMat, threadMat, holeMat, dimpleMat, ringMat };
+      w2SlotMat, walSlotFleshMat, walEdgeMat, threadMat, holeMat, dimpleMat, ringMat };
   }
   var modelCodec, modelDecoder;
   async function downloadModel() {
@@ -2785,7 +2809,7 @@
       };
       for (var sg of [-1, 1]) {
         // the back pocket: every edge its own
-        fob.add(shift2(leatherPiece([w2Loop('B', sg)], T2, T2 * 1.5, function () { return 0; }, [walSlotMat, walEdgeMat, walSlotFleshMat], pocketCol2), sg * (W2_BX + W2_BW / 2)));
+        fob.add(shift2(leatherPiece([w2Loop('B', sg)], T2, T2 * 1.5, function () { return 0; }, [w2SlotMat, walEdgeMat, walSlotFleshMat], pocketCol2), sg * (W2_BX + W2_BW / 2)));
         yield sg < 0 ? 42 : 62;
         // the front pocket: in the stack along the foot and the end, lifted over the back pocket
         var dStack = function (p) { return p.y < -H2 + 0.01 || Math.abs(p.x) > W2_L / 2 - 0.01 || (Math.abs(p.x) > W2_L / 2 - W2_R - 0.01 && p.y < -H2 + W2_R) ? 1 : 0; };
@@ -2805,7 +2829,7 @@
           fd2.P[fv * 3 + 2] += lz;   // the normals left as they are: tipped with the rise, it shaded as a dark band where the back pocket lies under (the owner, 2026-11-10)
         }
         for (var fu = 0; fu < fd2.U.length; fu += 2) { fd2.U[fu] -= sg * (W2_DX + W2_DW / 2); }
-        fob.add(new THREE.Mesh(k2Geo(fd2), [walSlotMat, walEdgeMat, walSlotFleshMat]));
+        fob.add(new THREE.Mesh(k2Geo(fd2), [w2SlotMat, walEdgeMat, walSlotFleshMat]));
         fp.geometry.dispose();
         yield sg < 0 ? 55 : 75;
       }
