@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-17 10:00] - Refresh Codex desktop icon - Owner disliked the launcher icon. Replaced the generic executable icon with a dedicated dark leather coloured SLOU CODEX badge with a brass ring, making the desktop shortcut recognizable. Launcher behavior is unchanged.
 [2026-11-17 09:58] - Default staging automatic push - Owner wants this Codex launcher to work on stage by default and automatically commit and push completed, checked changes there. Launcher now switches to stage before starting; project instructions record the workflow.
 [2026-11-17 12:00] - Codex desktop launcher - Owner wants to work in Codex too. Installed the Codex CLI and added a "SLOU Codex" desktop launcher like the Claude one (server, Chrome, then Codex in the project). Codex reads CLAUDE.md as its rules; nothing in the repo changed.
 [2026-11-17 09:58] - Merge main into stage - Owner requested the current main branch be merged and pushed to stage so staging includes the latest approved storefront and designer changes. Resolved outdated stitch conflicts using main and retained both branches in Git history.
