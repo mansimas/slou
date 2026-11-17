@@ -40,6 +40,9 @@
   .kf__labels { position: absolute; inset: 0; pointer-events: none; }
   .kf__full { position: absolute; top: 12px; right: 12px; z-index: 2; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line);
     background: rgba(255,255,255,.85); color: var(--ink); cursor: pointer; display: grid; place-items: center; }
+  .kf__loading { position: absolute; inset: 0; z-index: 5; display: grid; place-content: center; gap: 12px; padding: 24px; text-align: center; background: rgba(251,246,238,.94); color: var(--ink); }
+  .kf__loading[hidden] { display: none; }
+  .kf__loading progress { width: min(260px, 65vw); height: 12px; accent-color: var(--leather-dark); }
   .kf__center { top: 60px; }
   .kf__full:hover { background: #fff; }
   .kf__full svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -68,6 +71,10 @@
 
     <div class="kf__grid">
       <div class="kf__stage" id="kfStage">
+        <div class="kf__loading" id="kfLoading" hidden role="status" aria-live="polite">
+          <span id="kfLoadingText"><%= e.loadingModel %></span>
+          <progress id="kfProgress" max="100" value="0" aria-label="<%= e.loadingModel %>"></progress>
+        </div>
         <p class="kf__hint" id="kfHint" data-rotate="<%= e.hint %>" data-pan="<%= e.hintPan %>"><%= e.hint %></p>
         <button type="button" class="kf__full" id="kfFull" aria-label="<%= t.videos.full %>" title="<%= t.videos.full %>"
                 data-enter="<%= t.videos.full %>" data-exit="<%= e.exitFull %>">
@@ -2448,7 +2455,53 @@
     });
   }
 
+  // PDF snapshots still need an immediate build; interactive builds yield to the browser.
   function build() {
+    var steps = buildSteps();
+    while (!steps.next().done) { /* drain synchronously for PDF snapshots */ }
+  }
+  var building = false;
+  async function requestBuild() {
+    if (building) { return; }
+    building = true;
+    var overlay = document.getElementById('kfLoading'), progress = document.getElementById('kfProgress');
+    var panel = document.querySelector('.kf__panel'), autoRotate = controls.autoRotate;
+    panel.inert = true;
+    stage.setAttribute('aria-busy', 'true');
+    overlay.hidden = false;
+    progress.value = 0;
+    controls.autoRotate = false;
+    fob.visible = false;
+    var pause = function () { return new Promise(function (resolve) { requestAnimationFrame(function () { setTimeout(resolve, 0); }); }); };
+    try {
+      await pause();
+      var steps = buildSteps(), step;
+      while (!(step = steps.next()).done) {
+        progress.value = step.value;
+        await pause();
+      }
+      progress.value = 100;
+      fob.visible = true;
+      drawMeasures();
+      renderer.render(scene, camera);
+      labelRenderer.render(scene, camera);
+      await pause();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('kfLoadingText').textContent = I18N.modelError;
+      await new Promise(function (resolve) { setTimeout(resolve, 2500); });
+    } finally {
+      fob.visible = true;
+      controls.autoRotate = autoRotate && !measures.visible;
+      panel.inert = false;
+      stage.removeAttribute('aria-busy');
+      overlay.hidden = true;
+      document.getElementById('kfLoadingText').textContent = I18N.loadingModel;
+      building = false;
+    }
+  }
+  function* buildSteps() {
+    yield 5;
     fob.children.slice().forEach(function (m) {
       fob.remove(m);
       if (m.isInstancedMesh) { m.dispose(); }   // release per-instance GPU buffers too
@@ -2540,6 +2593,7 @@
       ext2m.userData.w2Ext = true;   // stays as it is when the rest stands off it (w2Separate)
       fob.add(ext2m);
       ext2.geometry.dispose();
+      yield 20;
       // The exterior is 5 mm longer than the lining (on the pattern: it goes
       // round the outside of the fold); open, the lining stands off it at the
       // fold, see w2Separate
@@ -2548,14 +2602,16 @@
       lin2m.userData.w2Lining = true;   // cut finer than the pockets when it stands off (w2Separate)
       fob.add(lin2m);
       lin2.geometry.dispose();
+      yield 35;
       var shift2 = function (mesh, c) {
         var uv = mesh.geometry.attributes.uv;
         for (var i = 0; i < uv.count; i++) { uv.setX(i, uv.getX(i) - c); }
         return mesh;
       };
-      [-1, 1].forEach(function (sg) {
+      for (var sg of [-1, 1]) {
         // the back pocket: every edge its own
         fob.add(shift2(leatherPiece([w2Loop('B', sg)], T2, T2 * 1.5, function () { return 0; }, [walSlotMat, walEdgeMat, walSlotFleshMat], pocketCol2), sg * (W2_BX + W2_BW / 2)));
+        yield sg < 0 ? 42 : 62;
         // the front pocket: in the stack along the foot and the end, lifted over the back pocket
         var dStack = function (p) { return p.y < -H2 + 0.01 || Math.abs(p.x) > W2_L / 2 - 0.01 || (Math.abs(p.x) > W2_L / 2 - W2_R - 0.01 && p.y < -H2 + W2_R) ? 1 : 0; };
         var fp = leatherPiece([w2Loop('D', sg)], T2, T2 * 1.5, dStack, [], pocketCol2, null, null, function () { return 2 * T2; }, T2);
@@ -2576,7 +2632,8 @@
         for (var fu = 0; fu < fd2.U.length; fu += 2) { fd2.U[fu] -= sg * (W2_DX + W2_DW / 2); }
         fob.add(new THREE.Mesh(k2Geo(fd2), [walSlotMat, walEdgeMat, walSlotFleshMat]));
         fp.geometry.dispose();
-      });
+        yield sg < 0 ? 55 : 75;
+      }
       // The seams, the owner's stitch: on each half the U through every layer
       // (from the top corner, down the end, round the foot to near the
       // middle), its hole POCKET_END above the front pocket's top where the
@@ -2956,6 +3013,7 @@
       fob.add(slab(shape, BEVEL, DEPTH, 0, [leatherMat, edgeMat, backMat]));
       holesAt = stitchHoles(outline(state.shape, STITCH_INSET));
     }
+    yield 80;
     // An open seam (the card holder's U) has no stitch after its last hole.
     var open = card || fold || wallet || wal2;
 
@@ -3234,6 +3292,7 @@
     var corner = holesAt.map(function (p, k) { return chordIn(k).dot(chords[k]) < Math.cos(Math.PI / 9); });
     current = { holes: holesAt, chords: chords, chordIn: chordIn, E: E, corner: corner, open: open, runs: runs, frontRuns: frontRuns };
     for (var k = 0; k < n; k++) {
+      if (k % 24 === 0) { yield 80 + 15 * k / n; }
       var a = holesAt[k], b = holesAt[(k + 1) % n], d = chords[k];
       var run = open ? runOf(k) : null, sewn = !(open && k === run[1]);
       // the card holder's thread starts and ends at the opening, and at each
@@ -3431,6 +3490,7 @@
         });
       });
     }
+    yield 96;
     current.spine = spineHoles;
     stitches.count = extra;   // only the instances laid
     if (addPockets) { addPockets(); }   // now the dents the stitches press in are known
@@ -3569,7 +3629,7 @@
     ev.currentTarget.setAttribute('aria-pressed', String(on));
     document.getElementById('kfSpecs').hidden = !on;
     measures.visible = on;
-    if (state.product === 'wallet' || state.product === 'wallet2') { build(); }   // laid flat to be measured, opened again after
+    if (state.product === 'wallet' || state.product === 'wallet2') { requestBuild(); }   // laid flat to be measured, opened again after
     // CSS2D labels ignore their parent's visibility, so switch them one by one
     labels.forEach(function (l) { l.visible = on; });
     lockBtn.hidden = !on;
@@ -3663,10 +3723,10 @@
       grp.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === btn)); });
       state[grp.dataset.group] = btn.dataset.value;
       // the item and the shape are geometry; the rest is colour
-      if (grp.dataset.group === 'product') { setProduct(); } else if (grp.dataset.group === 'shape' || grp.dataset.group === 'slot') { build(); } else {
+      if (grp.dataset.group === 'product') { setProduct(); } else if (grp.dataset.group === 'shape' || grp.dataset.group === 'slot') { requestBuild(); } else {
         applyColors();
         // the card holder's burnished edges carry their shades in the geometry
-        if (state.product !== 'keyfob' && (grp.dataset.group === 'leather' || grp.dataset.group === 'pocket' || grp.dataset.group === 'second')) { build(); }
+        if (state.product !== 'keyfob' && (grp.dataset.group === 'leather' || grp.dataset.group === 'pocket' || grp.dataset.group === 'second')) { requestBuild(); }
       }
     });
   });
@@ -3702,7 +3762,7 @@
     if (state.text.trim()) { paintTextures(); }   // only initials move; blank grain is already painted
     controls.target.y = centreY();
     fitView();
-    build();
+    requestBuild();
     drawMeasures();
   }
 
@@ -5204,10 +5264,11 @@
   new ResizeObserver(resize).observe(stage);
 
   paintCalib();
-  build();
+  requestBuild();
   applyColors();
   resize();
   renderer.setAnimationLoop(function () {
+    if (building) { return; }
     controls.update();
     renderer.render(scene, camera);
     labelRenderer.render(scene, camera);
