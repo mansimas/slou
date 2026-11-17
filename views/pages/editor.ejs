@@ -40,6 +40,7 @@
   .kf__labels { position: absolute; inset: 0; pointer-events: none; }
   .kf__full { position: absolute; top: 12px; right: 12px; z-index: 2; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line);
     background: rgba(255,255,255,.85); color: var(--ink); cursor: pointer; display: grid; place-items: center; }
+  .kf__center { top: 60px; }
   .kf__full:hover { background: #fff; }
   .kf__full svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .kf__full .kf__shrink, .kf__stage.is-full .kf__full .kf__grow { display: none; }
@@ -72,6 +73,9 @@
                 data-enter="<%= t.videos.full %>" data-exit="<%= e.exitFull %>">
           <svg class="kf__grow" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
           <svg class="kf__shrink" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
+        </button>
+        <button type="button" class="kf__full kf__center" id="kfCenter" aria-label="<%= e.center %>" title="<%= e.center %>">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/></svg>
         </button>
       </div>
 
@@ -3602,6 +3606,13 @@
   }
   lockBtn.addEventListener('click', function () {
     setLock(lockBtn.getAttribute('aria-pressed') !== 'true');
+  });
+
+  document.getElementById('kfCenter').addEventListener('click', function () {
+    var offset = new THREE.Vector3(0, centreY(), 0).sub(controls.target);
+    camera.position.add(offset);
+    controls.target.add(offset);
+    controls.update();
   });
 
   // ---------- fullscreen ----------
