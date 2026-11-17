@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-17 10:24] - Restore original editor view - Owner clarified that Center must reset rotation and location too. Restore the initial camera position, target and zoom, clear residual movement and stop automatic rotation; measurements retain their straight-on view and wallets fit the viewport.
 [2026-11-17 10:23] - Add editor centering button - Owner wants to recover the model after moving the view. Added a localized center button below fullscreen that recenters the current item while preserving viewing angle and zoom in normal, fullscreen and locked top views.
 [2026-11-17 10:20] - Speed up product switching - Owner reported PC freezes when switching 3D items. Avoid repeated shared-edge calculations, no-op subdivision scans, blank texture repaints and rebuilding an already-selected option; release instance buffers. CPU checks reduced card and keyfob 2 builds about 38%; all seven geometry hashes match. Wallet 2 remains expensive.
 [2026-11-17 10:20] - Persist full Codex access - Owner wants commands to run without repeated permission prompts. Saved global approval_policy never and sandbox_mode danger-full-access with a backup of the previous configuration. Applies to newly started Codex sessions; the current session retains its assigned permissions.

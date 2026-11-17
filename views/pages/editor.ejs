@@ -3609,10 +3609,21 @@
   });
 
   document.getElementById('kfCenter').addEventListener('click', function () {
-    var offset = new THREE.Vector3(0, centreY(), 0).sub(controls.target);
-    camera.position.add(offset);
-    controls.target.add(offset);
+    // Drain pending orbit/pan damping before restoring the initial view.
+    controls.autoRotate = false;
+    var damping = controls.enableDamping;
+    controls.enableDamping = false;
     controls.update();
+    camera.up.set(0, 1, 0);
+    if (measures.visible) {
+      faceFront();
+    } else {
+      camera.position.set(4, 2, 19);
+      controls.target.set(0, centreY(), 0);
+      if (state.product === 'wallet' || state.product === 'wallet2') { fitView(); }
+    }
+    controls.update();
+    controls.enableDamping = damping;
   });
 
   // ---------- fullscreen ----------
