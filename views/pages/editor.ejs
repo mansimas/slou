@@ -1191,7 +1191,7 @@
     pressLogo(w2OutTex, w2OutBump, w2OutRough, -3.75, false, false, 1, -(W2_GAP + W2_L / 2 - STITCH_INSET) / 2, leather);
   }
   paintWallet2();
-  var w2OutMat = new THREE.MeshStandardMaterial({ map: w2OutTex, bumpMap: w2OutBump, roughnessMap: w2OutRough, bumpScale: 2, roughness: 0.6 });
+  var w2OutMat = new THREE.MeshStandardMaterial({ map: w2OutTex, bumpMap: w2OutBump, roughnessMap: w2OutRough, bumpScale: 2, roughness: 0.74 });
   var walOutMat = new THREE.MeshStandardMaterial({ map: walOutTex, bumpMap: walOutBump, roughnessMap: walOutRough, bumpScale: 2, roughness: 0.6 });
   // the inside: the natural leather (each piece's texture shifted onto it,
   // see build), the flesh sides, and the edges as on keyfob Nr. 2 and card
@@ -1203,23 +1203,29 @@
   var walSlotFleshMat = new THREE.MeshStandardMaterial({ map: mirrored(backColorTex), bumpMap: mirrored(plainBumpTex), bumpScale: 1, roughness: 0.85 });
   var w2GrainTex = canvasTex(true), w2GrainBump = canvasTex(false);
   [w2GrainTex, w2GrainBump].forEach(function (tex) { tex.wrapS = tex.wrapT = THREE.MirroredRepeatWrapping; });
-  var w2LiningMat = new THREE.MeshStandardMaterial({ map: w2GrainTex, bumpMap: w2GrainBump, bumpScale: 0.8, roughness: 0.6 });
+  var w2LiningMat = new THREE.MeshStandardMaterial({ map: w2GrainTex, bumpMap: w2GrainBump, bumpScale: 0.8, roughness: 0.74 });
   var w2SlotMat = w2LiningMat.clone();
   w2GrainTex.image.getContext('2d').drawImage(natural.col, 0, 0);
   w2GrainBump.image.getContext('2d').drawImage(natural.bump, 0, 0);
   var w2LeatherImage = document.createElement('img');
   w2LeatherImage.onload = function () {
     var col = w2GrainTex.image, bump = w2GrainBump.image;
-    col.getContext('2d').drawImage(w2LeatherImage, 0, 0, TEX_N, TEX_N);
+    var c = col.getContext('2d');
+    // Keep the selected leather tint while retaining the hide's tonal variation.
+    c.save();
+    c.filter = 'grayscale(1) brightness(1.12)';
+    c.drawImage(w2LeatherImage, 0, 0, TEX_N, TEX_N);
+    c.restore();
     var b = bump.getContext('2d');
     b.save();
-    b.filter = 'grayscale(1)';
-    b.drawImage(col, 0, 0);
+    // Missouri's tumbled grain is shallow. Suppress relief from colour mottling.
+    b.filter = 'grayscale(1) contrast(0.35) blur(0.5px)';
+    b.drawImage(w2LeatherImage, 0, 0, TEX_N, TEX_N);
     b.restore();
     w2GrainTex.needsUpdate = w2GrainBump.needsUpdate = true;
     paintWallet2({ col: col, bump: bump });
   };
-  w2LeatherImage.src = '/images/wallet-2-leather.jpg';
+  w2LeatherImage.src = '/images/wallet-2-missouri-natural.jpg';
   var walEdgeMat = new THREE.MeshPhysicalMaterial({ map: mirrored(fold2EdgeTex), bumpMap: mirrored(fold2EdgeBump), bumpScale: 1, roughness: 0.5, clearcoat: 0.2, clearcoatRoughness: 0.5, vertexColors: true });
   // Twisted waxed thread: diagonal plies wound round each stitch.
   var plyTex = (function () {
