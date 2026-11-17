@@ -1217,7 +1217,7 @@
     w2ToneImage.onload = function () {
       // Blend only broad tone from the Missouri reference into the procedural grain.
       w2Colour.save();
-      w2Colour.globalAlpha = 0.36;
+      w2Colour.globalAlpha = 0.68;
       w2Colour.filter = 'grayscale(1) blur(10px)';
       w2Colour.drawImage(w2ToneImage, -30, -30, TEX_N + 60, TEX_N + 60);
       w2Colour.restore();
