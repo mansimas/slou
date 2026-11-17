@@ -793,7 +793,10 @@
 
   var controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
-  controls.enablePan = false;
+  controls.enablePan = true;
+  controls.screenSpacePanning = true;
+  controls.mouseButtons.RIGHT = THREE.MOUSE.PAN;
+  controls.mouseButtons.MIDDLE = THREE.MOUSE.PAN;
   controls.minDistance = 7;
   controls.maxDistance = 30;
   // Zoom towards the pointer, not the middle of the screen: the wheel carries
@@ -3772,7 +3775,7 @@
   function setLock(on) {
     lockBtn.setAttribute('aria-pressed', String(on));
     controls.enableRotate = !on;
-    controls.enablePan = on;
+    controls.enablePan = true;
     controls.screenSpacePanning = true;
     controls.mouseButtons.LEFT = on ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
     controls.touches.ONE = on ? THREE.TOUCH.PAN : THREE.TOUCH.ROTATE;
