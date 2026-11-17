@@ -17,6 +17,7 @@ module.exports.bootstrap = async function() {
   // rather than sails.log so no log level can hide it.
   sails.on('lifted', function () {
     console.log('lifted on Master  ->  http://localhost:' + sails.config.port);
+    require('../api/services/EditorModelService').ensureWarm();
   });
 
 };

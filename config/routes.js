@@ -37,6 +37,7 @@ module.exports.routes = {
 
   // 3D keyfob designer (three.js, loaded from a CDN by the view itself).
   'GET /editor':           'PagesController.editor',
+  'GET /editor-models/:version/:key.bin': 'EditorModelsController.model',
 
   // The customer's conversation with the shop, shown at the top of the
   // homepage to whoever holds its key (kept in their browser's localStorage).

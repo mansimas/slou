@@ -70,7 +70,7 @@
     </header>
 
     <div class="kf__grid">
-      <div class="kf__stage" id="kfStage">
+      <div class="kf__stage" id="kfStage" data-model-version="<%= typeof modelVersion === 'undefined' ? '' : modelVersion %>">
         <div class="kf__loading" id="kfLoading" hidden role="status" aria-live="polite">
           <span id="kfLoadingText"><%= e.loadingModel %></span>
           <progress id="kfProgress" max="100" value="0" aria-label="<%= e.loadingModel %>"></progress>
@@ -194,7 +194,7 @@
   </div>
 </section>
 
-<script type="application/json" id="kfI18n"><%- JSON.stringify({ pattern: e.pattern, measure: e.measure, calib: e.calib, card: e.card, card2: e.card2, card3: e.card3, keyfob2: e.keyfob2, wallet: e.wallet, wallet2: e.wallet2 }).replace(/</g, '\\u003c') %></script>
+<script type="application/json" id="kfI18n"><%- JSON.stringify({ loadingModel: e.loadingModel, modelError: e.modelError, pattern: e.pattern, measure: e.measure, calib: e.calib, card: e.card, card2: e.card2, card3: e.card3, keyfob2: e.keyfob2, wallet: e.wallet, wallet2: e.wallet2 }).replace(/</g, '\\u003c') %></script>
 
 <script type="importmap">
   { "imports": {
@@ -2455,6 +2455,114 @@
     });
   }
 
+  // Keep completed geometry (including the PDF stitch layout), never user data
+  // on the server. Evict old variants instead of growing RAM without a bound.
+  var modelCache = new Map(), modelCacheBytes = 0, activeModel = null;
+  var MODEL_CACHE_LIMIT = 96 * 1024 * 1024;
+  function modelCacheKey() {
+    var p = state.product, wallet = p === 'wallet' || p === 'wallet2';
+    return JSON.stringify([p, p === 'keyfob' ? state.shape : '', wallet ? state.slot : '',
+      p === 'keyfob' ? '' : state.leather,
+      p === 'card' || wallet ? state.pocket : '', p === 'keyfob2' ? state.second : '', wallet && measures.visible]);
+  }
+  function preparedModelKey() {
+    var p = state.product, wallet = p === 'wallet' || p === 'wallet2';
+    // Geometry is shared across leather colours; the decoder reapplies only
+    // the baked edge dye. Thread, ring finish and initials use live materials.
+    return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
+  }
+  function disposeModel(children) {
+    var geometries = new Set();
+    children.forEach(function (m) {
+      if (m.isInstancedMesh) { m.dispose(); }
+      if (m.geometry !== stitchGeo && m.geometry !== holeGeo && m.geometry !== dimpleGeo) { geometries.add(m.geometry); }
+    });
+    geometries.forEach(function (g) { g.dispose(); });
+  }
+  function detachModel() {
+    var children = fob.children.slice();
+    children.forEach(function (m) { fob.remove(m); });
+    if (!activeModel) { disposeModel(children); }
+    activeModel = null;
+  }
+  function cachedLayout(source) {
+    var layout = { holes: source.holes, chords: source.chords, E: source.E,
+      corner: source.corner, open: source.open, runs: source.runs,
+      frontRuns: source.frontRuns, spine: source.spine || [] };
+    // Do not retain the builder/decoder's large temporary arrays via a closure.
+    layout.chordIn = function (k) {
+      return layout.open && layout.runs.some(function (r) { return r[0] === k; }) ? layout.chords[k] : layout.chords[(k + layout.chords.length - 1) % layout.chords.length];
+    };
+    return layout;
+  }
+  function rememberModel(key, entry) {
+    current = entry.current = cachedLayout(entry.current);
+    var buffers = new Set();
+    entry.children.forEach(function (m) {
+      Object.values(m.geometry.attributes).forEach(function (a) { buffers.add(a.array.buffer); });
+      if (m.geometry.index) { buffers.add(m.geometry.index.array.buffer); }
+      if (m.isInstancedMesh) { buffers.add(m.instanceMatrix.array.buffer); }
+    });
+    entry.bytes = Array.from(buffers).reduce(function (n, b) { return n + b.byteLength; }, 0);
+    modelCache.set(key, entry); modelCacheBytes += entry.bytes;
+    activeModel = entry;
+    for (var pair of modelCache) {
+      if (modelCacheBytes <= MODEL_CACHE_LIMIT && modelCache.size <= 8) { break; }
+      if (pair[1] === activeModel) { continue; }
+      modelCache.delete(pair[0]); modelCacheBytes -= pair[1].bytes;
+      disposeModel(pair[1].children);
+    }
+  }
+  function useModel(key, entry) {
+    detachModel();
+    entry.children.forEach(function (m) { fob.add(m); });
+    current = entry.current; activeModel = entry;
+    modelCache.delete(key); modelCache.set(key, entry);   // most recently used
+    foldDims();
+    var fold = state.product === 'card2' || state.product === 'card3';
+    backLight.intensity = fold ? 2.2 : 1.2;
+    backLight.position.set(fold ? -5 : -4, fold ? 8 : 5, -10);
+  }
+  function editorMaterials() {
+    return { leatherMat, backMat, edgeMat, bodyGrainMat, bodyEdgeMat, pocketFrontMat,
+      pocketBackMat, pocketEdgeMat, pocketFleshMat, fold2FrontMat, fold3FrontMat,
+      fold2BackMat, fold2EdgeMat, fob2FrontMat, fob2BackMat, fob2FleshMat,
+      walOutMat, w2OutMat, walBaseMat, w2LiningMat, walFleshMat, walSlotMat,
+      walSlotFleshMat, walEdgeMat, threadMat, holeMat, dimpleMat, ringMat };
+  }
+  var modelCodec, modelDecoder;
+  async function downloadModel() {
+    var key = preparedModelKey(), version = stage.dataset.modelVersion;
+    if (!key || !version) { return null; }
+    var abort = new AbortController(), timer = setTimeout(function () { abort.abort(); }, 30000);
+    try {
+      var response;
+      for (var attempt = 0; attempt < 20; attempt++) {
+        response = await fetch('/editor-models/' + version + '/' + key + '.bin', { signal: abort.signal });
+        if (response.status !== 503 || abort.signal.aborted) { break; }
+        await new Promise(function (resolve) { setTimeout(resolve, 1000); });
+      }
+      if (!response.ok) { return null; }
+      var buffer = await response.arrayBuffer();
+      if (!modelCodec) {
+        var modules = await Promise.all([import('/js/editor-model-codec.mjs?v=' + version), import('https://cdn.jsdelivr.net/npm/meshoptimizer@0.22.0/meshopt_decoder.module.js')]);
+        modelCodec = modules[0]; modelDecoder = modules[1].MeshoptDecoder;
+      }
+      await modelDecoder.ready;
+      return modelCodec.decodeModel(THREE, buffer, editorMaterials(), modelDecoder, state);
+    } catch (err) {
+      console.warn('Prepared model unavailable; using local geometry.', err);
+      return null;
+    } finally { clearTimeout(timer); }
+  }
+  function* buildSteps() {
+    var key = modelCacheKey(), saved = modelCache.get(key);
+    if (saved) { useModel(key, saved); return; }
+    detachModel();
+    yield* createModelSteps();
+    rememberModel(key, { children: fob.children.slice(), current: current });
+  }
+
   // PDF snapshots still need an immediate build; interactive builds yield to the browser.
   function build() {
     var steps = buildSteps();
@@ -2463,6 +2571,8 @@
   var building = false;
   async function requestBuild() {
     if (building) { return; }
+    var cacheKey = modelCacheKey(), saved = modelCache.get(cacheKey);
+    if (saved) { useModel(cacheKey, saved); drawMeasures(); return; }
     building = true;
     var overlay = document.getElementById('kfLoading'), progress = document.getElementById('kfProgress');
     var panel = document.querySelector('.kf__panel'), autoRotate = controls.autoRotate;
@@ -2475,10 +2585,22 @@
     var pause = function () { return new Promise(function (resolve) { requestAnimationFrame(function () { setTimeout(resolve, 0); }); }); };
     try {
       await pause();
-      var steps = buildSteps(), step;
-      while (!(step = steps.next()).done) {
-        progress.value = step.value;
+      progress.removeAttribute('value');
+      var downloaded = await downloadModel();
+      if (downloaded) {
+        progress.value = 85;
         await pause();
+        detachModel();
+        downloaded.children.forEach(function (m) { fob.add(m); });
+        current = downloaded.current;
+        rememberModel(cacheKey, downloaded);
+        useModel(cacheKey, downloaded);
+      } else {
+        var steps = buildSteps(), step;
+        while (!(step = steps.next()).done) {
+          progress.value = step.value;
+          await pause();
+        }
       }
       progress.value = 100;
       fob.visible = true;
@@ -2500,13 +2622,8 @@
       building = false;
     }
   }
-  function* buildSteps() {
+  function* createModelSteps() {
     yield 5;
-    fob.children.slice().forEach(function (m) {
-      fob.remove(m);
-      if (m.isInstancedMesh) { m.dispose(); }   // release per-instance GPU buffers too
-      if (m.geometry !== stitchGeo && m.geometry !== holeGeo) { m.geometry.dispose(); }
-    });
 
     foldDims();
     var card = state.product === 'card', fold = state.product === 'card2' || state.product === 'card3', fold3 = state.product === 'card3', fob2 = state.product === 'keyfob2', wallet = state.product === 'wallet', wal2 = state.product === 'wallet2', holesAt, crossings = [], addPockets = null, runs = null, frontRuns = null;

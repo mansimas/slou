@@ -228,6 +228,7 @@ module.exports = {
     return res.view('pages/editor', {
       layout: 'layouts/slou',
       active: 'editor',
+      modelVersion: require('../services/EditorModelService').version(),
       pageTitle: res.locals.t.editor.pageTitle,
     });
   },
