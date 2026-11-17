@@ -25,6 +25,33 @@ function geometryHash(children, skipColour) {
 }
 
 async function check() {
+  // The strip cutter must cover a flat piece exactly, with consistent winding
+  // and shared vertices on internal edges, including duplicate/boundary cuts.
+  const view = fs.readFileSync(path.join(__dirname, '../views/pages/editor.ejs'), 'utf8');
+  const stripSource = view.slice(view.indexOf('  function w2SliceAt('), view.indexOf('  function k2Bend('));
+  const cut = new Function('return (' + stripSource + ');')();
+  let square = { P: [0,0,0, 3,0,0, 3,3,0, 0,3,0], Nm: [0,0,1, 0,0,1, 0,0,1, 0,0,1],
+    U: [0,0, 3,0, 3,3, 0,3], Cl: [1,0,0, 1,0,0, 1,0,0, 1,0,0], tris: [[0,1,2,7],[0,2,3,7]] };
+  const lines = [0, 0.5, 0.5, 1, 1.5, 2, 2.5, 3];
+  square = cut(cut(square, 0, lines), 1, lines);
+  let area = 0;
+  const edges = new Map();
+  for (const [a,b,c,group] of square.tris) {
+    const twice = (square.P[b*3]-square.P[a*3])*(square.P[c*3+1]-square.P[a*3+1]) -
+      (square.P[b*3+1]-square.P[a*3+1])*(square.P[c*3]-square.P[a*3]);
+    assert(twice > 0, 'no inverted or degenerate triangles');
+    area += twice / 2; assert.equal(group, 7);
+    for (const [i,j] of [[a,b],[b,c],[c,a]]) {
+      const key = [Math.min(i,j),Math.max(i,j)].join(':'); edges.set(key, (edges.get(key) || 0) + 1);
+    }
+  }
+  assert(Math.abs(area - 9) < 1e-10, 'flat surface area is unchanged');
+  for (const [edge,n] of edges) {
+    const [a,b] = edge.split(':').map(Number);
+    const boundary = [0,1].some(axis => [0,3].some(v => Math.abs(square.P[a*3+axis]-v)<1e-9 && Math.abs(square.P[b*3+axis]-v)<1e-9));
+    assert.equal(n, boundary ? 1 : 2, 'no gaps on shared edges');
+  }
+  console.log('Wallet 2 strip coverage, winding and shared edges passed.');
   const { THREE, builder } = await createBuilder();
   const baseline = process.env.SLOU_MODEL_BASELINE ? (await createBuilder(fs.readFileSync(process.env.SLOU_MODEL_BASELINE, 'utf8'))).builder : null;
   const { MeshoptEncoder, MeshoptDecoder } = require('meshoptimizer');
@@ -38,7 +65,15 @@ async function check() {
     const expected = geometryHash(builder.fob.children);
     if (baseline) {
       Object.assign(baseline.state, config); baseline.measures.visible = variant.flat; baseline.build();
-      assert.equal(expected, geometryHash(baseline.fob.children), variant.key + ' original geometry');
+      if (variant.product === 'wallet2') {
+        const stitches = (b) => b.fob.children.filter(m => m.isInstancedMesh || m.material === b.materials.threadMat);
+        assert.equal(geometryHash(stitches(builder)), geometryHash(stitches(baseline)), variant.key + ' locked stitching');
+        for (const field of ['holes', 'chords', 'E', 'corner', 'open', 'runs', 'frontRuns', 'spine']) {
+          assert.deepEqual(builder.getCurrent()[field], baseline.getCurrent()[field], variant.key + ' PDF ' + field);
+        }
+      } else {
+        assert.equal(expected, geometryHash(baseline.fob.children), variant.key + ' original geometry');
+      }
     }
     const packed = encodeModel(THREE, builder.fob, builder.getCurrent(), builder.materials, MeshoptEncoder, builder.state);
     const decoded = decodeModel(THREE, packed.buffer, builder.getLiveMaterials(), MeshoptDecoder, builder.state);

@@ -2283,6 +2283,61 @@
     });
     return { P: P, Nm: Nm, U: U, Cl: Cl, tris: out };
   }
+  // Wallet No. 2: clip each original triangle into parallel strips first,
+  // then triangulate each strip once. Repeatedly cutting the new diagonals
+  // creates thousands of interior vertices that do not improve the surface.
+  // Keep the same sample rows, outline, UVs, material groups and edge normals.
+  function w2SliceAt(d, axis, lines, lo, hi) {
+    var P = d.P, Nm = d.Nm, U = d.U, Cl = d.Cl, other = 1 - axis, eps = 1e-6;
+    var L = lines.slice().sort(function (a, b) { return a - b; }).filter(function (x, i, all) { return !i || x - all[i - 1] > eps; });
+    var cuts = L.map(function () { return new Map(); }), out = [];
+    function at(li, a, b) {
+      var key = Math.min(a, b) * 1e7 + Math.max(a, b), cached = cuts[li].get(key);
+      if (cached !== undefined) { return cached; }
+      var f = (L[li] - P[a * 3 + axis]) / (P[b * 3 + axis] - P[a * 3 + axis]), v = P.length / 3;
+      for (var j = 0; j < 3; j++) {
+        P.push(P[a * 3 + j] + (P[b * 3 + j] - P[a * 3 + j]) * f);
+        Cl.push(Cl[a * 3 + j] + (Cl[b * 3 + j] - Cl[a * 3 + j]) * f);
+      }
+      P[v * 3 + axis] = L[li];
+      var nx = Nm[a * 3] + (Nm[b * 3] - Nm[a * 3]) * f, ny = Nm[a * 3 + 1] + (Nm[b * 3 + 1] - Nm[a * 3 + 1]) * f, nz = Nm[a * 3 + 2] + (Nm[b * 3 + 2] - Nm[a * 3 + 2]) * f, n = Math.hypot(nx, ny, nz) || 1;
+      Nm.push(nx / n, ny / n, nz / n);
+      U.push(U[a * 2] + (U[b * 2] - U[a * 2]) * f, U[a * 2 + 1] + (U[b * 2 + 1] - U[a * 2 + 1]) * f);
+      cuts[li].set(key, v);
+      return v;
+    }
+    d.tris.forEach(function (t) {
+      var values = t.slice(0, 3).map(function (v) { return P[v * 3 + axis]; });
+      var mn = Math.min.apply(null, values), mx = Math.max.apply(null, values);
+      if (lo !== undefined) {
+        var others = t.slice(0, 3).map(function (v) { return P[v * 3 + other]; });
+        if (Math.max.apply(null, others) < lo || Math.min.apply(null, others) > hi) { out.push(t); return; }
+      }
+      var first = 0;
+      while (first < L.length && L[first] <= mn + eps) { first++; }
+      var end = first;
+      while (end < L.length && L[end] < mx - eps) { end++; }
+      if (first === end) { out.push(t); return; }
+      for (var band = first; band <= end; band++) {
+        var low = band === first ? -Infinity : L[band - 1], high = band === end ? Infinity : L[band], poly = [];
+        for (var e = 0; e < 3; e++) {
+          var a = t[e], b = t[(e + 1) % 3], va = values[e], vb = values[(e + 1) % 3];
+          if (va >= low - eps && va <= high + eps) { poly.push(a); }
+          var lower = low > Math.min(va, vb) + eps && low < Math.max(va, vb) - eps;
+          var upper = high > Math.min(va, vb) + eps && high < Math.max(va, vb) - eps;
+          if (vb > va) {
+            if (lower) { poly.push(at(band - 1, a, b)); }
+            if (upper) { poly.push(at(band, a, b)); }
+          } else {
+            if (upper) { poly.push(at(band, a, b)); }
+            if (lower) { poly.push(at(band - 1, a, b)); }
+          }
+        }
+        for (var k = 1; k < poly.length - 1; k++) { out.push([poly[0], poly[k], poly[k + 1], t[3]]); }
+      }
+    });
+    return { P: P, Nm: Nm, U: U, Cl: Cl, tris: out };
+  }
   function k2Bend(src) {
     var path = strapPath(), S = path[path.length - 1].s;
     var line = path.slice().reverse().map(function (q) { return { y: q.y, z: q.z, th: q.th, u: S - q.s }; });
@@ -2404,7 +2459,7 @@
       var g = o.geometry;
       if (g.index && g.groups.length && g.attributes.color && g.attributes.uv) {   // a leather piece: cut finer where it moves
         var rw = o.userData.w2Lining ? fine : coarse;
-        var dd = sliceAt(sliceAt(k2Split(g, null), 0, rw[0], -H2 - 1, H2 + 1), 1, rw[1], -XE, XE);
+        var dd = w2SliceAt(w2SliceAt(k2Split(g, null), 0, rw[0], -H2 - 1, H2 + 1), 1, rw[1], -XE, XE);
         for (var v = 0; v < dd.P.length / 3; v++) {
           var x = dd.P[v * 3], y = dd.P[v * 3 + 1], dz2 = at(x, y);
           if (!dz2) { continue; }
@@ -2706,7 +2761,7 @@
         // a row of vertices every 0.6 mm across the bend (walBend is straight past it)
         var xs = [];
         for (var hi2 = -15; hi2 <= 15; hi2++) { xs.push(hi2 * W2_S / 15); }
-        return sliceAt(k2Split(g, null), 0, xs);
+        return w2SliceAt(k2Split(g, null), 0, xs);
       };
       var ext2 = leatherPiece([w2Ext()], T2, -T2 / 2, function (p) { return 1 - topFree(p, 0.3); }, [], leatherCol2, null, null, stackTop, T2);
       var ext2m = new THREE.Mesh(k2Geo(hingeSplit(ext2.geometry)), [walFleshMat, walEdgeMat, w2OutMat]);
@@ -2743,7 +2798,7 @@
           ys2.push(-H2 + W2_BY - 0.28 + li * 0.03);
         }
         var bx0 = W2_BX - 0.4, bx1 = W2_BX + W2_BW + 0.4;   // the foot's rows only across the back pocket
-        var fd2 = sliceAt(sliceAt(k2Split(fp.geometry, null), 0, xs2), 1, ys2, sg > 0 ? bx0 : -bx1, sg > 0 ? bx1 : -bx0);
+        var fd2 = w2SliceAt(w2SliceAt(k2Split(fp.geometry, null), 0, xs2), 1, ys2, sg > 0 ? bx0 : -bx1, sg > 0 ? bx1 : -bx0);
         for (var fv = 0; fv < fd2.P.length / 3; fv++) {
           var qx = fd2.P[fv * 3], qy = fd2.P[fv * 3 + 1], lz = w2Lift(qx, qy);
           if (!lz) { continue; }
