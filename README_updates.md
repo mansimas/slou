@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-17 21:49] - Refine wallet leather finish - Keep the preferred procedural leather on Wallet No. 2, soften its relief and sheen, and blend in broad Missouri-inspired tone to make the material look more natural on the existing model.
 [2026-11-17 21:45] - Restore original wallet leather - Owner preferred Claude's previous Wallet No. 2 leather appearance. Restore the approved editor materials and remove the generated texture.
 [2026-11-17 21:30] - Match natural Missouri leather - Replace Wallet No. 2’s artificial-looking grain with a ChatGPT texture based on a natural La Perla Azzurra Missouri sample. Soften the relief and sheen to match the tumbled vegetable-tanned finish.
 [2026-11-17 21:23] - Add wallet leather texture - Use a ChatGPT-generated full-grain leather texture on Wallet No. 2's exterior, lining and card pockets for a more realistic 3D preview.
