@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-17 12:00] - Codex desktop launcher - Owner wants to work in Codex too. Installed the Codex CLI and added a "SLOU Codex" desktop launcher like the Claude one (server, Chrome, then Codex in the project). Codex reads CLAUDE.md as its rules; nothing in the repo changed.
 [2026-11-14 19:30] - Wallet 2 foot edge smooth - Owner: where the front pockets end on the foot, the exterior's and lining's rounding finished too early, leaving steep corners. Their own rounding now runs 1 mm on under each pocket's end; the middle stays as before (easing to the middle was rejected).
 [2026-11-14 17:40] - Wallet 2 spine gap - Owner: open, exterior and lining lay flush as if equal. The exterior stays smooth; the lining with its pockets stands off it, no break, sloping evenly from a small hole between the last foot stitches to ~8 mm at the top.
 [2026-11-14 17:00] - Wallet 2 own shapes - Owner: make wallet Nr. 2 not a pure copy of the Miura pattern. Pockets now take wallet Nr. 1's slot shapes (same control), heights leave 8 mm of card showing, spine corners R 5; lining top follows the pockets' shape, level through the middle (no hump).
