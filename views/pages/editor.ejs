@@ -3179,9 +3179,9 @@
       // across the card and taper only between its sides and the glued seam.
       var cardHalf = 0.076 / 2, cardTop = -CARD_H / 2 + STITCH_INSET + 8.56;
       var xs0 = CARD_W / 2 - STITCH_INSET - 0.1, sideEase = xs0 - 5.398 / 2;
-      var yb0 = -CARD_H / 2 + STITCH_INSET + 0.1;
+      var yb0 = -CARD_H / 2 + STITCH_INSET + 0.1, bottomEase = 0.3;
       function cardFill(x, y) {
-        return ease((xs0 - Math.abs(x)) / sideEase) * ease((y - yb0) / 1.6) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
+        return ease((xs0 - Math.abs(x)) / sideEase) * ease((y - yb0) / bottomEase) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
       }
       function fuller(mesh, amt) {
         var d = k2Split(mesh.geometry, function (ya, yb, xa, xb) {
