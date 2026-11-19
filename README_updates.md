@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-19 20:05] - Fill window pocket fully - Carry the lift down toward the bottom seam so the window-side pocket looks like it holds a fully inserted card.
 [2026-11-19 20:04] - Ease middle slot further - Extend the transition from the side seams to 10 mm so the middle opening looks more gradual.
 [2026-11-19 20:02] - Soften middle slot opening - Reduce the gap to 0.85 mm and lengthen the transition at the seams so the opening looks more gradual.
 [2026-11-19 19:55] - Extend middle slot opening - Keep the main pieces apart across the unsewn area and taper the gap into the upper ends of the side seams.

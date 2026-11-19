@@ -3180,22 +3180,28 @@
       var cardHalf = 0.076 / 2, cardTop = -CARD_H / 2 + STITCH_INSET + 8.56;
       var cardHalfWidth = 5.398 / 2, xs0 = CARD_W / 2 - STITCH_INSET - 0.1, sideEase = xs0 - cardHalfWidth;
       var yb0 = -CARD_H / 2 + STITCH_INSET + 0.1, bottomEase = 0.3;
-      function cardFill(x, y) {
+      function cardFootFill(x, y) {
         var cornerStart = cardHalfWidth - BANK_CR;
         var bottom = yb0 + 0.15 * ease((Math.abs(x) - cornerStart) / BANK_CR);
+        return ease((y - bottom) / bottomEase);
+      }
+      function cardFill(x, y) {
         var sides = ease((xs0 - Math.abs(x)) / sideEase);
-        var fill = ease((y - bottom) / bottomEase) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
+        var fill = cardFootFill(x, y) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
         // The middle slot opens across the unsewn area. The opening fades
         // into the stitched area along the line between the upper end holes.
         var mouth = ease(y - (pocketTop(x) + POCKET_END));   // ease over 10 mm
         var closedAtSeams = sides * fill;
         return closedAtSeams + (0.0425 / cardHalf - closedAtSeams) * mouth;
       }
-      function pocketFill(x, y) {
+      function pocketFill(x, y, seated = false) {
         // Leave a 1.5 mm gap at the mouth, fading into the pocket
         // over 12 mm and closing before the side seams.
-        var opening = ease(1 - (pocketTop(x) - y) / 1.2) * ease((xs0 - Math.abs(x)) / sideEase);
-        return cardFill(x, y) + (0.15 / cardHalf) * opening;
+        var mouth = ease(1 - (pocketTop(x) - y) / 1.2);
+        var sides = ease((xs0 - Math.abs(x)) / sideEase);
+        // The window-side pocket stands out over the hidden card down to its foot.
+        var depth = seated ? 0.076 * cardFootFill(x, y) : 0;
+        return cardFill(x, y) + sides * (depth + (0.15 - depth) * mouth) / cardHalf;
       }
       function fuller(mesh, amt, fill = cardFill) {
         var d = k2Split(mesh.geometry, function (ya, yb, xa, xb) {
@@ -3216,7 +3222,7 @@
         return new THREE.Mesh(k2Geo(d), mesh.material);
       }
       addPockets = function () {
-        fob.add(fuller(leatherPiece([frontLoop], CARD_POCKET, zp, frontStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol), cardHalf, pocketFill));
+        fob.add(fuller(leatherPiece([frontLoop], CARD_POCKET, zp, frontStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol), cardHalf, function (x, y) { return pocketFill(x, y, true); }));
         fob.add(fuller(leatherPiece([pocketLoop], CARD_POCKET, -zp, sandedStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, null, null, stackTop), -cardHalf, pocketFill));
       };
       fob.add(fuller(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol, null, null, stackTop), cardHalf));
