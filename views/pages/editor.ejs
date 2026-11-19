@@ -3185,7 +3185,7 @@
         var bottom = yb0 + 0.15 * ease((Math.abs(x) - cornerStart) / BANK_CR);
         return ease((xs0 - Math.abs(x)) / sideEase) * ease((y - bottom) / bottomEase) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
       }
-      function frontPocketFill(x, y) {
+      function pocketFill(x, y) {
         // Leave a 1.5 mm gap at the mouth, fading into the pocket
         // over 12 mm and closing before the side seams.
         var opening = ease(1 - (pocketTop(x) - y) / 1.2) * ease((xs0 - Math.abs(x)) / sideEase);
@@ -3208,8 +3208,8 @@
         return new THREE.Mesh(k2Geo(d), mesh.material);
       }
       addPockets = function () {
-        fob.add(fuller(leatherPiece([frontLoop], CARD_POCKET, zp, frontStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol), cardHalf));
-        fob.add(fuller(leatherPiece([pocketLoop], CARD_POCKET, -zp, sandedStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, null, null, stackTop), -cardHalf, frontPocketFill));
+        fob.add(fuller(leatherPiece([frontLoop], CARD_POCKET, zp, frontStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol), cardHalf, pocketFill));
+        fob.add(fuller(leatherPiece([pocketLoop], CARD_POCKET, -zp, sandedStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, null, null, stackTop), -cardHalf, pocketFill));
       };
       fob.add(fuller(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol, null, null, stackTop), cardHalf));
       fob.add(fuller(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol, null, null, stackTop), -cardHalf));
