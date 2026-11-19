@@ -3183,7 +3183,11 @@
       function cardFill(x, y) {
         var cornerStart = cardHalfWidth - BANK_CR;
         var bottom = yb0 + 0.15 * ease((Math.abs(x) - cornerStart) / BANK_CR);
-        return ease((xs0 - Math.abs(x)) / sideEase) * ease((y - bottom) / bottomEase) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
+        var sides = ease((xs0 - Math.abs(x)) / sideEase);
+        var fill = ease((y - bottom) / bottomEase) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
+        // Open the middle slot to 1 mm at its mouth, easing in over the last 10 mm.
+        var mouth = ease(y - (CARD_H / 2 - 1));
+        return sides * (fill + (0.05 / cardHalf - fill) * mouth);
       }
       function pocketFill(x, y) {
         // Leave a 1.5 mm gap at the mouth, fading into the pocket
