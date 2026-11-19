@@ -3185,9 +3185,11 @@
         var bottom = yb0 + 0.15 * ease((Math.abs(x) - cornerStart) / BANK_CR);
         var sides = ease((xs0 - Math.abs(x)) / sideEase);
         var fill = ease((y - bottom) / bottomEase) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
-        // Open the middle slot to 1 mm at its mouth, easing in over the last 10 mm.
-        var mouth = ease(y - (CARD_H / 2 - 1));
-        return sides * (fill + (0.05 / cardHalf - fill) * mouth);
+        // The middle slot opens across the unsewn area. The opening fades
+        // into the stitched area along the line between the upper end holes.
+        var mouth = ease((y - (pocketTop(x) + POCKET_END)) / 0.35);
+        var closedAtSeams = sides * fill;
+        return closedAtSeams + (0.05 / cardHalf - closedAtSeams) * mouth;
       }
       function pocketFill(x, y) {
         // Leave a 1.5 mm gap at the mouth, fading into the pocket
@@ -3197,7 +3199,9 @@
       }
       function fuller(mesh, amt, fill = cardFill) {
         var d = k2Split(mesh.geometry, function (ya, yb, xa, xb) {
-          return Math.min(xa, xb) < xs0 && Math.max(xa, xb) > -xs0 && Math.max(ya, yb) > yb0 && Math.hypot(xa - xb, ya - yb) > 0.2;
+          var insideSeams = Math.min(xa, xb) < xs0 && Math.max(xa, xb) > -xs0;
+          var reachesOpening = Math.max(ya, yb) > pocketTop(Math.min(xa, xb)) + POCKET_END;
+          return (insideSeams || reachesOpening) && Math.max(ya, yb) > yb0 && Math.hypot(xa - xb, ya - yb) > 0.2;
         });
         for (var v = 0; v < d.P.length / 3; v++) {
           var x = d.P[v * 3], y = d.P[v * 3 + 1], f = fill(x, y);
