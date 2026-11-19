@@ -1195,7 +1195,7 @@
   w2Relief.globalAlpha = 0.85; w2Relief.drawImage(natural.bump, 0, 0); w2Relief.globalAlpha = 1;
   function paintWallet2Stamp() {
     // Centre the stamp between the spine and the end of the bottom seam.
-    pressLogo(w2OutTex, w2OutBump, w2OutRough, -3.25, false, false, 1, -(W2_GAP + W2_L / 2 - STITCH_INSET) / 2, w2Grain);
+    pressLogo(w2OutTex, w2OutBump, w2OutRough, -3.45, false, false, 1, -(W2_GAP + W2_L / 2 - STITCH_INSET) / 2, w2Grain);
   }
   paintWallet2Stamp();
   var w2OutMat = new THREE.MeshStandardMaterial({ map: w2OutTex, bumpMap: w2OutBump, roughnessMap: w2OutRough, bumpScale: 2, roughness: 0.66 });
