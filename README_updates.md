@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-19 20:16] - Lower high pocket edge - Lower the high side by 5 mm so the pocket opening and its reinforcement sit less prominently. The pattern follows the adjusted shape.
 [2026-11-19 20:14] - Extend taper to 60mm - Lengthen the middle slot transition for a shallower opening along the edges.
 [2026-11-19 20:11] - Extend taper to 50mm - Lengthen the middle slot transition to make the opening more gradual.
 [2026-11-19 20:10] - Lengthen middle slot taper - Extend the transition to 35 mm for a gentler opening along the edges.
