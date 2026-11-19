@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-19 20:08] - Extend middle slot taper - Soften the side transition by spreading the middle opening over 25 mm from the seam ends.
 [2026-11-19 20:07] - Smooth all card slot profiles - Keep the middle slot from narrowing before its mouth and smooth the shared lower transitions so all pocket surfaces flow evenly into the seams.
 [2026-11-19 20:06] - Remove flared pocket lips - Keep a card-thickness gap from the opening toward the bottom in both outside pockets so the leather does not curl outward at the mouths.
 [2026-11-19 20:05] - Fill window pocket fully - Carry the lift down toward the bottom seam so the window-side pocket looks like it holds a fully inserted card.
