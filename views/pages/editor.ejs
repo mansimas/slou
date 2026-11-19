@@ -3183,15 +3183,21 @@
       function cardFill(x, y) {
         return ease((xs0 - Math.abs(x)) / sideEase) * ease((y - yb0) / bottomEase) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
       }
-      function fuller(mesh, amt) {
+      function frontPocketFill(x, y) {
+        // Leave a card-thickness gap at the mouth, fading into the pocket
+        // over 12 mm and closing before the side seams.
+        var opening = ease(1 - (pocketTop(x) - y) / 1.2) * ease((xs0 - Math.abs(x)) / sideEase);
+        return cardFill(x, y) + 2 * opening;
+      }
+      function fuller(mesh, amt, fill = cardFill) {
         var d = k2Split(mesh.geometry, function (ya, yb, xa, xb) {
           return Math.min(xa, xb) < xs0 && Math.max(xa, xb) > -xs0 && Math.max(ya, yb) > yb0 && Math.hypot(xa - xb, ya - yb) > 0.2;
         });
         for (var v = 0; v < d.P.length / 3; v++) {
-          var x = d.P[v * 3], y = d.P[v * 3 + 1], f = cardFill(x, y);
+          var x = d.P[v * 3], y = d.P[v * 3 + 1], f = fill(x, y);
           if (!f) { continue; }
           d.P[v * 3 + 2] += amt * f;
-          var gx = amt * (cardFill(x + 0.004, y) - cardFill(x - 0.004, y)) / 0.008, gy = 0.5 * amt * (cardFill(x, y + 0.004) - cardFill(x, y - 0.004)) / 0.008, nz = d.Nm[v * 3 + 2];   // half the slope's shading up and down
+          var gx = amt * (fill(x + 0.004, y) - fill(x - 0.004, y)) / 0.008, gy = 0.5 * amt * (fill(x, y + 0.004) - fill(x, y - 0.004)) / 0.008, nz = d.Nm[v * 3 + 2];   // half the slope's shading up and down
           d.Nm[v * 3] -= nz * gx; d.Nm[v * 3 + 1] -= nz * gy;
           var nl = Math.hypot(d.Nm[v * 3], d.Nm[v * 3 + 1], d.Nm[v * 3 + 2]) || 1;
           d.Nm[v * 3] /= nl; d.Nm[v * 3 + 1] /= nl; d.Nm[v * 3 + 2] /= nl;
@@ -3201,7 +3207,7 @@
       }
       addPockets = function () {
         fob.add(fuller(leatherPiece([frontLoop], CARD_POCKET, zp, frontStack, [pocketFrontMat, pocketEdgeMat, pocketFleshMat], pocketCol), cardHalf));
-        fob.add(fuller(leatherPiece([pocketLoop], CARD_POCKET, -zp, sandedStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, null, null, stackTop), -cardHalf));
+        fob.add(fuller(leatherPiece([pocketLoop], CARD_POCKET, -zp, sandedStack, [pocketFleshMat, pocketEdgeMat, pocketBackMat], pocketCol, null, null, stackTop), -cardHalf, frontPocketFill));
       };
       fob.add(fuller(leatherPiece([bodyLoop], CARD_BODY, zb, bodyStack, [bodyGrainMat, bodyEdgeMat, backMat], bodyCol, null, null, stackTop), cardHalf));
       fob.add(fuller(leatherPiece([bodyLoop], CARD_BODY, -zb, bodyStack, [backMat, bodyEdgeMat, bodyGrainMat], bodyCol, null, null, stackTop), -cardHalf));
