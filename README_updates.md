@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-19 20:11] - Extend taper to 50mm - Lengthen the middle slot transition to make the opening more gradual.
 [2026-11-19 20:10] - Lengthen middle slot taper - Extend the transition to 35 mm for a gentler opening along the edges.
 [2026-11-19 20:08] - Extend middle slot taper - Soften the side transition by spreading the middle opening over 25 mm from the seam ends.
 [2026-11-19 20:07] - Smooth all card slot profiles - Keep the middle slot from narrowing before its mouth and smooth the shared lower transitions so all pocket surfaces flow evenly into the seams.
