@@ -3187,7 +3187,7 @@
         var fill = ease((y - bottom) / bottomEase) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
         // The middle slot opens across the unsewn area. The opening fades
         // into the stitched area along the line between the upper end holes.
-        var mouth = ease((y - (pocketTop(x) + POCKET_END)) / 0.65);
+        var mouth = ease(y - (pocketTop(x) + POCKET_END));   // ease over 10 mm
         var closedAtSeams = sides * fill;
         return closedAtSeams + (0.0425 / cardHalf - closedAtSeams) * mouth;
       }
