@@ -3178,10 +3178,12 @@
       // thickness, carrying the outer pocket with it. The faces stay level
       // across the card and taper only between its sides and the glued seam.
       var cardHalf = 0.076 / 2, cardTop = -CARD_H / 2 + STITCH_INSET + 8.56;
-      var xs0 = CARD_W / 2 - STITCH_INSET - 0.1, sideEase = xs0 - 5.398 / 2;
+      var cardHalfWidth = 5.398 / 2, xs0 = CARD_W / 2 - STITCH_INSET - 0.1, sideEase = xs0 - cardHalfWidth;
       var yb0 = -CARD_H / 2 + STITCH_INSET + 0.1, bottomEase = 0.3;
       function cardFill(x, y) {
-        return ease((xs0 - Math.abs(x)) / sideEase) * ease((y - yb0) / bottomEase) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
+        var cornerStart = cardHalfWidth - BANK_CR;
+        var bottom = yb0 + 0.15 * ease((Math.abs(x) - cornerStart) / BANK_CR);
+        return ease((xs0 - Math.abs(x)) / sideEase) * ease((y - bottom) / bottomEase) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
       }
       function frontPocketFill(x, y) {
         // Leave a 1.5 mm gap at the mouth, fading into the pocket

@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-19 10:56] - Raise hidden card corners - Lift the lower corners of the fullness profile 1.5 mm to leave more room by the seam while keeping the middle seated deep.
 [2026-11-19 10:49] - Widen front pocket opening - Increase the gap to 1.5 mm so the opening reads more clearly with the card hidden.
 [2026-11-19 10:47] - Open card wallet pocket - Leave a slim empty gap at the front pocket mouth so the leather looks held open by a hidden card.
 [2026-11-19 10:38] - Lower card fullness taper - Shorten the bottom transition so a thin card looks seated almost against the bottom seam.
