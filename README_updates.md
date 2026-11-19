@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-19 20:20] - Soften high seam transition - Blend the middle gap over 12 mm above and across the high reinforcement so the leather opens without a sharp corner.
 [2026-11-19 20:17] - Open at high reinforcement - Restore the 88 mm edge and bring the middle opening in immediately above the high seam end, where the owner wanted the gap to start.
 [2026-11-19 20:16] - Lower high pocket edge - Lower the high side by 5 mm so the pocket opening and its reinforcement sit less prominently. The pattern follows the adjusted shape.
 [2026-11-19 20:14] - Extend taper to 60mm - Lengthen the middle slot transition for a shallower opening along the edges.

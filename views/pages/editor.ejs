@@ -3191,9 +3191,9 @@
         var aboveSeam = y - (pocketTop(x) + POCKET_END);
         // Bring the gap in sooner beside the high reinforcement, blending
         // back to the gradual opening across the rest of the wallet.
-        var highSide = ease((x - POCKET_X) / (xs0 - POCKET_X));
+        var highSide = ease(1 - (xs0 - x) / 1.2);
         var gradual = ease(aboveSeam / 6);
-        var mouth = gradual + (ease(aboveSeam / 0.25) - gradual) * highSide;
+        var mouth = gradual + (ease(aboveSeam / 1.2) - gradual) * highSide;
         var closedAtSeams = seatedCardFill(x, y);
         return closedAtSeams + (0.0425 / cardHalf - closedAtSeams) * mouth;
       }
