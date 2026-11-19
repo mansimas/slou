@@ -270,7 +270,7 @@
   // high on the right seen from the window side, as on the owner's piece.
   // Both pockets are this one shape — the drawing's second is its mirror, which
   // turned over onto the back lines up with the first.
-  var POCKET_HI = -CARD_H / 2 + 8.3, POCKET_LO = -CARD_H / 2 + 4.8, POCKET_X = CARD_W / 2 - 1.0;   // 48 and 83 mm high (88 at the high end until 2026-11-19); 10 mm in from each side (11.3 mm until 2026-10-20, the owner)
+  var POCKET_HI = -CARD_H / 2 + 8.8, POCKET_LO = -CARD_H / 2 + 4.8, POCKET_X = CARD_W / 2 - 1.0;   // 48 and 88 mm high (52 and 81 until 2026-10-20); 10 mm in from each side (11.3 mm until 2026-10-20, the owner)
   var POCKET_EASE = 0.2;   // 2 mm: a firmer bend (it was 5 mm; the owner, 2026-10-20)
   // The last hole of each side is in the body, just *above* the pocket edge
   // (the owner's close-ups, 2026-10-19): the last stitch climbs over the
@@ -3188,7 +3188,12 @@
       function cardFill(x, y) {
         // The middle slot opens across the unsewn area. The opening fades
         // into the stitched area along the line between the upper end holes.
-        var mouth = ease((y - (pocketTop(x) + POCKET_END)) / 6);   // ease over 60 mm
+        var aboveSeam = y - (pocketTop(x) + POCKET_END);
+        // Bring the gap in sooner beside the high reinforcement, blending
+        // back to the gradual opening across the rest of the wallet.
+        var highSide = ease((x - POCKET_X) / (xs0 - POCKET_X));
+        var gradual = ease(aboveSeam / 6);
+        var mouth = gradual + (ease(aboveSeam / 0.25) - gradual) * highSide;
         var closedAtSeams = seatedCardFill(x, y);
         return closedAtSeams + (0.0425 / cardHalf - closedAtSeams) * mouth;
       }
