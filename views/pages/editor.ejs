@@ -3184,10 +3184,10 @@
         return ease((xs0 - Math.abs(x)) / sideEase) * ease((y - yb0) / bottomEase) * (1 - 0.4 * ease((y - cardTop + 0.4) / 0.6));
       }
       function frontPocketFill(x, y) {
-        // Leave a card-thickness gap at the mouth, fading into the pocket
+        // Leave a 1.5 mm gap at the mouth, fading into the pocket
         // over 12 mm and closing before the side seams.
         var opening = ease(1 - (pocketTop(x) - y) / 1.2) * ease((xs0 - Math.abs(x)) / sideEase);
-        return cardFill(x, y) + 2 * opening;
+        return cardFill(x, y) + (0.15 / cardHalf) * opening;
       }
       function fuller(mesh, amt, fill = cardFill) {
         var d = k2Split(mesh.geometry, function (ya, yb, xa, xb) {
