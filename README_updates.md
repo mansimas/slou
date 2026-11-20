@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-20 15:08] - Extend lower seam reinforcement - Add one stitch to each lower corner of Card Wallet No. 2 so the reinforcement follows the curve and reaches closer to the fold.
 [2026-11-20 15:03] - Soften bottom corner shadows - Reduce the downward hook in the shading at the hidden card?s lower corners while keeping the fold and card geometry.
 [2026-11-20 14:50] - Restore center of fold - Keep the earlier profile at the center of the marked U and retain soft rounding where the bend meets its sides.
 [2026-11-20 14:49] - Soften marked inner bend - Match the annotated side view by rounding the U-shaped inside surface at the bottom of the thumb opening while keeping the cutout width.
