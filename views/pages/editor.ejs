@@ -2018,6 +2018,7 @@
     // so the outside of the fold stays where it was, and the halves come back
     // together over the PUFF_H above it (smootherstep), before the seams start.
     // Nr. 2 uses a smaller inside radius and blends into its straight faces sooner.
+    var card2Bend = state.product === 'card2';
     var PUFF_R = state.product === 'card3' ? 0.1 : 0.045, PUFF_H = state.product === 'card3' ? 2.0 : 0.8;
     function puff(sv) {   // 1 at the bend, easing to 0 PUFF_H up the half
       var t = Math.min(1, Math.max(0, (Math.abs(sv) - FOLD_B) / PUFF_H));
@@ -2030,17 +2031,25 @@
       var t = Math.min(1, Math.max(0, (FOLD_W / 2 - STITCH_INSET - 0.15 - Math.abs(x)) / 0.5));   // clear of the bent last stitch
       return t * t * (3 - 2 * t);
     }
+    // Keep the original fold mapping along the thumb-hole rim and blend
+    // the added rounding into the leather beyond the cut edge.
+    function bendWeight(x, s) {
+      if (!card2Bend) { return 1; }
+      var t = Math.min(1, Math.max(0, (Math.hypot(x, s) - FOLD_HOLE - 0.12) / 0.35));
+      return t * t * (3 - 2 * t);
+    }
+    function insideRadius(x, s) { return PUFF_R * puffX(x) * bendWeight(x, s); }
     for (var v = 0; v < P.length / 3; v++) {
       var px = P[v * 3], sv = P[v * 3 + 1], zz = P[v * 3 + 2], th = Math.max(-1, Math.min(1, sv / FOLD_B)) * Math.PI / 2, y, z, dpz = 0, dpx = 0;
-      var PR = PUFF_R * puffX(px);
+      var PR = insideRadius(px, sv);
       if (Math.abs(sv) >= FOLD_B) {
         var pf = puff(sv), sg2 = sv > 0 ? 1 : -1;
         y = FOLD_YC + Math.abs(sv) - FOLD_B + PR * pf; z = sg2 * (zz + PR * pf);
         if (PR) {   // the slope of the puff, to tip the normals
-          var pa = puff(sv + 0.004 * sg2), pb = puff(sv - 0.004 * sg2);
-          dpz = sg2 * PR * (pa - pb) / 0.008;
+                    var sa = sv + 0.004 * sg2, sb = sv - 0.004 * sg2;
+          dpz = sg2 * (card2Bend ? insideRadius(px, sa) * puff(sa) - insideRadius(px, sb) * puff(sb) : PR * (puff(sa) - puff(sb))) / 0.008;
         }
-        if (PUFF_R) { dpx = sg2 * PUFF_R * pf * (puffX(px + 0.004) - puffX(px - 0.004)) / 0.008; }
+        if (PUFF_R) { dpx = sg2 * PUFF_R * pf * (puffX(px + 0.004) * bendWeight(px + 0.004, sv) - puffX(px - 0.004) * bendWeight(px - 0.004, sv)) / 0.008; }
       }
       else { y = FOLD_YC + PR - (zz + PR) * Math.cos(th); z = (zz + PR) * Math.sin(th); }
       // the corner rounded off (foldRound): the last 9 mm of the width drawn
@@ -2054,14 +2063,15 @@
         P[v * 3] = px;
       }
       var turnArc = fr[0] && ax > c0 && Math.abs(Nm[v * 3]) > 0.3 && (ax - c0) / (FOLD_W / 2 - c0) > 0.97;
-      var sn = Math.sin(th), onInsideBend = state.product === 'card2' && Math.abs(sv) < FOLD_B;
+      var sn = Math.sin(th), roundWeight = card2Bend ? bendWeight(px, sv) : 0;
+      var onInsideBend = roundWeight > 0 && Math.abs(sv) < FOLD_B;
       // Use the existing opening at the tangency as radial room for the
       // bend. Both faces share its centre and keep their radial thickness.
-      var liftY = onInsideBend ? FOLD_YC + PR : y, lift = foldLift(px, liftY) * sn;
+      var liftY = onInsideBend ? y + (FOLD_YC + PR - y) * roundWeight : y, lift = foldLift(px, liftY) * sn;
       var dlx = (foldLift(px + 0.004, liftY) - foldLift(px - 0.004, liftY)) / 0.008 * sn + dpx,
-          dly = onInsideBend ? 0 : (foldLift(px, y + 0.004) - foldLift(px, y - 0.004)) / 0.008 * sn + dpz;
-      if (state.product === 'card2') {
-        var bendRoom = foldLift(px, FOLD_YC + PR);
+          dly = (foldLift(px, liftY + 0.004) - foldLift(px, liftY - 0.004)) / 0.008 * sn * (onInsideBend ? 1 - roundWeight : 1) + dpz;
+      if (roundWeight > 0) {
+        var bendRoom = foldLift(px, FOLD_YC + PR) * roundWeight;
         var cos = Math.cos(th);
         // Slightly flatten the middle of the bend without changing the
         // thickness or the tangent where it meets the straight faces.
