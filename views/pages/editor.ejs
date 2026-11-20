@@ -2083,11 +2083,11 @@
         y += bendRoom * (Math.abs(sv) < FOLD_B ? bendRise : puff(sv));
       }
       if (card2Bend && Math.abs(sv) >= FOLD_B) {
-        // Soften the downward hook in the highlight around the card foot.
+        // Soften the horizontal shadow at the card foot and its corner turns.
         var cornerX = Math.min(1, Math.max(0, (Math.abs(px) - (BANK_HW - 0.55)) / 0.55));
-        var cornerY = Math.min(1, Math.max(0, 1 - Math.abs(liftY - (FOLD_BOT + FOLD_CARD)) / 0.8));
-        var shade = cornerX * cornerX * (3 - 2 * cornerX) * cornerY * cornerY * (3 - 2 * cornerY);
-        dly -= (dly - dpz) * 0.65 * shade;
+        var footY = Math.min(1, Math.max(0, 1 - Math.abs(liftY - (FOLD_BOT + FOLD_CARD)) / 0.8));
+        var shade = (0.55 + 0.10 * cornerX * cornerX * (3 - 2 * cornerX)) * footY * footY * (3 - 2 * footY);
+        dly -= (dly - dpz) * shade;
       }
       P[v * 3 + 1] = y; P[v * 3 + 2] = z + lift;
       var ny0 = Nm[v * 3 + 1], nz0 = Nm[v * 3 + 2];
