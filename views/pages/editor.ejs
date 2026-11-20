@@ -2073,7 +2073,9 @@
       if (card2Bend) {
         // Round the U visible through the cutout in the height direction.
         // The rim retains its existing width, and both faces rise together.
-        var bendRoom = foldLift(px, FOLD_YC + PR) * (0.55 + 0.45 * roundWeight);
+        var shoulder = Math.min(1, Math.max(0, (Math.abs(sn) - 0.45) / 0.45));
+        shoulder *= shoulder * (3 - 2 * shoulder);
+        var bendRoom = foldLift(px, FOLD_YC + PR) * (roundWeight + 0.55 * (1 - roundWeight) * shoulder);
         var cos = Math.cos(th);
         // Slightly flatten the middle of the bend without changing the
         // thickness or the tangent where it meets the straight faces.
