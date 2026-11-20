@@ -3034,7 +3034,12 @@
       var foldStack = function (p, hole) {
         // Nr. 3: the front's cut-out open edge is its own edge, as the open tops are
         if (fold3 && !hole && p.y > FOLD_L - C3_DEPTH - 0.01 && Math.abs(p.x) < C3_HALF + 0.05) { return 0; }
-        return hole ? 1 : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R);
+        if (hole) {
+          // Give the flesh-side rim a slight bevel where the hole crosses
+          // the fold, blending back into the existing edge over 4 mm.
+          return fold3 ? 1 : 0.55 + 0.45 * fe(Math.abs(p.y) / 0.4);
+        }
+        return 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R);
       };
       var thumb = new THREE.Path(); thumb.absarc(0, 0, FOLD_HOLE, 0, Math.PI * 2, true);
       var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], withCore(state.leather, 1.27), null, null, null, FOLD_T);   // × the map's ~0.8: as light as Nr. 1's edges (the owner, 2026-10-29; 0.78 read darker)
