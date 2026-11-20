@@ -2052,8 +2052,16 @@
         P[v * 3] = px;
       }
       var turnArc = fr[0] && ax > c0 && Math.abs(Nm[v * 3]) > 0.3 && (ax - c0) / (FOLD_W / 2 - c0) > 0.97;
-      var sn = Math.sin(th), lift = foldLift(px, y) * sn;
-      var dlx = (foldLift(px + 0.004, y) - foldLift(px - 0.004, y)) / 0.008 * sn + dpx, dly = (foldLift(px, y + 0.004) - foldLift(px, y - 0.004)) / 0.008 * sn + dpz;
+      var sn = Math.sin(th), onInsideBend = state.product === 'card2' && Math.abs(sv) < FOLD_B;
+      // Use the existing opening at the tangency as radial room for the
+      // bend. Both faces share its centre and keep their radial thickness.
+      var liftY = onInsideBend ? FOLD_YC + PR : y, lift = foldLift(px, liftY) * sn;
+      var dlx = (foldLift(px + 0.004, liftY) - foldLift(px - 0.004, liftY)) / 0.008 * sn + dpx,
+          dly = onInsideBend ? 0 : (foldLift(px, y + 0.004) - foldLift(px, y - 0.004)) / 0.008 * sn + dpz;
+      if (state.product === 'card2') {
+        var bendRoom = foldLift(px, FOLD_YC + PR);
+        y += bendRoom * (onInsideBend ? 1 - Math.cos(th) : puff(sv));
+      }
       P[v * 3 + 1] = y; P[v * 3 + 2] = z + lift;
       var ny0 = Nm[v * 3 + 1], nz0 = Nm[v * 3 + 2];
       Nm[v * 3 + 1] = ny0 * sn - nz0 * Math.cos(th); Nm[v * 3 + 2] = ny0 * Math.cos(th) + nz0 * sn;
