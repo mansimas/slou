@@ -369,6 +369,7 @@
   var FOLD_OPEN = 0.17, FOLD_CARD = 0.25, FOLD_EASE = 0.5;
   var BANK_HW = 5.398 / 2, BANK_LEN = 8.56, BANK_CR = 0.318;   // ISO ID-1: 85.6 × 54 mm, 3.18 mm corners
   function foldLift(x, y) {
+    var card2 = state.product === 'card2';
     var cy = FOLD_BOT + FOLD_CARD + BANK_LEN / 2, r = BANK_CR + 0.1;
     // over the card's top nothing at all: the leather stays lifted right up to
     // the open mouth, no outline of the card there (the owner, 2026-10-29)
@@ -385,7 +386,7 @@
     // seam's end instead, over its last few mm, left a dark shadow at the
     // card's bottom corners, so it was put back to this (the owner).
     var foot = cy - BANK_LEN / 2, wb = Math.min(1, Math.max(0, (foot + 1.5 - y) / 1.5));
-    if (wb > 0) {
+    if (!card2 && wb > 0) {
       var ty = Math.min(1, Math.max(0, 1 - (foot - y) / FOLD_EASE));
       var xi0 = BANK_HW - 1.0, xo0 = FOLD_W / 2 - STITCH_INSET, b0 = Math.min(1, Math.max(0, (xo0 - Math.abs(x)) / (xo0 - xi0)));
       wb = 0.55 * wb * wb * (3 - 2 * wb);
@@ -394,7 +395,10 @@
     // and nothing in the glued margin outside the stitch lines, down to the
     // fold: there the halves are glued to each other right to the end (the
     // owner, 2026-10-29). Reaching it, the lift opened a hole at each corner.
-    t *= Math.min(1, Math.max(0, (FOLD_W / 2 - STITCH_INSET - Math.abs(x)) / 0.15));
+    var seam = Math.min(1, Math.max(0, (FOLD_W / 2 - STITCH_INSET - Math.abs(x)) / 0.15));
+    // On Nr. 2 continue the rounded card profile down to both corners.
+    // Ease the last bit of lift into the seam for a smooth normal there.
+    t *= card2 ? seam * seam * (3 - 2 * seam) : seam;
     // Above the card's top there are no cards, so no lines (the owner,
     // 2026-10-29): from the card's top to the mouth the side slopes spread
     // out evenly into one broad, soft one, from 1 cm in from the card's side
@@ -411,7 +415,7 @@
     // in it holds it open (the owner, 2026-10-29; closing it evenly towards
     // the mouth was tried and undone)
     var lift = FOLD_OPEN / 2 * t * t * (3 - 2 * t);
-    if (state.product === 'card2') {
+    if (card2) {
       // The free lip starts at the uppermost stitch and gradually opens
       // across the width over the remaining 6 mm to the mouth.
       var lip = Math.min(1, Math.max(0, (y - foldY(FOLD_L - FOLD_END)) / FOLD_END));

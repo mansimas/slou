@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-20 14:05] - Restore rounded card silhouette - Carry the hidden card profile around both lower corners of Card Wallet No. 2 and smooth the lift into the seams for continuous shading.
 [2026-11-20 13:57] - Open card wallet two lip - Begin the gap immediately above the uppermost stitches so the free lip opens gradually through to the mouth.
 [2026-11-19 20:21] - Finalize card wallet project - Owner approved the current card wallet after refining the pocket fullness, opening, and seam transitions.
 [2026-11-19 20:20] - Soften high seam transition - Blend the middle gap over 12 mm above and across the high reinforcement so the leather opens without a sharp corner.
