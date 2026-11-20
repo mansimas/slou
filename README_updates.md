@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-20 14:49] - Soften marked inner bend - Match the annotated side view by rounding the U-shaped inside surface at the bottom of the thumb opening while keeping the cutout width.
 [2026-11-20 14:40] - Preserve thumb hole width - Fade the added fold rounding away from the cut rim so the hole keeps its original width while the nearby leather stays rounded.
 [2026-11-20 14:37] - Refine fold and card outline - Slightly flatten the inside bend and define the hidden card?s rounded lower corners without adding a visible card.
 [2026-11-20 14:33] - Preserve thickness through fold - Use the existing opening to round the inside bend of Card Wallet No. 2 while preserving the gap at its shoulders and the leather thickness through the curve.

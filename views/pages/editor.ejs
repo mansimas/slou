@@ -2031,8 +2031,8 @@
       var t = Math.min(1, Math.max(0, (FOLD_W / 2 - STITCH_INSET - 0.15 - Math.abs(x)) / 0.5));   // clear of the bent last stitch
       return t * t * (3 - 2 * t);
     }
-    // Keep the original fold mapping along the thumb-hole rim and blend
-    // the added rounding into the leather beyond the cut edge.
+    // Keep the added opening away from the thumb-hole rim and blend it
+    // into the leather beyond the cut edge.
     function bendWeight(x, s) {
       if (!card2Bend) { return 1; }
       var t = Math.min(1, Math.max(0, (Math.hypot(x, s) - FOLD_HOLE - 0.12) / 0.35));
@@ -2070,13 +2070,15 @@
       var liftY = onInsideBend ? y + (FOLD_YC + PR - y) * roundWeight : y, lift = foldLift(px, liftY) * sn;
       var dlx = (foldLift(px + 0.004, liftY) - foldLift(px - 0.004, liftY)) / 0.008 * sn + dpx,
           dly = (foldLift(px, liftY + 0.004) - foldLift(px, liftY - 0.004)) / 0.008 * sn * (onInsideBend ? 1 - roundWeight : 1) + dpz;
-      if (roundWeight > 0) {
-        var bendRoom = foldLift(px, FOLD_YC + PR) * roundWeight;
+      if (card2Bend) {
+        // Round the U visible through the cutout in the height direction.
+        // The rim retains its existing width, and both faces rise together.
+        var bendRoom = foldLift(px, FOLD_YC + PR) * (0.55 + 0.45 * roundWeight);
         var cos = Math.cos(th);
         // Slightly flatten the middle of the bend without changing the
         // thickness or the tangent where it meets the straight faces.
         var bendRise = 1 - cos - 0.12 * sn * sn * cos * cos;
-        y += bendRoom * (onInsideBend ? bendRise : puff(sv));
+        y += bendRoom * (Math.abs(sv) < FOLD_B ? bendRise : puff(sv));
       }
       P[v * 3 + 1] = y; P[v * 3 + 2] = z + lift;
       var ny0 = Nm[v * 3 + 1], nz0 = Nm[v * 3 + 2];
