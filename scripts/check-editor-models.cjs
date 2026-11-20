@@ -58,7 +58,7 @@ async function check() {
   await Promise.all([MeshoptEncoder.ready, MeshoptDecoder.ready]);
   const { encodeModel, decodeModel } = await import('../assets/js/editor-model-codec.mjs');
   for (const variant of models.variants()) {
-    const config = { product: variant.product, shape: variant.shape, slot: variant.slot,
+    const config = { product: variant.product, shape: variant.shape, slot: variant.slot, card3Slot: variant.card3Slot,
       leather: '#9a5527', pocket: '#5b5a35', second: '#222020' };
     Object.assign(builder.state, config); builder.measures.visible = variant.flat;
     builder.build();

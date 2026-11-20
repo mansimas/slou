@@ -60,7 +60,7 @@ async function warm() {
   for (const variant of models.variants()) {
     const target = path.join(directory, variant.key + '.bin.gz');
     if (fs.existsSync(target)) { continue; }
-    Object.assign(builder.state, { product: variant.product, shape: variant.shape, slot: variant.slot });
+    Object.assign(builder.state, { product: variant.product, shape: variant.shape, slot: variant.slot, card3Slot: variant.card3Slot });
     builder.measures.visible = variant.flat;
     builder.build();
     const packed = encodeModel(THREE, builder.fob, builder.getCurrent(), builder.materials, MeshoptEncoder, builder.state);

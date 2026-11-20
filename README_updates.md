@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-20 17:07] - Add card pocket shape selector - Let customers choose four new openings or keep the original on Card Wallet No. 3, with a matching 3D preview and printable template.
 [2026-11-20 16:53] - Sketch four pocket openings - Explore alternative opening shapes for Card Wallet No. 3 so the owner can compare silhouettes before selecting a design.
 [2026-11-20 15:47] - Match thumb and top edges - Use the same free leather edge finish on the thumb cutout and top opening to remove the painted-looking band.
 [2026-11-20 15:43] - Bevel inside thumb hole - Add a light 0.25 mm bevel around the flesh-side rim so the cutout looks finished from both faces.

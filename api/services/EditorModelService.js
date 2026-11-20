@@ -22,13 +22,14 @@ function getVersion() {
 function variants() {
   var list = [];
   function add(product, shape, slot, flat) {
-    list.push({ product: product, shape: shape || 'arch', slot: slot || 'curved', flat: !!flat,
-      key: product + '-' + (product === 'keyfob' ? shape : product.indexOf('wallet') === 0 ? slot : 'default') + '-' + (flat ? 'flat' : 'open') });
+    list.push({ product: product, shape: shape || 'arch', slot: slot || 'curved', card3Slot: product === 'card3' ? slot : 'curved', flat: !!flat,
+      key: product + '-' + (product === 'keyfob' ? shape : product.indexOf('wallet') === 0 || product === 'card3' ? slot : 'default') + '-' + (flat ? 'flat' : 'open') });
   }
   // The heaviest default first, then every shape and open/flat wallet variant.
   add('wallet2', null, 'curved');
   ['keyfob', 'keyfob2', 'card', 'card2', 'card3', 'wallet', 'wallet2'].forEach((product) => {
     if (product === 'keyfob') { ['arch', 'rect', 'point'].forEach((shape) => { add(product, shape); }); }
+    else if (product === 'card3') { ['curved', 'straight', 'u', 'v', 'diagonal'].forEach((slot) => { add(product, null, slot); }); }
     else if (product.indexOf('wallet') === 0) {
       ['curved', 'straight', 'slanted', 'sloped'].forEach((slot) => {
         if (product !== 'wallet2' || slot !== 'curved') { add(product, null, slot); }
