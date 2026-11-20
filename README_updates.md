@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-20 15:43] - Bevel inside thumb hole - Add a light 0.25 mm bevel around the flesh-side rim so the cutout looks finished from both faces.
 [2026-11-20 15:41] - Soften horizontal bottom shadow - Reduce the shading across the hidden card?s lower edge so the horizontal line is less pronounced while preserving the fold and stitching.
 [2026-11-20 15:08] - Extend lower seam reinforcement - Add one stitch to each lower corner of Card Wallet No. 2 so the reinforcement follows the curve and reaches closer to the fold.
 [2026-11-20 15:03] - Soften bottom corner shadows - Reduce the downward hook in the shading at the hidden card?s lower corners while keeping the fold and card geometry.

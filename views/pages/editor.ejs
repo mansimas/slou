@@ -1694,8 +1694,8 @@
   // is how far below z = 0 the stack starts; it may be a function of the point. A
   // `stack` value over 1 (up to 2) is the stack's dome flattened, 2 being a
   // square edge: card holder Nr. 2's fold corners, glued to the very end.
-  function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp, top, stackT, lowCrown) {
-    var LC = false, S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T0 = typeof stackT === 'function' ? 0 : stackT || CARD_THICK / 2, T = T0, tp = T, domeNormals = [], matte = {}, sideFace = [];
+  function leatherPiece(loops, h, z, stack, mats, ownCol, squeeze, ramp, top, stackT, lowCrown, holeInsideBevel = 0) {
+    var LC = false, insideBevel = 0, S = 16, pos = [], uv = [], col = [], side = [], caps = [[], []], T0 = typeof stackT === 'function' ? 0 : stackT || CARD_THICK / 2, T = T0, tp = T, domeNormals = [], matte = {}, sideFace = [];
     function vert(x, y, zz, c, edge) {
       pos.push(x, y, zz + (squeeze && edge ? squeeze(x, y, zz) : 0)); uv.push(x, y); col.push(c.r, c.g, c.b);
       return pos.length / 3 - 1;
@@ -1717,7 +1717,12 @@
       if (LC) { all = CARD_DOME * (1 - Math.sqrt(Math.max(0, 1 - Math.pow((zz + T) / (tp + T), 2)))); }
       var k = s > 1 ? 2 - s : 1;
       s = Math.min(1, s);
-      return k * (own + (all - own) * s);
+      var bevel = 0;
+      if (insideBevel) {
+        var h0 = Math.min(1, Math.max(0, 1 - (zz - (z - h / 2)) / insideBevel));
+        bevel = insideBevel * (1 - Math.sqrt(1 - h0 * h0));
+      }
+      return k * (own + (all - own) * s) + bevel;
     }
     // resampled every 0.5 mm, so the rounding can change along a straight
     // run; the material on the left, so the outline runs CCW and holes CW
@@ -1748,6 +1753,7 @@
     var capLoops = [[], []];
     loops.forEach(function (pts, li) {
       var m = pts.length, rings = [];
+      insideBevel = li > 0 ? holeInsideBevel : 0;
       capLoops[0].push([]); capLoops[1].push([]);
       pts.forEach(function (p, i) {
         var a = pts[(i + m - 1) % m], b = pts[(i + 1) % m];
@@ -1759,7 +1765,7 @@
         T = typeof stackT === 'function' ? stackT(p) : T0;
         tp = top ? top(p) : T;
         LC = lowCrown ? lowCrown(p) : false;
-        function glued(fz) { return fz > -T + 1e-6 && fz < tp - 1e-6; }
+        function glued(fz) { return !insideBevel && fz > -T + 1e-6 && fz < tp - 1e-6; }
         var s = stack(p, li > 0), ring = [], ex = ramp && !li ? ramp(p) : 0;
         // At a sharp corner each side keeps its own rounding right up to it, and
         // the corner point sits where the two set-in edges meet. A single mitre
@@ -3074,7 +3080,7 @@
         return hole ? 1 : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R);
       };
       var thumb = new THREE.Path(); thumb.absarc(0, 0, FOLD_HOLE, 0, Math.PI * 2, true);
-      var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], withCore(state.leather, 1.27), null, null, null, FOLD_T);   // × the map's ~0.8: as light as Nr. 1's edges (the owner, 2026-10-29; 0.78 read darker)
+      var flat = leatherPiece([loopOf(foldOutline()), loopOf(thumb)], FOLD_T, FOLD_T / 2, foldStack, [], withCore(state.leather, 1.27), null, null, null, FOLD_T, null, fold3 ? 0 : 0.025);   // × the map's ~0.8: as light as Nr. 1's edges (the owner, 2026-10-29; 0.78 read darker)
       fob.add(new THREE.Mesh(folded(flat.geometry, flat.userData.caps), [fold3 ? fold3FrontMat : fold2FrontMat, fold2EdgeMat, backMat, fold2BackMat]));
       flat.geometry.dispose();
       // a bank card inside (ISO ID-1, 85.6 × 54 × 0.76 mm, 3.18 mm corners),
