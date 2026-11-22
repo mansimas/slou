@@ -508,7 +508,10 @@
     if (opening === C3_OPENINGS.u) {
       if (xa >= opening.width) { return 0; }
       var oval = Math.sqrt(1 - (xa / opening.width) ** 2);
-      return opening.depth * oval * taper(opening.width - xa, 0.35);
+      // Blend into the straight edge with zero slope and curvature at both ends of the blend.
+      var t = Math.min(1, (opening.width - xa) / 0.8);
+      var blend = t * t * t * (10 + t * (-15 + 6 * t));
+      return opening.depth * oval * blend;
     }
     if (opening === C3_OPENINGS.v) {
       var shoulder = 1.2, tip = 0.9;
