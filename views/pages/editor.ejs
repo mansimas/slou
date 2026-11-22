@@ -109,7 +109,7 @@
           <% if (e.card3.slots) { %>
             <span class="kf__label"><%= e.card3.topShape %></span>
             <div class="kf__opts" data-group="card3Slot">
-              <% Object.keys(e.card3.slots).forEach(function (k, i) { %>
+              <% ['curved', 'straight', 'u', 'v', 'diagonal'].forEach(function (k, i) { %>
                 <button type="button" class="kf__btn" data-value="<%= k %>" aria-pressed="<%= i === 0 %>"><%= e.card3.slots[k] %></button>
               <% }); %>
             </div>
@@ -495,10 +495,7 @@
     straight: { depth: 0.75, x: 0, width: 4.35 },
     u: { depth: 1.2, x: 0, width: 1.6 },
     v: { depth: 1.3, x: 0, width: 3.5 },
-    diagonal: { depth: 1.05, x: 3, width: 4.35 },
-    asymmetricWave: { depth: 1.2, x: 1.55, width: 4.2, split: -1.1 },
-    doubleWave: { depth: 0.95, x: 2.1, width: 4.2, waves: 2 },
-    tripleWave: { depth: 0.85, x: 0, width: 4.2, waves: 3 }
+    diagonal: { depth: 1.05, x: 3, width: 4.35 }
   };
   function card3Opening() { return C3_OPENINGS[state.card3Slot] || C3_OPENINGS.curved; }
   function card3Depth(x) {
@@ -516,18 +513,6 @@
     }
     if (opening === C3_OPENINGS.diagonal) {
       return opening.depth * taper(x + opening.width, opening.x + opening.width) * taper(opening.width - x, opening.width - opening.x);
-    }
-    // Start and end the waves flat, clear of the stitched side edges.
-    if (opening.waves || opening === C3_OPENINGS.asymmetricWave) {
-      if (xa >= opening.width) { return 0; }
-      if (opening.waves) {
-        var phase = (x + opening.width) / (2 * opening.width);
-        return opening.depth * Math.pow(Math.sin(Math.PI * opening.waves * phase), 2);
-      }
-      var left = x < opening.split;
-      var from = left ? -opening.width : opening.split, to = left ? opening.split : opening.width;
-      var wave = Math.sin(Math.PI * (x - from) / (to - from));
-      return opening.depth * (left ? 0.55 : 1) * wave * wave;
     }
     return xa >= C3_HALF ? 0 : C3_DEPTH * (1 + Math.cos(Math.PI * xa / C3_HALF)) / 2;
   }
