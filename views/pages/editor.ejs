@@ -106,12 +106,14 @@
         </div>
 
         <div id="kfCard3SlotBox" hidden>
-          <span class="kf__label"><%= e.card3.topShape %></span>
-          <div class="kf__opts" data-group="card3Slot">
-            <% Object.keys(e.card3.slots).forEach(function (k, i) { %>
-              <button type="button" class="kf__btn" data-value="<%= k %>" aria-pressed="<%= i === 0 %>"><%= e.card3.slots[k] %></button>
-            <% }); %>
-          </div>
+          <% if (e.card3.slots) { %>
+            <span class="kf__label"><%= e.card3.topShape %></span>
+            <div class="kf__opts" data-group="card3Slot">
+              <% Object.keys(e.card3.slots).forEach(function (k, i) { %>
+                <button type="button" class="kf__btn" data-value="<%= k %>" aria-pressed="<%= i === 0 %>"><%= e.card3.slots[k] %></button>
+              <% }); %>
+            </div>
+          <% } %>
         </div>
         <div id="kfSlotBox" hidden>
           <span class="kf__label"><%= e.wallet.slotShape %></span>
