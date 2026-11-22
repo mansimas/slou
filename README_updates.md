@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-22 07:49] - Check local editor startup - Confirmed that port 1437 had no listener and attempted to start SLOU there so the editor could load the current translations. The execution policy blocked the launch.
 [2026-11-22 07:45] - Fix editor startup error - Keep the editor available when a running Sails process still holds translations from before the Card Wallet No. 3 top selector was added.
 [2026-11-22 07:43] - Check top selector visibility - Verified the new picker renders for Card Wallet No. 3 and found that the running local server started before the selector was added.
 [2026-11-22 07:40] - Add three wave tops - Give Card Wallet No. 3 a dedicated top-edge selector with three additional wave shapes for the 3D preview and matching pattern.
