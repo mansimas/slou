@@ -29,7 +29,7 @@ function variants() {
   add('wallet2', null, 'curved');
   ['keyfob', 'keyfob2', 'card', 'card2', 'card3', 'wallet', 'wallet2'].forEach((product) => {
     if (product === 'keyfob') { ['arch', 'rect', 'point'].forEach((shape) => { add(product, shape); }); }
-    else if (product === 'card3') { ['curved', 'straight', 'u', 'v', 'diagonal'].forEach((slot) => { add(product, null, slot); }); }
+    else if (product === 'card3') { ['curved', 'straight', 'u', 'v', 'diagonal', 'asymmetricWave', 'doubleWave', 'tripleWave'].forEach((slot) => { add(product, null, slot); }); }
     else if (product.indexOf('wallet') === 0) {
       ['curved', 'straight', 'slanted', 'sloped'].forEach((slot) => {
         if (product !== 'wallet2' || slot !== 'curved') { add(product, null, slot); }
