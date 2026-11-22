@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-22 08:00] - Match oval to thumb hole - Replace the narrow U with a rounded oval opening matching the 22 mm thumb hole so both cutouts align in width.
 [2026-11-22 07:58] - Start the local editor - Started SLOU on port 1437 so the owner can see the revised openings and verified that the editor serves the updated profile.
 [2026-11-22 07:56] - Round the low opening - Lengthen the Straight Low side transitions so the corners climb more gradually in the 3D preview and cutting pattern.
 [2026-11-22 07:55] - Soften the V opening - Use a wider, shallower Soft V with gradual transitions at the center and shoulders so the 3D preview and cutting pattern have gentler corners.

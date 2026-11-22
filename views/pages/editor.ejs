@@ -493,7 +493,7 @@
   var C3_OPENINGS = {
     curved: { depth: C3_DEPTH, x: 0, width: C3_HALF },
     straight: { depth: 0.75, x: 0, width: 4.35 },
-    u: { depth: 1.2, x: 0, width: 1.6 },
+    u: { depth: 1.2, x: 0, width: C3_HOLE },
     v: { depth: 1.2, x: 0, width: 4.2 },
     diagonal: { depth: 1.05, x: 3, width: 4.35 }
   };
@@ -505,7 +505,11 @@
       return t * t * (3 - 2 * t);
     }
     if (opening === C3_OPENINGS.straight) { return opening.depth * taper(opening.width - xa, 1.35); }
-    if (opening === C3_OPENINGS.u) { return opening.depth * taper(opening.width - xa, 0.95); }
+    if (opening === C3_OPENINGS.u) {
+      if (xa >= opening.width) { return 0; }
+      var oval = Math.sqrt(1 - (xa / opening.width) ** 2);
+      return opening.depth * oval * taper(opening.width - xa, 0.35);
+    }
     if (opening === C3_OPENINGS.v) {
       var shoulder = 1.2, tip = 0.9;
       // Integrate a smoothstep slope so the straight flanks join both roundings smoothly.
