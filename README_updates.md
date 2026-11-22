@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-22 08:14] - Draw the round cutout - Draw the top cutout as a true thumb-hole arc in the shared pattern, with rounded transitions only at the horizontal edge.
 [2026-11-22 08:13] - Smooth the circular arc joins - Extend the circular bottom and match curvature at both shoulder joins so the outline has no abrupt changes near the bottom.
 [2026-11-22 08:09] - Refresh the oval model - Give the circular cutout a new prepared model key so a running server's cached angular oval cannot replace the updated geometry.
 [2026-11-22 08:05] - Match the thumb hole arc - Copy the lower thumb hole's 22 mm circular profile into the top opening and round only its joins to the straight edge.

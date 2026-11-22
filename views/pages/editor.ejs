@@ -452,9 +452,17 @@
       sh.lineTo(x, -hc); sh.absarc(x - rs, -hc, rs, 0, a, false); sh.absarc(x, 0, rn, a - PI, PI - a, true); sh.absarc(x - rs, hc, rs, -a, 0, false);
     } else if (exact) { sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, PI / 2); sh.absarc(x - r, r, r, -PI / 2, 0); }
     sh.lineTo(x, L - r); sh.absarc(x - r, L - r, r, 0, PI / 2);
-    if (state.product === 'card3') {   // Nr. 3: the front half's open edge cut in its waist
-      var step = state.card3Slot === 'u' ? 0.025 : 0.05;
-      for (var xv = x - r; xv > -x + r + 1e-6; xv -= step) { sh.lineTo(xv, L - card3Depth(xv)); }
+    if (state.product === 'card3' && state.card3Slot === 'u') {
+      // Use the thumb hole's circle for the cut and round only the two lips.
+      var radius = C3_HOLE, shoulder = 0.25, join = radius - shoulder;
+      var angle = Math.acos(join / radius), rise = radius * Math.sin(angle);
+      var handle = shoulder / 3, lift = handle * join / rise;
+      sh.lineTo(radius, L);
+      sh.bezierCurveTo(radius - handle, L, join + handle, L - rise + lift, join, L - rise);
+      sh.absarc(0, L, radius, -angle, angle - PI, true);
+      sh.bezierCurveTo(-join - handle, L - rise + lift, -radius + handle, L, -radius, L);
+    } else if (state.product === 'card3') {   // Nr. 3: the front half's open edge cut in its waist
+      for (var xv = x - r; xv > -x + r + 1e-6; xv -= 0.05) { sh.lineTo(xv, L - card3Depth(xv)); }
     }
     sh.lineTo(-x + r, L); sh.absarc(-x + r, L - r, r, PI / 2, PI);
     if (relief) {
@@ -506,21 +514,6 @@
       return t * t * (3 - 2 * t);
     }
     if (opening === C3_OPENINGS.straight) { return opening.depth * taper(opening.width - xa, 1.35); }
-    if (opening === C3_OPENINGS.u) {
-      var radius = opening.width, shoulder = 0.3, join = radius - shoulder;
-      if (xa >= radius) { return 0; }
-      if (xa <= join) { return Math.sqrt(radius * radius - xa * xa); }
-      // Match the circular arc's depth, slope and curvature at the join.
-      // At the straight edge all three are zero.
-      var rise = Math.sqrt(radius * radius - join * join);
-      var slope = shoulder * join / rise;
-      var curvature = -shoulder * shoulder * radius * radius / (rise * rise * rise);
-      var t = (radius - xa) / shoulder;
-      var a = 10 * rise - 4 * slope + curvature / 2;
-      var b = -15 * rise + 7 * slope - curvature;
-      var c = 6 * rise - 3 * slope + curvature / 2;
-      return t * t * t * (a + t * (b + t * c));
-    }
     if (opening === C3_OPENINGS.v) {
       var shoulder = 1.2, tip = 0.9;
       // Integrate a smoothstep slope so the straight flanks join both roundings smoothly.
