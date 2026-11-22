@@ -494,7 +494,7 @@
   var C3_OPENINGS = {
     curved: { depth: C3_DEPTH, x: 0, width: C3_HALF },
     straight: { depth: 0.75, x: 0, width: 4.35 },
-    u: { depth: 1.2, x: 0, width: C3_HOLE },
+    u: { depth: C3_HOLE, x: 0, width: C3_HOLE },
     v: { depth: 1.2, x: 0, width: 4.2 },
     diagonal: { depth: 1.05, x: 3, width: 4.35 }
   };
@@ -507,9 +507,13 @@
     }
     if (opening === C3_OPENINGS.straight) { return opening.depth * taper(opening.width - xa, 1.35); }
     if (opening === C3_OPENINGS.u) {
-      // A single rounded profile meets the straight edge with zero slope and curvature.
-      var oval = Math.max(0, 1 - (xa / opening.width) ** 2);
-      return opening.depth * oval * oval * oval;
+      var radius = opening.width, shoulder = 0.4, join = radius - shoulder;
+      if (xa >= radius) { return 0; }
+      if (xa <= join) { return Math.sqrt(radius * radius - xa * xa); }
+      // Match the thumb hole's circular arc, then ease its ends into the flat edge.
+      var rise = Math.sqrt(radius * radius - join * join), slope = join / rise;
+      var t = (radius - xa) / shoulder;
+      return t * t * (rise * (3 - 2 * t) + slope * shoulder * (t - 1));
     }
     if (opening === C3_OPENINGS.v) {
       var shoulder = 1.2, tip = 0.9;

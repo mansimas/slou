@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-22 08:05] - Match the thumb hole arc - Copy the lower thumb hole's 22 mm circular profile into the top opening and round only its joins to the straight edge.
 [2026-11-22 08:03] - Round the entire oval - Use one continuous profile and sample it more finely so the oval looks round along its full cut in the 3D preview and the pattern.
 [2026-11-22 08:02] - Smooth the oval shoulders - Extend the blending into the top edge to remove the sharp-looking oval corners in the preview and pattern.
 [2026-11-22 08:00] - Match oval to thumb hole - Replace the narrow U with a rounded oval opening matching the 22 mm thumb hole so both cutouts align in width.
