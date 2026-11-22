@@ -494,7 +494,7 @@
     curved: { depth: C3_DEPTH, x: 0, width: C3_HALF },
     straight: { depth: 0.75, x: 0, width: 4.35 },
     u: { depth: 1.2, x: 0, width: 1.6 },
-    v: { depth: 1.3, x: 0, width: 3.5 },
+    v: { depth: 1.2, x: 0, width: 4.2 },
     diagonal: { depth: 1.05, x: 3, width: 4.35 }
   };
   function card3Opening() { return C3_OPENINGS[state.card3Slot] || C3_OPENINGS.curved; }
@@ -507,9 +507,15 @@
     if (opening === C3_OPENINGS.straight) { return opening.depth * taper(opening.width - xa, 0.55); }
     if (opening === C3_OPENINGS.u) { return opening.depth * taper(opening.width - xa, 0.95); }
     if (opening === C3_OPENINGS.v) {
-      var radius = 0.16;
-      var run = (Math.hypot(xa, radius) - radius) / (Math.hypot(opening.width, radius) - radius);
-      return opening.depth * Math.max(0, 1 - run) * taper(opening.width - xa, 0.45);
+      var shoulder = 1.2, tip = 0.9;
+      // Integrate a smoothstep slope so the straight flanks join both roundings smoothly.
+      function roundedRun(distance, length) {
+        if (distance >= length) { return distance - length / 2; }
+        var t = Math.max(0, distance / length);
+        return length * t * t * t * (1 - t / 2);
+      }
+      var run = roundedRun(opening.width - xa, shoulder) - roundedRun(tip - xa, tip);
+      return opening.depth * run / (opening.width - (shoulder + tip) / 2);
     }
     if (opening === C3_OPENINGS.diagonal) {
       return opening.depth * taper(x + opening.width, opening.x + opening.width) * taper(opening.width - x, opening.width - opening.x);

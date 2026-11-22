@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-22 07:55] - Soften the V opening - Use a wider, shallower Soft V with gradual transitions at the center and shoulders so the 3D preview and cutting pattern have gentler corners.
 [2026-11-22 07:55] - Remove asymmetric wave - Return the Card Wallet No. 3 top selector to the five original shapes at the owner's request.
 [2026-11-22 07:54] - Remove two wave options - Drop the double and triple waves from Card Wallet No. 3 because the owner ruled out those shapes.
 [2026-11-22 07:49] - Check local editor startup - Confirmed that port 1437 had no listener and attempted to start SLOU there so the editor could load the current translations. The execution policy blocked the launch.
