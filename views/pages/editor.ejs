@@ -453,7 +453,8 @@
     } else if (exact) { sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, PI / 2); sh.absarc(x - r, r, r, -PI / 2, 0); }
     sh.lineTo(x, L - r); sh.absarc(x - r, L - r, r, 0, PI / 2);
     if (state.product === 'card3') {   // Nr. 3: the front half's open edge cut in its waist
-      for (var xv = x - r; xv > -x + r + 1e-6; xv -= 0.05) { sh.lineTo(xv, L - card3Depth(xv)); }
+      var step = state.card3Slot === 'u' ? 0.025 : 0.05;
+      for (var xv = x - r; xv > -x + r + 1e-6; xv -= step) { sh.lineTo(xv, L - card3Depth(xv)); }
     }
     sh.lineTo(-x + r, L); sh.absarc(-x + r, L - r, r, PI / 2, PI);
     if (relief) {
@@ -506,12 +507,9 @@
     }
     if (opening === C3_OPENINGS.straight) { return opening.depth * taper(opening.width - xa, 1.35); }
     if (opening === C3_OPENINGS.u) {
-      if (xa >= opening.width) { return 0; }
-      var oval = Math.sqrt(1 - (xa / opening.width) ** 2);
-      // Blend into the straight edge with zero slope and curvature at both ends of the blend.
-      var t = Math.min(1, (opening.width - xa) / 0.8);
-      var blend = t * t * t * (10 + t * (-15 + 6 * t));
-      return opening.depth * oval * blend;
+      // A single rounded profile meets the straight edge with zero slope and curvature.
+      var oval = Math.max(0, 1 - (xa / opening.width) ** 2);
+      return opening.depth * oval * oval * oval;
     }
     if (opening === C3_OPENINGS.v) {
       var shoulder = 1.2, tip = 0.9;
