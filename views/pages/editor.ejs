@@ -507,13 +507,19 @@
     }
     if (opening === C3_OPENINGS.straight) { return opening.depth * taper(opening.width - xa, 1.35); }
     if (opening === C3_OPENINGS.u) {
-      var radius = opening.width, shoulder = 0.4, join = radius - shoulder;
+      var radius = opening.width, shoulder = 0.3, join = radius - shoulder;
       if (xa >= radius) { return 0; }
       if (xa <= join) { return Math.sqrt(radius * radius - xa * xa); }
-      // Match the thumb hole's circular arc, then ease its ends into the flat edge.
-      var rise = Math.sqrt(radius * radius - join * join), slope = join / rise;
+      // Match the circular arc's depth, slope and curvature at the join.
+      // At the straight edge all three are zero.
+      var rise = Math.sqrt(radius * radius - join * join);
+      var slope = shoulder * join / rise;
+      var curvature = -shoulder * shoulder * radius * radius / (rise * rise * rise);
       var t = (radius - xa) / shoulder;
-      return t * t * (rise * (3 - 2 * t) + slope * shoulder * (t - 1));
+      var a = 10 * rise - 4 * slope + curvature / 2;
+      var b = -15 * rise + 7 * slope - curvature;
+      var c = 6 * rise - 3 * slope + curvature / 2;
+      return t * t * t * (a + t * (b + t * c));
     }
     if (opening === C3_OPENINGS.v) {
       var shoulder = 1.2, tip = 0.9;
