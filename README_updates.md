@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-22 07:43] - Check top selector visibility - Verified the new picker renders for Card Wallet No. 3 and found that the running local server started before the selector was added.
 [2026-11-22 07:40] - Add three wave tops - Give Card Wallet No. 3 a dedicated top-edge selector with three additional wave shapes for the 3D preview and matching pattern.
 [2026-11-20 17:07] - Add card pocket shape selector - Let customers choose four new openings or keep the original on Card Wallet No. 3, with a matching 3D preview and printable template.
 [2026-11-20 16:53] - Sketch four pocket openings - Explore alternative opening shapes for Card Wallet No. 3 so the owner can compare silhouettes before selecting a design.
