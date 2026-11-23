@@ -453,14 +453,30 @@
     } else if (exact) { sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, PI / 2); sh.absarc(x - r, r, r, -PI / 2, 0); }
     sh.lineTo(x, L - r); sh.absarc(x - r, L - r, r, 0, PI / 2);
     if (state.product === 'card3' && state.card3Slot === 'u') {
-      // Use the thumb hole's circle for the cut and round only the two lips.
-      var radius = C3_HOLE, shoulder = 0.25, join = radius - shoulder;
+      // Match both tangent and curvature at the flat lip and the circular cut.
+      // The convex shoulder must also be gentler than the 0.5 mm bevel inset.
+      var radius = C3_HOLE, shoulder = 0.4, join = radius - shoulder;
       var angle = Math.acos(join / radius), rise = radius * Math.sin(angle);
-      var handle = shoulder / 3, lift = handle * join / rise;
+      var slope = shoulder * join / rise;
+      var halfBend = -0.5 * Math.pow(shoulder * radius, 2) / Math.pow(rise, 3);
+      function lipDepth(t) {
+        return t * t * t * ((10 * rise - 4 * slope + halfBend) +
+          t * (-15 * rise + 7 * slope - 2 * halfBend + t * (6 * rise - 3 * slope + halfBend)));
+      }
+      var samples = 64;
       sh.lineTo(radius, L);
-      sh.bezierCurveTo(radius - handle, L, join + handle, L - rise + lift, join, L - rise);
-      sh.absarc(0, L, radius, -angle, angle - PI, true);
-      sh.bezierCurveTo(-join - handle, L - rise + lift, -radius + handle, L, -radius, L);
+      for (var i = 1; i < samples; i++) {
+        var t = i / samples;
+        sh.lineTo(radius - shoulder * t, L - lipDepth(t));
+      }
+      for (var j = 0; j <= samples; j++) {
+        var arc = -angle + (2 * angle - PI) * j / samples;
+        sh.lineTo(radius * Math.cos(arc), L + radius * Math.sin(arc));
+      }
+      for (var k = samples - 1; k >= 0; k--) {
+        var u = k / samples;
+        sh.lineTo(-radius + shoulder * u, L - lipDepth(u));
+      }
     } else if (state.product === 'card3') {   // Nr. 3: the front half's open edge cut in its waist
       for (var xv = x - r; xv > -x + r + 1e-6; xv -= 0.05) { sh.lineTo(xv, L - card3Depth(xv)); }
     }
@@ -3120,6 +3136,11 @@
         // Nr. 3: the front's cut-out open edge is its own edge, as the open tops are
         if (fold3 && !hole) {
           var opening = card3Opening();
+          if (opening === C3_OPENINGS.u && p.y > FOLD_L - opening.depth - 0.01) {
+            // Keep the bevel uniform around the cut and ease into the mouth.
+            var mouth = 1 - fe((p.y - (FOLD_L - FOLD_R)) / FOLD_R);
+            return mouth * fe((Math.abs(p.x) - opening.width) / 0.35);
+          }
           if (p.y > FOLD_L - opening.depth - 0.01 && Math.abs(p.x) < opening.width + 0.05) { return 0; }
         }
         return hole ? (fold3 ? 1 : 0) : 1 - fe((Math.abs(p.y) - (FOLD_L - FOLD_R)) / FOLD_R);
