@@ -1,6 +1,8 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-23 08:01] - Deploy to stage - Push the checked full-height pocket update to the staging branch so it is available for review there.
+[2026-11-23 07:59] - Lift the full panel - Extend the raised plane across each brown side pocket from top to bottom, with the sewn perimeter anchored and its attached slot following the same lift.
 [2026-11-23 07:57] - Shape flat side inserts - Keep the lift level inside each side opening and ease it only at the perimeter, as if a flat card cut to that opening were inserted.
 [2026-11-23 07:54] - Raise both side openings - Lift the exposed inner edges beside the wallet fold and taper the rise along each opening so the side pockets have visible depth.
 [2026-11-23 07:51] - Follow the card profile - Use the earlier folded card holders’ rounded card footprint to shape both wallet pockets, giving the leather support at the mouth and a soft transition at the hidden card corners.
