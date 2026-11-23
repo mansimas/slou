@@ -2662,7 +2662,7 @@
     var p = state.product, wallet = p === 'wallet' || p === 'wallet2';
     // A running server can still serve the previous oval under its old key.
     if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-fillets-open'; }
-    if (p === 'wallet') { return 'wallet-raised-openings-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
+    if (p === 'wallet') { return 'wallet-shaped-inserts-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
@@ -3052,9 +3052,13 @@
       };
       var sideLift = function (x, y) {
         var ax = Math.abs(x), lip = -WAL_H / 2 + walSlotTop(WE - ax);
-        // The exposed inner edge opens between the slot and the top seam.
-        return 0.07 * wease(1 - (ax - S) / 1.1) *
-          wease((y - lip - 0.22) / 0.5) * wease((WAL_H / 2 - STITCH_INSET - 0.12 - y) / 0.55);
+        // A flat insert follows the slot edge and the top seam. Only its
+        // buried corners and the short transition around its perimeter bend.
+        var radius = 0.2;
+        var dx = ax - (S + 1.1 - radius);
+        var dy = Math.max(lip + 0.22 + radius - y, y - (WAL_H / 2 - STITCH_INSET - 0.12 - radius));
+        var distance = Math.hypot(Math.max(dx, 0), Math.max(dy, 0)) + Math.min(Math.max(dx, dy), 0) - radius;
+        return 0.07 * wease(-distance / 0.22);
       };
       var raisePanel = function (panel, lift) {
         for (var i = 0; i < panel.P.length; i += 3) {
