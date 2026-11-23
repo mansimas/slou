@@ -663,6 +663,14 @@
   }
   // is (x, y), flat, on a slot (between it and the base is where the cards go)
   function walInSlot(x, y) { return Math.abs(x) >= WAL_SPINE && y < -WAL_H / 2 + walSlotTop(WAL_W / 2 - Math.abs(x)); }
+  function walPocketLift(x, y) {
+    // Leave the sewn margin flat, including the rounded bottom corner.
+    var ax = Math.abs(x), bottom = -WAL_H / 2, outer = WAL_W / 2;
+    var dx = ax - (outer - WAL_R), dy = bottom + WAL_R - y;
+    var edge = WAL_R - Math.hypot(Math.max(0, dx), Math.max(0, dy));
+    var t = Math.max(0, Math.min(1, (Math.min(ax - WAL_SPINE, edge) - 0.4) / 0.8));
+    return 0.08 * t * t * (3 - 2 * t);
+  }
   // The pieces' outlines, flat, `sg` the side (1 right, -1 left as seen from
   // the inside); the exterior is one piece across both.
   function walShape(kind, sg) {
@@ -2651,6 +2659,7 @@
     var p = state.product, wallet = p === 'wallet' || p === 'wallet2';
     // A running server can still serve the previous oval under its old key.
     if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-fillets-open'; }
+    if (p === 'wallet') { return 'wallet-filled-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
@@ -3040,7 +3049,19 @@
       };
       [-1, 1].forEach(function (sg) {
         fob.add(shifted(leatherPiece([loopOf(walShape('base', sg))], WAL_IN, WAL_IN / 2, baseStack, [walBaseMat, walEdgeMat, walFleshMat], leatherCol, null, null, slotTopAt, stackBot, atSpine), sg));
-        fob.add(shifted(leatherPiece([loopOf(walShape(state.slot, sg))], WAL_IN, WAL_IN * 1.5, slotStack, [walSlotMat, walEdgeMat, walSlotFleshMat], slotCol, null, null, function () { return 2 * WAL_IN; }, stackBot, atSpine), sg));
+        var pocket = leatherPiece([loopOf(walShape(state.slot, sg))], WAL_IN, WAL_IN * 1.5, slotStack, [], slotCol, null, null, function () { return 2 * WAL_IN; }, stackBot, atSpine);
+        var panel = k2Split(pocket.geometry, function (ya, yb, xa, xb) { return Math.hypot(xa - xb, ya - yb) > 0.4; });
+        pocket.geometry.dispose();
+        for (var i = 0; i < panel.P.length; i += 3) {
+          var px = panel.P[i], py = panel.P[i + 1], d = 0.004;
+          panel.P[i + 2] += walPocketLift(px, py);
+          var dx = (walPocketLift(px + d, py) - walPocketLift(px - d, py)) / (2 * d);
+          var dy = (walPocketLift(px, py + d) - walPocketLift(px, py - d)) / (2 * d);
+          var nz = panel.Nm[i + 2], nx = panel.Nm[i] - nz * dx, ny = panel.Nm[i + 1] - nz * dy;
+          var length = Math.hypot(nx, ny, nz) || 1;
+          panel.Nm[i] = nx / length; panel.Nm[i + 1] = ny / length; panel.Nm[i + 2] = nz / length;
+        }
+        fob.add(shifted(new THREE.Mesh(k2Geo(panel), [walSlotMat, walEdgeMat, walSlotFleshMat]), sg));
       });
       // The seams, each an open run of the owner's stitch, the last two
       // stitches at each end doubled. On each half the U through all the

@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-23 07:48] - Raise both wallet pockets - Lift the leather inside the sewn margins on both sides of the Wallet preview to give the pockets the fullness of inserted cards.
 [2026-11-23 07:45] - Round the oval corners - Round the two joins at the top of the Nr. 3 oval with 1 mm fillets so the original circular cut meets the straight edge smoothly.
 [2026-11-23 07:42] - Match the bottom cutout - Use the fold hole’s exact semicircular profile at the top of Nr. 3 so both cuts share the same diameter and depth.
 [2026-11-23 07:41] - Reload the local editor - Reload the owner's open Chrome tab so the editor can fetch the revised Nr. 3 oval.
