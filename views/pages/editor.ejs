@@ -2662,7 +2662,7 @@
     var p = state.product, wallet = p === 'wallet' || p === 'wallet2';
     // A running server can still serve the previous oval under its old key.
     if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-fillets-open'; }
-    if (p === 'wallet') { return 'wallet-card-profile-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
+    if (p === 'wallet') { return 'wallet-raised-openings-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
@@ -3050,8 +3050,32 @@
         for (var i = 0; i < uv.count; i++) { uv.setX(i, uv.getX(i) - sg * (S + WAL_PW / 2)); }
         return mesh;
       };
+      var sideLift = function (x, y) {
+        var ax = Math.abs(x), lip = -WAL_H / 2 + walSlotTop(WE - ax);
+        // The exposed inner edge opens between the slot and the top seam.
+        return 0.07 * wease(1 - (ax - S) / 1.1) *
+          wease((y - lip - 0.22) / 0.5) * wease((WAL_H / 2 - STITCH_INSET - 0.12 - y) / 0.55);
+      };
+      var raisePanel = function (panel, lift) {
+        for (var i = 0; i < panel.P.length; i += 3) {
+          var px = panel.P[i], py = panel.P[i + 1], d = 0.004;
+          panel.P[i + 2] += lift(px, py);
+          var dx = (lift(px + d, py) - lift(px - d, py)) / (2 * d);
+          var dy = (lift(px, py + d) - lift(px, py - d)) / (2 * d);
+          var nz = panel.Nm[i + 2], nx = panel.Nm[i] - nz * dx, ny = panel.Nm[i + 1] - nz * dy;
+          var length = Math.hypot(nx, ny, nz) || 1;
+          panel.Nm[i] = nx / length; panel.Nm[i + 1] = ny / length; panel.Nm[i + 2] = nz / length;
+        }
+        return k2Geo(panel);
+      };
       [-1, 1].forEach(function (sg) {
-        fob.add(shifted(leatherPiece([loopOf(walShape('base', sg))], WAL_IN, WAL_IN / 2, baseStack, [walBaseMat, walEdgeMat, walFleshMat], leatherCol, null, null, slotTopAt, stackBot, atSpine), sg));
+        var base = leatherPiece([loopOf(walShape('base', sg))], WAL_IN, WAL_IN / 2, baseStack, [], leatherCol, null, null, slotTopAt, stackBot, atSpine);
+        var sideXs = [], sideYs = [];
+        for (var column = 1; column <= 11; column++) { sideXs.push(sg * (S + column * 0.1)); }
+        for (var height = 22; height <= 49; height++) { sideYs.push(height * 0.1); }
+        var side = sliceAt(sliceAt(k2Split(base.geometry, null), 0, sideXs), 1, sideYs, sg < 0 ? -S - 1.1 : S, sg < 0 ? -S : S + 1.1);
+        base.geometry.dispose();
+        fob.add(shifted(new THREE.Mesh(raisePanel(side, sideLift), [walBaseMat, walEdgeMat, walFleshMat]), sg));
         var pocket = leatherPiece([loopOf(walShape(state.slot, sg))], WAL_IN, WAL_IN * 1.5, slotStack, [], slotCol, null, null, function () { return 2 * WAL_IN; }, stackBot, atSpine);
         // Place vertex rows where the leather bends over the card sides and foot.
         var xs = [], ys = [];
@@ -3062,16 +3086,7 @@
         }
         var panel = sliceAt(sliceAt(k2Split(pocket.geometry, null), 0, xs), 1, ys);
         pocket.geometry.dispose();
-        for (var i = 0; i < panel.P.length; i += 3) {
-          var px = panel.P[i], py = panel.P[i + 1], d = 0.004;
-          panel.P[i + 2] += walPocketLift(px, py);
-          var dx = (walPocketLift(px + d, py) - walPocketLift(px - d, py)) / (2 * d);
-          var dy = (walPocketLift(px, py + d) - walPocketLift(px, py - d)) / (2 * d);
-          var nz = panel.Nm[i + 2], nx = panel.Nm[i] - nz * dx, ny = panel.Nm[i + 1] - nz * dy;
-          var length = Math.hypot(nx, ny, nz) || 1;
-          panel.Nm[i] = nx / length; panel.Nm[i + 1] = ny / length; panel.Nm[i + 2] = nz / length;
-        }
-        fob.add(shifted(new THREE.Mesh(k2Geo(panel), [walSlotMat, walEdgeMat, walSlotFleshMat]), sg));
+        fob.add(shifted(new THREE.Mesh(raisePanel(panel, walPocketLift), [walSlotMat, walEdgeMat, walSlotFleshMat]), sg));
       });
       // The seams, each an open run of the owner's stitch, the last two
       // stitches at each end doubled. On each half the U through all the

@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-23 07:54] - Raise both side openings - Lift the exposed inner edges beside the wallet fold and taper the rise along each opening so the side pockets have visible depth.
 [2026-11-23 07:51] - Follow the card profile - Use the earlier folded card holders’ rounded card footprint to shape both wallet pockets, giving the leather support at the mouth and a soft transition at the hidden card corners.
 [2026-11-23 07:48] - Raise both wallet pockets - Lift the leather inside the sewn margins on both sides of the Wallet preview to give the pockets the fullness of inserted cards.
 [2026-11-23 07:45] - Round the oval corners - Round the two joins at the top of the Nr. 3 oval with 1 mm fillets so the original circular cut meets the straight edge smoothly.
