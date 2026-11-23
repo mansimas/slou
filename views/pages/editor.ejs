@@ -663,13 +663,16 @@
   }
   // is (x, y), flat, on a slot (between it and the base is where the cards go)
   function walInSlot(x, y) { return Math.abs(x) >= WAL_SPINE && y < -WAL_H / 2 + walSlotTop(WAL_W / 2 - Math.abs(x)); }
+  var WAL_CARD_X = WAL_SPINE + WAL_PW / 2, WAL_CARD_HW = 5.398 / 2;
+  var WAL_CARD_FOOT = -WAL_H / 2 + 1, WAL_CARD_EASE = 0.5;
   function walPocketLift(x, y) {
-    // Leave the sewn margin flat, including the rounded bottom corner.
-    var ax = Math.abs(x), bottom = -WAL_H / 2, outer = WAL_W / 2;
-    var dx = ax - (outer - WAL_R), dy = bottom + WAL_R - y;
-    var edge = WAL_R - Math.hypot(Math.max(0, dx), Math.max(0, dy));
-    var t = Math.max(0, Math.min(1, (Math.min(ax - WAL_SPINE, edge) - 0.4) / 0.8));
-    return 0.08 * t * t * (3 - 2 * t);
+    // As on the folded card holders, follow the card's rounded footprint.
+    // The card extends above the lip, so the lift continues to the opening.
+    var dx = Math.abs(Math.abs(x) - WAL_CARD_X) - (WAL_CARD_HW - BANK_CR);
+    var dy = WAL_CARD_FOOT + BANK_CR - y;
+    var dist = Math.hypot(Math.max(0, dx), Math.max(0, dy)) - BANK_CR;
+    var t = Math.max(0, Math.min(1, 1 - dist / WAL_CARD_EASE));
+    return 0.09 * t * t * (3 - 2 * t);
   }
   // The pieces' outlines, flat, `sg` the side (1 right, -1 left as seen from
   // the inside); the exterior is one piece across both.
@@ -2659,7 +2662,7 @@
     var p = state.product, wallet = p === 'wallet' || p === 'wallet2';
     // A running server can still serve the previous oval under its old key.
     if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-fillets-open'; }
-    if (p === 'wallet') { return 'wallet-filled-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
+    if (p === 'wallet') { return 'wallet-card-profile-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
@@ -3050,7 +3053,14 @@
       [-1, 1].forEach(function (sg) {
         fob.add(shifted(leatherPiece([loopOf(walShape('base', sg))], WAL_IN, WAL_IN / 2, baseStack, [walBaseMat, walEdgeMat, walFleshMat], leatherCol, null, null, slotTopAt, stackBot, atSpine), sg));
         var pocket = leatherPiece([loopOf(walShape(state.slot, sg))], WAL_IN, WAL_IN * 1.5, slotStack, [], slotCol, null, null, function () { return 2 * WAL_IN; }, stackBot, atSpine);
-        var panel = k2Split(pocket.geometry, function (ya, yb, xa, xb) { return Math.hypot(xa - xb, ya - yb) > 0.4; });
+        // Place vertex rows where the leather bends over the card sides and foot.
+        var xs = [], ys = [];
+        for (var row = 0; row <= 10; row++) {
+          var offset = -WAL_CARD_EASE + (WAL_CARD_EASE + BANK_CR) * row / 10;
+          xs.push(sg * (WAL_CARD_X - WAL_CARD_HW + offset), sg * (WAL_CARD_X + WAL_CARD_HW - offset));
+          ys.push(WAL_CARD_FOOT + offset);
+        }
+        var panel = sliceAt(sliceAt(k2Split(pocket.geometry, null), 0, xs), 1, ys);
         pocket.geometry.dispose();
         for (var i = 0; i < panel.P.length; i += 3) {
           var px = panel.P[i], py = panel.P[i + 1], d = 0.004;
