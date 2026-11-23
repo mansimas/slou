@@ -453,30 +453,9 @@
     } else if (exact) { sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, PI / 2); sh.absarc(x - r, r, r, -PI / 2, 0); }
     sh.lineTo(x, L - r); sh.absarc(x - r, L - r, r, 0, PI / 2);
     if (state.product === 'card3' && state.card3Slot === 'u') {
-      // Match both tangent and curvature at the flat lip and the circular cut.
-      // The convex shoulder must also be gentler than the 0.5 mm bevel inset.
-      var radius = C3_HOLE, shoulder = 0.4, join = radius - shoulder;
-      var angle = Math.acos(join / radius), rise = radius * Math.sin(angle);
-      var slope = shoulder * join / rise;
-      var halfBend = -0.5 * Math.pow(shoulder * radius, 2) / Math.pow(rise, 3);
-      function lipDepth(t) {
-        return t * t * t * ((10 * rise - 4 * slope + halfBend) +
-          t * (-15 * rise + 7 * slope - 2 * halfBend + t * (6 * rise - 3 * slope + halfBend)));
-      }
-      var samples = 64;
-      sh.lineTo(radius, L);
-      for (var i = 1; i < samples; i++) {
-        var t = i / samples;
-        sh.lineTo(radius - shoulder * t, L - lipDepth(t));
-      }
-      for (var j = 0; j <= samples; j++) {
-        var arc = -angle + (2 * angle - PI) * j / samples;
-        sh.lineTo(radius * Math.cos(arc), L + radius * Math.sin(arc));
-      }
-      for (var k = samples - 1; k >= 0; k--) {
-        var u = k / samples;
-        sh.lineTo(-radius + shoulder * u, L - lipDepth(u));
-      }
+      // Use the same semicircle as the thumb hole on the fold.
+      sh.lineTo(FOLD_HOLE, L);
+      sh.absarc(0, L, FOLD_HOLE, 0, -PI, true);
     } else if (state.product === 'card3') {   // Nr. 3: the front half's open edge cut in its waist
       for (var xv = x - r; xv > -x + r + 1e-6; xv -= 0.05) { sh.lineTo(xv, L - card3Depth(xv)); }
     }
@@ -2667,7 +2646,7 @@
   function preparedModelKey() {
     var p = state.product, wallet = p === 'wallet' || p === 'wallet2';
     // A running server can still serve the previous oval under its old key.
-    if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-smooth-lips-open'; }
+    if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-open'; }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');

@@ -23,7 +23,7 @@ function variants() {
   var list = [];
   function add(product, shape, slot, flat) {
     list.push({ product: product, shape: shape || 'arch', slot: slot || 'curved', card3Slot: product === 'card3' ? slot : 'curved', flat: !!flat,
-      key: product === 'card3' && slot === 'u' ? 'card3-u-smooth-lips-open' :
+      key: product === 'card3' && slot === 'u' ? 'card3-u-fold-hole-open' :
         product + '-' + (product === 'keyfob' ? shape : product.indexOf('wallet') === 0 || product === 'card3' ? slot : 'default') + '-' + (flat ? 'flat' : 'open') });
   }
   // The heaviest default first, then every shape and open/flat wallet variant.
