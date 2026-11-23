@@ -453,9 +453,13 @@
     } else if (exact) { sh.lineTo(x, -r); sh.absarc(x - r, -r, r, 0, PI / 2); sh.absarc(x - r, r, r, -PI / 2, 0); }
     sh.lineTo(x, L - r); sh.absarc(x - r, L - r, r, 0, PI / 2);
     if (state.product === 'card3' && state.card3Slot === 'u') {
-      // Use the same semicircle as the thumb hole on the fold.
-      sh.lineTo(FOLD_HOLE, L);
-      sh.absarc(0, L, FOLD_HOLE, 0, -PI, true);
+      // Round just the two joins, tangent to the straight edge and the original circle.
+      var fillet = 0.1, centre = Math.sqrt(FOLD_HOLE * (FOLD_HOLE + 2 * fillet));
+      var angle = Math.atan2(fillet, centre);
+      sh.lineTo(centre, L);
+      sh.absarc(centre, L - fillet, fillet, PI / 2, PI - angle);
+      sh.absarc(0, L, FOLD_HOLE, -angle, angle - PI, true);
+      sh.absarc(-centre, L - fillet, fillet, angle, PI / 2);
     } else if (state.product === 'card3') {   // Nr. 3: the front half's open edge cut in its waist
       for (var xv = x - r; xv > -x + r + 1e-6; xv -= 0.05) { sh.lineTo(xv, L - card3Depth(xv)); }
     }
@@ -2646,7 +2650,7 @@
   function preparedModelKey() {
     var p = state.product, wallet = p === 'wallet' || p === 'wallet2';
     // A running server can still serve the previous oval under its old key.
-    if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-open'; }
+    if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-fillets-open'; }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
