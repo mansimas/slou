@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-23 07:39] - Refresh the smoothed oval - Give the revised Nr. 3 oval its own prepared model key so a running server cannot supply the previous mesh when the editor has the new outline.
 [2026-11-23 07:35] - Smooth the oval cutout - Match curvature where the round cutout meets the straight top edge and blend the bevel continuously so the Nr. 3 opening looks like one clean punch cut.
 [2026-11-22 08:14] - Draw the round cutout - Draw the top cutout as a true thumb-hole arc in the shared pattern, with rounded transitions only at the horizontal edge.
 [2026-11-22 08:13] - Smooth the circular arc joins - Extend the circular bottom and match curvature at both shoulder joins so the outline has no abrupt changes near the bottom.

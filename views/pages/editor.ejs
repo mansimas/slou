@@ -2666,8 +2666,8 @@
   }
   function preparedModelKey() {
     var p = state.product, wallet = p === 'wallet' || p === 'wallet2';
-    // A running server can still serve the older oval under the original key.
-    if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-thumb-arc-open'; }
+    // A running server can still serve the previous oval under its old key.
+    if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-smooth-lips-open'; }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
