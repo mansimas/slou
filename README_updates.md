@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-24 07:57] - Level straight card sides - Complete the underlying step before the card corner reaches its tangent so the straight section keeps one depth.
 [2026-11-24 07:55] - Straighten card relief sides - Spread the hidden pocket’s lower step beneath the card so it does not bend the vertical relief just above each corner.
 [2026-11-24 07:52] - Smooth card corner joins - Sample the exact tangent joins and soften how the shading changes through the ramp so the lower corners flow into the straight sides.
 [2026-11-24 07:49] - Seat a standard card - Base the front pocket relief on an actual ID-1 card seated just above the bottom stitches, so the sides, corners and lower contour match its insertion depth.
