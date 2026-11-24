@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-24 07:46] - Smooth lower relief corners - Separate the card’s lower rounding from the underlying pocket step and sample its curve more finely so both bottom corners read cleanly.
 [2026-11-24 07:45] - Soften front pocket relief - Reduce the card lift from 1.5 to 0.9 mm so the front pockets look subtly filled.
 [2026-11-24 07:43] - Shape the front pockets - Move the card relief to both front pockets in Wallet No. 2 and restore the back pockets to their original profile.
 [2026-11-24 07:42] - Show the card relief - Increase the upper pocket lift and move its side transitions onto the exposed leather so the inserted card shape is visible.

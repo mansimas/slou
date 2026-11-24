@@ -831,7 +831,9 @@
   }
   var W2_CARD_EASE = 0.35, W2_CARD_X = W2_DX + W2_DW / 2;
   // Start the side ramps at the card edges so they show on the pocket face.
-  var W2_CARD_HW = 8.56 / 2 - W2_CARD_EASE, W2_CARD_FOOT = -W2_H / 2 + 0.9;
+  // Keep the entire lower card ramp above the underlying pocket's foot ramp.
+  var W2_CARD_HW = 8.56 / 2 - W2_CARD_EASE;
+  var W2_CARD_FOOT = -W2_H / 2 + W2_BY + 0.02 + W2_CARD_EASE + 0.03;
   function w2CardLift(x, y) {
     var dx = Math.abs(Math.abs(x) - W2_CARD_X) - (W2_CARD_HW - BANK_CR);
     var dy = W2_CARD_FOOT + BANK_CR - y;
@@ -2689,7 +2691,7 @@
     // A running server can still serve the previous oval under its old key.
     if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-fillets-open'; }
     if (p === 'wallet') { return 'wallet-slot-stamp-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
-    if (p === 'wallet2') { return 'wallet2-soft-card-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
+    if (p === 'wallet2') { return 'wallet2-round-card-foot-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
@@ -2950,8 +2952,8 @@
       };
       for (var sg of [-1, 1]) {
         var cardXs = [], cardYs = [];
-        for (var row = 0; row <= 9; row++) {
-          var offset = -W2_CARD_EASE + (W2_CARD_EASE + BANK_CR) * row / 9;
+        for (var row = 0; row <= 14; row++) {
+          var offset = -W2_CARD_EASE + (W2_CARD_EASE + BANK_CR) * row / 14;
           cardXs.push(sg * (W2_CARD_X - W2_CARD_HW + offset), sg * (W2_CARD_X + W2_CARD_HW - offset));
           cardYs.push(W2_CARD_FOOT + offset);
         }
