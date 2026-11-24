@@ -850,6 +850,18 @@
     var ax = Math.abs(x), e = function (t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
     return W2_T * e((ax - W2_BX + 0.28) / 0.3) * e((W2_BX + W2_BW + 0.28 - ax) / 0.3) * e((y + W2_H / 2 - W2_BY + 0.28) / 0.3);
   }
+  var W2_SUPPORT_TOP = -W2_H / 2 + W2_BY + 0.02;
+  function w2FrontSupport(x, y) {
+    var overlap = w2Lift(x, y);
+    if (y <= W2_CARD_FOOT || y >= W2_SUPPORT_TOP) { return overlap; }
+    // Under the card, spread the hidden pocket's step over the available
+    // space above the bottom seam so it does not kink the straight relief.
+    var t = (y - W2_CARD_FOOT) / (W2_SUPPORT_TOP - W2_CARD_FOOT);
+    var outside = Math.abs(Math.abs(x) - W2_CARD_X) - W2_CARD_HW;
+    var across = Math.max(0, Math.min(1, (0.2 - outside) / 0.15));
+    var support = W2_T * t * t * t * (10 + t * (6 * t - 15));
+    return overlap + across * across * (3 - 2 * across) * (Math.max(overlap, support) - overlap);
+  }
   function hingeS() { return state.product === 'wallet2' ? W2_S : WAL_SPINE; }
   function hingeT() { return state.product === 'wallet2' ? W2_T : WAL_EXT; }
   function walBend(x, z, a) {
@@ -2690,7 +2702,7 @@
     // A running server can still serve the previous oval under its old key.
     if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-fillets-open'; }
     if (p === 'wallet') { return 'wallet-slot-stamp-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
-    if (p === 'wallet2') { return 'wallet2-smooth-card-joins-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
+    if (p === 'wallet2') { return 'wallet2-continuous-card-sides-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
@@ -2961,6 +2973,12 @@
           cardXs.push(sg * (W2_CARD_X - W2_CARD_HW + offset), sg * (W2_CARD_X + W2_CARD_HW - offset));
           cardYs.push(W2_CARD_FOOT + offset);
         });
+        [0.05, 0.125, 0.2].forEach(function (offset) {
+          cardXs.push(sg * (W2_CARD_X - W2_CARD_HW - offset), sg * (W2_CARD_X + W2_CARD_HW + offset));
+        });
+        for (var supportRow = 1; supportRow <= 18; supportRow++) {
+          cardYs.push(W2_CARD_FOOT + (W2_SUPPORT_TOP - W2_CARD_FOOT) * supportRow / 18);
+        }
         // the back pocket: every edge its own
         fob.add(shift2(leatherPiece([w2Loop('B', sg)], T2, T2 * 1.5, function () { return 0; }, [w2SlotMat, walEdgeMat, walSlotFleshMat], pocketCol2), sg * (W2_BX + W2_BW / 2)));
         yield sg < 0 ? 42 : 62;
@@ -2979,7 +2997,7 @@
         fd2 = w2SliceAt(w2SliceAt(fd2, 0, cardXs), 1, cardYs);
         for (var fv = 0; fv < fd2.P.length; fv += 3) {
           var qx = fd2.P[fv], qy = fd2.P[fv + 1], d = 0.004;
-          fd2.P[fv + 2] += w2Lift(qx, qy) + w2CardLift(qx, qy);
+          fd2.P[fv + 2] += w2FrontSupport(qx, qy) + w2CardLift(qx, qy);
           // Shade the card relief while keeping the original overlap shading.
           var dx = (w2CardLift(qx + d, qy) - w2CardLift(qx - d, qy)) / (2 * d);
           var dy = (w2CardLift(qx, qy + d) - w2CardLift(qx, qy - d)) / (2 * d);
