@@ -1,6 +1,8 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-24 07:38] - Move wallet two stamp - Put the SLOU stamp inside Wallet No. 2 on the right front pocket, matching the placement on Wallet No. 1.
+[2026-11-24 07:37] - Shape upper wallet pockets - Follow the rounded footprint of an inserted card under both upper pockets on Wallet No. 2 so the open leather shows their relief.
 [2026-11-24 07:34] - Stamp the green pocket - Place the SLOU stamp at the foot of the right card pocket to match the owner’s logo placement.
 [2026-11-24 07:28] - Move the wallet logo - Move the SLOU stamp from the exterior to the exposed right inner pocket so it is seen when the wallet is opened.
 [2026-11-23 08:01] - Deploy to stage - Push the checked full-height pocket update to the staging branch so it is available for review there.

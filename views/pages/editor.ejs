@@ -829,12 +829,21 @@
     }
     return c;
   }
-  // the front pocket lies on the back pocket where they overlap: lifted by a
+  var W2_CARD_X = W2_BX + W2_BW / 2, W2_CARD_HW = 8.56 / 2;
+  var W2_CARD_FOOT = -W2_H / 2 + W2_BY + 0.77, W2_CARD_EASE = 0.35;
+  function w2CardLift(x, y) {
+    var dx = Math.abs(Math.abs(x) - W2_CARD_X) - (W2_CARD_HW - BANK_CR);
+    var dy = W2_CARD_FOOT + BANK_CR - y;
+    var distance = Math.hypot(Math.max(0, dx), Math.max(0, dy)) - BANK_CR;
+    var t = Math.max(0, Math.min(1, 1 - distance / W2_CARD_EASE));
+    return 0.08 * t * t * (3 - 2 * t);
+  }
+  // The front pocket lies on the back pocket where they overlap: lifted by a
   // layer there, easing down over 3 mm to the lining round it. The rise is
   // outside the back pocket, full 0.2 mm in from its edge, so the front
   // pocket bends up and over that edge (the owner, 2026-11-14: easing over the
   // back pocket's first 2.5 mm, its rounded side stuck up through the front
-  // pocket's top edge)
+  // pocket's top edge).
   function w2Lift(x, y) {
     var ax = Math.abs(x), e = function (t) { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 * t); };
     return W2_T * e((ax - W2_BX + 0.28) / 0.3) * e((W2_BX + W2_BW + 0.28 - ax) / 0.3) * e((y + W2_H / 2 - W2_BY + 0.28) / 0.3);
@@ -1262,11 +1271,11 @@
   paintWallet();
   var walInnerLogoTex = canvasTex(true), walInnerLogoBump = canvasTex(false), walInnerLogoRough = canvasTex(false);
   pressLogo(walInnerLogoTex, walInnerLogoBump, walInnerLogoRough, -WAL_H / 2 + 1.2, true);
-  // wallet Nr. 2's exterior: the SLOU stamp where the wallet has it, on the
-  // front cover, only a little lower (the owner, 2026-11-10: in the corner
-  // was tried first)
+  // Wallet Nr. 2: plain exterior and the stamp on the right front pocket.
   // 24 cm across: the 20 cm one ran out short of the ends and smeared there
   var w2OutTex = wideTex(true, 24), w2OutBump = wideTex(false, 24), w2OutRough = wideTex(false, 24);
+  var w2InnerTex = canvasTex(true), w2InnerBump = canvasTex(false), w2InnerRough = canvasTex(false);
+  [w2InnerTex, w2InnerBump, w2InnerRough].forEach(function (tex) { tex.wrapS = tex.wrapT = THREE.MirroredRepeatWrapping; });
   var w2GrainTex = canvasTex(true), w2GrainBump = canvasTex(false);
   [w2GrainTex, w2GrainBump].forEach(function (tex) { tex.wrapS = tex.wrapT = THREE.MirroredRepeatWrapping; });
   var w2Grain = { col: w2GrainTex.image, bump: w2GrainBump.image };
@@ -1275,8 +1284,8 @@
   w2Relief.fillStyle = '#808080'; w2Relief.fillRect(0, 0, TEX_N, TEX_N);
   w2Relief.globalAlpha = 0.85; w2Relief.drawImage(natural.bump, 0, 0); w2Relief.globalAlpha = 1;
   function paintWallet2Stamp() {
-    // Centre the stamp between the spine and the end of the bottom seam.
-    pressLogo(w2OutTex, w2OutBump, w2OutRough, -3.45, false, false, 1, -(W2_GAP + W2_L / 2 - STITCH_INSET) / 2, w2Grain);
+    pressLogo(w2OutTex, w2OutBump, w2OutRough, null, false, false, 1, 0, w2Grain);
+    pressLogo(w2InnerTex, w2InnerBump, w2InnerRough, -W2_H / 2 + 1.2, true, false, 1, 0, w2Grain);
   }
   paintWallet2Stamp();
   var w2OutMat = new THREE.MeshStandardMaterial({ map: w2OutTex, bumpMap: w2OutBump, roughnessMap: w2OutRough, bumpScale: 2, roughness: 0.66 });
@@ -1292,6 +1301,7 @@
   var walSlotFleshMat = new THREE.MeshStandardMaterial({ map: mirrored(backColorTex), bumpMap: mirrored(plainBumpTex), bumpScale: 1, roughness: 0.85 });
   var w2LiningMat = new THREE.MeshStandardMaterial({ map: w2GrainTex, bumpMap: w2GrainBump, bumpScale: 0.8, roughness: 0.66 });
   var w2SlotMat = w2LiningMat.clone();
+  var w2RightSlotMat = new THREE.MeshStandardMaterial({ map: w2InnerTex, bumpMap: w2InnerBump, roughnessMap: w2InnerRough, bumpScale: 2, roughness: 0.66 });
   var w2ToneImage;
   function loadWallet2Tone() {
     if (w2ToneImage) { return; }
@@ -1451,6 +1461,7 @@
     walSlotMat.color.copy(new THREE.Color(state.pocket)).multiplyScalar(1.2);
     walRightSlotMat.color.copy(walSlotMat.color);
     w2SlotMat.color.copy(walSlotMat.color);
+    w2RightSlotMat.color.copy(w2SlotMat.color);
     if (state.product === 'wallet2') { loadWallet2Tone(); }
     walSlotFleshMat.color.copy(new THREE.Color(state.pocket)).multiplyScalar(0.9);
     var pc = new THREE.Color(state.pocket);
@@ -2677,6 +2688,7 @@
     // A running server can still serve the previous oval under its old key.
     if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-fillets-open'; }
     if (p === 'wallet') { return 'wallet-slot-stamp-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
+    if (p === 'wallet2') { return 'wallet2-filled-upper-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
@@ -2738,7 +2750,7 @@
       pocketBackMat, pocketEdgeMat, pocketFleshMat, fold2FrontMat, fold3FrontMat,
       fold2BackMat, fold2EdgeMat, fob2FrontMat, fob2BackMat, fob2FleshMat,
       walOutMat, w2OutMat, walBaseMat, w2LiningMat, walFleshMat, walSlotMat, walRightSlotMat,
-      w2SlotMat, walSlotFleshMat, walEdgeMat, threadMat, holeMat, dimpleMat, ringMat };
+      w2SlotMat, w2RightSlotMat, walSlotFleshMat, walEdgeMat, threadMat, holeMat, dimpleMat, ringMat };
   }
   var modelCodec, modelDecoder;
   async function downloadModel() {
@@ -2936,8 +2948,28 @@
         return mesh;
       };
       for (var sg of [-1, 1]) {
+        var cardXs = [], cardYs = [];
+        for (var row = 0; row <= 9; row++) {
+          var offset = -W2_CARD_EASE + (W2_CARD_EASE + BANK_CR) * row / 9;
+          cardXs.push(sg * (W2_CARD_X - W2_CARD_HW + offset), sg * (W2_CARD_X + W2_CARD_HW - offset));
+          cardYs.push(W2_CARD_FOOT + offset);
+        }
+        var overCard = function (panel) {
+          return w2SliceAt(w2SliceAt(panel, 0, cardXs), 1, cardYs, sg < 0 ? -W2_BX - W2_BW - 0.3 : W2_BX - 0.3, sg < 0 ? -W2_BX + 0.3 : W2_BX + W2_BW + 0.3);
+        };
         // the back pocket: every edge its own
-        fob.add(shift2(leatherPiece([w2Loop('B', sg)], T2, T2 * 1.5, function () { return 0; }, [w2SlotMat, walEdgeMat, walSlotFleshMat], pocketCol2), sg * (W2_BX + W2_BW / 2)));
+        var upper = leatherPiece([w2Loop('B', sg)], T2, T2 * 1.5, function () { return 0; }, [], pocketCol2);
+        var raised = overCard(k2Split(upper.geometry, null));
+        upper.geometry.dispose();
+        for (var u = 0; u < raised.P.length; u += 3) {
+          var ux = raised.P[u], uy = raised.P[u + 1], d = 0.004, nz = raised.Nm[u + 2];
+          raised.P[u + 2] += w2CardLift(ux, uy);
+          var nx = raised.Nm[u] - nz * (w2CardLift(ux + d, uy) - w2CardLift(ux - d, uy)) / (2 * d);
+          var ny = raised.Nm[u + 1] - nz * (w2CardLift(ux, uy + d) - w2CardLift(ux, uy - d)) / (2 * d);
+          var len = Math.hypot(nx, ny, nz) || 1;
+          raised.Nm[u] = nx / len; raised.Nm[u + 1] = ny / len; raised.Nm[u + 2] = nz / len;
+        }
+        fob.add(shift2(new THREE.Mesh(k2Geo(raised), [w2SlotMat, walEdgeMat, walSlotFleshMat]), sg * W2_CARD_X));
         yield sg < 0 ? 42 : 62;
         // the front pocket: in the stack along the foot and the end, lifted over the back pocket
         var dStack = function (p) { return p.y < -H2 + 0.01 || Math.abs(p.x) > W2_L / 2 - 0.01 || (Math.abs(p.x) > W2_L / 2 - W2_R - 0.01 && p.y < -H2 + W2_R) ? 1 : 0; };
@@ -2951,13 +2983,14 @@
         }
         var bx0 = W2_BX - 0.4, bx1 = W2_BX + W2_BW + 0.4;   // the foot's rows only across the back pocket
         var fd2 = w2SliceAt(w2SliceAt(k2Split(fp.geometry, null), 0, xs2), 1, ys2, sg > 0 ? bx0 : -bx1, sg > 0 ? bx1 : -bx0);
+        fd2 = overCard(fd2);
         for (var fv = 0; fv < fd2.P.length / 3; fv++) {
-          var qx = fd2.P[fv * 3], qy = fd2.P[fv * 3 + 1], lz = w2Lift(qx, qy);
+          var qx = fd2.P[fv * 3], qy = fd2.P[fv * 3 + 1], lz = w2Lift(qx, qy) + w2CardLift(qx, qy);
           if (!lz) { continue; }
           fd2.P[fv * 3 + 2] += lz;   // the normals left as they are: tipped with the rise, it shaded as a dark band where the back pocket lies under (the owner, 2026-11-10)
         }
         for (var fu = 0; fu < fd2.U.length; fu += 2) { fd2.U[fu] -= sg * (W2_DX + W2_DW / 2); }
-        fob.add(new THREE.Mesh(k2Geo(fd2), [w2SlotMat, walEdgeMat, walSlotFleshMat]));
+        fob.add(new THREE.Mesh(k2Geo(fd2), [sg > 0 ? w2RightSlotMat : w2SlotMat, walEdgeMat, walSlotFleshMat]));
         fp.geometry.dispose();
         yield sg < 0 ? 55 : 75;
       }
