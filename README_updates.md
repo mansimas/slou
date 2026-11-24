@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-24 08:03] - Broaden the card transition - Spread the front pocket rise to both sides of the card outline and ease it gradually from the bottom so the leather looks naturally filled.
 [2026-11-24 08:00] - Ease the leather transition - Widen the leather transition from 2.2 to 3 mm so it forms gradually around the seated card.
 [2026-11-24 08:00] - Reduce the card relief - Lower the front pocket card relief from 0.76 to 0.45 mm to make it subtler while keeping the same contour.
 [2026-11-24 07:57] - Level straight card sides - Complete the underlying step before the card corner reaches its tangent so the straight section keeps one depth.
