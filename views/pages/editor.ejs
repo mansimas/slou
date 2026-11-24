@@ -829,9 +829,9 @@
     }
     return c;
   }
-  var W2_CARD_EASE = 0.35, W2_CARD_X = W2_BX + W2_BW / 2;
+  var W2_CARD_EASE = 0.35, W2_CARD_X = W2_DX + W2_DW / 2;
   // Start the side ramps at the card edges so they show on the pocket face.
-  var W2_CARD_HW = 8.56 / 2 - W2_CARD_EASE, W2_CARD_FOOT = -W2_H / 2 + W2_BY + 0.77;
+  var W2_CARD_HW = 8.56 / 2 - W2_CARD_EASE, W2_CARD_FOOT = -W2_H / 2 + 0.9;
   function w2CardLift(x, y) {
     var dx = Math.abs(Math.abs(x) - W2_CARD_X) - (W2_CARD_HW - BANK_CR);
     var dy = W2_CARD_FOOT + BANK_CR - y;
@@ -2689,7 +2689,7 @@
     // A running server can still serve the previous oval under its old key.
     if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-fillets-open'; }
     if (p === 'wallet') { return 'wallet-slot-stamp-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
-    if (p === 'wallet2') { return 'wallet2-visible-card-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
+    if (p === 'wallet2') { return 'wallet2-front-card-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
@@ -2955,22 +2955,8 @@
           cardXs.push(sg * (W2_CARD_X - W2_CARD_HW + offset), sg * (W2_CARD_X + W2_CARD_HW - offset));
           cardYs.push(W2_CARD_FOOT + offset);
         }
-        var overCard = function (panel) {
-          return w2SliceAt(w2SliceAt(panel, 0, cardXs), 1, cardYs, sg < 0 ? -W2_BX - W2_BW - 0.3 : W2_BX - 0.3, sg < 0 ? -W2_BX + 0.3 : W2_BX + W2_BW + 0.3);
-        };
         // the back pocket: every edge its own
-        var upper = leatherPiece([w2Loop('B', sg)], T2, T2 * 1.5, function () { return 0; }, [], pocketCol2);
-        var raised = overCard(k2Split(upper.geometry, null));
-        upper.geometry.dispose();
-        for (var u = 0; u < raised.P.length; u += 3) {
-          var ux = raised.P[u], uy = raised.P[u + 1], d = 0.004, nz = raised.Nm[u + 2];
-          raised.P[u + 2] += w2CardLift(ux, uy);
-          var nx = raised.Nm[u] - nz * (w2CardLift(ux + d, uy) - w2CardLift(ux - d, uy)) / (2 * d);
-          var ny = raised.Nm[u + 1] - nz * (w2CardLift(ux, uy + d) - w2CardLift(ux, uy - d)) / (2 * d);
-          var len = Math.hypot(nx, ny, nz) || 1;
-          raised.Nm[u] = nx / len; raised.Nm[u + 1] = ny / len; raised.Nm[u + 2] = nz / len;
-        }
-        fob.add(shift2(new THREE.Mesh(k2Geo(raised), [w2SlotMat, walEdgeMat, walSlotFleshMat]), sg * W2_CARD_X));
+        fob.add(shift2(leatherPiece([w2Loop('B', sg)], T2, T2 * 1.5, function () { return 0; }, [w2SlotMat, walEdgeMat, walSlotFleshMat], pocketCol2), sg * (W2_BX + W2_BW / 2)));
         yield sg < 0 ? 42 : 62;
         // the front pocket: in the stack along the foot and the end, lifted over the back pocket
         var dStack = function (p) { return p.y < -H2 + 0.01 || Math.abs(p.x) > W2_L / 2 - 0.01 || (Math.abs(p.x) > W2_L / 2 - W2_R - 0.01 && p.y < -H2 + W2_R) ? 1 : 0; };
@@ -2984,11 +2970,17 @@
         }
         var bx0 = W2_BX - 0.4, bx1 = W2_BX + W2_BW + 0.4;   // the foot's rows only across the back pocket
         var fd2 = w2SliceAt(w2SliceAt(k2Split(fp.geometry, null), 0, xs2), 1, ys2, sg > 0 ? bx0 : -bx1, sg > 0 ? bx1 : -bx0);
-        fd2 = overCard(fd2);
-        for (var fv = 0; fv < fd2.P.length / 3; fv++) {
-          var qx = fd2.P[fv * 3], qy = fd2.P[fv * 3 + 1], lz = w2Lift(qx, qy) + w2CardLift(qx, qy);
-          if (!lz) { continue; }
-          fd2.P[fv * 3 + 2] += lz;   // the normals left as they are: tipped with the rise, it shaded as a dark band where the back pocket lies under (the owner, 2026-11-10)
+        fd2 = w2SliceAt(w2SliceAt(fd2, 0, cardXs), 1, cardYs);
+        for (var fv = 0; fv < fd2.P.length; fv += 3) {
+          var qx = fd2.P[fv], qy = fd2.P[fv + 1], d = 0.004;
+          fd2.P[fv + 2] += w2Lift(qx, qy) + w2CardLift(qx, qy);
+          // Shade the card relief while keeping the original overlap shading.
+          var dx = (w2CardLift(qx + d, qy) - w2CardLift(qx - d, qy)) / (2 * d);
+          var dy = (w2CardLift(qx, qy + d) - w2CardLift(qx, qy - d)) / (2 * d);
+          if (!dx && !dy) { continue; }
+          var nz = fd2.Nm[fv + 2], nx = fd2.Nm[fv] - nz * dx, ny = fd2.Nm[fv + 1] - nz * dy;
+          var len = Math.hypot(nx, ny, nz) || 1;
+          fd2.Nm[fv] = nx / len; fd2.Nm[fv + 1] = ny / len; fd2.Nm[fv + 2] = nz / len;
         }
         for (var fu = 0; fu < fd2.U.length; fu += 2) { fd2.U[fu] -= sg * (W2_DX + W2_DW / 2); }
         fob.add(new THREE.Mesh(k2Geo(fd2), [sg > 0 ? w2RightSlotMat : w2SlotMat, walEdgeMat, walSlotFleshMat]));
