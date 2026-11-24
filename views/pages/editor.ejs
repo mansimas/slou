@@ -1261,7 +1261,7 @@
   }
   paintWallet();
   var walInnerLogoTex = canvasTex(true), walInnerLogoBump = canvasTex(false), walInnerLogoRough = canvasTex(false);
-  pressLogo(walInnerLogoTex, walInnerLogoBump, walInnerLogoRough, 4.25, true);
+  pressLogo(walInnerLogoTex, walInnerLogoBump, walInnerLogoRough, -WAL_H / 2 + 1.2, true);
   // wallet Nr. 2's exterior: the SLOU stamp where the wallet has it, on the
   // front cover, only a little lower (the owner, 2026-11-10: in the corner
   // was tried first)
@@ -1286,7 +1286,7 @@
   // holder Nr. 2, their texture mirrored past the 10 cm rather than smeared
   function mirrored(t) { var c = t.clone(); c.wrapS = c.wrapT = THREE.MirroredRepeatWrapping; c.needsUpdate = true; return c; }
   var walBaseMat = new THREE.MeshStandardMaterial({ map: naturalTex, bumpMap: naturalBumpTex, bumpScale: 0.8, roughness: 0.6 });
-  var walRightBaseMat = new THREE.MeshStandardMaterial({ map: walInnerLogoTex, bumpMap: walInnerLogoBump, roughnessMap: walInnerLogoRough, bumpScale: 2, roughness: 0.6 });
+  var walRightSlotMat = new THREE.MeshStandardMaterial({ map: walInnerLogoTex, bumpMap: walInnerLogoBump, roughnessMap: walInnerLogoRough, bumpScale: 2, roughness: 0.6 });
   var walSlotMat = new THREE.MeshStandardMaterial({ map: naturalTex, bumpMap: naturalBumpTex, bumpScale: 0.8, roughness: 0.6 });
   var walFleshMat = new THREE.MeshStandardMaterial({ map: mirrored(backColorTex), bumpMap: mirrored(plainBumpTex), bumpScale: 1, roughness: 0.85 });
   var walSlotFleshMat = new THREE.MeshStandardMaterial({ map: mirrored(backColorTex), bumpMap: mirrored(plainBumpTex), bumpScale: 1, roughness: 0.85 });
@@ -1446,10 +1446,10 @@
     walOutMat.color.copy(c).multiplyScalar(1.2);
     w2OutMat.color.copy(c).multiplyScalar(1.2);
     walBaseMat.color.copy(c).multiplyScalar(1.2);
-    walRightBaseMat.color.copy(walBaseMat.color);
     w2LiningMat.color.copy(c).multiplyScalar(1.2);
     walFleshMat.color.copy(c).multiplyScalar(0.9);
     walSlotMat.color.copy(new THREE.Color(state.pocket)).multiplyScalar(1.2);
+    walRightSlotMat.color.copy(walSlotMat.color);
     w2SlotMat.color.copy(walSlotMat.color);
     if (state.product === 'wallet2') { loadWallet2Tone(); }
     walSlotFleshMat.color.copy(new THREE.Color(state.pocket)).multiplyScalar(0.9);
@@ -2676,7 +2676,7 @@
     var p = state.product, wallet = p === 'wallet' || p === 'wallet2';
     // A running server can still serve the previous oval under its old key.
     if (p === 'card3' && state.card3Slot === 'u') { return 'card3-u-fold-hole-fillets-open'; }
-    if (p === 'wallet') { return 'wallet-inner-stamp-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
+    if (p === 'wallet') { return 'wallet-slot-stamp-' + state.slot + '-' + (measures.visible ? 'flat' : 'open'); }
     // Geometry is shared across leather colours; the decoder reapplies only
     // the baked edge dye. Thread, ring finish and initials use live materials.
     return p + '-' + (p === 'keyfob' ? state.shape : wallet ? state.slot : p === 'card3' ? state.card3Slot : 'default') + '-' + (wallet && measures.visible ? 'flat' : 'open');
@@ -2737,7 +2737,7 @@
     return { leatherMat, backMat, edgeMat, bodyGrainMat, bodyEdgeMat, pocketFrontMat,
       pocketBackMat, pocketEdgeMat, pocketFleshMat, fold2FrontMat, fold3FrontMat,
       fold2BackMat, fold2EdgeMat, fob2FrontMat, fob2BackMat, fob2FleshMat,
-      walOutMat, w2OutMat, walBaseMat, walRightBaseMat, w2LiningMat, walFleshMat, walSlotMat,
+      walOutMat, w2OutMat, walBaseMat, w2LiningMat, walFleshMat, walSlotMat, walRightSlotMat,
       w2SlotMat, walSlotFleshMat, walEdgeMat, threadMat, holeMat, dimpleMat, ringMat };
   }
   var modelCodec, modelDecoder;
@@ -3086,7 +3086,7 @@
         }
         var side = sliceAt(sliceAt(k2Split(base.geometry, null), 0, sideXs), 1, sideYs);
         base.geometry.dispose();
-        fob.add(shifted(new THREE.Mesh(raisePanel(side, walBaseLift), [sg > 0 ? walRightBaseMat : walBaseMat, walEdgeMat, walFleshMat]), sg));
+        fob.add(shifted(new THREE.Mesh(raisePanel(side, walBaseLift), [walBaseMat, walEdgeMat, walFleshMat]), sg));
         var pocket = leatherPiece([loopOf(walShape(state.slot, sg))], WAL_IN, WAL_IN * 1.5, slotStack, [], slotCol, null, null, function () { return 2 * WAL_IN; }, stackBot, atSpine);
         // Place vertex rows where the leather bends over the card sides and foot.
         var xs = sideXs.slice(), ys = sideYs.slice();
@@ -3099,7 +3099,7 @@
         pocket.geometry.dispose();
         fob.add(shifted(new THREE.Mesh(raisePanel(panel, function (x, y) {
           return walBaseLift(x, y) + walPocketLift(x, y);
-        }), [walSlotMat, walEdgeMat, walSlotFleshMat]), sg));
+        }), [sg > 0 ? walRightSlotMat : walSlotMat, walEdgeMat, walSlotFleshMat]), sg));
       });
       // The seams, each an open run of the owner's stitch, the last two
       // stitches at each end doubled. On each half the U through all the
