@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-24 07:28] - Move the wallet logo - Move the SLOU stamp from the exterior to the exposed right inner pocket so it is seen when the wallet is opened.
 [2026-11-23 08:01] - Deploy to stage - Push the checked full-height pocket update to the staging branch so it is available for review there.
 [2026-11-23 07:59] - Lift the full panel - Extend the raised plane across each brown side pocket from top to bottom, with the sewn perimeter anchored and its attached slot following the same lift.
 [2026-11-23 07:57] - Shape flat side inserts - Keep the lift level inside each side opening and ease it only at the perimeter, as if a flat card cut to that opening were inserted.
