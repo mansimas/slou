@@ -763,14 +763,6 @@
   // again into a hump over the fold, as "sloped" (the owner, the same day)
   var w2DropCache = {};
   function w2LiningDrop(x) {
-    var ax = Math.abs(x);
-    var blend = 0.25;   // trim 2.5 mm off each end of the original flat section
-    if (state.slot === 'slanted' && ax < W2_DX + blend) {
-      // Start level at the central cut, then ease into the original diagonal.
-      var t = Math.max(0, (ax - (W2_DX - blend)) / (2 * blend));
-      var high = walSlotTop(0), low = walSlotTop(7.2);
-      return (low - high) * (1 - 2 * blend / W2_DW * t * t * t * (1 - t / 2));
-    }
     var c = w2DropCache[state.slot];
     if (!c) {   // the shape's highest, and where it first reaches its lowest
       c = w2DropCache[state.slot] = { mx: 0, mn: 1e9, tmin: 0 };
@@ -780,7 +772,7 @@
         if (h < c.mn - 1e-9) { c.mn = h; c.tmin = t; }
       }
     }
-    var mx = c.mx, tmin = c.tmin, t2 = Math.min(W2_DW, Math.max(0, W2_L / 2 - ax));
+    var mx = c.mx, tmin = c.tmin, ax = Math.abs(x), t2 = Math.min(W2_DW, Math.max(0, W2_L / 2 - ax));
     return walSlotTop(Math.min(t2 * 7.2 / W2_DW, tmin)) - mx;
   }
   // a piece's outline in the wallet's frame (cm, the middle at 0, 0), CCW
