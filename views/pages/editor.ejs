@@ -764,10 +764,12 @@
   var w2DropCache = {};
   function w2LiningDrop(x) {
     var ax = Math.abs(x);
-    if (state.slot === 'slanted' && ax < 2 * W2_DX) {
-      // Ease the slope from zero at the fold into the original diagonal.
-      var t = ax / (2 * W2_DX), high = walSlotTop(0), low = walSlotTop(7.2);
-      return (low - high) * (1 - 2 * W2_DX / W2_DW * t * t * t * (1 - t / 2));
+    var blend = 0.25;   // trim 2.5 mm off each end of the original flat section
+    if (state.slot === 'slanted' && ax < W2_DX + blend) {
+      // Start level at the central cut, then ease into the original diagonal.
+      var t = Math.max(0, (ax - (W2_DX - blend)) / (2 * blend));
+      var high = walSlotTop(0), low = walSlotTop(7.2);
+      return (low - high) * (1 - 2 * blend / W2_DW * t * t * t * (1 - t / 2));
     }
     var c = w2DropCache[state.slot];
     if (!c) {   // the shape's highest, and where it first reaches its lowest

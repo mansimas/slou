@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-25 20:20] - Shorten the flat cut - Restore a straight middle on the slanted lining, 5 mm shorter than the original, with smooth joins for continuous knife cutting.
 [2026-11-25 20:17] - Smooth the cash opening - Ease the slanted Wallet No. 2 lining through the fold so the central cut can be made in one continuous knife pass.
 [2026-11-24 08:03] - Broaden the card transition - Spread the front pocket rise to both sides of the card outline and ease it gradually from the bottom so the leather looks naturally filled.
 [2026-11-24 08:00] - Ease the leather transition - Widen the leather transition from 2.2 to 3 mm so it forms gradually around the seated card.
