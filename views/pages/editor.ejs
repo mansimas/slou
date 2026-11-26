@@ -763,6 +763,11 @@
   // again into a hump over the fold, as "sloped" (the owner, the same day)
   var w2DropCache = {};
   function w2LiningDrop(x) {
+    if (state.slot === 'straight') {
+      // Lower the free edge by 5 mm and blend back before the reinforced corners.
+      var t = Math.min(1, Math.max(0, W2_L / 2 - W2_R - Math.abs(x)));
+      return -0.5 * t * t * t * (10 + t * (-15 + 6 * t));
+    }
     var c = w2DropCache[state.slot];
     if (!c) {   // the shape's highest, and where it first reaches its lowest
       c = w2DropCache[state.slot] = { mx: 0, mn: 1e9, tmin: 0 };
