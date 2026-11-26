@@ -25,6 +25,7 @@ function variants() {
     list.push({ product: product, shape: shape || 'arch', slot: slot || 'curved', card3Slot: product === 'card3' ? slot : 'curved', flat: !!flat,
       key: product === 'card3' && slot === 'u' ? 'card3-u-fold-hole-fillets-open' :
         product === 'wallet' ? 'wallet-slot-stamp-' + slot + '-' + (flat ? 'flat' : 'open') :
+        product === 'wallet2' && slot === 'straight' ? 'wallet2-straight-lowered-lining-' + (flat ? 'flat' : 'open') :
         product === 'wallet2' ? 'wallet2-draped-card-' + slot + '-' + (flat ? 'flat' : 'open') :
         product + '-' + (product === 'keyfob' ? shape : product.indexOf('wallet') === 0 || product === 'card3' ? slot : 'default') + '-' + (flat ? 'flat' : 'open') });
   }

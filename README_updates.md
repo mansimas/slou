@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-26 10:22] - Refresh straight wallet geometry - Give the lowered banknote lining its own prepared-model key so the editor cannot load a previously prepared straight wallet with the full-height lining.
 [2026-11-26 10:16] - Lower the straight lining - Lower the entire free edge of the straight banknote pocket by 5 mm for easier access and retain the exterior height at the reinforced ends.
 [2026-11-25 20:24] - Restore the slanted lining - Restore the original slanted cut after the owner clarified that the requested shortening applies to the straight variant.
 [2026-11-25 20:20] - Shorten the flat cut - Restore a straight middle on the slanted lining, 5 mm shorter than the original, with smooth joins for continuous knife cutting.
