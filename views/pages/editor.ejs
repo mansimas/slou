@@ -1976,7 +1976,36 @@
   var CARD5_W = (870.1 - 562.2) / CARD5_SCALE;
   var CARD5_H = (CARD5_Y - 306.85) / CARD5_SCALE - CARD5_BEND + CARD5_R + CARD5_T / 2;
   var CARD5_SHIFT = CARD5_H / 2 - CARD5_R - CARD5_T / 2;
-  var CARD5_FACE = CARD5_R + 1.5 * CARD5_T;
+  var CARD5_BOND = (CARD5_X - 620) / CARD5_SCALE;
+  var CARD5_EASE = 0.8;
+
+  // The two inner faces meet at both sewn wings. The central fold keeps
+  // its clearance, with the same profile applied to the body and pockets.
+  function card5Radius(x) {
+    var t = Math.max(0, Math.min(1, (CARD5_BOND - Math.abs(x)) / CARD5_EASE));
+    return CARD5_T / 2 + (CARD5_R - CARD5_T / 2) * t * t * (3 - 2 * t);
+  }
+
+  function card5Slope(x) {
+    return (card5Radius(x + 0.001) - card5Radius(x - 0.001)) / 0.002;
+  }
+
+  function card5EdgeStack(p) {
+    var y = Math.abs(p.y);
+    var across = (Math.abs(p.x) - CARD5_BOND) / 0.04;
+    var along = (card5Point(0, 364.5).y - y) / 0.22;
+    var weight = Math.max(0, Math.min(1, across, along));
+    return weight * weight * (3 - 2 * weight);
+  }
+
+  function card5Across(geometry) {
+    var lines = [];
+    for (var i = 0; i <= 8; i++) {
+      var x = CARD5_BOND - i * CARD5_EASE / 8;
+      lines.push(-x, x);
+    }
+    return sliceAt(k2Split(geometry), 0, lines);
+  }
 
   function card5Point(x, y) {
     return new THREE.Vector2((x - CARD5_X) / CARD5_SCALE, (CARD5_Y - y) / CARD5_SCALE);
@@ -2048,21 +2077,24 @@
   }
 
   function card5Body() {
-    var mesh = leatherPiece([loopOf(card5Contour(false))], CARD5_T, 0, function () { return 0; },
-      [bodyGrainMat, bodyEdgeMat, backMat], withCore(state.leather, 1.1));
-    var data = k2Split(mesh.geometry, function (a, b) {
-      return Math.min(a, b) < CARD5_BEND && Math.max(a, b) > -CARD5_BEND && Math.abs(a - b) > 0.035;
-    });
+    var mesh = leatherPiece([loopOf(card5Contour(false))], CARD5_T, CARD5_T / 2, card5EdgeStack,
+      [bodyGrainMat, bodyEdgeMat, backMat], withCore(state.leather, 1.1), null, null, null, 2 * CARD5_T);
+    var bendLines = [];
+    for (var j = 0; j <= 12; j++) { bendLines.push(CARD5_BEND * (j / 6 - 1)); }
+    var data = sliceAt(card5Across(mesh.geometry), 1, bendLines);
     mesh.geometry.dispose();
     for (var i = 0; i < data.P.length; i += 3) {
-      var y = data.P[i + 1], z = data.P[i + 2], r = CARD5_R + z;
+      var x = data.P[i], y = data.P[i + 1], z = data.P[i + 2], r = card5Radius(x) + z - CARD5_T / 2;
       var a = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, y / CARD5_R));
       var s = Math.sin(a), c = Math.cos(a);
       data.P[i + 1] = Math.max(0, Math.abs(y) - CARD5_BEND) - r * c - CARD5_SHIFT;
       data.P[i + 2] = r * s;
       var ny = data.Nm[i + 1], nz = data.Nm[i + 2];
-      data.Nm[i + 1] = ny * s - nz * c;
-      data.Nm[i + 2] = ny * c + nz * s;
+      var nx = data.Nm[i] - card5Slope(x) * nz;
+      var norm = Math.hypot(nx, ny, nz) || 1;
+      data.Nm[i] = nx / norm;
+      data.Nm[i + 1] = (ny * s - nz * c) / norm;
+      data.Nm[i + 2] = (ny * c + nz * s) / norm;
       var uv = i / 3 * 2;
       data.U[uv] *= 0.9;
       data.U[uv + 1] = Math.abs(y) - CARD5_H / 2;
@@ -2987,13 +3019,22 @@
       fob.add(card5Body());
       yield 42;
       var pocket5 = loopOf(card5Contour(true));
-      var pocketZ = CARD5_FACE - CARD5_T / 2;
-      var pocket5Mesh = leatherPiece([pocket5], CARD5_T, pocketZ, function () { return 0; },
-        [pocketFrontMat, pocketEdgeMat, pocketFleshMat], withCore(state.pocket, 1.1));
-      var pocketUV = pocket5Mesh.geometry.attributes.uv;
-      for (var v = 0; v < pocketUV.count; v++) {
-        pocketUV.setXY(v, pocketUV.getX(v) * 0.9, pocketUV.getY(v) - 2.6);
+      var pocket5Mesh = leatherPiece([pocket5], CARD5_T, 1.5 * CARD5_T, card5EdgeStack,
+        [pocketFrontMat, pocketEdgeMat, pocketFleshMat], withCore(state.pocket, 1.1), null, null, null, 2 * CARD5_T);
+      var pocketData = card5Across(pocket5Mesh.geometry);
+      pocket5Mesh.geometry.dispose();
+      for (var v = 0; v < pocketData.P.length; v += 3) {
+        var px5 = pocketData.P[v];
+        pocketData.P[v + 2] += card5Radius(px5) - CARD5_T / 2;
+        var pnx = pocketData.Nm[v] - card5Slope(px5) * pocketData.Nm[v + 2];
+        var plen = Math.hypot(pnx, pocketData.Nm[v + 1], pocketData.Nm[v + 2]) || 1;
+        pocketData.Nm[v] = pnx / plen;
+        pocketData.Nm[v + 1] /= plen;
+        pocketData.Nm[v + 2] /= plen;
+        pocketData.U[v / 3 * 2] *= 0.9;
+        pocketData.U[v / 3 * 2 + 1] -= 2.6;
       }
+      pocket5Mesh.geometry = k2Geo(pocketData);
       pocket5Mesh.position.y = -CARD5_BEND - CARD5_SHIFT;
       var rear5 = pocket5Mesh.clone();
       rear5.rotation.y = Math.PI;
@@ -3821,7 +3862,7 @@
     // card holder the pockets stand one piece proud of the bodies below their
     // top, except in the front pocket's window.
     function face(x, y, side) {
-      if (card5) { return CARD5_FACE; }
+      if (card5) { return card5Radius(x) + 1.5 * CARD5_T; }
       if (wal2) {   // wallet Nr. 2: the lining, and the front pocket on it (lifted over the back pocket), or the back pocket alone
         if (side < 0) { return W2_T; }
         var sg = x < 0 ? -1 : 1;

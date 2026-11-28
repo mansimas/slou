@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-28 08:04] - Join card holder seams - Bring all four layers of holder No. 5 together on both sewn edges and clarify the assembly in all seven languages so the thread joins both sides while the central opening stays free.
 [2026-11-28 07:56] - Stop local Sails server - Stop the running instance at the owner's request so the next startup can load the updated editor translations.
 [2026-11-28 07:55] - Verify new holder visibility - Confirm that the running local editor still serves the previous locale data and needs a server restart before the new holder can appear.
 [2026-11-28 07:53] - Handle stale editor translations - Keep the editor available when a running server reads the updated template before reloading the new card holder translations.
