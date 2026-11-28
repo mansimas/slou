@@ -65,8 +65,8 @@
 <section class="kf">
   <div class="wrap">
     <header class="kf__head">
-      <h1 id="kfTitle" data-keyfob="<%= e.title %>" data-card="<%= e.card.title %>" data-card2="<%= e.card2.title %>" data-card3="<%= e.card3.title %>" data-card5="<%= e.card5.title %>" data-keyfob2="<%= e.keyfob2.title %>" data-wallet="<%= e.wallet.title %>" data-wallet2="<%= e.wallet2.title %>"><%= e.title %></h1>
-      <p id="kfLead" data-keyfob="<%= e.lead %>" data-card="<%= e.card.lead %>" data-card2="<%= e.card2.lead %>" data-card3="<%= e.card3.lead %>" data-card5="<%= e.card5.lead %>" data-keyfob2="<%= e.keyfob2.lead %>" data-wallet="<%= e.wallet.lead %>" data-wallet2="<%= e.wallet2.lead %>"><%= e.lead %></p>
+      <h1 id="kfTitle" data-keyfob="<%= e.title %>" data-card="<%= e.card.title %>" data-card2="<%= e.card2.title %>" data-card3="<%= e.card3.title %>" data-card5="<%= e.card5 ? e.card5.title : '' %>" data-keyfob2="<%= e.keyfob2.title %>" data-wallet="<%= e.wallet.title %>" data-wallet2="<%= e.wallet2.title %>"><%= e.title %></h1>
+      <p id="kfLead" data-keyfob="<%= e.lead %>" data-card="<%= e.card.lead %>" data-card2="<%= e.card2.lead %>" data-card3="<%= e.card3.lead %>" data-card5="<%= e.card5 ? e.card5.lead : '' %>" data-keyfob2="<%= e.keyfob2.lead %>" data-wallet="<%= e.wallet.lead %>" data-wallet2="<%= e.wallet2.lead %>"><%= e.lead %></p>
     </header>
 
     <div class="kf__grid">
@@ -90,7 +90,7 @@
         <div>
           <span class="kf__label"><%= e.product %></span>
           <div class="kf__opts" data-group="product">
-            <% ['keyfob', 'keyfob2', 'card', 'card2', 'card3', 'card5', 'wallet', 'wallet2'].forEach(function (k, i) { %>
+            <% ['keyfob', 'keyfob2', 'card', 'card2', 'card3', 'card5', 'wallet', 'wallet2'].filter(function (k) { return k !== 'card5' || e.card5; }).forEach(function (k, i) { %>
               <button type="button" class="kf__btn" data-value="<%= k %>" aria-pressed="<%= i === 0 %>"><%= e.products[k] %></button>
             <% }); %>
           </div>

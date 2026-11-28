@@ -1,6 +1,7 @@
 # Update Log
 IMPORTANT FOR AI! MUST READ! NEVER IGNORE THOSE RULES OF FILLING THIS DOCUMENT!
 [YYYY-MM-DD HH:MM] - [git commit message: MAX 5 WORDS!] - [description: MAX 50 WORDS!]  << NEVER ADD EXTRA LINES UNDER IT! NO 2-LINE MESSAGES, ALL COMPACT!
+[2026-11-28 07:53] - Handle stale editor translations - Keep the editor available when a running server reads the updated template before reloading the new card holder translations.
 [2026-11-28 07:47] - Build card holder number five - Add the folded body and two outside pockets from the No. 5 drawing so the owner can inspect the assembled leatherwork and print matching full-size templates with the established saddle stitching.
 [2026-11-28 07:30] - Identify new card holder references - Record the matching number 5 PDF and SVG so the new card holder starts from the intended reference files.
 [2026-11-26 10:22] - Refresh straight wallet geometry - Give the lowered banknote lining its own prepared-model key so the editor cannot load a previously prepared straight wallet with the full-height lining.
